@@ -7,7 +7,7 @@
 다음 기존 기능은 유지한다.
 
 - Langflow 1.9.2 standalone custom component
-- 자연어 기반 metadata 등록, `validate_only`, 고정 3컬렉션 원자적 `save`
+- 자연어 기반 metadata 등록, `validate_only`, 입력 가능한 3컬렉션 원자적 `save`
 - 결정 가능한 질문의 LLM 0회 실행
 - 선택적 Intent/Answer LLM
 - Top/Bottom N, extrema, filter, aggregate, compare, join, derive와 detail 조회
@@ -64,7 +64,7 @@ Data Analysis와 Authoring의 특화 Prompt Template에는 배포 대상 업무 
 
 공유 Flow와 component에는 `manufacturing`, `MCP_NO`, `OPER_NAME`, `production_today`와 embedded 제조 catalog가 없어야 한다. 날짜·순위·임계값 같은 공통 literal만 core가 처리하고, field/value/group/order/relation은 active Domain Package에서 해석한다.
 
-제조 v5 planner, literal parser와 dummy fixture는 compatibility/validation package로 격리한다. 공유 Flow의 `01 사용 가능 메타데이터 불러오기`는 domain/source mode 선택 input을 두지 않고 고정 3컬렉션에서 가장 최근의 완전한 release를 자동 선택·결합한다.
+제조 v5 planner, literal parser와 dummy fixture는 compatibility/validation package로 격리한다. 공유 Flow의 `01 사용 가능 메타데이터 불러오기`는 domain/source mode 선택 input을 두지 않고 노드에 지정된 3컬렉션에서 가장 최근의 완전한 release를 자동 선택·결합한다.
 
 ### 2.4 metadata policy를 실제 consumer에 연결한다
 
@@ -81,7 +81,7 @@ Data Analysis와 Authoring의 특화 Prompt Template에는 배포 대상 업무 
 
 ```text
 분석 질문 입력
-→ 사용 가능 메타데이터 불러오기 (Mongo URI/DB/timeout, 고정 3컬렉션 최신 release 자동 결합)
+→ 사용 가능 메타데이터 불러오기 (Mongo URI/DB/세 컬렉션명/timeout, 최신 release 자동 결합)
 → 요청·대화 상태 구성 (기준시각·시간대 UI 없음, Asia/Seoul 고정)
 → 후보·실행 경로 판정
    ├─ deterministic → 결정론적 Intent 생성
@@ -195,7 +195,7 @@ Sticky Note는 Langflow 1.9.2의 `noteNode`/`data.type=note` 구조로 builder�
 - 공통 literal parser와 제조 compatibility literal parser 분리
 - generic component에서 legacy planner/catalog/dummy source embed 제거
 - domain/timezone/environment identity를 active package에서 검증
-- Metadata loader의 UI를 MongoDB URI·database·timeout으로 제한하고 고정 3컬렉션 최신 완전 release 자동 결합을 fail-closed로 구현
+- Metadata loader의 UI에 MongoDB URI·database·세 컬렉션명·timeout을 제공하고 입력 3컬렉션의 최신 완전 release 자동 결합을 fail-closed로 구현
 - 제조 validation Flow/package는 exact hash pin과 명시적 opt-in 유지
 
 ### Phase 3. Domain policy와 authoring UX

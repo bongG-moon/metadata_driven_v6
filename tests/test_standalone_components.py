@@ -697,15 +697,22 @@ def test_oracle_source_retriever_executes_v5_compatible_connector_without_source
     assert result["source_results"][0]["source_type"] == "oracle"
 
 
-def test_metadata_and_request_nodes_hide_deployment_internal_selectors() -> None:
+def test_metadata_node_exposes_collection_names_but_hides_domain_selectors() -> None:
     domain_cls = _component_class("data_analysis/domain_bundle_loader.py")
     request_cls = _component_class("data_analysis/request_state_capsule.py")
 
     assert {item.name for item in domain_cls.inputs} == {
         "mongo_uri",
         "mongo_database",
+        "domain_collection",
+        "table_collection",
+        "main_filter_collection",
         "mongo_timeout_ms",
     }
+    values = {item.name: getattr(item, "value", None) for item in domain_cls.inputs}
+    assert values["domain_collection"] == "agent_v6_domain_metadata"
+    assert values["table_collection"] == "agent_v6_table_catalog"
+    assert values["main_filter_collection"] == "agent_v6_main_filter"
     assert {"domain_id", "environment", "metadata_source_mode", "inline_domain_bundle"}.isdisjoint(
         {item.name for item in domain_cls.inputs}
     )
@@ -1460,6 +1467,24 @@ def test_authoring_component_exposes_v2_full_and_patch_controls() -> None:
     assert "authoring_invocation_result" in values
     assert "language_model" not in values
     assert "domain_id" in values and "environment" in values
+
+
+def test_authoring_component_accepts_safe_distinct_collection_names() -> None:
+    component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
+    component = component_cls()
+    component.domain_collection = "orders_domain"
+    component.table_collection = "orders_catalog"
+    component.main_filter_collection = "orders_filter"
+
+    assert component._collection_names() == {
+        "domain_collection": "orders_domain",
+        "table_collection": "orders_catalog",
+        "main_filter_collection": "orders_filter",
+    }
+
+    component.main_filter_collection = "orders_catalog"
+    with pytest.raises(Exception, match="safe and distinct"):
+        component._collection_names()
 
 
 def test_generated_authoring_prompt_uses_embedded_schema_without_external_globals() -> None:

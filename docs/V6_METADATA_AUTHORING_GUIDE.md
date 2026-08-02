@@ -338,7 +338,7 @@ Compiler는 세 section hash와 catalog/package/bundle hash를 `metadata.release
 3. 세 문서는 같은 `_id=environment:domain_id`, revision, `release_id`, release manifest와 package metadata를 가진다.
 4. MongoDB transaction에서 세 current 문서를 `replace_one(upsert=true)`로 교체한다.
 5. 같은 transaction 안에서 다시 읽고 세 문서의 identity/release/manifest/source/section/document hash를 검증해 원래 Domain Package와 동치인지 확인한다.
-6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받고 domain collection의 최신 identity를 자동 선택한 뒤 같은 검사를 수행한다. domain/environment/source mode/collection 이름은 UI에 없다.
+6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 지정한 domain collection의 최신 identity를 자동 선택한 뒤 같은 검사를 수행한다. domain/environment/source mode는 UI에 없다.
 
 이 단순 current 구조에는 자동 승인 대기열, active pointer, revision archive나 자동 rollback이 없다. 이력이 필요한 조직은 MongoDB change stream/backup 또는 별도 감사 서비스를 사용한다. 세부 계약은 [V6_THREE_COLLECTION_METADATA.md](V6_THREE_COLLECTION_METADATA.md)를 따른다.
 

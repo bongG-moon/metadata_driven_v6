@@ -46,7 +46,7 @@ v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 �
 | session state | `agent_v6_session_state` |
 | result/source ref | `agent_v6_result_store` |
 
-운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·timeout만 보이며, 세 metadata collection 이름·domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 위 고정 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합하고 hash 불일치 시 fail-closed한다. Source config/query의 secret·실제 query는 이 세 collection에 저장하지 않고 기존 승인 adapter/registry 경계에서만 해석한다.
+운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·세 metadata collection 이름·timeout이 보이며, domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 입력받은 안전하고 서로 다른 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합하고 hash 불일치 시 fail-closed한다. Source config/query의 secret·실제 query는 이 세 collection에 저장하지 않고 기존 승인 adapter/registry 경계에서만 해석한다.
 
 ## 3. 공통 envelope
 

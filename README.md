@@ -30,14 +30,14 @@
 - Domain Policy Authoring: 별도 Flow의 explicit 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json` 전용. Prompt Template/Composer/envelope/LLM 0회
 - 특화 함수: descriptor→build-time standalone registry attestation→candidate→Intent→`registered_call` Typed IR→Registered Function Gateway→output schema/lineage 검증의 닫힌 실행 chain을 사용하며 metadata code/dynamic import/fallback은 금지
 - v5 사용자 출력 기능: 결과표/근거/다운로드/알림/적용 기준/후속 질문/의도·조회·실행 진단 표시 선택, 구조화 API output, GaiA metadata, CSV ref, 멀티턴을 호환 계약으로 유지
-- Langflow UI: Data Analysis node는 `00`~`27`, 네 등록 Flow는 각 Flow의 `00` 입력부터 최종 출력까지 실행 순서가 드러나는 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분한다. Metadata loader에는 MongoDB URI·database·timeout만, 실제 source node에는 조회 행 수 제한만 운영 조절값으로 노출한다.
-- metadata read: `01 사용 가능 메타데이터 불러오기`가 고정된 도메인·테이블 카탈로그·메인필터 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·검증·결합한다. domain/environment/source mode/collection 선택은 UI에 없다.
+- Langflow UI: Data Analysis node는 `00`~`27`, 네 등록 Flow는 각 Flow의 `00` 입력부터 최종 출력까지 실행 순서가 드러나는 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분한다. Metadata loader에는 MongoDB URI·database·세 컬렉션명·timeout을 노출하고, 실제 source node에는 v5 호환 연결 설정과 조회 행 제한을 노출한다.
+- metadata read: `01 사용 가능 메타데이터 불러오기`가 입력받은 도메인·테이블 카탈로그·메인필터 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·검증·결합한다. 컬렉션 입력 기본값은 v6 운영명이며 domain/environment/source mode 선택은 UI에 없다.
 - 요청 시간: `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없고, 실행 시각을 내부에서 생성해 `Asia/Seoul`로 고정한다. 검증의 고정 시각은 harness fixture다.
 - 데이터 source 경계: `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 연결된 payload는 각 node가 자기 source 계약으로만 검증하며, 개발 dummy 검증을 실제 원천 조회 완료로 과장하지 않는다.
 - 출력 전달 경계: `23 → 24·25·26`은 전송용 해시가 없는 일반 JSON 응답을 전달한다. 24·25·26은 수신 payload의 해시나 전체 응답 schema를 다시 검사하지 않으며, 결과 무결성 hash는 MongoDB result store 내부에서만 유지한다.
 - MVP Flow inventory: Data Analysis 1개 + Domain/Dataset/Main Filter/Domain Policy authoring 4개, 총 5개
 - metadata write: 자연어 해석 → deterministic compile/validation → 도메인·테이블 카탈로그·메인필터 3컬렉션 transaction 저장
-- v5 MongoDB 문서: 직접 덮어쓰지 않고 v6 고정 3컬렉션 current release로 컴파일·이관
+- v5 MongoDB 문서: 직접 덮어쓰지 않고 기본 v6 3컬렉션 current release로 컴파일·이관
 
 실행 계층은 다음과 같다.
 

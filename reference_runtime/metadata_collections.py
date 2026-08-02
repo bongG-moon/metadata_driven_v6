@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from datetime import datetime, timezone
+import re
 from typing import Any, Mapping
 
 from .canonical import ContractError, sha256_json
@@ -26,6 +27,7 @@ METADATA_COLLECTIONS = {
     "table_catalog": TABLE_CATALOG_COLLECTION,
     "main_filter": MAIN_FILTER_COLLECTION,
 }
+_COLLECTION_NAME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_.-]{0,127}$")
 
 _DOMAIN_CATALOG_KEYS = {
     "contract_version",
@@ -58,6 +60,30 @@ def _metadata_collection_fail(message: str, details: Mapping[str, Any] | None = 
         message,
         deepcopy(dict(details or {})),
     )
+
+
+def _metadata_collection_names(
+    domain_collection: Any,
+    table_collection: Any,
+    main_filter_collection: Any,
+) -> dict[str, str]:
+    actual = {
+        "domain": str(domain_collection or "").strip(),
+        "table_catalog": str(table_collection or "").strip(),
+        "main_filter": str(main_filter_collection or "").strip(),
+    }
+    invalid = [
+        role
+        for role, name in actual.items()
+        if _COLLECTION_NAME_PATTERN.fullmatch(name) is None
+        or name.casefold().startswith("system.")
+    ]
+    if invalid or len(set(actual.values())) != 3:
+        _metadata_collection_fail(
+            "메타데이터 컬렉션 이름은 안전한 서로 다른 세 이름이어야 합니다.",
+            {"invalid_roles": invalid, "actual": actual},
+        )
+    return actual
 
 
 def _source_texts(value: Mapping[str, Any] | None) -> dict[str, str]:
@@ -263,18 +289,11 @@ def load_domain_package_from_three_collections(
     main_filter_collection: str = MAIN_FILTER_COLLECTION,
     session: Any = None,
 ) -> dict[str, Any]:
-    expected = {
-        "domain": DOMAIN_METADATA_COLLECTION,
-        "table_catalog": TABLE_CATALOG_COLLECTION,
-        "main_filter": MAIN_FILTER_COLLECTION,
-    }
-    actual = {
-        "domain": str(domain_collection),
-        "table_catalog": str(table_collection),
-        "main_filter": str(main_filter_collection),
-    }
-    if actual != expected or len(set(actual.values())) != 3:
-        _metadata_collection_fail("메타데이터 컬렉션 이름은 등록된 3컬렉션 계약과 일치해야 합니다.", {"actual": actual})
+    actual = _metadata_collection_names(
+        domain_collection,
+        table_collection,
+        main_filter_collection,
+    )
     current_id = f"{environment}:{domain_id}"
     documents = {
         kind: database[collection].find_one({"_id": current_id}, session=session)
@@ -297,29 +316,19 @@ def load_available_domain_package_from_three_collections(
     """Load the newest complete metadata release without a Flow-level selector.
 
     A deployment publishes its currently usable metadata by replacing the three
-    documents for a domain.  The runtime therefore does not expose domain ID,
-    environment, source mode, or collection-name controls on the Langflow node.
-    It discovers the newest domain document and then validates the matching
-    table-catalog and main-filter documents through the normal sealed join.
+    documents for a domain.  The runtime accepts safe, distinct collection
+    names from the Langflow node, discovers the newest domain document, and
+    validates the matching table-catalog and main-filter documents through the
+    normal sealed join.
     """
 
-    expected = {
-        "domain": DOMAIN_METADATA_COLLECTION,
-        "table_catalog": TABLE_CATALOG_COLLECTION,
-        "main_filter": MAIN_FILTER_COLLECTION,
-    }
-    actual = {
-        "domain": str(domain_collection),
-        "table_catalog": str(table_collection),
-        "main_filter": str(main_filter_collection),
-    }
-    if actual != expected or len(set(actual.values())) != 3:
-        _metadata_collection_fail(
-            "메타데이터 컬렉션 이름은 등록된 3컬렉션 계약과 일치해야 합니다.",
-            {"actual": actual},
-        )
+    actual = _metadata_collection_names(
+        domain_collection,
+        table_collection,
+        main_filter_collection,
+    )
 
-    collection = database[DOMAIN_METADATA_COLLECTION]
+    collection = database[actual["domain"]]
     try:
         latest = collection.find_one(
             {},
@@ -341,9 +350,9 @@ def load_available_domain_package_from_three_collections(
         database,
         domain_id,
         environment,
-        domain_collection=DOMAIN_METADATA_COLLECTION,
-        table_collection=TABLE_CATALOG_COLLECTION,
-        main_filter_collection=MAIN_FILTER_COLLECTION,
+        domain_collection=actual["domain"],
+        table_collection=actual["table_catalog"],
+        main_filter_collection=actual["main_filter"],
         session=session,
     )
 
@@ -357,11 +366,11 @@ def replace_metadata_release(
     table_collection: str = TABLE_CATALOG_COLLECTION,
     main_filter_collection: str = MAIN_FILTER_COLLECTION,
 ) -> None:
-    collections = {
-        "domain": domain_collection,
-        "table_catalog": table_collection,
-        "main_filter": main_filter_collection,
-    }
+    collections = _metadata_collection_names(
+        domain_collection,
+        table_collection,
+        main_filter_collection,
+    )
     for kind, collection in collections.items():
         document = deepcopy(dict(documents[kind]))
         database[str(collection)].replace_one(

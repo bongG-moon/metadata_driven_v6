@@ -2,7 +2,7 @@
 
 ## 결정
 
-v6 runtime metadata는 active pointer나 bundle/pending collection을 요구하지 않는다. 운영자가 관리하는 current metadata는 아래 세 MongoDB collection으로 고정한다.
+v6 runtime metadata는 active pointer나 bundle/pending collection을 요구하지 않는다. 운영자가 관리하는 current metadata는 아래 세 MongoDB collection을 기본값으로 사용한다.
 
 | Collection | 자연어 원문 | 정규화 영역 |
 | --- | --- | --- |
@@ -10,7 +10,9 @@ v6 runtime metadata는 active pointer나 bundle/pending collection을 요구하�
 | `agent_v6_table_catalog` | Dataset/Table TXT | dataset와 canonical field binding |
 | `agent_v6_main_filter` | Main Filter TXT | predicate와 alias |
 
-분석 결과와 멀티턴 상태는 metadata가 아니므로 기존 `agent_v6_result_store`, `agent_v6_session_state`를 그대로 사용한다. Source adapter의 secret, 실제 query와 raw data는 세 metadata collection에 넣지 않는다.
+컬렉션 이름은 Data Analysis의 `01 사용 가능 메타데이터 불러오기`와 네 메타데이터 등록 Flow의 저장 엔진에서 직접 변경할 수 있다. 세 이름은 영문자로 시작하는 안전한 MongoDB collection 이름이어야 하고 서로 달라야 한다. 등록과 조회 노드에는 반드시 같은 세 이름을 입력한다.
+
+분석 결과와 멀티턴 상태는 metadata가 아니므로 기존 `agent_v6_result_store`, `agent_v6_session_state`를 그대로 사용한다. Source adapter의 secret, 실제 query와 raw data는 세 metadata collection에 넣지 않는다. 과거 bundle/active pointer/개별 semantic·dataset·filter catalog/pending/audit 구조는 현재 Flow의 실행 계약이 아니며 `tools/cleanup_legacy_v6_collections.py`가 정확한 폐기 allowlist와 보호 컬렉션을 확인한 뒤에만 제거한다.
 
 ## 자연어 등록 흐름
 
@@ -42,7 +44,7 @@ v6 runtime metadata는 active pointer나 bundle/pending collection을 요구하�
 - 외부 공통/특화 Prompt Template: 실제 LLM instruction을 소유한다.
 - `조건부 LLM 호출`: 필요한 분기만 호출한다.
 - `메타데이터 등록 엔진`: LLM 결과를 closed decode하고 deterministic compile/validation 후 세 collection을 transaction 저장한다.
-- `01 사용 가능 메타데이터 불러오기`: MongoDB URI·database·timeout만 입력받고, 고정된 세 collection에서 가장 최근의 완전한 동일 release를 자동 검증·결합해 Data Analysis Flow에 전달한다. domain/environment/source mode/collection 이름은 UI 입력이 아니다.
+- `01 사용 가능 메타데이터 불러오기`: MongoDB URI·database·도메인/데이터 카탈로그/메인필터 collection 이름·timeout을 입력받고, 입력된 세 collection에서 가장 최근의 완전한 동일 release를 자동 검증·결합해 Data Analysis Flow에 전달한다. domain/environment/source mode는 UI 입력이 아니다.
 - `메타데이터 등록 메시지 구성`: 저장/검증/clarification/error 결과를 한글 Message로 표시한다.
 
 등록 엔진의 `mode=save`가 기본이다. `mode=validate_only` 또는 `dry_run=true`는 동일한 compile/release 검증을 수행하되 write하지 않는다.

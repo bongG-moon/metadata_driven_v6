@@ -425,7 +425,7 @@ Phase 4에서는 아직 adapter가 없으므로 30+6 전체 E2E나 multi-turn �
 | 26 | GaiA 형식 출력 |
 | 27 | 분석 답변 출력 |
 
-`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 받고 고정 3컬렉션의 최신 완전 release를 자동 결합한다. `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없다. Runtime Intent와 Answer에는 각각 물리적으로 분리된 공통·특화 Prompt Template node가 필수이며 두 prompt는 변수 없이 서로 다른 ID/source/revision/hash/edge를 가진다. Context Builder 출력은 Composer의 `runtime_context`로 한 번만 연결한다.
+`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 컬렉션명·timeout을 받고 입력된 3컬렉션의 최신 완전 release를 자동 결합한다. 세 컬렉션명은 안전한 형식이어야 하고 서로 달라야 하며 기본값은 v6 운영 컬렉션명이다. `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없다. Runtime Intent와 Answer에는 각각 물리적으로 분리된 공통·특화 Prompt Template node가 필수이며 두 prompt는 변수 없이 서로 다른 ID/source/revision/hash/edge를 가진다. Context Builder 출력은 Composer의 `runtime_context`로 한 번만 연결한다.
 
 deterministic branch에서는 Language Model node가 실행되지 않아야 한다. `23 → 24·25·26`은 전송용 hash가 없는 일반 JSON을 전달하며, 출력 adapter는 수신 hash나 전체 응답 schema를 재검증하지 않는다. 결과 무결성 hash는 MongoDB result store 내부에서만 사용한다.
 

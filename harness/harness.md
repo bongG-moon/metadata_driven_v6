@@ -41,7 +41,7 @@
    - 최초 bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter 원문을 각각 받는다. 세 내부 LLM branch는 같은 hash로 봉인된 `semantic_vocabulary`의 `id/family/business labels`만 보고 원문 표현을 승인 후보에 매핑한다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR을 반환한다. 작업자는 이 내부 형식을 알 필요가 없다.
    - 결정론적 compiler가 `metadata.authoring.source-registry.v3`의 LLM 비공개 `semantic_templates`와 dataset descriptor/Source binding으로 세 결과를 확장·재결합한다. 실행 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 planner policy는 LLM이 아니라 registry가 소유한다.
    - 정보가 부족하거나 한 표현이 여러 승인 후보에 대응하면 작업자가 고를 수 있는 쉬운 업무 표현으로 `status=needs_clarification`을 반환한다. 작업자용 질문에 내부 ID, JSON/DSL, 타입, 물리 컬럼이나 schema 경로를 노출하지 않는다.
-3. runtime은 compiled metadata만 사용한다. `01 사용 가능 메타데이터 불러오기`는 UI에 MongoDB URI·database·timeout만 노출하고, 고정된 도메인·테이블 카탈로그·메인필터 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합한다. domain/environment/source mode/collection 이름 선택 input은 두지 않는다.
+3. runtime은 compiled metadata만 사용한다. `01 사용 가능 메타데이터 불러오기`는 UI에 MongoDB URI·database·도메인 컬렉션·데이터 카탈로그 컬렉션·메인필터 컬렉션·timeout을 노출하고, 입력받은 서로 다른 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합한다. domain/environment/source mode 선택 input은 두지 않는다.
    - `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI input을 두지 않는다. 실행 시각은 내부에서 생성하고 날짜 해석 시간대는 항상 `Asia/Seoul`이다. 검증용 고정 시각은 harness가 주입하는 test fixture이지 운영 Flow 설정이 아니다.
 4. canonical↔physical mapping은 **Source Contract Merger**가 source boundary에서 정확히 한 번 수행한다.
 5. metric output 하나마다 source/date/filter/aggregation lineage가 하나 존재한다.

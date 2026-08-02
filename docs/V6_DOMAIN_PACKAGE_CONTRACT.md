@@ -180,7 +180,7 @@ Public API request는 자유형 자연어 `input_message`와 공개 authoring co
 | 테이블 카탈로그 current | `agent_v6_table_catalog` | `{environment}:{domain_id}` |
 | 메인필터 current | `agent_v6_main_filter` | `{environment}:{domain_id}` |
 
-세 current 문서는 동일 `release_id`, revision, manifest와 package hash를 가져야 한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받고 domain collection에서 가장 최근 문서의 identity를 자동 선택한다. 이어 고정된 table catalog/main filter collection에서 같은 identity의 문서를 읽어 source/section/document hash와 공통 release manifest를 재계산하고 결합한 Domain Package의 catalog/package/bundle hash를 검증한다. domain/environment/source mode/collection 이름은 UI에 노출하지 않으며 어느 하나라도 다르면 실행하지 않는다. active pointer와 immutable bundle/pending collection은 runtime 필수 계약이 아니다.
+세 current 문서는 동일 `release_id`, revision, manifest와 package hash를 가져야 한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 domain collection에서 가장 최근 문서의 identity를 자동 선택한다. 이어 입력된 table catalog/main filter collection에서 같은 identity의 문서를 읽어 source/section/document hash와 공통 release manifest를 재계산하고 결합한 Domain Package의 catalog/package/bundle hash를 검증한다. collection 이름은 안전한 형식이며 서로 달라야 한다. domain/environment/source mode는 UI에 노출하지 않으며 어느 하나라도 다르면 실행하지 않는다. active pointer와 immutable bundle/pending collection은 runtime 필수 계약이 아니다.
 
 ## 6. 검증 / 저장 연결
 

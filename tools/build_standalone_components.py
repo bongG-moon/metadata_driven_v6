@@ -790,6 +790,9 @@ class DomainBundleLoader(Component):
     inputs = [
         SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="세 메타데이터 컬렉션을 읽을 MongoDB 연결 문자열입니다."),
         StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="datagov", info="운영 메타데이터가 저장된 데이터베이스입니다."),
+        StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", info="도메인 원문과 검증된 공통 업무 규칙을 읽을 컬렉션입니다."),
+        StrInput(name="table_collection", display_name="데이터 카탈로그 컬렉션", value="agent_v6_table_catalog", info="데이터셋·필드·원천 조회 계약을 읽을 컬렉션입니다."),
+        StrInput(name="main_filter_collection", display_name="메인필터 메타데이터 컬렉션", value="agent_v6_main_filter", info="주요 필터·별칭·predicate를 읽을 컬렉션입니다."),
         IntInput(name="mongo_timeout_ms", display_name="MongoDB 제한 시간(ms)", value=5000, info="MongoDB 연결 및 조회에 적용할 제한 시간(밀리초)입니다."),
     ]
     outputs = [Output(name="domain_bundle", display_name="검증된 도메인 실행 번들", method="load_bundle", types=["Data"])]
@@ -807,7 +810,12 @@ class DomainBundleLoader(Component):
             client = MongoClient(uri, serverSelectionTimeoutMS=max(500, min(int(getattr(self, "mongo_timeout_ms", 5000)), 30000)))
             try:
                 database = client[str(getattr(self, "mongo_database", "") or os.getenv("MONGODB_DATABASE", "datagov"))]
-                package = load_available_domain_package_from_three_collections(database)
+                package = load_available_domain_package_from_three_collections(
+                    database,
+                    domain_collection=str(getattr(self, "domain_collection", "agent_v6_domain_metadata") or "").strip(),
+                    table_collection=str(getattr(self, "table_collection", "agent_v6_table_catalog") or "").strip(),
+                    main_filter_collection=str(getattr(self, "main_filter_collection", "agent_v6_main_filter") or "").strip(),
+                )
             finally:
                 client.close()
             domain_id = str(package["domain_id"])
@@ -7545,12 +7553,17 @@ class MetadataAuthoringEngine(Component):
             role: str(getattr(self, role, expected) or "").strip()
             for role, expected in V6_AUTHORING_COLLECTIONS.items()
         }
-        if values != V6_AUTHORING_COLLECTIONS or len(set(values.values())) != len(values):
+        invalid = [
+            role for role, name in values.items()
+            if re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}", name) is None
+            or name.casefold().startswith("system.")
+        ]
+        if invalid or len(set(values.values())) != len(values):
             raise ContractError(
                 "metadata_policy_error",
                 "metadata_store_config",
-                "Authoring collections are role-bound to the registered v6-only names.",
-                {"expected": V6_AUTHORING_COLLECTIONS, "actual": values},
+                "Metadata collection names must be safe and distinct.",
+                {"invalid_roles": invalid, "actual": values},
             )
         return values
 

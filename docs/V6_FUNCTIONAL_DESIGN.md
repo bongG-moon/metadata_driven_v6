@@ -99,7 +99,7 @@ Trusted core 정상 경로:
 
 ## 4. 기능 요구사항
 
-Data Analysis Flow는 `00`~`27` 실행 순서의 한국어 표시명을 사용한다. Domain/Dataset/Main Filter/Domain Policy 등록 Flow도 각자의 `00` 입력부터 최종 출력까지 번호를 붙이고, 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C`로 구분한다. 도메인 초기 등록의 세 context/composer/invoker에는 도메인·초기 데이터셋·초기 주요 필터 분기명을 명시한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받아 고정 3컬렉션의 최신 완전 release를 자동 결합한다. domain/environment/source mode/collection 선택은 UI에 없다. `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI 없이 내부 현재 시각을 `Asia/Seoul`로 고정한다.
+Data Analysis Flow는 `00`~`27` 실행 순서의 한국어 표시명을 사용한다. Domain/Dataset/Main Filter/Domain Policy 등록 Flow도 각자의 `00` 입력부터 최종 출력까지 번호를 붙이고, 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C`로 구분한다. 도메인 초기 등록의 세 context/composer/invoker에는 도메인·초기 데이터셋·초기 주요 필터 분기명을 명시한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인/데이터 카탈로그/메인필터 컬렉션명·timeout을 입력받아 해당 3컬렉션의 최신 완전 release를 자동 결합한다. domain/environment/source mode 선택은 UI에 없다. `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI 없이 내부 현재 시각을 `Asia/Seoul`로 고정한다.
 
 ### FR-01. 자연어 질문 이해
 
@@ -229,7 +229,7 @@ v5 호환 surface는 다음과 같이 이전한다.
 - optional explicit-inventory Main Filter도 Prompt Template/Composer/envelope/LLM은 0회
 - JSON Schema와 semantic·dependency·security lint가 실행 가능성을 검증한다. 누락·모호한 정보는 포맷 재작성 요구가 아니라 draft/candidate 없는 `status=needs_clarification`으로 반환하며, 질문은 내부 ID나 타입 대신 작업자가 고를 수 있는 쉬운 업무 label을 사용한다.
 - dependency closure 후 동일 release의 세 section과 catalog/package/bundle hash를 봉인
-- `validate_only`는 write 0건, `save`는 고정 3컬렉션을 하나의 transaction으로 교체
+- `validate_only`는 write 0건, `save`는 노드에 지정된 3컬렉션을 하나의 transaction으로 교체
 - raw source/hash와 compiled runtime record 분리
 
 ### FR-09. Observability
@@ -401,7 +401,7 @@ Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/ha
 현재 기본 등록 Flow는 `save`와 `validate_only` 두 모드만 제공한다. 두 모드 모두 자연어 TXT를 LLM으로 typed 등록 IR로 바꾼 뒤 동일한 schema, 참조, hash 검증을 수행한다.
 
 - `validate_only`: 변환·컴파일·검증 결과만 반환하고 MongoDB를 변경하지 않는다.
-- `save`: 검증된 동일 release의 도메인, 테이블 카탈로그, 메인필터 문서를 고정 3개 컬렉션에 transaction으로 교체한다.
+- `save`: 검증된 동일 release의 도메인, 테이블 카탈로그, 메인필터 문서를 노드에 지정된 서로 다른 3개 컬렉션에 transaction으로 교체한다.
 
 별도의 pending collection이나 active pointer는 사용하지 않는다. 각 문서는 같은 `release_id`, revision, section hash, package hash를 가지며, 분석 Flow의 selector-free loader는 가장 최근 도메인 문서의 identity를 기준으로 나머지 두 문서를 결합한 뒤 세 문서의 seal을 다시 검증한다. 세 문서 중 하나라도 누락되거나 release/hash가 다르면 저장 결과를 사용하지 않는다.
 

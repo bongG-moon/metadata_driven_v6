@@ -14,7 +14,7 @@
 - pandas code 생성 LLM과 repair LLM은 기본 경로에서 0회다.
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter authoring의 공통·특화 Prompt는 외부 Prompt Template node로 분리되어 있다. 특화 규칙은 각 특화 Template 본문에 직접 작성하고 runtime context는 Composer에 한 번만 연결한다. Domain Policy의 prompt extension·등록 함수·출력 정책은 별도 관리자 입력으로 관리한다.
 - Message 표시 항목 선택, structured API, GaiA, CSV ref와 멀티턴 상태 계약을 유지한다.
-- Data Analysis node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C`로 구분하며 도메인 초기 등록의 반복 노드는 담당 분기명까지 표시한다. Metadata loader는 MongoDB URI·database·timeout만 받아 고정 3컬렉션의 최신 완전 release를 자동 결합하고, Request는 기준시각·시간대 UI 없이 `Asia/Seoul`로 고정한다.
+- Data Analysis node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C`로 구분하며 도메인 초기 등록의 반복 노드는 담당 분기명까지 표시한다. Metadata loader는 MongoDB URI·database·세 컬렉션명·timeout을 받아 입력 3컬렉션의 최신 완전 release를 자동 결합하고, Request는 기준시각·시간대 UI 없이 `Asia/Seoul`로 고정한다.
 - Dummy/Oracle/H-API/Datalake/Goodocs 조회 node는 분리돼 있고 실제 source node의 운영 조절값은 조회 행 수 제한뿐이다. 23→24·25·26은 전송용 hash가 없는 일반 JSON을 전달하며 출력 adapter는 수신 hash나 전체 응답 schema를 재검증하지 않는다.
 
 ## 2. Flow 구성

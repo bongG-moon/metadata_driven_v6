@@ -139,14 +139,51 @@ def test_tampered_natural_source_or_mixed_release_is_rejected() -> None:
         assemble_domain_package_from_sections(mixed, "manufacturing", "production")
 
 
-def test_loader_rejects_collection_name_drift() -> None:
+def test_loader_supports_safe_distinct_collection_names() -> None:
     database = _Database()
-    replace_metadata_release(database, _documents())
+    names = {
+        "domain_collection": "custom_domain",
+        "table_collection": "custom_catalog",
+        "main_filter_collection": "custom_filter",
+    }
+    replace_metadata_release(database, _documents(), **names)
+
+    loaded = load_domain_package_from_three_collections(
+        database,
+        "manufacturing",
+        "production",
+        **names,
+    )
+    auto_loaded = load_available_domain_package_from_three_collections(
+        database,
+        **names,
+    )
+
+    assert loaded == _package()
+    assert auto_loaded == _package()
+
+
+@pytest.mark.parametrize(
+    "overrides",
+    [
+        {"domain_collection": "same", "table_collection": "same"},
+        {"domain_collection": "$invalid"},
+        {"domain_collection": "system.profile"},
+    ],
+)
+def test_loader_rejects_unsafe_or_duplicate_collection_names(overrides: dict[str, str]) -> None:
+    database = _Database()
+    values = {
+        "domain_collection": "custom_domain",
+        "table_collection": "custom_catalog",
+        "main_filter_collection": "custom_filter",
+        **overrides,
+    }
 
     with pytest.raises(ContractError):
         load_domain_package_from_three_collections(
             database,
             "manufacturing",
             "production",
-            domain_collection="custom_domain",
+            **values,
         )
