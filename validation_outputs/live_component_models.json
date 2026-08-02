@@ -1,0 +1,280 @@
+{
+  "contract_version": "live.langflow.component-model.validation.v1",
+  "model": "gemini-3.5-flash-lite",
+  "model_contract": {
+    "requested_model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "candidate_count": 1,
+    "fallback_enabled": false,
+    "fallback_models": []
+  },
+  "flow_model_contract": {
+    "contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "required": true,
+    "model_node_count": 1,
+    "nodes": [
+      {
+        "node_id": "intent_language_model",
+        "model_names": [
+          "gemini-3.5-flash-lite"
+        ],
+        "providers": [
+          "Google Generative AI"
+        ],
+        "temperature": 0.0,
+        "stream": false,
+        "configured_fallback_fields": [],
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "provider_payloads_persisted": false,
+  "prompts_persisted": false,
+  "case_count": 4,
+  "passed": 4,
+  "failed": 0,
+  "provider_calls": 2,
+  "provider_model_evidence_passed": true,
+  "rows": [
+    {
+      "case_id": "LIVE-ZERO",
+      "model": "gemini-3.5-flash-lite",
+      "expected_route": "deterministic",
+      "actual_route": "deterministic",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "narrative_enabled": false,
+      "expected_provider_calls": 0,
+      "actual_provider_calls": 0,
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "provider": {
+        "model": "gemini-3.5-flash-lite",
+        "model_contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "fallback_used": false,
+        "provider_model_versions_exact": true,
+        "calls": 0,
+        "prompt_sha256": [],
+        "provider_response_sha256": [],
+        "provider_model_versions": [],
+        "finish_reasons": [],
+        "candidate_text_bytes": [],
+        "usage": {
+          "prompt_tokens": 0,
+          "candidate_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "pipeline_response_sha256": "d6bafdbe53bb92e14582e41aaaa32c5347f9d8071265416d873d507396b0a64d",
+      "pipeline_failures": [],
+      "checks": {
+        "pipeline_passed": true,
+        "route_exact": true,
+        "intent_calls_exact": true,
+        "answer_calls_exact": true,
+        "provider_calls_exact": true,
+        "provider_model_versions_exact": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true
+      },
+      "passed": true
+    },
+    {
+      "case_id": "LIVE-INTENT",
+      "model": "gemini-3.5-flash-lite",
+      "expected_route": "intent_llm",
+      "actual_route": "intent_llm",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "narrative_enabled": false,
+      "expected_provider_calls": 1,
+      "actual_provider_calls": 1,
+      "usage": {
+        "intent_llm_calls": 1,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "provider": {
+        "model": "gemini-3.5-flash-lite",
+        "model_contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "fallback_used": false,
+        "provider_model_versions_exact": true,
+        "calls": 1,
+        "prompt_sha256": [
+          "d1f9967910534acda5aa1b7abfd7444807790a6859ff3795d72f6c838a22bd4b"
+        ],
+        "provider_response_sha256": [
+          "8fa19507c16cfb53a24e591208242350b40ddb9a6a2da7bc257badced0466008"
+        ],
+        "provider_model_versions": [
+          "gemini-3.5-flash-lite"
+        ],
+        "finish_reasons": [
+          "STOP"
+        ],
+        "candidate_text_bytes": [
+          59
+        ],
+        "usage": {
+          "prompt_tokens": 356,
+          "candidate_tokens": 34,
+          "total_tokens": 390
+        }
+      },
+      "pipeline_response_sha256": "7cf42d75f8d38a0d41329ee232d55a4a21db3af0b9703b683fb8ea972bce6bf0",
+      "pipeline_failures": [],
+      "checks": {
+        "pipeline_passed": true,
+        "route_exact": true,
+        "intent_calls_exact": true,
+        "answer_calls_exact": true,
+        "provider_calls_exact": true,
+        "provider_model_versions_exact": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true
+      },
+      "passed": true
+    },
+    {
+      "case_id": "LIVE-NARRATIVE",
+      "model": "gemini-3.5-flash-lite",
+      "expected_route": "deterministic",
+      "actual_route": "deterministic",
+      "expected_status": "ok",
+      "actual_status": "ok",
+      "narrative_enabled": true,
+      "expected_provider_calls": 1,
+      "actual_provider_calls": 1,
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 1
+      },
+      "provider": {
+        "model": "gemini-3.5-flash-lite",
+        "model_contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "fallback_used": false,
+        "provider_model_versions_exact": true,
+        "calls": 1,
+        "prompt_sha256": [
+          "21d20601357c98ff0b370f6ada0e2325ccb82072d664677cda46c6a24e13d5ba"
+        ],
+        "provider_response_sha256": [
+          "4552926f4ba5e19ed9bdc492a4184d044f7aff3982cd2ba549a647b6b2e98d78"
+        ],
+        "provider_model_versions": [
+          "gemini-3.5-flash-lite"
+        ],
+        "finish_reasons": [
+          "STOP"
+        ],
+        "candidate_text_bytes": [
+          274
+        ],
+        "usage": {
+          "prompt_tokens": 608,
+          "candidate_tokens": 85,
+          "total_tokens": 693
+        }
+      },
+      "pipeline_response_sha256": "8e88091364d9b1f69e9e915b63eed3051d03cf5410126d900230332e414bd35b",
+      "pipeline_failures": [],
+      "checks": {
+        "pipeline_passed": true,
+        "route_exact": true,
+        "intent_calls_exact": true,
+        "answer_calls_exact": true,
+        "provider_calls_exact": true,
+        "provider_model_versions_exact": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true
+      },
+      "passed": true
+    },
+    {
+      "case_id": "LIVE-UNSUPPORTED",
+      "model": "gemini-3.5-flash-lite",
+      "expected_route": "unsupported",
+      "actual_route": "unsupported",
+      "expected_status": "error",
+      "actual_status": "error",
+      "narrative_enabled": true,
+      "expected_provider_calls": 0,
+      "actual_provider_calls": 0,
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "provider": {
+        "model": "gemini-3.5-flash-lite",
+        "model_contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "fallback_used": false,
+        "provider_model_versions_exact": true,
+        "calls": 0,
+        "prompt_sha256": [],
+        "provider_response_sha256": [],
+        "provider_model_versions": [],
+        "finish_reasons": [],
+        "candidate_text_bytes": [],
+        "usage": {
+          "prompt_tokens": 0,
+          "candidate_tokens": 0,
+          "total_tokens": 0
+        }
+      },
+      "pipeline_response_sha256": "ccde06198c27049d35a127a7f683cd14728e42f29fd556afdd364e1d430248c0",
+      "pipeline_failures": [],
+      "checks": {
+        "pipeline_passed": true,
+        "route_exact": true,
+        "intent_calls_exact": true,
+        "answer_calls_exact": true,
+        "provider_calls_exact": true,
+        "provider_model_versions_exact": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true
+      },
+      "passed": true
+    }
+  ]
+}

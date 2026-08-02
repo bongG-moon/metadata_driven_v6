@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "callTemplate": {
+      "additionalProperties": false,
+      "properties": {
+        "dataset_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "field_ref": {
+          "maxLength": 128,
+          "minLength": 1,
+          "type": "string"
+        },
+        "output_fields": {
+          "items": {
+            "maxLength": 128,
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "parameters": {
+          "additionalProperties": false,
+          "properties": {
+            "case_sensitive": {
+              "type": "boolean"
+            },
+            "match_mode": {
+              "enum": [
+                "any",
+                "all"
+              ],
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals",
+                "contains",
+                "starts_with",
+                "ends_with"
+              ],
+              "type": "string"
+            },
+            "tokens": {
+              "items": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "tokens",
+            "operator",
+            "match_mode",
+            "case_sensitive"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "dataset_ref",
+        "field_ref",
+        "parameters",
+        "output_fields"
+      ],
+      "type": "object"
+    },
+    "limits": {
+      "additionalProperties": false,
+      "properties": {
+        "max_input_rows": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_output_bytes": {
+          "maximum": 8388608,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "max_output_rows": {
+          "maximum": 100000,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "timeout_ms": {
+          "maximum": 5000,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "timeout_ms",
+        "max_input_rows",
+        "max_output_rows",
+        "max_output_bytes"
+      ],
+      "type": "object"
+    },
+    "schemaObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,128}$": {
+          "$ref": "#/$defs/schemaValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "schemaValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/schemaValue"
+          },
+          "maxItems": 256,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/schemaObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/registered-function-card.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aliases": {
+      "items": {
+        "maxLength": 200,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "call_template": {
+      "$ref": "#/$defs/callTemplate"
+    },
+    "execution_mode": {
+      "const": "registered_standalone"
+    },
+    "failure_policy": {
+      "const": "fail_closed"
+    },
+    "function_id": {
+      "const": "core.trim_and_match_tokens"
+    },
+    "implementation_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "input_schema": {
+      "$ref": "#/$defs/schemaObject"
+    },
+    "limits": {
+      "$ref": "#/$defs/limits"
+    },
+    "output_schema": {
+      "$ref": "#/$defs/schemaObject"
+    },
+    "required_fields": {
+      "items": {
+        "maxLength": 128,
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "version": {
+      "const": 1
+    }
+  },
+  "required": [
+    "function_id",
+    "version",
+    "execution_mode",
+    "implementation_sha256",
+    "input_schema",
+    "output_schema",
+    "required_fields",
+    "limits",
+    "failure_policy",
+    "aliases",
+    "call_template"
+  ],
+  "title": "registered.function.card.v1",
+  "type": "object"
+}

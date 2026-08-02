@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/gaia-metadata.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "gaia.metadata.v1",
+      "type": "string"
+    },
+    "docs": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 0,
+      "type": "array"
+    },
+    "followup_questions": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "text": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "text"
+        ],
+        "type": "object"
+      },
+      "maxItems": 3,
+      "type": "array"
+    },
+    "images": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 0,
+      "type": "array"
+    },
+    "knowhows": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 0,
+      "type": "array"
+    },
+    "response_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "trace_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "urls": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "url": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "url"
+        ],
+        "type": "object"
+      },
+      "maxItems": 16,
+      "type": "array"
+    },
+    "usage": {
+      "additionalProperties": false,
+      "properties": {
+        "answer_llm_calls": {
+          "maximum": 1,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "intent_llm_calls": {
+          "maximum": 2,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pandas_code_llm_calls": {
+          "maximum": 0,
+          "minimum": 0,
+          "type": "integer"
+        },
+        "pandas_repair_llm_calls": {
+          "maximum": 0,
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "intent_llm_calls",
+        "pandas_code_llm_calls",
+        "pandas_repair_llm_calls",
+        "answer_llm_calls"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "contract_version",
+    "urls",
+    "followup_questions",
+    "trace_id",
+    "usage",
+    "response_sha256",
+    "docs",
+    "images",
+    "knowhows"
+  ],
+  "title": "gaia.metadata.v1",
+  "type": "object"
+}

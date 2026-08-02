@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/metadata-authoring-proposal.schema.json",
+  "title": "metadata.authoring.proposal.v1",
+  "description": "자유형 자연어 메타데이터 입력을 한 번의 LLM 변환으로 만든 폐쇄형 제안 계약이다. 완성 초안 또는 최대 3개의 추가 확인 질문 중 하나만 허용한다.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "status",
+        "source_sha256",
+        "draft"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "metadata.authoring.proposal.v1",
+          "type": "string"
+        },
+        "status": {
+          "const": "complete",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "draft": {
+          "$ref": "metadata-authoring-draft.schema.json"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "status",
+        "source_sha256",
+        "clarification"
+      ],
+      "properties": {
+        "contract_version": {
+          "const": "metadata.authoring.proposal.v1",
+          "type": "string"
+        },
+        "status": {
+          "const": "needs_clarification",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "clarification": {
+          "$ref": "#/$defs/clarificationPayload"
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "clarificationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "questions",
+        "missing_fields"
+      ],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          }
+        },
+        "missing_fields": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        }
+      }
+    }
+  }
+}

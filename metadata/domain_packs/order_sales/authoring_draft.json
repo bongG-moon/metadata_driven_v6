@@ -1,0 +1,384 @@
+{
+  "contract_version": "metadata.authoring.draft.v1",
+  "display_name": "주문·매출 분석",
+  "description": "제조 공정과 무관한 범용성 검증을 위한 주문, 상품, 환불, 목표 데이터 도메인입니다.",
+  "locale": "ko-KR",
+  "timezone": "Asia/Seoul",
+  "datasets": {
+    "orders": {
+      "display_name": "주문",
+      "family": "sales_actual",
+      "source_type": "dummy",
+      "source_adapter": "dummy.orders.v1",
+      "time_scope": "history",
+      "config_ref": "config:dummy:order_sales@1",
+      "query_ref": "query:orders@1",
+      "parameters": {
+        "DATE_FROM": {"type": "LocalDate", "required": false},
+        "DATE_TO": {"type": "LocalDate", "required": false}
+      },
+      "date_policy": {
+        "field": "ORDER_DATE",
+        "timezone": "Asia/Seoul",
+        "inclusive_start": true,
+        "inclusive_end": true
+      },
+      "fields": {
+        "ORDER_ID": {
+          "physical_column": "order_id",
+          "aliases": ["주문번호", "order id"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "ORDER_DATE": {
+          "physical_column": "order_date",
+          "aliases": ["주문일", "날짜"],
+          "semantic_type": "LocalDate",
+          "roles": ["filter", "group", "sort", "project", "output"],
+          "required_in_source": true,
+          "nullable": false,
+          "timezone": "Asia/Seoul"
+        },
+        "CUSTOMER_ID": {
+          "physical_column": "customer_id",
+          "aliases": ["고객", "고객 ID"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "group", "join", "project", "output"]
+        },
+        "PRODUCT_ID": {
+          "physical_column": "product_id",
+          "aliases": ["상품", "상품 ID"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "group", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "SALES_AMOUNT": {
+          "physical_column": "sales_amount",
+          "aliases": ["매출", "주문금액", "판매금액"],
+          "semantic_type": "currency",
+          "roles": ["filter", "aggregate", "compare", "sort", "rank", "metric", "project", "output"],
+          "required_in_source": true,
+          "nullable": false,
+          "unit": "KRW",
+          "allowed_rollups": ["sum", "mean", "min", "max"]
+        }
+      },
+      "default_detail_fields": ["ORDER_ID", "ORDER_DATE", "CUSTOMER_ID", "PRODUCT_ID", "SALES_AMOUNT"],
+      "read_policy": {"read_only": true, "timeout_seconds": 30, "max_rows": 50000}
+    },
+    "products": {
+      "display_name": "상품 마스터",
+      "family": "product_master",
+      "source_type": "dummy",
+      "source_adapter": "dummy.products.v1",
+      "time_scope": "current",
+      "config_ref": "config:dummy:order_sales@1",
+      "query_ref": "query:products@1",
+      "parameters": {},
+      "date_policy": {},
+      "fields": {
+        "PRODUCT_ID": {
+          "physical_column": "product_id",
+          "aliases": ["상품", "상품 ID"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "group", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "PRODUCT_NAME": {
+          "physical_column": "product_name",
+          "aliases": ["상품명", "제품명"],
+          "semantic_type": "string",
+          "roles": ["filter", "group", "project", "sort", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "CATEGORY": {
+          "physical_column": "category",
+          "aliases": ["카테고리", "상품군"],
+          "semantic_type": "string",
+          "roles": ["filter", "group", "project", "sort", "output"]
+        }
+      },
+      "default_detail_fields": ["PRODUCT_ID", "PRODUCT_NAME", "CATEGORY"],
+      "read_policy": {"read_only": true, "timeout_seconds": 30, "max_rows": 10000}
+    },
+    "refunds": {
+      "display_name": "환불",
+      "family": "sales_refund",
+      "source_type": "dummy",
+      "source_adapter": "dummy.refunds.v1",
+      "time_scope": "history",
+      "config_ref": "config:dummy:order_sales@1",
+      "query_ref": "query:refunds@1",
+      "parameters": {},
+      "date_policy": {},
+      "fields": {
+        "ORDER_ID": {
+          "physical_column": "order_id",
+          "aliases": ["주문번호", "order id"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "PRODUCT_ID": {
+          "physical_column": "product_id",
+          "aliases": ["상품", "상품 ID"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "group", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "REFUND_AMOUNT": {
+          "physical_column": "refund_amount",
+          "aliases": ["환불액", "환불금액"],
+          "semantic_type": "currency",
+          "roles": ["filter", "aggregate", "compare", "sort", "rank", "metric", "project", "output"],
+          "required_in_source": true,
+          "nullable": false,
+          "unit": "KRW",
+          "allowed_rollups": ["sum", "mean", "min", "max"]
+        }
+      },
+      "default_detail_fields": ["ORDER_ID", "PRODUCT_ID", "REFUND_AMOUNT"],
+      "read_policy": {"read_only": true, "timeout_seconds": 30, "max_rows": 50000}
+    },
+    "targets": {
+      "display_name": "상품별 매출 목표",
+      "family": "sales_target",
+      "source_type": "dummy",
+      "source_adapter": "dummy.targets.v1",
+      "time_scope": "history",
+      "config_ref": "config:dummy:order_sales@1",
+      "query_ref": "query:targets@1",
+      "parameters": {
+        "DATE_FROM": {"type": "LocalDate", "required": false},
+        "DATE_TO": {"type": "LocalDate", "required": false}
+      },
+      "date_policy": {"field": "TARGET_DATE", "timezone": "Asia/Seoul", "inclusive_start": true, "inclusive_end": true},
+      "fields": {
+        "TARGET_DATE": {
+          "physical_column": "target_date",
+          "aliases": ["목표일", "기준일", "날짜"],
+          "semantic_type": "LocalDate",
+          "roles": ["filter", "group", "join", "sort", "project", "output"],
+          "timezone": "Asia/Seoul",
+          "required_in_source": true,
+          "nullable": false
+        },
+        "PRODUCT_ID": {
+          "physical_column": "product_id",
+          "aliases": ["상품", "상품 ID"],
+          "semantic_type": "identifier",
+          "roles": ["filter", "group", "join", "project", "output"],
+          "required_in_source": true,
+          "nullable": false
+        },
+        "TARGET_AMOUNT": {
+          "physical_column": "target_amount",
+          "aliases": ["매출목표", "목표금액", "목표액"],
+          "semantic_type": "currency",
+          "roles": ["filter", "aggregate", "compare", "sort", "rank", "metric", "project", "output"],
+          "required_in_source": true,
+          "nullable": false,
+          "unit": "KRW",
+          "allowed_rollups": ["sum", "min", "max"]
+        }
+      },
+      "default_detail_fields": ["TARGET_DATE", "PRODUCT_ID", "TARGET_AMOUNT"],
+      "read_policy": {"read_only": true, "timeout_seconds": 30, "max_rows": 10000}
+    }
+  },
+  "metrics": {
+    "SALES_AMOUNT": {
+      "aliases": ["매출", "매출액", "주문금액"],
+      "source_field": "SALES_AMOUNT",
+      "source_binding": {"dataset_family": "sales_actual", "field": "SALES_AMOUNT"},
+      "aggregation": "sum",
+      "additivity": {"default": "fully_additive", "allowed_rollups": ["sum", "mean", "min", "max"]},
+      "unit": "KRW"
+    },
+    "REFUND_AMOUNT": {
+      "aliases": ["환불", "환불액", "환불금액"],
+      "source_field": "REFUND_AMOUNT",
+      "source_binding": {"dataset_family": "sales_refund", "field": "REFUND_AMOUNT"},
+      "aggregation": "sum",
+      "additivity": {"default": "fully_additive", "allowed_rollups": ["sum", "mean", "min", "max"]},
+      "unit": "KRW"
+    },
+    "TARGET_AMOUNT": {
+      "aliases": ["목표", "매출목표", "목표금액", "목표액"],
+      "source_field": "TARGET_AMOUNT",
+      "source_binding": {"dataset_family": "sales_target", "field": "TARGET_AMOUNT"},
+      "aggregation": "sum",
+      "additivity": {"default": "fully_additive", "allowed_rollups": ["sum", "min", "max"]},
+      "unit": "KRW"
+    },
+    "NET_SALES_AMOUNT": {
+      "aliases": ["순매출", "순매출액"],
+      "aggregation": "sum",
+      "additivity": {"default": "fully_additive", "allowed_rollups": ["sum"]},
+      "formula": {"op": "subtract", "left_metric": "SALES_AMOUNT", "right_metric": "REFUND_AMOUNT"},
+      "unit": "KRW"
+    },
+    "ACHIEVEMENT_RATE": {
+      "aliases": ["달성률", "목표 달성률"],
+      "aggregation": "ratio_after_aggregate",
+      "additivity": {"default": "non_additive", "allowed_rollups": ["mean"]},
+      "formula": {"op": "safe_divide", "numerator_metric": "SALES_AMOUNT", "denominator_metric": "TARGET_AMOUNT"},
+      "unit": "percent"
+    }
+  },
+  "entity_groups": {
+    "all_products": {
+      "aliases": ["전체 상품", "모든 상품"],
+      "entity": "PRODUCT_ID",
+      "selection": {"operator": "all_registered"}
+    },
+    "electronics_category": {
+      "aliases": ["전자 카테고리", "전자 상품군"],
+      "target_field": "CATEGORY",
+      "selection": {"operator": "eq", "value": "A", "semantic_type": "string"}
+    },
+    "living_category": {
+      "aliases": ["생활 카테고리", "생활 상품군"],
+      "target_field": "CATEGORY",
+      "selection": {"operator": "eq", "value": "B", "semantic_type": "string"}
+    }
+  },
+  "grains": {
+    "product": {"keys": ["PRODUCT_ID"], "display_fields": ["PRODUCT_NAME", "CATEGORY"]},
+    "customer": {"keys": ["CUSTOMER_ID"]},
+    "order": {"keys": ["ORDER_ID"]},
+    "date_product": {"keys": ["TARGET_DATE", "PRODUCT_ID"]}
+  },
+  "relations": {
+    "orders_products": {
+      "left_dataset": "orders",
+      "right_dataset": "products",
+      "left_keys": ["PRODUCT_ID"],
+      "right_keys": ["PRODUCT_ID"],
+      "join_type": "left",
+      "cardinality": "many_to_one",
+      "null_key_policy": "never_match",
+      "multi_match_policy": "fail"
+    },
+    "orders_refunds": {
+      "left_dataset": "orders",
+      "right_dataset": "refunds",
+      "left_keys": ["ORDER_ID", "PRODUCT_ID"],
+      "right_keys": ["ORDER_ID", "PRODUCT_ID"],
+      "join_type": "left",
+      "cardinality": "one_to_zero_or_one",
+      "null_key_policy": "never_match",
+      "multi_match_policy": "fail"
+    },
+    "sales_targets": {
+      "left_dataset": "orders",
+      "right_dataset": "targets",
+      "left_keys": ["PRODUCT_ID"],
+      "right_keys": ["PRODUCT_ID"],
+      "join_type": "left",
+      "cardinality": "many_to_one",
+      "null_key_policy": "never_match",
+      "multi_match_policy": "fail"
+    }
+  },
+  "orderings": {
+    "product_name": {"keys": [{"field": "PRODUCT_NAME", "direction": "asc", "nulls": "last"}]},
+    "sales_desc": {"keys": [{"field": "SALES_AMOUNT", "direction": "desc", "nulls": "last"}]}
+  },
+  "predicates": {},
+  "recipes": {
+    "sales.summary": {
+      "aliases": ["총 매출", "매출 합계", "전체 매출"],
+      "required_slots": ["date_scope"],
+      "default_operation_template": {"op": "aggregate", "metrics": ["SALES_AMOUNT"], "group_by": []}
+    },
+    "sales.by_product": {
+      "aliases": ["상품별 매출", "제품별 매출"],
+      "required_slots": ["date_scope"],
+      "default_operation_template": {
+        "op": "join",
+        "relation_id": "orders_products",
+        "next": {"op": "aggregate", "metrics": ["SALES_AMOUNT"], "group_by": ["PRODUCT_ID", "PRODUCT_NAME", "CATEGORY"]}
+      }
+    },
+    "sales.rank": {
+      "aliases": ["매출 상위", "매출 하위", "가장 큰 매출", "가장 작은 매출"],
+      "required_slots": ["date_scope", "rank_direction", "rank_limit"],
+      "default_operation_template": {
+        "op": "rank",
+        "metric": "SALES_AMOUNT",
+        "grain_id": "product",
+        "include_ties": true,
+        "stable_tie_break": ["PRODUCT_ID"]
+      }
+    },
+    "sales.net_by_product": {
+      "aliases": ["상품별 순매출", "환불 제외 매출"],
+      "required_slots": ["date_scope"],
+      "default_operation_template": {
+        "op": "join",
+        "relation_id": "orders_refunds",
+        "next": {"op": "aggregate", "metrics": ["SALES_AMOUNT", "REFUND_AMOUNT", "NET_SALES_AMOUNT"], "group_by": ["PRODUCT_ID"]}
+      }
+    },
+    "sales.target_comparison": {
+      "aliases": ["목표 대비 매출", "달성률"],
+      "required_slots": ["date_scope"],
+      "default_operation_template": {
+        "op": "join",
+        "relation_id": "sales_targets",
+        "next": {
+          "op": "derive",
+          "metric": "ACHIEVEMENT_RATE",
+          "next": {"op": "project", "fields": ["PRODUCT_ID", "ACHIEVEMENT_RATE"]}
+        }
+      }
+    },
+    "sales.detail_projection": {
+      "aliases": ["주문 상세", "주문 컬럼만 보여줘"],
+      "required_slots": ["project_fields"],
+      "default_operation_template": {"op": "project", "allowed_fields": ["ORDER_ID", "ORDER_DATE", "CUSTOMER_ID", "PRODUCT_ID", "SALES_AMOUNT"]}
+    }
+  },
+  "aliases": {
+    "dataset:orders": {"target_type": "dataset", "target_key": "orders", "values": ["주문", "판매", "매출 데이터"]},
+    "dataset:products": {"target_type": "dataset", "target_key": "products", "values": ["상품", "제품 마스터"]},
+    "dataset:refunds": {"target_type": "dataset", "target_key": "refunds", "values": ["환불", "반품"]},
+    "dataset:targets": {"target_type": "dataset", "target_key": "targets", "values": ["목표", "매출 목표"]},
+    "field:PRODUCT_ID": {"target_type": "field", "target_key": "PRODUCT_ID", "values": ["상품", "상품 ID"]},
+    "field:PRODUCT_NAME": {"target_type": "field", "target_key": "PRODUCT_NAME", "values": ["상품명", "제품명"]},
+    "metric:SALES_AMOUNT": {"target_type": "metric", "target_key": "SALES_AMOUNT", "values": ["매출", "매출액", "주문금액"]},
+    "metric:REFUND_AMOUNT": {"target_type": "metric", "target_key": "REFUND_AMOUNT", "values": ["환불액", "환불금액"]},
+    "metric:TARGET_AMOUNT": {"target_type": "metric", "target_key": "TARGET_AMOUNT", "values": ["목표", "목표금액", "목표액"]}
+  },
+  "prompt_extensions": {
+    "intent": "상품은 PRODUCT_ID grain을 뜻한다. 순매출은 등록된 NET_SALES_AMOUNT metric 후보를 선택한다. 목표 대비 질문은 sales.target_comparison 후보만 선택할 수 있다.",
+    "answer": "금액은 KRW로 표시하고 조회 기간과 집계 grain을 적용 기준에 명시한다. 계산되지 않은 숫자를 만들지 않는다."
+  },
+  "specialized_functions": [],
+  "output_profile": {
+    "currency": "KRW",
+    "date_format": "YYYY-MM-DD",
+    "null_label": "-",
+    "default_row_limit": 20,
+    "field_labels": {
+      "PRODUCT_NAME": "상품명",
+      "SALES_AMOUNT": "매출액",
+      "REFUND_AMOUNT": "환불액",
+      "TARGET_AMOUNT": "목표금액",
+      "NET_SALES_AMOUNT": "순매출액",
+      "ACHIEVEMENT_RATE": "달성률"
+    }
+  },
+  "source_provenance": {
+    "source_type": "natural_language_txt",
+    "fixture": "order_sales"
+  }
+}

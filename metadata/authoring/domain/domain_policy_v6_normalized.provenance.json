@@ -1,0 +1,23 @@
+{
+  "contract_version": "metadata.normalized-authoring-source-provenance.v1",
+  "source_kind": "domain_policy",
+  "original_source": {
+    "path": "metadata/authoring/domain/domain_knowledge.txt",
+    "encoding": "utf-8",
+    "content_sha256": "dd5f53b5b6eb5ce92eac447ccdc476ca4d6448224cc0855925536b2087b2faae"
+  },
+  "normalized_companion": {
+    "path": "metadata/authoring/domain/domain_policy_v6_normalized.txt",
+    "encoding": "utf-8",
+    "content_sha256": "fbbfe05e6356585a59b989073df641c2d517aa077e2b1489a4a0a2b3b8c3b619",
+    "source_manifest_contract_version": "metadata.authoring.source-manifest.v1",
+    "source_manifest_source_sha256": "c782c7a8d5728d67fe17b59cfb4e2276854329bab0252f50d16f08d18b279971",
+    "source_manifest_sha256": "4ddc256e723ba1e053a1d19a2831dc246f4478fa8d8a3ae89d7a02be971e0221"
+  },
+  "normalization": {
+    "method": "reviewed-domain-policy-request.v1",
+    "facts_only": true,
+    "executable_content_allowed": false,
+    "secrets_allowed": false
+  }
+}

@@ -1,0 +1,108 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/unsupported-telemetry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "case_ref": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "contract_version": {
+      "const": "unsupported.telemetry.v1",
+      "type": "string"
+    },
+    "first_seen_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "last_seen_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "metadata_bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "missing_capability_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 256,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "normalized_shape_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "occurrence_count": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "operator_registry_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "route_policy_version": {
+      "const": "route-policy.v1",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "normalized_shape_id",
+    "missing_capability_ids",
+    "metadata_bundle_sha256",
+    "operator_registry_sha256",
+    "route_policy_version",
+    "occurrence_count",
+    "first_seen_at",
+    "last_seen_at",
+    "case_ref"
+  ],
+  "title": "unsupported.telemetry.v1",
+  "type": "object"
+}

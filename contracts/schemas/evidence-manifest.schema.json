@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/evidence-manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifact_hashes": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "contract_version": {
+      "const": "evidence.manifest.v1",
+      "type": "string"
+    },
+    "dirty": {
+      "type": "boolean"
+    },
+    "generated_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "git_sha": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "route_counts": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "test_summary": {
+      "$ref": "#/$defs/jsonObject"
+    }
+  },
+  "required": [
+    "contract_version",
+    "git_sha",
+    "dirty",
+    "generated_at",
+    "artifact_hashes",
+    "route_counts",
+    "test_summary"
+  ],
+  "title": "evidence.manifest.v1",
+  "type": "object"
+}

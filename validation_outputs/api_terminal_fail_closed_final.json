@@ -1,0 +1,42 @@
+{
+  "contract_version": "api-terminal.fail-closed.validation.v1",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "valid_response_sha256": "3725ccc9fff8919f50ed7b1a7569d4da853d48e7f84e66f6ee5b54bd4309ff42",
+  "valid_checks": {
+    "accepted_unchanged": true,
+    "contract_preserved": true,
+    "hash_preserved": true
+  },
+  "negative_cases": [
+    {
+      "case_id": "message_changed_without_rehash",
+      "input_sha256": "9b39647b440e20ee077f24dff7062e65e47a492a7c73e352bf6420534e0d46fa",
+      "blocked": true,
+      "exception_type": "ContractError"
+    },
+    {
+      "case_id": "hash_corrupted",
+      "input_sha256": "e7a8b662237f4548cde8f9a08336ba34cb4e3207d987575df9af816d2d7b7c23",
+      "blocked": true,
+      "exception_type": "ContractError"
+    },
+    {
+      "case_id": "schema_extra_field_rehashed",
+      "input_sha256": "da67185686706b879ed8cfb7b2d1437dd7d69c66739fe72f2bced742a92a6aa0",
+      "blocked": true,
+      "exception_type": "ContractError"
+    },
+    {
+      "case_id": "schema_required_field_removed_rehashed",
+      "input_sha256": "175ef20b6e41e280160913661ee4b88a6ce8e68c86e7bd8236d61ed53da163d1",
+      "blocked": true,
+      "exception_type": "ContractError"
+    }
+  ],
+  "checks": {
+    "valid_response_accepted_unchanged": true,
+    "all_mutations_blocked": true,
+    "four_negative_classes_covered": true
+  },
+  "all_passed": true
+}

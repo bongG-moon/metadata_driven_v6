@@ -1,0 +1,1305 @@
+{
+  "contract_version": "order-sales.component.validation.v1",
+  "domain_id": "order_sales",
+  "package_sha256": "fb2dc7218c2db3b7d0b142947823fe1c9a98527961406bf8f5f3cbb8302198ec",
+  "bundle_sha256": "021ecfaa8211cc70163cb018af67715323c9f71d689099ee4c5c7d32c8706433",
+  "catalog_sha256": "1aeb6fe468b61e6e13e8afe1b9796a27f05772ed72963ac71b507bbd86c98b68",
+  "case_count": 19,
+  "passed": 19,
+  "failed": 0,
+  "rows": [
+    {
+      "case_id": "OS01",
+      "question_sha256": "55e95bfbda3ef1ba2fdff3426291d800b131bab60a1d66821075049610ce4a1a",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "4d982dce5fea29d61d8d6e446cd5735fa357f03f83d211a7514d6c2e094cd5c4",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "8ad6d3fd7e7bc81a4e46f4ebd11ba93be319ba4f3247938c629d91240cc4990d"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "project"
+        ],
+        "plan_fingerprint": "dd6b810490eed7b2fd85bbe3cef7bdf81ebfecf5f760a7f6fd60f98aeb07d1b7"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS02",
+      "question_sha256": "a41b1016d5129eb7cb52ff98ceac9a130a56d653afea8a2aa730e1df64f31e17",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "e699cb0d46bc5dca22a4af0986a4f9483d795545be1c3f17dfbb804082a78e47",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "PRODUCT_NAME",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 2,
+        "result_sha256": "d58003e494e17998af99a13ed030ababaffee3123e84e3692da7f8df1c72404e"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "products"
+        ],
+        "operators": [
+          "filter",
+          "project",
+          "join",
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "1af8055183df36512e9d416c7277eaace6bc232f600ce00fa1c9fc29d3b81705"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS03",
+      "question_sha256": "23c1f9a5937ffb8923ef22cb4e6b4c246b01d9b114b8a560416df370daac9793",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "91b53f8cfd075d584187cb653848e6141d604646a688a2aff3d121df61a26d38",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 2,
+        "result_sha256": "5b8f49e9bd82d8ee68664ce943519f168143e3f6ecee3d07349ff98b6be12d99"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "243a0a48388bfb72bb322918bd28ae694d2753998e826e5caa5022b04c790faa"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS04",
+      "question_sha256": "2f4a08cda00feafc953c2a6f875caa91efb16d60c9d6bb2e583fc2692a96d7d3",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "a43b5c98c0a5e7500bca32c0cdf667a84bf7243fd8506b335b06974efac52e47",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "19af56f62229b1b9a61bd7ae0d51dc6e9257eadeac8a137bbf54cab6607c35c9"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "5e4d2828ebd4c6f51983eff45dc30e9aed1d797087bb8af8d600a5f76ca17434"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS05",
+      "question_sha256": "e23f954f68dad4906bbd3428820a8bb651389790cc78d924ca1838d467a700eb",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "d7f53f3465d2fa496d9018bc8f5c316749c7219e2aee44ef14a6d4b6d3372bc9",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "5d5289f1b69811d6f01c6edd813394d0de945952fed12dedc2c726679f0dd49b"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "18276946911cc98813d3f8f7b5117325b34cd09e1268c4491bd5a5b63e7df3bc"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS06",
+      "question_sha256": "03f5be759374a8a2e3db5fb75fd1cb096e94227556433eefffe8488389bdd412",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "17c3806dc0536d05af6612ebc72528154f4b16ee3ff7774fd2332a641a78d2d4",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "CATEGORY",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "0e596bafb5b8b50feb82ab3509b2b236cf15e627d92068b399a95fa1eb009449"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "products"
+        ],
+        "operators": [
+          "filter",
+          "project",
+          "join",
+          "aggregate",
+          "sort",
+          "project"
+        ],
+        "plan_fingerprint": "e3720733254de56415fe3d4dc91e403a17c209a7f2434439a56a9837f28c3397"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS07",
+      "question_sha256": "fbd298c6482b38049b3a0b48662cf800d634a880cbd436d736a7a80742f74bc0",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "9790c661981df51b1060f273691f135b8c30da90af0757281cecbb2fc151991f",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "ORDER_ID",
+          "ORDER_DATE",
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 3,
+        "result_sha256": "0e56ce50e4a8c482b36fe85ac33ee812c23033a2e2e34bc9b68355484add865a"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "filter",
+          "project"
+        ],
+        "plan_fingerprint": "618c5fb08fc805a2a5621ebc9b9f2c9417068c274ea1c89faa2316e1e7299231"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS08",
+      "question_sha256": "183b913edc2c691cbc26d5a15717090d0097b09c363b87e0af34330f1c86c8ac",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "10280b117d0c85732c8681ae7854aaf62ee7e2214862f7bb358ac0e9c0289619",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT",
+          "REFUND_AMOUNT",
+          "NET_SALES_AMOUNT"
+        ],
+        "row_count": 2,
+        "result_sha256": "64c550c3864b57db5aec0bc4afbd44429d5b26ed8f8bb5afe3f8bd95e3000e6f"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "refunds"
+        ],
+        "operators": [
+          "filter",
+          "join",
+          "aggregate",
+          "derive",
+          "derive",
+          "project"
+        ],
+        "plan_fingerprint": "733e955ce9401799984576f9c91a5e055552ed67e0726abc6d81cfcf011e1d87"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS09",
+      "question_sha256": "a7bebb8273a979ceb1f74c1c471e1eacd0c362f12dd82078dbee278b40616371",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "77f130e9951e691ef16fd8e82d52458611c2164f9e52c246c437eb23ffc4020c",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT",
+          "TARGET_AMOUNT",
+          "ACHIEVEMENT_RATE"
+        ],
+        "row_count": 2,
+        "result_sha256": "b7deb70f35c7aa4337e17b62b6fecfa3078671259623c01fc5b211d6e1d8a483"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "targets"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "project",
+          "join",
+          "derive",
+          "derive",
+          "project"
+        ],
+        "plan_fingerprint": "d9ddea2d4f3285416e39075129cd79b3d48e42d140ba2e0a63c11edde457fa76"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS10",
+      "question_sha256": "56fa16c8ba978782031dcb189b9345602c305c4b22aa33d47c4e66707c06f15e",
+      "passed": true,
+      "failures": [],
+      "response_status": "empty",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "afa86d66d18d9dff640d57ccfe21ec39279927d2be48ebecad2d52cd1a9829b8",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT",
+          "TARGET_AMOUNT"
+        ],
+        "row_count": 0,
+        "result_sha256": "f320edce06c3905088d33929db53f3f256dbbaee0368875dbd9a400cf2b02961"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "targets"
+        ],
+        "operators": [
+          "filter",
+          "aggregate",
+          "project",
+          "join",
+          "derive",
+          "compare_fields",
+          "project"
+        ],
+        "plan_fingerprint": "b5dbd9e803c126049a989666446928235ba824c5363339e3ed5f09d825df6c83"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS11",
+      "question_sha256": "4581978471c30f794316e68191af4b3d3bc40c86788d51dc910ba6e09e568694",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "70fa167efea5e578d617e619b75da0b1b6f56b00a0b91e8ad9476c5928d241e1",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_NAME",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 2,
+        "result_sha256": "948e09dd139578f70dfb5b3475b54a55ce4a41a6322679e17ac1d0fd901dfc01"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "products"
+        ],
+        "operators": [
+          "filter",
+          "project",
+          "join",
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "cbe9b7f4c733fcf67aa28fc300c43a046179d670d872d46f5cc379c7c48cef03"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS12",
+      "question_sha256": "65ca9788d6937c51d9f0f66e6f296de43e1b78afed5f1c7324a56378344c7316",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "40c7fb35b62d2e1ef43562f0b96b54eab86a761c7a4995a1803ff5030e44d037",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_NAME",
+          "REFUND_AMOUNT"
+        ],
+        "row_count": 3,
+        "result_sha256": "eae0fd0bf7bfd4a730aa478eda937664113b75815ef701df3d5eb4d1f4649b58"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "refunds",
+          "orders",
+          "products"
+        ],
+        "operators": [
+          "filter",
+          "project",
+          "join",
+          "project",
+          "join",
+          "project"
+        ],
+        "plan_fingerprint": "b076770c882c9b4dcb370e3b49fd62bb2d4f1e7f3c6d1d22eda2135f2a8c648f"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS13",
+      "question_sha256": "5e5530db1268c43340031487ae3117c3173915d8a1ca3d9cc08568bb2e5195ee",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "bd39574ea3a007bdc02bca1f7e0d930e236cc4b1d30e9f3fe6d5e1ce79c4272c",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 1
+      },
+      "result_contract": {
+        "columns": [
+          "CATEGORY",
+          "NET_SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "1dfc3fb9a640630bd3240f80144fc810cf5cc05bff6cf1c7ccf12881fc755697"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "refunds",
+          "products"
+        ],
+        "operators": [
+          "filter",
+          "join",
+          "project",
+          "join",
+          "aggregate",
+          "derive",
+          "derive",
+          "project"
+        ],
+        "plan_fingerprint": "2d20af94a29b617ebb4f42bb40c90a5a839385e476febc84a1d641135e1cfc56"
+      },
+      "narrative_contract": {
+        "attempted": true,
+        "claim_status": "verified",
+        "llm_calls": 1,
+        "message_sha256": "8178eb88223739613b6ec8289e67a4f3e04544d6b64d241087d0437ae97ffb0a"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS14",
+      "question_sha256": "83bcc9ff8f4ccc5c44aa2bfc7ec09a57855b74bd600068499f3e6b12c716b54a",
+      "passed": true,
+      "failures": [],
+      "response_status": "error",
+      "response_errors": [
+        {
+          "code": "unsupported_operation",
+          "stage": "route_eligibility",
+          "message": "등록된 metadata와 typed operator로 처리할 수 없는 질문입니다.",
+          "detail_keys": [
+            "reason_code"
+          ],
+          "schema": "",
+          "path": "",
+          "reason": "",
+          "error_type": "",
+          "safe_details": {}
+        }
+      ],
+      "route": {
+        "route": "unsupported",
+        "reason_code": "unsupported_registry_gap",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "planner_profile": "generic_v2",
+        "eligibility_proof_sha256": "71810be163b9ff586e77eb9896ebe75916dccfdbfb1a5d6aec25939fdf96c451"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [],
+        "row_count": 0,
+        "result_sha256": null
+      },
+      "plan_contract": {
+        "dataset_keys": [],
+        "operators": [],
+        "plan_fingerprint": null
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": null,
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-02T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS-COMP-TOTAL",
+      "question_sha256": "7822ce7774ee23d8dd9a202f8d388e6189869671dd8777d4442865a2eac37ea5",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "5695ff6d8383dcb6e0c775ead62205bc5b2ebc176f7136a820b558a6ef3a21a1",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "3d69206d267ffdd5f702cfe5ea0683620122c3f6f90ae1e51284bbae34849af4"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "aggregate",
+          "project"
+        ],
+        "plan_fingerprint": "5bdd070e9f741adab5ed46fd3bd4aa3d145501410a575b2aa389011c98458339"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-30T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS-COMP-TOP-TIES",
+      "question_sha256": "62f1b66a96715f6785766d44b5f84cd960e6e5a3211b193990ca7f06fa26af1c",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "180464e1e93d023f3393188583f855c562f50515eea11d1fbbb570a7700a4ef6",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 2,
+        "result_sha256": "7f8b10ab03b43eaa413ae1a4c72e971caa987068502a30529f31cfd895a49d79"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "0dd07d2c40561d6cff94fdaa7f3690b9053591a26f08c4c797cd21b46bddfb2d"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-30T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS-COMP-BOTTOM",
+      "question_sha256": "5aa446178fd9f3ffe6cda1742239ceef55ec574a29f5394e8c2399131b4adc3e",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "f2ed01f2e3d93c7f69b6b6041300df8ebf8e2e6d305873c2817a260e8e862ce7",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "SALES_AMOUNT"
+        ],
+        "row_count": 1,
+        "result_sha256": "5d5289f1b69811d6f01c6edd813394d0de945952fed12dedc2c726679f0dd49b"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders"
+        ],
+        "operators": [
+          "aggregate",
+          "rank",
+          "project"
+        ],
+        "plan_fingerprint": "adb1d358a75ff528855473533886f27e4df49397e43cc3dc7d8e9b60fa275996"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-30T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS-COMP-NET",
+      "question_sha256": "772755dd5d78a03fc1c4b296bc6b0704a1883d8bca0e9914435d34e32de375ba",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "e4e8a9e57be0bda5debd27fd2e692c92b82ed2471bf71fc55e8c112965128a09",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "NET_SALES_AMOUNT"
+        ],
+        "row_count": 4,
+        "result_sha256": "41229eddbee20fd00a545d97080a514fa63240c3c61bc8648ce4941923dd711b"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "refunds"
+        ],
+        "operators": [
+          "join",
+          "aggregate",
+          "derive",
+          "derive",
+          "project"
+        ],
+        "plan_fingerprint": "2a67181fb274c9a1a2b006adf58bc8f8a64bf968177995a5bc3791db1d53ea88"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-30T09:00:00+09:00"
+    },
+    {
+      "case_id": "OS-COMP-TARGET",
+      "question_sha256": "2b8be62770c9b6b26467b3bddb215617530079a0c4e0c5647aa7e9590000d61c",
+      "passed": true,
+      "failures": [],
+      "response_status": "ok",
+      "response_errors": [],
+      "route": {
+        "route": "deterministic",
+        "reason_code": "unique_complete_selection",
+        "intent_llm_calls": 0,
+        "fallback_used": false,
+        "eligibility_proof_sha256": "9d50aae7693e25cc51e13a876632f24dbd6476d2a49485efceaf075d6ca71567",
+        "planner_profile": "generic_v2"
+      },
+      "usage": {
+        "intent_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0,
+        "answer_llm_calls": 0
+      },
+      "result_contract": {
+        "columns": [
+          "PRODUCT_ID",
+          "ACHIEVEMENT_RATE"
+        ],
+        "row_count": 4,
+        "result_sha256": "b67ede27c1ac9358f010f2d9dae601c17191528d62792a9de3d5c1ec2feb3ffe"
+      },
+      "plan_contract": {
+        "dataset_keys": [
+          "orders",
+          "targets"
+        ],
+        "operators": [
+          "aggregate",
+          "project",
+          "join",
+          "derive",
+          "derive",
+          "project"
+        ],
+        "plan_fingerprint": "4411d273f5bfa5ed8ea2a269f32968aa438c8ff36e45ed21785fe897150fd96d"
+      },
+      "narrative_contract": {
+        "attempted": false,
+        "claim_status": "deterministic",
+        "llm_calls": 0,
+        "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+      },
+      "stage_counts": {
+        "answer_facts": 1,
+        "candidate_route": 1,
+        "domain_bundle": 1,
+        "input": 1,
+        "intent_resolver": 1,
+        "job_router": 1,
+        "model": 1,
+        "plan_compiler_validator": 1,
+        "request_state": 1,
+        "response_state_commit": 1,
+        "source_merger": 1,
+        "source_retriever": 3,
+        "terminals": 4,
+        "typed_executor": 1
+      },
+      "reference_instant": "2026-07-30T09:00:00+09:00"
+    }
+  ],
+  "session_isolation": {
+    "passed": true,
+    "checks": {
+      "sales_flow_passed": true,
+      "manufacturing_flow_passed": true,
+      "independent_state_versions": true,
+      "different_result_refs": true
+    }
+  },
+  "source_boundary_checks": {
+    "refund_rows_present": true,
+    "refund_fields_exact": true,
+    "refund_date_absent": true,
+    "target_rows_present": true,
+    "target_fields_exact": true,
+    "target_month_absent": true,
+    "refund_relation_composite": true,
+    "refund_relation_optional_one": true
+  },
+  "all_passed": true
+}

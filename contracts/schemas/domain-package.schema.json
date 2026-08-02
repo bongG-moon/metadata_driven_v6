@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/domain-package.schema.json",
+  "title": "domain.package.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "domain_id",
+    "environment",
+    "revision",
+    "lifecycle",
+    "compiler_version",
+    "authoring_sha256",
+    "runtime_catalog",
+    "package_sha256",
+    "bundle_sha256"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "domain.package.v1"
+    },
+    "domain_id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{1,63}$"
+    },
+    "environment": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]{1,31}$"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "enum": ["draft", "validated", "active", "deprecated", "quarantined"]
+        }
+      }
+    },
+    "compiler_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "authoring_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "runtime_catalog": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "package_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "bundle_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  },
+  "$defs": {
+    "jsonObject": {
+      "type": "object",
+      "patternProperties": {"^.{1,256}$": {"$ref": "#/$defs/jsonValue"}},
+      "additionalProperties": false
+    },
+    "jsonValue": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "maxItems": 4096, "items": {"$ref": "#/$defs/jsonValue"}},
+        {"$ref": "#/$defs/jsonObject"}
+      ]
+    }
+  }
+}

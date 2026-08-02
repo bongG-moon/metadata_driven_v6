@@ -1,0 +1,29 @@
+[project]
+name = "metadata-driven-v6"
+version = "0.1.0"
+description = "Langflow 1.9.2 metadata-driven typed analysis runtime"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "jsonschema==4.26.0",
+  "langflow==1.9.2",
+  "langflow-base==0.9.2",
+  "lfx==0.4.2",
+  "pandas==2.2.3",
+  "pymongo==4.10.1",
+  "python-dotenv==1.2.2",
+  "requests==2.34.2",
+]
+
+[dependency-groups]
+dev = ["pytest==9.1.1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-q --strict-markers"
+markers = [
+  "live_llm: calls a configured external LLM API",
+  "live_mongodb: calls the configured MongoDB instance",
+  "langflow_runtime: requires the exact Langflow 1.9.2 runtime",
+]
+

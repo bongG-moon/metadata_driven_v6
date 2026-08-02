@@ -1,0 +1,500 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/response.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "else": {
+        "properties": {
+          "clarification": {
+            "type": "null"
+          }
+        }
+      },
+      "if": {
+        "properties": {
+          "status": {
+            "const": "needs_clarification"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "clarification": {
+            "additionalProperties": false,
+            "properties": {
+              "options": {
+                "items": {
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "maxItems": 20,
+                "type": "array"
+              },
+              "question": {
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "question",
+              "options"
+            ],
+            "type": "object"
+          },
+          "state": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "state": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "analysis": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "analysis_mode": {
+      "const": "typed_ir",
+      "type": "string"
+    },
+    "answer_sections": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "clarification": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "options": {
+              "items": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 20,
+              "type": "array"
+            },
+            "question": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "question",
+            "options"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "contract_version": {
+      "const": "response.v1",
+      "type": "string"
+    },
+    "data": {
+      "additionalProperties": false,
+      "properties": {
+        "columns": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 256,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "row_count": {
+          "minimum": 0,
+          "type": "integer"
+        },
+        "rows": {
+          "items": {
+            "$ref": "#/$defs/jsonObject"
+          },
+          "maxItems": 50,
+          "type": "array"
+        }
+      },
+      "required": [
+        "columns",
+        "rows",
+        "row_count"
+      ],
+      "type": "object"
+    },
+    "data_mode": {
+      "enum": [
+        "dummy",
+        "inline",
+        "live"
+      ],
+      "type": "string"
+    },
+    "data_refs": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "content_sha256": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "download_url": {
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "path": {
+            "const": "payload.rows",
+            "type": "string"
+          },
+          "ref_id": {
+            "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+            "type": "string"
+          },
+          "role": {
+            "enum": [
+              "analysis_result",
+              "source_snapshot"
+            ],
+            "type": "string"
+          },
+          "store": {
+            "const": "agent_v6_result_store",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ref_id",
+          "role",
+          "content_sha256",
+          "expires_at",
+          "store",
+          "path",
+          "download_url"
+        ],
+        "type": "object"
+      },
+      "maxItems": 32,
+      "type": "array"
+    },
+    "intent_plan": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "message": {
+      "type": "string"
+    },
+    "request": {
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "reference_instant": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "session_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "timezone": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "request_id",
+        "question",
+        "session_id",
+        "reference_instant",
+        "timezone"
+      ],
+      "type": "object"
+    },
+    "response_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "response_type": {
+      "const": "data_analysis",
+      "type": "string"
+    },
+    "stage_status": {
+      "additionalProperties": false,
+      "properties": {
+        "analysis": {
+          "enum": [
+            "ok",
+            "partial",
+            "empty",
+            "error",
+            "needs_clarification",
+            "not_called"
+          ],
+          "type": "string"
+        },
+        "intent": {
+          "enum": [
+            "ok",
+            "skipped",
+            "error",
+            "needs_clarification"
+          ],
+          "type": "string"
+        },
+        "overall": {
+          "enum": [
+            "ok",
+            "partial",
+            "empty",
+            "error",
+            "needs_clarification"
+          ],
+          "type": "string"
+        },
+        "retrieval": {
+          "enum": [
+            "ok",
+            "empty",
+            "error",
+            "not_called"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "overall",
+        "intent",
+        "retrieval",
+        "analysis"
+      ],
+      "type": "object"
+    },
+    "state": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "executed_result_ref": {
+              "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+              "type": "string"
+            },
+            "expires_at": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "state_version": {
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "state_version",
+            "executed_result_ref",
+            "expires_at"
+          ],
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "partial",
+        "empty",
+        "error",
+        "needs_clarification"
+      ],
+      "type": "string"
+    },
+    "trace": {
+      "additionalProperties": false,
+      "properties": {
+        "commit_order": {
+          "items": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "retrieval": {
+          "items": {
+            "$ref": "#/$defs/jsonObject"
+          },
+          "maxItems": 32,
+          "type": "array"
+        },
+        "route": {
+          "$ref": "#/$defs/jsonObject"
+        },
+        "trace_id": {
+          "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+          "type": "string"
+        },
+        "usage": {
+          "additionalProperties": false,
+          "properties": {
+            "answer_llm_calls": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "intent_llm_calls": {
+              "maximum": 2,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "pandas_code_llm_calls": {
+              "maximum": 0,
+              "minimum": 0,
+              "type": "integer"
+            },
+            "pandas_repair_llm_calls": {
+              "maximum": 0,
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "intent_llm_calls",
+            "pandas_code_llm_calls",
+            "pandas_repair_llm_calls",
+            "answer_llm_calls"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "trace_id",
+        "route",
+        "retrieval",
+        "usage",
+        "commit_order"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "contract_version",
+    "response_type",
+    "status",
+    "stage_status",
+    "message",
+    "data_mode",
+    "analysis_mode",
+    "request",
+    "intent_plan",
+    "analysis",
+    "clarification",
+    "data",
+    "data_refs",
+    "answer_sections",
+    "state",
+    "trace",
+    "response_sha256"
+  ],
+  "title": "response.v1",
+  "type": "object"
+}

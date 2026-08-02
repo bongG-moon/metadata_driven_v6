@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/analysis-plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "catalog_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "analysis.plan.v1",
+      "type": "string"
+    },
+    "input_refs": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 4,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "intent_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "lineage": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "type": "array"
+    },
+    "plan_fingerprint": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "plan_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "result_contract": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "result_operation_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retrieval_jobs": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 32,
+      "type": "array"
+    }
+  },
+  "required": [
+    "contract_version",
+    "intent_sha256",
+    "candidate_bundle_sha256",
+    "catalog_sha256",
+    "retrieval_jobs",
+    "operations",
+    "result_operation_id",
+    "result_contract",
+    "lineage",
+    "plan_id",
+    "plan_fingerprint"
+  ],
+  "title": "analysis.plan.v1",
+  "type": "object"
+}

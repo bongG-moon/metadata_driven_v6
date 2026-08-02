@@ -1,0 +1,39 @@
+{
+  "contract_version": "domain.extension-safety.validation.v1",
+  "package_count": 2,
+  "packages": [
+    {
+      "domain_id": "manufacturing",
+      "environment": "production",
+      "catalog_contract_version": "metadata.runtime.catalog.v2",
+      "intent_extension_utf8_bytes": 0,
+      "answer_extension_utf8_bytes": 0,
+      "specialized_function_count": 0,
+      "specialized_function_failures": [],
+      "passed": true
+    },
+    {
+      "domain_id": "order_sales",
+      "environment": "test",
+      "catalog_contract_version": "metadata.runtime.catalog.v2",
+      "intent_extension_utf8_bytes": 191,
+      "answer_extension_utf8_bytes": 144,
+      "specialized_function_count": 0,
+      "specialized_function_failures": [],
+      "passed": true
+    }
+  ],
+  "component_checks": {
+    "intent_reads_catalog_prompt_extension": true,
+    "intent_has_node_overlay": true,
+    "intent_overlay_utf8_bounded": true,
+    "answer_reads_catalog_prompt_extension": true,
+    "answer_has_node_overlay": true,
+    "answer_overlay_utf8_bounded": true,
+    "planner_does_not_execute_specialized_functions": true,
+    "executor_does_not_execute_specialized_functions": true,
+    "executor_has_no_python_eval_path": true
+  },
+  "failures": [],
+  "all_passed": true
+}

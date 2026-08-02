@@ -1,0 +1,27 @@
+도메인 ID는 order_sales이고 표시 이름은 "주문·매출 분석"이다. 한국어를 기본으로 사용하고 시간대는 Asia/Seoul이다. 이 도메인은 주문, 상품, 환불, 매출 목표를 분석한다.
+
+orders 데이터셋은 과거 주문 이력이다. source type은 dummy이고 adapter 식별자는 dummy.orders.v1이다. canonical 필드는 ORDER_ID, ORDER_DATE, CUSTOMER_ID, PRODUCT_ID, SALES_AMOUNT이다. 실제 입력 컬럼 이름은 각각 order_id, order_date, customer_id, product_id, sales_amount이다. ORDER_DATE는 Asia/Seoul의 LocalDate이다. SALES_AMOUNT는 KRW 통화형이고 합계, 평균, 최소, 최대를 계산할 수 있다. 주문번호, 주문일, 고객, 상품, 매출, 주문금액, 판매금액 같은 표현을 인식한다. 날짜 시작과 종료 parameter는 선택값이며 날짜 범위 양 끝을 포함한다.
+
+products 데이터셋은 현재 상품 마스터이다. source type은 dummy이고 adapter 식별자는 dummy.products.v1이다. canonical 필드는 PRODUCT_ID, PRODUCT_NAME, CATEGORY이며 실제 컬럼은 product_id, product_name, category이다. 상품 ID를 기준으로 주문과 연결할 수 있다. 상품명, 제품명, 카테고리, 상품군 표현을 인식한다.
+
+refunds 데이터셋은 과거 환불 이력이다. source type은 dummy이고 adapter 식별자는 dummy.refunds.v1이다. canonical 필드는 ORDER_ID, PRODUCT_ID, REFUND_AMOUNT이며 실제 컬럼은 order_id, product_id, refund_amount이다. REFUND_AMOUNT는 KRW 통화형이고 합계를 계산할 수 있다. 환불, 환불액 표현을 인식한다.
+
+targets 데이터셋은 상품별 매출 목표이다. source type은 dummy이고 adapter 식별자는 dummy.targets.v1이다. canonical 필드는 TARGET_DATE, PRODUCT_ID, TARGET_AMOUNT이며 실제 컬럼은 target_date, product_id, target_amount이다. TARGET_AMOUNT는 KRW 통화형이고 합계를 계산할 수 있다. 목표, 목표액, 매출목표 표현을 인식한다.
+
+각 dataset field에는 다음 exact role을 사용한다. 등록 field role은 orders.ORDER_ID=filter|join|project|output, orders.ORDER_DATE=filter|group|sort|project|output, orders.CUSTOMER_ID=filter|group|join|project|output, orders.PRODUCT_ID=filter|group|join|project|output, orders.SALES_AMOUNT=filter|aggregate|compare|sort|rank|metric|project|output, products.PRODUCT_ID=filter|group|join|project|output, products.PRODUCT_NAME=filter|group|project|sort|output, products.CATEGORY=filter|group|project|sort|output, refunds.ORDER_ID=filter|join|project|output, refunds.PRODUCT_ID=filter|group|join|project|output, refunds.REFUND_AMOUNT=filter|aggregate|compare|sort|rank|metric|project|output, targets.TARGET_DATE=filter|group|join|sort|project|output, targets.PRODUCT_ID=filter|group|join|project|output, targets.TARGET_AMOUNT=filter|aggregate|compare|sort|rank|metric|project|output이다.
+
+등록 metric은 SALES_AMOUNT, REFUND_AMOUNT, TARGET_AMOUNT, NET_SALES_AMOUNT, ACHIEVEMENT_RATE이다. SALES_AMOUNT, REFUND_AMOUNT, TARGET_AMOUNT는 각각 같은 이름의 canonical field를 source로 사용한다. NET_SALES_AMOUNT는 집계 후 SALES_AMOUNT에서 REFUND_AMOUNT를 뺀 값이다. ACHIEVEMENT_RATE는 집계 후 SALES_AMOUNT를 TARGET_AMOUNT로 나누고 100을 곱한 값이다. 목표가 0일 때의 동작은 null로 고정한다.
+
+relations는 orders_products, orders_refunds, sales_targets이다. 등록 relation endpoint는 orders_products=orders->products, orders_refunds=orders->refunds, sales_targets=orders->targets이다. 등록 relation key는 orders_products=PRODUCT_ID->PRODUCT_ID, orders_refunds=ORDER_ID|PRODUCT_ID->ORDER_ID|PRODUCT_ID, sales_targets=PRODUCT_ID->PRODUCT_ID이다. 등록 relation policy는 orders_products=join_type:left|cardinality:many_to_one|null_key_policy:never_match|multi_match_policy:fail, orders_refunds=join_type:left|cardinality:one_to_zero_or_one|null_key_policy:never_match|multi_match_policy:fail, sales_targets=join_type:left|cardinality:many_to_one|null_key_policy:never_match|multi_match_policy:fail이다. orders_products는 PRODUCT_ID로 orders를 products에 many-to-one left join한다. orders_refunds는 ORDER_ID와 PRODUCT_ID로 orders를 refunds에 one-to-zero-or-one left join한다. sales_targets는 targets를 기준일로 먼저 필터한 뒤 PRODUCT_ID로 집계된 orders 매출과 many-to-one left join한다. 등록되지 않은 join key나 cardinality는 허용하지 않는다.
+
+기본 grain은 product이며 key는 PRODUCT_ID이다. 등록 grain key는 product=PRODUCT_ID, customer=CUSTOMER_ID, order=ORDER_ID, date_product=TARGET_DATE|PRODUCT_ID이다. 등록 grain display field는 product=PRODUCT_NAME|CATEGORY이다. display field 선언은 exhaustive이며 목록에 없는 등록 grain의 display field는 빈 목록이다. product grain은 PRODUCT_NAME과 CATEGORY를 표시 필드로 지원한다. 상위 N, 하위 N, 최대값 전체 동률, 최소값 전체 동률, 합계, 정렬, projection, 등록된 join, 컬럼 간 비교, 순매출액, 달성률 recipe를 제공한다. 허용 operation은 filter, project, derive, aggregate, compare_fields, join, sort, rank이다. 순위 결과는 PRODUCT_ID로 안정 정렬하고 최대·최소 단일값 질문은 동률을 모두 포함한다.
+등록 recipe ID는 sales.summary, sales.by_product, sales.rank, sales.net_by_product, sales.target_comparison, sales.detail_projection이다.
+
+달성률 또는 목표 대비 표시는 행을 제거하는 비교 필터가 아니다. sales_targets 관계로 join하고 ACHIEVEMENT_RATE를 derive한 뒤 요청한 grain의 모든 행을 project한다. `compare_fields`는 질문에 "보다 큰", "보다 작은", "초과", "미만", "이상", "이하"처럼 방향이 명시된 경우에만 사용한다. 단순한 "대비" 또는 "비교" 표현만으로는 비교 필터를 만들지 않는다.
+
+자연어 별칭으로 매출과 주문금액은 SALES_AMOUNT에, 환불과 환불액은 REFUND_AMOUNT에, 목표와 목표액은 TARGET_AMOUNT에, 순매출은 NET_SALES_AMOUNT에, 달성률은 ACHIEVEMENT_RATE에 연결한다. 상품은 PRODUCT_ID, 상품명은 PRODUCT_NAME, 카테고리는 CATEGORY에 연결한다.
+카테고리 코드의 업무 명칭은 A가 전자이고 B가 생활이다. "전자 카테고리"와 "전자 상품군"은 CATEGORY가 A인 등록 필터로, "생활 카테고리"와 "생활 상품군"은 CATEGORY가 B인 등록 필터로 변환한다.
+
+intent 확장 지침은 질문에 명시된 metric, dimension, date, rank, join 의미만 등록 후보에서 선택하도록 한다. answer 확장 지침은 계산된 숫자와 조건을 바꾸지 않고 간결한 한국어로 설명하도록 한다. output profile은 통화 단위를 KRW로 표시하고 날짜 형식은 YYYY-MM-DD, 숫자는 천 단위 구분을 사용한다.
+
+특화 함수는 임의 코드를 포함하지 않는다. 표준 typed recipe로 표현되지 않는 기능은 등록하지 않는다. credential, 연결 문자열, URL, SQL, Python 코드는 metadata에 포함하지 않는다.

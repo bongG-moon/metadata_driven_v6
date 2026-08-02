@@ -1,0 +1,259 @@
+# manufacturing v6 검증 전용 trusted inventory
+
+도메인 ID는 manufacturing이고 표시 이름은 "Manufacturing Analysis"이다. 기본 언어는 ko-KR이고 시간대는 Asia/Seoul이다. Legacy manufacturing catalog isolated as a versioned domain pack다.
+이 문서는 사용자 입력이 아니라 manufacturing 검증 oracle을 재현하기 위한 내부 선언문이다. 일반 Domain Flow는 자유형 자연어 TXT 하나를 받아 closed draft proposal을 만들고 deterministic schema와 compiler로 검증한다.
+
+## 데이터 자료와 canonical field
+
+eqp_uph 데이터셋은 equipment_uph 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 current이다. canonical 필드는 BASE_DATE, DEN, EQP_MODEL, FAMILY, LEAD, LOAD_DATE, MCP_NO, MODE, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRESS_CNT, RECIPE_ID, TECH, UPH이다.
+equipment_assign 데이터셋은 equipment 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 current이다. canonical 필드는 BAY_ID, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, EQP_ID, EQP_MODEL, FAB, FACTORY, FAMILY, LEAD, LOT_ID, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, ORG, PKG_TYPE1, PKG_TYPE2, PRESS_CNT, RECIPE_ID, SHIFT, TECH, TSV_DIE_TYP이다.
+hold_history 데이터셋은 hold_history 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 history이다. canonical 필드는 DEN, DEVICE, DEVICE_DESC, FAMILY, HOLD_CD, HOLD_DESC, HOLD_EVENT_AT, LEAD, LOT_ID, MCP_NO, MODE, OPER_NAME, OPER_NUM, ORG, PKG_TYPE1, PKG_TYPE2, PROD_QTY, TECH이다.
+lot_status 데이터셋은 lot 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 current이다. canonical 필드는 CUM_TAT, DEN, DEVICE, DEVICE_DESC, EQP_ID, FAB, FAC_IN_AT, FAMILY, HOLD_REASON, HOLD_STAT, IN_TAT, LEAD, LOT_ID, LOT_STAT, MCP_NO, MODE, OPER_IN_AT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PROD_QTY, TECH, TSV_DIE_TYP, WF_QTY이다.
+product_master 데이터셋은 product_master 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 dummy이고 시간 범위 정책은 current이다. canonical 필드는 DEN, DEVICE, LEAD, MCP_NO, MODE, PKG_TYPE1, PKG_TYPE2, TECH, YIELD_RATE이다.
+production 데이터셋은 production 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 history이다. canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRODUCTION_QTY, SHIFT, TECH, TSV_DIE_TYP이다.
+production_today 데이터셋은 production 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 current이다. canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRODUCTION_QTY, SHIFT, TECH, TSV_DIE_TYP이다.
+target 데이터셋은 target 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 goodocs이고 시간 범위 정책은 history이다. canonical 필드는 DATE, DEN, INPUT_PLAN_QTY, LEAD, MCP_NO, MODE, ORG, OUT_PLAN_QTY, PKG_TYPE1, PKG_TYPE2, TECH이다.
+wip 데이터셋은 wip 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 history이다. canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, SHIFT, TECH, TSV_DIE_TYP, WIP_QTY이다.
+wip_today 데이터셋은 wip 업무를 위한 검토된 읽기 전용 자료이다. 소스 유형은 oracle이고 시간 범위 정책은 current이다. canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, SHIFT, TECH, TSV_DIE_TYP, WIP_QTY이다.
+
+## 실행 inventory
+
+등록 field role은 eqp_uph.BASE_DATE=filter|output, eqp_uph.DEN=filter|group|join|output, eqp_uph.EQP_MODEL=filter|group|join|output, eqp_uph.FAMILY=filter|group|output, eqp_uph.LEAD=filter|group|join|output, eqp_uph.LOAD_DATE=filter|output, eqp_uph.MCP_NO=filter|group|join|output, eqp_uph.MODE=filter|group|join|output, eqp_uph.OPER_NAME=filter|group|join|sort|output, eqp_uph.OPER_NUM=filter|group|output, eqp_uph.OPER_SEQ=filter|sort|output, eqp_uph.ORG=filter|group|join|output, eqp_uph.PKG_TYPE1=filter|group|join|output, eqp_uph.PKG_TYPE2=filter|group|join|output, eqp_uph.PRESS_CNT=filter|aggregate|output, eqp_uph.RECIPE_ID=filter|group|join|output, eqp_uph.TECH=filter|group|join|output, eqp_uph.UPH=filter|aggregate|rank|output, equipment_assign.BAY_ID=filter|group|output, equipment_assign.DEN=filter|group|join|output, equipment_assign.DEVICE=filter|group|join|output, equipment_assign.DEVICE_DESC=filter|output, equipment_assign.DIE_ATTACH_QTY=filter|aggregate|output, equipment_assign.EQP_ID=filter|group|join|aggregate|output, equipment_assign.EQP_MODEL=filter|group|join|output, equipment_assign.FAB=filter|group|output, equipment_assign.FACTORY=filter|group|output, equipment_assign.FAMILY=filter|group|output, equipment_assign.LEAD=filter|group|join|output, equipment_assign.LOT_ID=filter|group|join|output, equipment_assign.MCP_NO=filter|group|join|output, equipment_assign.MODE=filter|group|join|output, equipment_assign.NETDIE_300_CNT=filter|aggregate|derive|output, equipment_assign.OPER_NAME=filter|group|join|sort|output, equipment_assign.OPER_NUM=filter|group|output, equipment_assign.ORG=filter|group|join|output, equipment_assign.PKG_TYPE1=filter|group|join|output, equipment_assign.PKG_TYPE2=filter|group|join|output, equipment_assign.PRESS_CNT=filter|aggregate|output, equipment_assign.RECIPE_ID=filter|group|join|output, equipment_assign.SHIFT=filter|group|output, equipment_assign.TECH=filter|group|join|output, equipment_assign.TSV_DIE_TYP=filter|group|output, hold_history.DEN=filter|group|join|output, hold_history.DEVICE=filter|group|output, hold_history.DEVICE_DESC=filter|output, hold_history.FAMILY=filter|group|output, hold_history.HOLD_CD=filter|group|output, hold_history.HOLD_DESC=filter|output, hold_history.HOLD_EVENT_AT=filter|aggregate|derive|sort|output, hold_history.LEAD=filter|group|join|output, hold_history.LOT_ID=filter|group|join|output, hold_history.MCP_NO=filter|group|join|output, hold_history.MODE=filter|group|join|output, hold_history.OPER_NAME=filter|group|sort|output, hold_history.OPER_NUM=filter|group|output, hold_history.ORG=filter|group|join|output, hold_history.PKG_TYPE1=filter|group|join|output, hold_history.PKG_TYPE2=filter|group|join|output, hold_history.PROD_QTY=filter|aggregate|output, hold_history.TECH=filter|group|join|output, lot_status.CUM_TAT=filter|aggregate|sort|rank|output, lot_status.DEN=filter|group|join|output, lot_status.DEVICE=filter|group|join|output, lot_status.DEVICE_DESC=filter|output, lot_status.EQP_ID=filter|group|join|output, lot_status.FAB=filter|group|output, lot_status.FAC_IN_AT=filter|sort|output, lot_status.FAMILY=filter|group|output, lot_status.HOLD_REASON=filter|output, lot_status.HOLD_STAT=filter|group|output, lot_status.IN_TAT=filter|aggregate|sort|rank|output, lot_status.LEAD=filter|group|join|output, lot_status.LOT_ID=filter|group|join|output, lot_status.LOT_STAT=filter|group|output, lot_status.MCP_NO=filter|group|join|output, lot_status.MODE=filter|group|join|output, lot_status.OPER_IN_AT=filter|sort|output, lot_status.OPER_NAME=filter|group|join|sort|output, lot_status.OPER_NUM=filter|group|output, lot_status.OPER_SEQ=filter|sort|output, lot_status.ORG=filter|group|join|output, lot_status.PKG_TYPE1=filter|group|join|output, lot_status.PKG_TYPE2=filter|group|join|output, lot_status.PROD_QTY=filter|aggregate|rank|output, lot_status.TECH=filter|group|join|output, lot_status.TSV_DIE_TYP=filter|group|output, lot_status.WF_QTY=filter|aggregate|rank|output, product_master.DEN=filter|group|join|output, product_master.DEVICE=filter|group|join|output, product_master.LEAD=filter|group|join|output, product_master.MCP_NO=filter|group|join|output, product_master.MODE=filter|group|join|output, product_master.PKG_TYPE1=filter|group|join|output, product_master.PKG_TYPE2=filter|group|join|output, product_master.TECH=filter|group|join|output, product_master.YIELD_RATE=filter|rank|output, production.DATE=filter|output, production.DEN=filter|group|join|output, production.DEVICE=filter|group|join|output, production.DEVICE_DESC=filter|output, production.DIE_ATTACH_QTY=filter|aggregate|output, production.FAB=filter|group|output, production.FACTORY=filter|group|output, production.FAMILY=filter|group|output, production.LEAD=filter|group|join|output, production.MCP_NO=filter|group|join|output, production.MODE=filter|group|join|output, production.NETDIE_300_CNT=filter|aggregate|derive|output, production.OPER_NAME=filter|group|join|sort|output, production.OPER_NUM=filter|group|output, production.OPER_SEQ=filter|sort|output, production.ORG=filter|group|join|output, production.PKG_TYPE1=filter|group|join|output, production.PKG_TYPE2=filter|group|join|output, production.PRODUCTION_QTY=filter|aggregate|derive|rank|output, production.SHIFT=filter|group|output, production.TECH=filter|group|join|output, production.TSV_DIE_TYP=filter|group|output, production_today.DATE=filter|output, production_today.DEN=filter|group|join|output, production_today.DEVICE=filter|group|join|output, production_today.DEVICE_DESC=filter|output, production_today.DIE_ATTACH_QTY=filter|aggregate|output, production_today.FAB=filter|group|output, production_today.FACTORY=filter|group|output, production_today.FAMILY=filter|group|output, production_today.LEAD=filter|group|join|output, production_today.MCP_NO=filter|group|join|output, production_today.MODE=filter|group|join|output, production_today.NETDIE_300_CNT=filter|aggregate|derive|output, production_today.OPER_NAME=filter|group|join|sort|output, production_today.OPER_NUM=filter|group|output, production_today.OPER_SEQ=filter|sort|output, production_today.ORG=filter|group|join|output, production_today.PKG_TYPE1=filter|group|join|output, production_today.PKG_TYPE2=filter|group|join|output, production_today.PRODUCTION_QTY=filter|aggregate|derive|rank|output, production_today.SHIFT=filter|group|output, production_today.TECH=filter|group|join|output, production_today.TSV_DIE_TYP=filter|group|output, target.DATE=filter|sort|output, target.DEN=filter|group|join|output, target.INPUT_PLAN_QTY=filter|aggregate|derive|rank|output, target.LEAD=filter|group|join|output, target.MCP_NO=filter|group|join|output, target.MODE=filter|group|join|output, target.ORG=filter|group|join|output, target.OUT_PLAN_QTY=filter|aggregate|derive|rank|output, target.PKG_TYPE1=filter|group|join|output, target.PKG_TYPE2=filter|group|join|output, target.TECH=filter|group|join|output, wip.DATE=filter|output, wip.DEN=filter|group|join|output, wip.DEVICE=filter|group|join|output, wip.DEVICE_DESC=filter|output, wip.DIE_ATTACH_QTY=filter|aggregate|output, wip.FAB=filter|group|output, wip.FACTORY=filter|group|output, wip.FAMILY=filter|group|output, wip.LEAD=filter|group|join|output, wip.MCP_NO=filter|group|join|output, wip.MODE=filter|group|join|output, wip.NETDIE_300_CNT=filter|aggregate|derive|output, wip.OPER_NAME=filter|group|join|sort|output, wip.OPER_NUM=filter|group|output, wip.OPER_SEQ=filter|sort|output, wip.ORG=filter|group|join|output, wip.PKG_TYPE1=filter|group|join|output, wip.PKG_TYPE2=filter|group|join|output, wip.SHIFT=filter|group|output, wip.TECH=filter|group|join|output, wip.TSV_DIE_TYP=filter|group|output, wip.WIP_QTY=filter|aggregate|rank|output, wip_today.DATE=filter|output, wip_today.DEN=filter|group|join|output, wip_today.DEVICE=filter|group|join|output, wip_today.DEVICE_DESC=filter|output, wip_today.DIE_ATTACH_QTY=filter|aggregate|output, wip_today.FAB=filter|group|output, wip_today.FACTORY=filter|group|output, wip_today.FAMILY=filter|group|output, wip_today.LEAD=filter|group|join|output, wip_today.MCP_NO=filter|group|join|output, wip_today.MODE=filter|group|join|output, wip_today.NETDIE_300_CNT=filter|aggregate|derive|output, wip_today.OPER_NAME=filter|group|join|sort|output, wip_today.OPER_NUM=filter|group|output, wip_today.OPER_SEQ=filter|sort|output, wip_today.ORG=filter|group|join|output, wip_today.PKG_TYPE1=filter|group|join|output, wip_today.PKG_TYPE2=filter|group|join|output, wip_today.SHIFT=filter|group|output, wip_today.TECH=filter|group|join|output, wip_today.TSV_DIE_TYP=filter|group|output, wip_today.WIP_QTY=filter|aggregate|rank|output이다.
+등록 metric은 ACHIEVEMENT_RATE, CUM_TAT, EQP_COUNT, HOLD_DURATION_HOURS, INPUT_PLAN_QTY, INPUT_QTY, IN_TAT, LOT_COUNT, OUT_PLAN_QTY, OUT_QTY, PKG_OUT_QTY, PRODUCTION_QTY, UNIT_QTY, UPH, WAFER_QTY, WIP_BOH_QTY, WIP_QTY이다.
+데이터 자료 간 별도 결합 관계 목록은 이 도메인 pack에 등록되어 있지 않다.
+등록 grain key는 product=TECH|DEN|MODE|PKG_TYPE1|PKG_TYPE2|LEAD|MCP_NO이다.
+product grain의 표시 필드는 빈 목록으로 고정한다. 빈 목록은 선언 문법으로 추론하지 않고 검토된 blueprint byte를 그대로 사용한다.
+허용 operation은 aggregate, compare_fields, derive, filter, join, ordered_range, presence_filter, project, rank, sort, transform_previous_result이다.
+등록 recipe ID는 achievement.input_actual, equipment.assignment_enrich, equipment.assignment_uph, hold.oldest_current_history, join.operation.production_wip, ordered.process.range, presence.left_positive_right_zero, product.standard, rank.bottom_n, rank.top_n이다.
+
+## 자연어 표현
+
+별칭 카드의 안정 식별자는 metric:ACHIEVEMENT_RATE이다. 대상 유형은 metric, 대상 키는 ACHIEVEMENT_RATE이다.
+사용자가 "달성률", "달성율"라고 말하면 ACHIEVEMENT_RATE로 해석한다.
+별칭 카드의 안정 식별자는 predicate:AUTO이다. 대상 유형은 predicate, 대상 키는 AUTO이다.
+사용자가 "auto향", "오토모티브향", "오토향"라고 말하면 AUTO로 해석한다.
+별칭 카드의 안정 식별자는 field:BASE_DATE이다. 대상 유형은 field, 대상 키는 BASE_DATE이다.
+사용자가 "base_date"라고 말하면 BASE_DATE로 해석한다.
+별칭 카드의 안정 식별자는 field:BAY_ID이다. 대상 유형은 field, 대상 키는 BAY_ID이다.
+사용자가 "bay_id"라고 말하면 BAY_ID로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:BG이다. 대상 유형은 entity_group, 대상 키는 BG이다.
+사용자가 "b/g", "b/g 공정", "b/g공정", "bg", "bg 공정", "bg공정"라고 말하면 BG로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:BM이다. 대상 유형은 entity_group, 대상 키는 BM이다.
+사용자가 "b/m", "b/m 공정", "b/m공정", "bm", "bm 공정", "bm공정", "비엠", "비엠 공정", "비엠공정"라고 말하면 BM로 해석한다.
+별칭 카드의 안정 식별자는 field:CUM_TAT이다. 대상 유형은 field, 대상 키는 CUM_TAT이다.
+사용자가 "cum tat", "cum_tat", "누적 tat"라고 말하면 CUM_TAT로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:DA이다. 대상 유형은 entity_group, 대상 키는 DA이다.
+사용자가 "d/a", "d/a 공정", "d/a공정", "da", "da 공정", "da공정"라고 말하면 DA로 해석한다.
+별칭 카드의 안정 식별자는 field:DATE이다. 대상 유형은 field, 대상 키는 DATE이다.
+사용자가 "date", "work date", "기준일", "날짜", "일자", "작업일"라고 말하면 DATE로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:DC이다. 대상 유형은 entity_group, 대상 키는 DC이다.
+사용자가 "d/c", "d/c 공정", "d/c공정", "dc", "dc 공정", "dc공정"라고 말하면 DC로 해석한다.
+별칭 카드의 안정 식별자는 field:DEN이다. 대상 유형은 field, 대상 키는 DEN이다.
+사용자가 "den", "density", "제품 용량"라고 말하면 DEN로 해석한다.
+별칭 카드의 안정 식별자는 field:DEVICE이다. 대상 유형은 field, 대상 키는 DEVICE이다.
+사용자가 "device", "device code", "첨자"라고 말하면 DEVICE로 해석한다.
+별칭 카드의 안정 식별자는 field:DEVICE_DESC이다. 대상 유형은 field, 대상 키는 DEVICE_DESC이다.
+사용자가 "device_desc", "제품 설명"라고 말하면 DEVICE_DESC로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:DI이다. 대상 유형은 entity_group, 대상 키는 DI이다.
+사용자가 "d/i", "d/i 공정", "d/i공정", "di", "di 공정", "di공정", "dvi", "dvi 공정", "dvi공정"라고 말하면 DI로 해석한다.
+별칭 카드의 안정 식별자는 field:DIE_ATTACH_QTY이다. 대상 유형은 field, 대상 키는 DIE_ATTACH_QTY이다.
+사용자가 "die_attach_qty"라고 말하면 DIE_ATTACH_QTY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:DP이다. 대상 유형은 entity_group, 대상 키는 DP이다.
+사용자가 "d/p", "d/p 공정", "d/p공정", "dp", "dp 공정", "dp공정"라고 말하면 DP로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:DS이다. 대상 유형은 entity_group, 대상 키는 DS이다.
+사용자가 "d/s", "d/s 공정", "d/s공정", "ds", "ds 공정", "ds공정"라고 말하면 DS로 해석한다.
+별칭 카드의 안정 식별자는 metric:EQP_COUNT이다. 대상 유형은 metric, 대상 키는 EQP_COUNT이다.
+사용자가 "몇 대", "장비 대수", "장비 수"라고 말하면 EQP_COUNT로 해석한다.
+별칭 카드의 안정 식별자는 field:EQP_ID이다. 대상 유형은 field, 대상 키는 EQP_ID이다.
+사용자가 "eqp_id", "eqpid", "장비 id"라고 말하면 EQP_ID로 해석한다.
+별칭 카드의 안정 식별자는 field:EQP_MODEL이다. 대상 유형은 field, 대상 키는 EQP_MODEL이다.
+사용자가 "eqp_model", "equipment model", "설비 기종", "설비 모델", "장비 기종", "장비 모델"라고 말하면 EQP_MODEL로 해석한다.
+별칭 카드의 안정 식별자는 field:FAB이다. 대상 유형은 field, 대상 키는 FAB이다.
+사용자가 "fab"라고 말하면 FAB로 해석한다.
+별칭 카드의 안정 식별자는 field:FACTORY이다. 대상 유형은 field, 대상 키는 FACTORY이다.
+사용자가 "factory"라고 말하면 FACTORY로 해석한다.
+별칭 카드의 안정 식별자는 field:FAC_IN_AT이다. 대상 유형은 field, 대상 키는 FAC_IN_AT이다.
+사용자가 "fac_in_at"라고 말하면 FAC_IN_AT로 해석한다.
+별칭 카드의 안정 식별자는 field:FAMILY이다. 대상 유형은 field, 대상 키는 FAMILY이다.
+사용자가 "family"라고 말하면 FAMILY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:FCB이다. 대상 유형은 entity_group, 대상 키는 FCB이다.
+사용자가 "fcb", "fcb 공정", "fcb공정"라고 말하면 FCB로 해석한다.
+별칭 카드의 안정 식별자는 process:FCB1이다. 대상 유형은 process, 대상 키는 FCB1이다.
+사용자가 "fcb 1차", "fcb1", "fcb1 공정", "fcb1공정", "fcb1차"라고 말하면 FCB1로 해석한다.
+별칭 카드의 안정 식별자는 process:FCB2이다. 대상 유형은 process, 대상 키는 FCB2이다.
+사용자가 "fcb 2차", "fcb2", "fcb2 공정", "fcb2공정", "fcb2차"라고 말하면 FCB2로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:FCBH이다. 대상 유형은 entity_group, 대상 키는 FCBH이다.
+사용자가 "fcb/h", "fcb/h 공정", "fcb/h공정", "fcbh", "fcbh 공정", "fcbh공정"라고 말하면 FCBH로 해석한다.
+별칭 카드의 안정 식별자는 field:HOLD_CD이다. 대상 유형은 field, 대상 키는 HOLD_CD이다.
+사용자가 "hold_cd"라고 말하면 HOLD_CD로 해석한다.
+별칭 카드의 안정 식별자는 field:HOLD_DESC이다. 대상 유형은 field, 대상 키는 HOLD_DESC이다.
+사용자가 "hold_desc"라고 말하면 HOLD_DESC로 해석한다.
+별칭 카드의 안정 식별자는 metric:HOLD_DURATION_HOURS이다. 대상 유형은 metric, 대상 키는 HOLD_DURATION_HOURS이다.
+사용자가 "hold_duration_hours"라고 말하면 HOLD_DURATION_HOURS로 해석한다.
+별칭 카드의 안정 식별자는 field:HOLD_EVENT_AT이다. 대상 유형은 field, 대상 키는 HOLD_EVENT_AT이다.
+사용자가 "hold_event_at"라고 말하면 HOLD_EVENT_AT로 해석한다.
+별칭 카드의 안정 식별자는 field:HOLD_REASON이다. 대상 유형은 field, 대상 키는 HOLD_REASON이다.
+사용자가 "hold_reason"라고 말하면 HOLD_REASON로 해석한다.
+별칭 카드의 안정 식별자는 field:HOLD_STAT이다. 대상 유형은 field, 대상 키는 HOLD_STAT이다.
+사용자가 "hold_stat"라고 말하면 HOLD_STAT로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:HS이다. 대상 유형은 entity_group, 대상 키는 HS이다.
+사용자가 "h/s", "h/s 공정", "h/s공정", "hs", "hs 공정", "hs공정"라고 말하면 HS로 해석한다.
+별칭 카드의 안정 식별자는 process:INPUT이다. 대상 유형은 process, 대상 키는 INPUT이다.
+사용자가 "input 공정", "input공정"라고 말하면 INPUT로 해석한다.
+별칭 카드의 안정 식별자는 field:INPUT_PLAN_QTY이다. 대상 유형은 field, 대상 키는 INPUT_PLAN_QTY이다.
+사용자가 "input 계획", "input_plan_qty", "투입계획"라고 말하면 INPUT_PLAN_QTY로 해석한다.
+별칭 카드의 안정 식별자는 metric:INPUT_QTY이다. 대상 유형은 metric, 대상 키는 INPUT_QTY이다.
+사용자가 "input 수량", "input 실적", "input_qty", "input생산량", "input실적", "투입 실적", "투입량"라고 말하면 INPUT_QTY로 해석한다.
+별칭 카드의 안정 식별자는 field:IN_TAT이다. 대상 유형은 field, 대상 키는 IN_TAT이다.
+사용자가 "in tat", "in_tat", "현재 tat", "현재 공정 tat"라고 말하면 IN_TAT로 해석한다.
+별칭 카드의 안정 식별자는 field:LEAD이다. 대상 유형은 field, 대상 키는 LEAD이다.
+사용자가 "lead", "lead count"라고 말하면 LEAD로 해석한다.
+별칭 카드의 안정 식별자는 field:LOAD_DATE이다. 대상 유형은 field, 대상 키는 LOAD_DATE이다.
+사용자가 "load_date"라고 말하면 LOAD_DATE로 해석한다.
+별칭 카드의 안정 식별자는 metric:LOT_COUNT이다. 대상 유형은 metric, 대상 키는 LOT_COUNT이다.
+사용자가 "lot 건수", "lot 수"라고 말하면 LOT_COUNT로 해석한다.
+별칭 카드의 안정 식별자는 field:LOT_ID이다. 대상 유형은 field, 대상 키는 LOT_ID이다.
+사용자가 "lot id", "lot_id"라고 말하면 LOT_ID로 해석한다.
+별칭 카드의 안정 식별자는 field:LOT_STAT이다. 대상 유형은 field, 대상 키는 LOT_STAT이다.
+사용자가 "lot_stat"라고 말하면 LOT_STAT로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:LT이다. 대상 유형은 entity_group, 대상 키는 LT이다.
+사용자가 "l/t", "l/t 공정", "l/t공정", "lt", "lt 공정", "lt공정"라고 말하면 LT로 해석한다.
+별칭 카드의 안정 식별자는 field:MCP_NO이다. 대상 유형은 field, 대상 키는 MCP_NO이다.
+사용자가 "mcp no", "mcp_no", "mcp_sale_cd", "mcp_sales_no", "mcpsaleno"라고 말하면 MCP_NO로 해석한다.
+별칭 카드의 안정 식별자는 predicate:MOBILE이다. 대상 유형은 predicate, 대상 키는 MOBILE이다.
+사용자가 "mobile", "모바일"라고 말하면 MOBILE로 해석한다.
+별칭 카드의 안정 식별자는 field:MODE이다. 대상 유형은 field, 대상 키는 MODE이다.
+사용자가 "mode", "제품 모드"라고 말하면 MODE로 해석한다.
+별칭 카드의 안정 식별자는 field:NETDIE_300_CNT이다. 대상 유형은 field, 대상 키는 NETDIE_300_CNT이다.
+사용자가 "netdie_300_cnt"라고 말하면 NETDIE_300_CNT로 해석한다.
+별칭 카드의 안정 식별자는 field:OPER_IN_AT이다. 대상 유형은 field, 대상 키는 OPER_IN_AT이다.
+사용자가 "oper_in_at"라고 말하면 OPER_IN_AT로 해석한다.
+별칭 카드의 안정 식별자는 field:OPER_NAME이다. 대상 유형은 field, 대상 키는 OPER_NAME이다.
+사용자가 "oper name", "oper_name", "operation", "process", "공정", "공정별", "세부 공정별", "작업공정"라고 말하면 OPER_NAME로 해석한다.
+별칭 카드의 안정 식별자는 field:OPER_NUM이다. 대상 유형은 field, 대상 키는 OPER_NUM이다.
+사용자가 "oper no", "oper num", "공정 차수", "공정번호", "차수별"라고 말하면 OPER_NUM로 해석한다.
+별칭 카드의 안정 식별자는 field:OPER_SEQ이다. 대상 유형은 field, 대상 키는 OPER_SEQ이다.
+사용자가 "oper_seq"라고 말하면 OPER_SEQ로 해석한다.
+별칭 카드의 안정 식별자는 field:ORG이다. 대상 유형은 field, 대상 키는 ORG이다.
+사용자가 "org", "organization code", "조직"라고 말하면 ORG로 해석한다.
+별칭 카드의 안정 식별자는 field:OUT_PLAN_QTY이다. 대상 유형은 field, 대상 키는 OUT_PLAN_QTY이다.
+사용자가 "out 계획", "out_plan_qty", "target"라고 말하면 OUT_PLAN_QTY로 해석한다.
+별칭 카드의 안정 식별자는 metric:OUT_QTY이다. 대상 유형은 metric, 대상 키는 OUT_QTY이다.
+사용자가 "out_qty"라고 말하면 OUT_QTY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:PC이다. 대상 유형은 entity_group, 대상 키는 PC이다.
+사용자가 "p/c", "p/c 공정", "p/c공정", "pc", "pc 공정", "pc공정"라고 말하면 PC로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:PCO이다. 대상 유형은 entity_group, 대상 키는 PCO이다.
+사용자가 "pco", "pco 공정", "pco공정"라고 말하면 PCO로 해석한다.
+별칭 카드의 안정 식별자는 metric:PKG_OUT_QTY이다. 대상 유형은 metric, 대상 키는 PKG_OUT_QTY이다.
+사용자가 "out put", "out 실적", "output 실적", "pkg out 실적", "pkg out실적"라고 말하면 PKG_OUT_QTY로 해석한다.
+별칭 카드의 안정 식별자는 field:PKG_TYPE1이다. 대상 유형은 field, 대상 키는 PKG_TYPE1이다.
+사용자가 "package type 1", "pkg1", "pkg_type1"라고 말하면 PKG_TYPE1로 해석한다.
+별칭 카드의 안정 식별자는 field:PKG_TYPE2이다. 대상 유형은 field, 대상 키는 PKG_TYPE2이다.
+사용자가 "package type 2", "pkg2", "pkg_type2"라고 말하면 PKG_TYPE2로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:PLH이다. 대상 유형은 entity_group, 대상 키는 PLH이다.
+사용자가 "p/l", "p/l 공정", "p/l공정", "plh", "plh 공정", "plh공정"라고 말하면 PLH로 해석한다.
+별칭 카드의 안정 식별자는 predicate:POP이다. 대상 유형은 predicate, 대상 키는 POP이다.
+사용자가 "pop"라고 말하면 POP로 해석한다.
+별칭 카드의 안정 식별자는 field:PRESS_CNT이다. 대상 유형은 field, 대상 키는 PRESS_CNT이다.
+사용자가 "press_cnt"라고 말하면 PRESS_CNT로 해석한다.
+별칭 카드의 안정 식별자는 field:PRODUCTION_QTY이다. 대상 유형은 field, 대상 키는 PRODUCTION_QTY이다.
+사용자가 "production_qty", "생산량", "생산실적", "실적"라고 말하면 PRODUCTION_QTY로 해석한다.
+별칭 카드의 안정 식별자는 field:PROD_QTY이다. 대상 유형은 field, 대상 키는 PROD_QTY이다.
+사용자가 "prod_qty"라고 말하면 PROD_QTY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:QCSPC이다. 대상 유형은 entity_group, 대상 키는 QCSPC이다.
+사용자가 "qcspc", "qcspc 공정", "qcspc공정"라고 말하면 QCSPC로 해석한다.
+별칭 카드의 안정 식별자는 field:RECIPE_ID이다. 대상 유형은 field, 대상 키는 RECIPE_ID이다.
+사용자가 "recipe id", "recipe_id", "레시피"라고 말하면 RECIPE_ID로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:SAT이다. 대상 유형은 entity_group, 대상 키는 SAT이다.
+사용자가 "sat", "sat 공정", "sat공정"라고 말하면 SAT로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:SBM이다. 대상 유형은 entity_group, 대상 키는 SBM이다.
+사용자가 "sbm", "sbm 공정", "sbm공정"라고 말하면 SBM로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:SG이다. 대상 유형은 entity_group, 대상 키는 SG이다.
+사용자가 "s/g", "s/g 공정", "s/g공정", "sg", "sg 공정", "sg공정"라고 말하면 SG로 해석한다.
+별칭 카드의 안정 식별자는 field:SHIFT이다. 대상 유형은 field, 대상 키는 SHIFT이다.
+사용자가 "shift"라고 말하면 SHIFT로 해석한다.
+별칭 카드의 안정 식별자는 status:SHIFT_A이다. 대상 유형은 status, 대상 키는 SHIFT_A이다.
+사용자가 "07:00~15:00", "1조", "a조", "shift a", "shift a조"라고 말하면 SHIFT_A로 해석한다.
+별칭 카드의 안정 식별자는 status:SHIFT_B이다. 대상 유형은 status, 대상 키는 SHIFT_B이다.
+사용자가 "15:00~23:00", "2조", "b조", "shift b", "shift b조"라고 말하면 SHIFT_B로 해석한다.
+별칭 카드의 안정 식별자는 status:SHIFT_C이다. 대상 유형은 status, 대상 키는 SHIFT_C이다.
+사용자가 "23:00~07:00", "3조", "c조", "shift c", "shift c조"라고 말하면 SHIFT_C로 해석한다.
+별칭 카드의 안정 식별자는 predicate:STACK_2HI이다. 대상 유형은 predicate, 대상 키는 STACK_2HI이다.
+사용자가 "2hi"라고 말하면 STACK_2HI로 해석한다.
+별칭 카드의 안정 식별자는 predicate:STACK_4HI이다. 대상 유형은 predicate, 대상 키는 STACK_4HI이다.
+사용자가 "4hi"라고 말하면 STACK_4HI로 해석한다.
+별칭 카드의 안정 식별자는 predicate:STACK_8HI이다. 대상 유형은 predicate, 대상 키는 STACK_8HI이다.
+사용자가 "8hi"라고 말하면 STACK_8HI로 해석한다.
+별칭 카드의 안정 식별자는 field:TECH이다. 대상 유형은 field, 대상 키는 TECH이다.
+사용자가 "tech", "제품 기술"라고 말하면 TECH로 해석한다.
+별칭 카드의 안정 식별자는 field:TSV_DIE_TYP이다. 대상 유형은 field, 대상 키는 TSV_DIE_TYP이다.
+사용자가 "tsv_die_typ"라고 말하면 TSV_DIE_TYP로 해석한다.
+별칭 카드의 안정 식별자는 metric:UNIT_QTY이다. 대상 유형은 metric, 대상 키는 UNIT_QTY이다.
+사용자가 "die 수량", "unit 수량"라고 말하면 UNIT_QTY로 해석한다.
+별칭 카드의 안정 식별자는 metric:WAFER_QTY이다. 대상 유형은 metric, 대상 키는 WAFER_QTY이다.
+사용자가 "wafer 수량", "웨이퍼 수량"라고 말하면 WAFER_QTY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WB이다. 대상 유형은 entity_group, 대상 키는 WB이다.
+사용자가 "w/b", "w/b 공정", "w/b공정", "wb", "wb 공정", "wb공정"라고 말하면 WB로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WBM이다. 대상 유형은 entity_group, 대상 키는 WBM이다.
+사용자가 "w/bm", "w/bm 공정", "w/bm공정", "wbm", "wbm 공정", "wbm공정"라고 말하면 WBM로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WEC이다. 대상 유형은 entity_group, 대상 키는 WEC이다.
+사용자가 "wec", "wec 공정", "wec공정"라고 말하면 WEC로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WET이다. 대상 유형은 entity_group, 대상 키는 WET이다.
+사용자가 "wet", "wet 공정", "wet공정"라고 말하면 WET로 해석한다.
+별칭 카드의 안정 식별자는 field:WF_QTY이다. 대상 유형은 field, 대상 키는 WF_QTY이다.
+사용자가 "wf_qty"라고 말하면 WF_QTY로 해석한다.
+별칭 카드의 안정 식별자는 metric:WIP_BOH_QTY이다. 대상 유형은 metric, 대상 키는 WIP_BOH_QTY이다.
+사용자가 "07시 기준 재공"라고 말하면 WIP_BOH_QTY로 해석한다.
+별칭 카드의 안정 식별자는 field:WIP_QTY이다. 대상 유형은 field, 대상 키는 WIP_QTY이다.
+사용자가 "wip", "wip_qty", "공정 물량", "재공", "재공수량"라고 말하면 WIP_QTY로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WLS이다. 대상 유형은 entity_group, 대상 키는 WLS이다.
+사용자가 "wls", "wls 공정", "wls공정"라고 말하면 WLS로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WS이다. 대상 유형은 entity_group, 대상 키는 WS이다.
+사용자가 "w/s", "w/s 공정", "w/s공정", "ws", "ws 공정", "ws공정"라고 말하면 WS로 해석한다.
+별칭 카드의 안정 식별자는 entity_group:WSD이다. 대상 유형은 entity_group, 대상 키는 WSD이다.
+사용자가 "wsd", "wsd 공정", "wsd공정"라고 말하면 WSD로 해석한다.
+별칭 카드의 안정 식별자는 field:YIELD_RATE이다. 대상 유형은 field, 대상 키는 YIELD_RATE이다.
+사용자가 "yield rate", "yield_rate", "수율"라고 말하면 YIELD_RATE로 해석한다.
+별칭 카드의 안정 식별자는 recipe:achievement.input_actual이다. 대상 유형은 recipe, 대상 키는 achievement.input_actual이다.
+사용자가 "input 계획 대비 실적"라고 말하면 achievement.input_actual로 해석한다.
+별칭 카드의 안정 식별자는 recipe:equipment.assignment_enrich이다. 대상 유형은 recipe, 대상 키는 equipment.assignment_enrich이다.
+사용자가 "장비 목록", "할당된 장비 대수와 list"라고 말하면 equipment.assignment_enrich로 해석한다.
+별칭 카드의 안정 식별자는 recipe:equipment.assignment_uph이다. 대상 유형은 recipe, 대상 키는 equipment.assignment_uph이다.
+사용자가 "배정 장비 uph", "장비별 uph", "장비와 recipe uph"라고 말하면 equipment.assignment_uph로 해석한다.
+별칭 카드의 안정 식별자는 dataset:equipment_assign이다. 대상 유형은 dataset, 대상 키는 equipment_assign이다.
+사용자가 "장비 현황"라고 말하면 equipment_assign로 해석한다.
+별칭 카드의 안정 식별자는 recipe:hold.oldest_current_history이다. 대상 유형은 recipe, 대상 키는 hold.oldest_current_history이다.
+사용자가 "hold 시간이 가장 오래된 lot", "오래된 hold 이력"라고 말하면 hold.oldest_current_history로 해석한다.
+별칭 카드의 안정 식별자는 dataset:hold_history이다. 대상 유형은 dataset, 대상 키는 hold_history이다.
+사용자가 "hold 발생 시각", "hold 이력"라고 말하면 hold_history로 해석한다.
+별칭 카드의 안정 식별자는 recipe:join.operation.production_wip이다. 대상 유형은 recipe, 대상 키는 join.operation.production_wip이다.
+사용자가 "생산 wip 비교", "생산량과 재공수량"라고 말하면 join.operation.production_wip로 해석한다.
+별칭 카드의 안정 식별자는 dataset:lot_status이다. 대상 유형은 dataset, 대상 키는 lot_status이다.
+사용자가 "hold lot", "lot 현황", "현재 lot"라고 말하면 lot_status로 해석한다.
+별칭 카드의 안정 식별자는 recipe:ordered.process.range이다. 대상 유형은 recipe, 대상 키는 ordered.process.range이다.
+사용자가 "oper_seq 범위", "공정 구간", "공정 범위"라고 말하면 ordered.process.range로 해석한다.
+별칭 카드의 안정 식별자는 recipe:presence.left_positive_right_zero이다. 대상 유형은 recipe, 대상 키는 presence.left_positive_right_zero이다.
+사용자가 "a는 있으나 b는 없음", "실적 있음 재공 없음", "존재 미존재"라고 말하면 presence.left_positive_right_zero로 해석한다.
+별칭 카드의 안정 식별자는 recipe:product.standard이다. 대상 유형은 recipe, 대상 키는 product.standard이다.
+사용자가 "제품 기준", "제품 집계", "제품별"라고 말하면 product.standard로 해석한다.
+별칭 카드의 안정 식별자는 dataset:product_master이다. 대상 유형은 dataset, 대상 키는 product_master이다.
+사용자가 "product master", "제품 master", "제품 기준정보", "제품 마스터"라고 말하면 product_master로 해석한다.
+별칭 카드의 안정 식별자는 dataset:production이다. 대상 유형은 dataset, 대상 키는 production이다.
+사용자가 "production", "production 데이터", "생산 실적", "이력 생산"라고 말하면 production로 해석한다.
+별칭 카드의 안정 식별자는 dataset:production_today이다. 대상 유형은 dataset, 대상 키는 production_today이다.
+사용자가 "당일 생산", "오늘 생산", "현재 생산"라고 말하면 production_today로 해석한다.
+별칭 카드의 안정 식별자는 recipe:rank.bottom_n이다. 대상 유형은 recipe, 대상 키는 rank.bottom_n이다.
+사용자가 "bottom n", "가장 적은", "하위 n개"라고 말하면 rank.bottom_n로 해석한다.
+별칭 카드의 안정 식별자는 recipe:rank.top_n이다. 대상 유형은 recipe, 대상 키는 rank.top_n이다.
+사용자가 "top n", "가장 많은", "상위 n개"라고 말하면 rank.top_n로 해석한다.
+별칭 카드의 안정 식별자는 dataset:target이다. 대상 유형은 dataset, 대상 키는 target이다.
+사용자가 "schd", "계획", "스케줄", "스케쥴"라고 말하면 target로 해석한다.
+별칭 카드의 안정 식별자는 dataset:wip이다. 대상 유형은 dataset, 대상 키는 wip이다.
+사용자가 "이력 재공"라고 말하면 wip로 해석한다.
+별칭 카드의 안정 식별자는 dataset:wip_today이다. 대상 유형은 dataset, 대상 키는 wip_today이다.
+사용자가 "금일 현재 재공", "지금 재공", "현재 재공"라고 말하면 wip_today로 해석한다.
+
+## 운영 원칙
+
+상위 N, 하위 N, 최대값과 최소값의 전체 동률, 집계, 정렬, 컬럼 간 비교, 등록된 순차 공정 범위와 presence 조건은 typed Execution IR로만 실행한다.
+credential, 연결 문자열, URL, SQL, Python 코드와 임의 실행 코드는 이 입력에 포함하지 않는다. pandas 코드 생성 모델과 repair 모델은 사용하지 않는다.

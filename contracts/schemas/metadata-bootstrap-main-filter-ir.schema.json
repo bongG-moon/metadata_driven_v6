@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/contracts/metadata-bootstrap-main-filter-ir.schema.json",
+  "title": "Metadata Bootstrap Main Filter IR",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["alias_additions"],
+  "properties": {
+    "alias_additions": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 256,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["target_type", "target_id", "expressions"],
+        "properties": {
+          "target_type": {
+            "type": "string",
+            "enum": [
+              "dataset",
+              "field",
+              "metric",
+              "relation",
+              "grain",
+              "predicate",
+              "recipe",
+              "entity_group"
+            ]
+          },
+          "target_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expressions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            }
+          }
+        }
+      }
+    }
+  }
+}

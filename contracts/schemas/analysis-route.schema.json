@@ -1,0 +1,176 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/analysis-route.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "route": {
+            "const": "deterministic"
+          }
+        },
+        "required": [
+          "route"
+        ]
+      },
+      "then": {
+        "properties": {
+          "ambiguity_sets": {
+            "maxItems": 0
+          },
+          "selected_candidate_ids": {
+            "minItems": 1
+          },
+          "unresolved_slots": {
+            "maxItems": 0
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "route": {
+            "const": "unsupported"
+          }
+        },
+        "required": [
+          "route"
+        ]
+      },
+      "then": {
+        "properties": {
+          "reason_code": {
+            "const": "unsupported_registry_gap"
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "ambiguity_sets": {
+      "items": {
+        "items": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "minItems": 2,
+        "type": "array",
+        "uniqueItems": true
+      },
+      "maxItems": 32,
+      "type": "array"
+    },
+    "contract_version": {
+      "const": "analysis.route.v1",
+      "type": "string"
+    },
+    "eligibility_proof_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "reason_code": {
+      "enum": [
+        "unique_complete_selection",
+        "semantic_choice_required",
+        "unsupported_registry_gap",
+        "ambiguous_candidate_selection",
+        "forced_equivalence_probe"
+      ],
+      "type": "string"
+    },
+    "required_slots": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 256,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "resolved_candidate_bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "route": {
+      "enum": [
+        "deterministic",
+        "intent_llm",
+        "unsupported"
+      ],
+      "type": "string"
+    },
+    "route_policy_version": {
+      "const": "route-policy.v1",
+      "type": "string"
+    },
+    "selected_candidate_ids": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 256,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "unresolved_slots": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 256,
+      "type": "array",
+      "uniqueItems": true
+    }
+  },
+  "required": [
+    "contract_version",
+    "route",
+    "reason_code",
+    "resolved_candidate_bundle_sha256",
+    "selected_candidate_ids",
+    "required_slots",
+    "unresolved_slots",
+    "ambiguity_sets",
+    "route_policy_version",
+    "eligibility_proof_sha256"
+  ],
+  "title": "analysis.route.v1",
+  "type": "object"
+}

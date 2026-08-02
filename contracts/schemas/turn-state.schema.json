@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/turn-state.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "turn.state.v1",
+      "type": "string"
+    },
+    "etag": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "executed_result_ref": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "last_question": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "owner_subject_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "parent_state_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parent_turn_id": {
+      "anyOf": [
+        {
+          "minLength": 1,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "semantic_context": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "session_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "state_version": {
+      "minimum": 1,
+      "type": "integer"
+    },
+    "turn_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "state_version",
+    "etag",
+    "owner_subject_id",
+    "session_id",
+    "turn_id",
+    "parent_turn_id",
+    "parent_state_sha256",
+    "last_question",
+    "semantic_context",
+    "executed_result_ref",
+    "expires_at"
+  ],
+  "title": "turn.state.v1",
+  "type": "object"
+}

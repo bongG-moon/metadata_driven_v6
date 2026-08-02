@@ -1,0 +1,23 @@
+{
+  "contract_version": "metadata.normalized-authoring-source-provenance.v1",
+  "source_kind": "dataset",
+  "original_source": {
+    "path": "metadata/authoring/table_catalog/data_catalog.txt",
+    "encoding": "utf-8",
+    "content_sha256": "8ecbb8dd0b78276a0e5faf0ae468b47075ec3432c88051a4a216ce4fcb56dd9d"
+  },
+  "normalized_companion": {
+    "path": "metadata/authoring/table_catalog/data_catalog_v6_normalized.txt",
+    "encoding": "utf-8",
+    "content_sha256": "a7d7e93731723151b35b7d53a684ee53a7d5da2ff355fe620df5dfad332acc8e",
+    "source_manifest_contract_version": "metadata.authoring.source-manifest.v1",
+    "source_manifest_source_sha256": "5a9533402717b7bf602911083ee5a5bdbc5109272af86c9db54b5dcd5f9632d8",
+    "source_manifest_sha256": "a8540897f6e160d122628a9c0d9a0a4cd53df683e8af456e536ce664400b5226"
+  },
+  "normalization": {
+    "method": "reviewed-explicit-dataset-cards.v1",
+    "facts_only": true,
+    "executable_content_allowed": false,
+    "secrets_allowed": false
+  }
+}

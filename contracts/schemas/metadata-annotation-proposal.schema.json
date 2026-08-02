@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/metadata-annotation-proposal.schema.json",
+  "title": "metadata authoring annotation proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["display_name", "description"],
+  "properties": {
+    "display_name": {"type": "string", "minLength": 1, "maxLength": 200},
+    "description": {"type": "string", "maxLength": 4000}
+  }
+}

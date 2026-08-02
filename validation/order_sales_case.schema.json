@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/validation/order-sales-case.schema.json",
+  "title": "validation.multidomain.case.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "case_id",
+    "domain_id",
+    "scenario_id",
+    "turn_index",
+    "question",
+    "capability",
+    "expected_route",
+    "expected_intent_llm_calls",
+    "narrative_enabled",
+    "expected_answer_llm_calls",
+    "expected_retrieval_calls",
+    "expected_datasets",
+    "expected_operators",
+    "expected_output_fields",
+    "invariants"
+  ],
+  "properties": {
+    "contract_version": {"const": "validation.multidomain.case.v1"},
+    "case_id": {"type": "string", "pattern": "^OS[A-Z0-9-]{1,31}$"},
+    "domain_id": {"const": "order_sales"},
+    "scenario_id": {"type": ["string", "null"]},
+    "turn_index": {"type": ["integer", "null"], "minimum": 1},
+    "question": {"type": "string", "minLength": 1},
+    "capability": {"type": "string", "minLength": 1},
+    "expected_route": {"enum": ["deterministic", "intent_llm", "unsupported"]},
+    "expected_intent_llm_calls": {"type": "integer", "minimum": 0, "maximum": 1},
+    "narrative_enabled": {"type": "boolean"},
+    "expected_answer_llm_calls": {"type": "integer", "minimum": 0, "maximum": 1},
+    "expected_retrieval_calls": {"type": "integer", "minimum": 0},
+    "expected_datasets": {
+      "type": "array",
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"enum": ["orders", "products", "refunds", "targets"]}
+    },
+    "expected_operators": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*\\.v[0-9]+$"}
+    },
+    "expected_output_fields": {
+      "type": "array",
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[A-Z][A-Z0-9_]*$"}
+    },
+    "invariants": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"}
+    }
+  }
+}

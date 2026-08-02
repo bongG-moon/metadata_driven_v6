@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/error.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "code": {
+      "enum": [
+        "request_invalid",
+        "route_contract_error",
+        "intent_contract_error",
+        "metadata_dependency_error",
+        "metadata_budget_exceeded",
+        "plan_contract_error",
+        "missing_required_param",
+        "parameter_value_limit_exceeded",
+        "ambiguous_alias",
+        "ambiguous_field_binding",
+        "source_missing",
+        "source_retrieval_failed",
+        "source_timeout",
+        "source_row_limit_exceeded",
+        "source_acl_denied",
+        "source_schema_mismatch",
+        "source_coverage_incomplete",
+        "unsupported_operation",
+        "execution_memory_limit_exceeded",
+        "metric_rollup_violation",
+        "metric_lineage_violation",
+        "join_cardinality_violation",
+        "result_schema_violation",
+        "state_reference_expired",
+        "state_reference_forbidden",
+        "state_conflict",
+        "state_policy_mismatch",
+        "answer_claim_violation",
+        "approval_not_found",
+        "approval_expired",
+        "approval_hash_mismatch",
+        "approval_already_claimed",
+        "stale_candidate"
+      ],
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "error.v1",
+      "type": "string"
+    },
+    "details": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "error_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "error_registry_version": {
+      "const": "error_registry.v1",
+      "type": "string"
+    },
+    "message": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "retryable": {
+      "type": "boolean"
+    },
+    "stage": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "trace_id": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "error_registry_version",
+    "error_id",
+    "code",
+    "stage",
+    "message",
+    "retryable",
+    "details",
+    "trace_id"
+  ],
+  "title": "error.v1",
+  "type": "object"
+}

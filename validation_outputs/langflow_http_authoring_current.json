@@ -1,0 +1,3803 @@
+{
+  "contract_version": "langflow.http.authoring-e2e.validation.v3",
+  "model": "gemini-3.5-flash-lite",
+  "model_contract": {
+    "requested_model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "candidate_count": 1,
+    "fallback_enabled": false,
+    "fallback_models": []
+  },
+  "exact_gemini_no_fallback": true,
+  "requested_environment_prefix_sha256": "8c71ab06b184e4b9d167d97ba600a10f7182e33fe2600291d70b7ea33d4620d3",
+  "environment": "v6_release_validation8_50c70b68",
+  "fresh_environment": true,
+  "domain_id": "manufacturing",
+  "source_hashes": {
+    "domain": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+    "dataset": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+    "main_filter": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+    "domain_policy": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc"
+  },
+  "authoring_sources": {
+    "domain": {
+      "path": "metadata/authoring/v6_inputs/domain_v6.txt",
+      "content_sha256": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+      "byte_count": 8826,
+      "line_count": 99,
+      "source_text_persisted": false
+    },
+    "dataset": {
+      "path": "metadata/authoring/v6_inputs/dataset_v6.txt",
+      "content_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "byte_count": 5930,
+      "line_count": 55,
+      "source_text_persisted": false
+    },
+    "main_filter": {
+      "path": "metadata/authoring/v6_inputs/main_filter_v6.txt",
+      "content_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "byte_count": 1843,
+      "line_count": 17,
+      "source_text_persisted": false
+    },
+    "domain_policy": {
+      "path": "metadata/authoring/v6_inputs/domain_policy_v6.txt",
+      "content_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+      "byte_count": 2953,
+      "line_count": 33,
+      "source_text_persisted": false
+    }
+  },
+  "domain_bootstrap_source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+  "source_text_persisted": false,
+  "trusted_blueprint_json_persisted": false,
+  "trusted_inventory_manifest_persisted": false,
+  "trusted_blueprint_default_flow_input": false,
+  "trusted_inventory_default_flow_input": false,
+  "provider_output_persisted": false,
+  "approval_payload_persisted": false,
+  "secrets_persisted": false,
+  "flow_defaults": [
+    {
+      "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_domain_authoring",
+      "authoring_kind": "domain",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 3,
+      "context_builder_node_count": 3,
+      "composer_node_count": 3,
+      "invoker_node_count": 3,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input",
+        "dataset_source_input",
+        "main_filter_source_input"
+      ],
+      "natural_source_bundle_node_count": 1,
+      "node_count": 23
+    },
+    {
+      "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_dataset_catalog_authoring",
+      "authoring_kind": "dataset",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 1,
+      "context_builder_node_count": 1,
+      "composer_node_count": 1,
+      "invoker_node_count": 1,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_main_filter_authoring",
+      "authoring_kind": "main_filter",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 1,
+      "context_builder_node_count": 1,
+      "composer_node_count": 1,
+      "invoker_node_count": 1,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_domain_policy_authoring",
+      "authoring_kind": "domain_policy",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": false,
+        "model_node_count": 0,
+        "nodes": [],
+        "passed": true
+      },
+      "prompt_node_count": 0,
+      "context_builder_node_count": 0,
+      "composer_node_count": 0,
+      "invoker_node_count": 0,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 7
+    }
+  ],
+  "flow_defaults_passed": true,
+  "imports": [
+    {
+      "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "flow_sha256": "97ee4c980409838b898e4a12302211b12ba235cbcc32b513fb3b178d1fa098ba",
+      "flow_id_sha256": "a6b422ad910556c303c9d5b1e316bbb2ee8c6eb533ad60eec775039dd8aafdd8",
+      "endpoint_name": "metadata_v6_domain_authoring",
+      "node_count": 23
+    },
+    {
+      "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "flow_sha256": "533ac2c1754d62becd4b50a682b9933214c7e336e8879cca8884299994d47819",
+      "flow_id_sha256": "c51f03749c4c928cfb406e258104cf350923fdef5ca7a3c757b3267b4c5e9ac0",
+      "endpoint_name": "metadata_v6_dataset_catalog_authoring",
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "flow_sha256": "544b8cf4cbc160b7cd8e20ddbd0e596b1072197c1d321faabe72a2bdf0b02269",
+      "flow_id_sha256": "0ca956894f790436f46351d0ea167eb4f3708e6b000e8bc7b105a243e123e1b6",
+      "endpoint_name": "metadata_v6_main_filter_authoring",
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
+      "flow_sha256": "dd302681e46b2308a90fde88318e2fc556378de2a9521f2b2c44a7cd7526a0b6",
+      "flow_id_sha256": "9f85706387d6535c4c524d00641ee1d86cb2f9aa7f0accf3b7ffb812698be067",
+      "endpoint_name": "metadata_v6_domain_policy_authoring",
+      "node_count": 7
+    }
+  ],
+  "collection_guard_negatives": {
+    "case_count": 3,
+    "rows": [
+      {
+        "case_id": "legacy_name",
+        "override_sha256": "0c1521782f3cf3cc1f64cdefa80b7e703472a9612f6704e8ac06abfd9ac3df49",
+        "http_response_sha256": "15cd977d82be2273b7e0f82ebaa9486c1a097bdc376292ea735aebdbabc0769f",
+        "error_code": "metadata_policy_error",
+        "error_stage": "metadata_store_config",
+        "error_detail_keys": [
+          "actual",
+          "expected"
+        ],
+        "error_message_sha256": "261eaa5c4dc95665ab2cd353ff917e1af5672bbbc8a90085c5f50e1b767ffd2e",
+        "checks": {
+          "http_200": true,
+          "status_error": true,
+          "policy_error": true,
+          "store_config_stage": true,
+          "no_llm_calls": true,
+          "collections_unchanged": true
+        },
+        "passed": true
+      },
+      {
+        "case_id": "role_swap",
+        "override_sha256": "f0dc9828bd043be50e54d40f134f63f59537f5336c4621b1e4b52a24fbfd3b23",
+        "http_response_sha256": "a29167d27a6f2dfd11d1711e5230f71d9cf3823158adeabcfe9b7cd3dff1fb61",
+        "error_code": "metadata_policy_error",
+        "error_stage": "metadata_store_config",
+        "error_detail_keys": [
+          "actual",
+          "expected"
+        ],
+        "error_message_sha256": "261eaa5c4dc95665ab2cd353ff917e1af5672bbbc8a90085c5f50e1b767ffd2e",
+        "checks": {
+          "http_200": true,
+          "status_error": true,
+          "policy_error": true,
+          "store_config_stage": true,
+          "no_llm_calls": true,
+          "collections_unchanged": true
+        },
+        "passed": true
+      },
+      {
+        "case_id": "same_collection",
+        "override_sha256": "3fb1ee060a322fea220b63dd72dab8ad070ad62cba5a897cf286a0c1a93dc1b9",
+        "http_response_sha256": "36c9107bde7a5f5d74458038a3966859c801dd81f227e761d7b361ae4a35ac4c",
+        "error_code": "metadata_policy_error",
+        "error_stage": "metadata_store_config",
+        "error_detail_keys": [
+          "actual",
+          "expected"
+        ],
+        "error_message_sha256": "261eaa5c4dc95665ab2cd353ff917e1af5672bbbc8a90085c5f50e1b767ffd2e",
+        "checks": {
+          "http_200": true,
+          "status_error": true,
+          "policy_error": true,
+          "store_config_stage": true,
+          "no_llm_calls": true,
+          "collections_unchanged": true
+        },
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "optional_explicit_inventory_admin_lane": {
+    "executed": false,
+    "default_success_evidence": false,
+    "validator": "validate_live_blueprint_authoring.py"
+  },
+  "freeform_clarification_probe": {
+    "source_text_sha256": "31796d406364caee5bdf6b8793ed2b727a2bcc8887ba8638f6c917da08b44b0f",
+    "source_text_persisted": false,
+    "http_response_sha256": "691b841458fb54f235e8f42159a27d6db9048f76d85ef912029249cd9934c8da",
+    "clarification": {
+      "contract_version": "metadata.authoring.clarification.v1",
+      "source_sha256": "31796d406364caee5bdf6b8793ed2b727a2bcc8887ba8638f6c917da08b44b0f",
+      "proposal_sha256": "6e11a80e0034a7972736fde0046dcd838ca8853fcfcaec0a28fafd7b3c7b5994",
+      "questions_count": 2,
+      "missing_fields_count": 1,
+      "questions_sha256": "5f9b24fae6748284e521a5643a9b5495132cc2c34b555d9476b96fc15bf21e3a",
+      "missing_fields_sha256": "c12185b296ee28f8c3d4fcb98d45b9e182eefd5ea23d79a8563590cd68ded149",
+      "raw_clarification_persisted": false,
+      "branches": [],
+      "safe_missing_fields": []
+    },
+    "forbidden_response_fields": {
+      "candidate_fields": [],
+      "package_fields": [],
+      "persistence_fields": []
+    },
+    "mongo_document_count_before": 330,
+    "mongo_document_count_after": 330,
+    "mongo_write_count_increase": 0,
+    "collection_snapshot_before_sha256": "35c99f26385e50dcd673539cd365f7992ed0a52e435f7eea156c6e39ee65e68d",
+    "collection_snapshot_after_sha256": "35c99f26385e50dcd673539cd365f7992ed0a52e435f7eea156c6e39ee65e68d",
+    "diagnostics": {
+      "status": "needs_clarification",
+      "error_code": "",
+      "error_stage": "",
+      "error_reason": "",
+      "error_type": "",
+      "error_path": "",
+      "error_message_sha256": "",
+      "error_operator_sha256": "",
+      "error_metric_id_sha256": "",
+      "error_field_sha256": "",
+      "manifest_error_code": "",
+      "error_dataset_id_sha256": "",
+      "error_detail_value_sha256": "",
+      "error_candidate_count": 0,
+      "error_detail_index": 0
+    },
+    "checks": {
+      "http_200": true,
+      "status_needs_clarification": true,
+      "response_hash_valid": true,
+      "terminal_equivalent": true,
+      "identity_exact": true,
+      "draft_llm_three": true,
+      "annotation_llm_zero": true,
+      "repair_llm_zero": true,
+      "clarification_contract_exact": true,
+      "source_hash_exact": true,
+      "proposal_sealed": true,
+      "question_count_bounded": true,
+      "missing_fields_reported": true,
+      "candidate_fields_absent": true,
+      "package_fields_absent": true,
+      "persist_fields_absent": true,
+      "mongo_document_count_increase_zero": true,
+      "collections_unchanged": true
+    },
+    "passed": true
+  },
+  "cycles": [
+    {
+      "authoring_kind": "domain",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "a6b422ad910556c303c9d5b1e316bbb2ee8c6eb533ad60eec775039dd8aafdd8",
+      "source_text_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+      "source_input_node_hashes": {
+        "chat_input": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+        "dataset_source_input": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+        "main_filter_source_input": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278"
+      },
+      "source_text_persisted": false,
+      "before": {
+        "revision": 0
+      },
+      "target_revision": 1,
+      "prepare_http_response_sha256": "d4cec28040f4905240cb8d4c9920df844eec6793cc25215908cee384b2ca6ccb",
+      "prepare": {
+        "response_sha256": "4802b921b44e0e2c5111d67819ca5a1a3ee27a7ba9e0b8780ecb1f0d11977f01",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "domain",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 1,
+        "candidate_id": "candidate:94ff649e9096999977a047400b3971425306c326ca54755673f6f1a09ee6a5d2",
+        "candidate_sha256": "94ff649e9096999977a047400b3971425306c326ca54755673f6f1a09ee6a5d2",
+        "package_sha256": "3331d39959a48f434622088b3caa938ea64c06c3c2718d1eb2a15746261b0a30",
+        "bundle_sha256": "f4c1e3838941c6c68cb8c4c60d3b3feaa6f742281e06c425b1cb9e6f7d1f2c5a",
+        "catalog_sha256": "8ecd4a0fd52be80220b754dafc075192d6205e380e7899cfe5066dabd75e6e5b",
+        "draft_llm_calls": 3,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "domain": {
+            "purpose": "metadata_domain_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "de9db1fc9582f3f1d25a16f03b84d7e47b917212763bd17dd3a0e89a1c1ac0a7",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          },
+          "dataset": {
+            "purpose": "metadata_dataset_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          },
+          "main_filter": {
+            "purpose": "metadata_main_filter_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "ca048102951780ac8ac7725399cc368e41a63a9436cbd213361d21a08b2620f0",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268', 'proposal_sha256': '7be3f10ccb791a89f31397a23093b4904e39a5f15b09596d54ed63583dd0e8da', 'draft_sha256': '287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074', 'expanded_draft_sha256': '287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074', 'dataset_ir_sha256': '666fd6c8ce763551c50fc5170c52c41f52c10a8984b6e10e17c9d1c2ed13d758', 'dataset_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'domain_template_expander_version': 'metadata.domain-template-expansion.v1', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'sealed_authoring_sha256': '778e1787132d5a2b081f1610bd70208830244c7bfa20a63838e1ac4a217c0674'}",
+          "authoring_proposals": "{'domain': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6', 'proposal_sha256': '4efcd211506651039d2f7f84407d989a379145dabab186b5069ac2440e2006da', 'draft_sha256': 'd5974cb0baec866d29789c4628cb1372c08c86ef0ea8f2e5d3ea3fe355a305cf', 'template_expansion': {'contract_version': 'metadata.domain-template-expansion.v1', 'template_contract_version': 'metadata.authoring.semantic-templates.v1', 'annotation_sha256': 'd5974cb0baec866d29789c4628cb1372c08c86ef0ea8f2e5d3ea3fe355a305cf', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'planner_policy_sha256': 'aeb92080976fb1abcebd259abc224baac8746a7e4fa2be498de6c75f281e5425', 'section_counts': {'metrics': 17, 'relations': 0, 'entity_groups': 25, 'grains': 1, 'orderings': 1, 'predicates': 7, 'recipes': 10, 'aliases': 141}}}, 'dataset': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'proposal_sha256': '7a069e12b6f478187be66f8f65a3d5d66f5d309763c918ac06b59a9b72e7224a', 'draft_sha256': '666fd6c8ce763551c50fc5170c52c41f52c10a8984b6e10e17c9d1c2ed13d758', 'dataset_ir_contract_version': 'metadata.bootstrap.dataset-ir.v1', 'dataset_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'dataset_ir_sha256': '666fd6c8ce763551c50fc5170c52c41f52c10a8984b6e10e17c9d1c2ed13d758', 'registry_reconciliation': {'contract_version': 'metadata.dataset-registry-reconciliation.v1', 'approved_field_count': 186, 'model_field_count': 124, 'completed_field_count': 62, 'applied_exclusion_count': 0, 'applied_exclusions_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_binding_count': 0, 'corrected_bindings_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'compiler_owned_dataset_template_count': 10, 'compiler_owned_dataset_templates_sha256': '0f6b46a914bcb1ada5b7002fd1d934e751498d17938d95f4a2e12ca68057c143', 'completed_fields_sha256': '1e9c1b50223b29da72d7ce99f91fae91de49e0aa573c5f0e1067a1cf507d5954', 'normalized_fields_sha256': 'a2711da24477d6a7146919264ce049a6fa0ed8405aa00c6e5f343996f2a134bd'}}, 'main_filter': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'proposal_sha256': '00ee0655d274e7cd2e86b4c3ff7225993cf2425ca1066b86eb8d22b6cd896154', 'draft_sha256': '66fcf954393a5f06fdceae1c84e3edab7d31bf88f2060216d80a70c00105d631', 'main_filter_ir_expansion': {'contract_version': 'metadata.main-filter-ir-expansion.v1', 'input_count': 21, 'canonical_alias_count': 21, 'canonical_targets_sha256': '6dfdc23a30845f8c6c1b558f06101ed804ca0f6309b8c103a02931b85aa047c8'}}}",
+          "dependency_closure": "passed",
+          "domain_template_expansion": "{'contract_version': 'metadata.domain-template-expansion.v1', 'template_contract_version': 'metadata.authoring.semantic-templates.v1', 'annotation_sha256': 'd5974cb0baec866d29789c4628cb1372c08c86ef0ea8f2e5d3ea3fe355a305cf', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'planner_policy_sha256': 'aeb92080976fb1abcebd259abc224baac8746a7e4fa2be498de6c75f281e5425', 'section_counts': {'metrics': 17, 'relations': 0, 'entity_groups': 25, 'grains': 1, 'orderings': 1, 'predicates': 7, 'recipes': 10, 'aliases': 141}}",
+          "filter_operator_normalization": "{'contract_version': 'metadata.filter-operator-normalization.v1', 'replacement_count': 0, 'replacements_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_dataset_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'provider_schema_sha256': 'ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32', 'runtime_output_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'raw_prompt_persisted': False, 'raw_response_persisted': False}, {'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_domain_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f', 'provider_schema_sha256': 'de9db1fc9582f3f1d25a16f03b84d7e47b917212763bd17dd3a0e89a1c1ac0a7', 'runtime_output_schema_sha256': 'adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f', 'raw_prompt_persisted': False, 'raw_response_persisted': False}, {'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_main_filter_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'provider_schema_sha256': '175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868', 'runtime_output_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "metric_binding_completion": "{'contract_version': 'metadata.metric-binding-reconciliation.v1', 'resolution_mode': 'approved_semantic_vocabulary_exact', 'completed_count': 0, 'completed_metric_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_count': 0, 'corrected_metric_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'preserved_full_card_count': 15, 'preserved_full_card_ids_sha256': '9cbb7c526b2475ac2b98eed87517f104e56779a61111addb75277ed8785ae1dd'}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_alias_normalization": "{'contract_version': 'metadata.alias-semantic-reconciliation.v1', 'resolution_mode': 'approved_semantic_vocabulary_exact', 'normalized_count': 0, 'normalized_alias_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268', 'structured_proposal_sha256': '287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '8ecd4a0fd52be80220b754dafc075192d6205e380e7899cfe5066dabd75e6e5b', 'coverage_sha256': '1ca294ef2054b51d68bd7b77c38466370dbecf23d888dfe56f139317b4891155'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+          "structured_proposal_sha256": "287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "1ca294ef2054b51d68bd7b77c38466370dbecf23d888dfe56f139317b4891155"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+          "proposal_sha256": "7be3f10ccb791a89f31397a23093b4904e39a5f15b09596d54ed63583dd0e8da",
+          "draft_sha256": "287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {
+          "domain": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+            "proposal_sha256": "4efcd211506651039d2f7f84407d989a379145dabab186b5069ac2440e2006da",
+            "draft_sha256": "d5974cb0baec866d29789c4628cb1372c08c86ef0ea8f2e5d3ea3fe355a305cf"
+          },
+          "dataset": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+            "proposal_sha256": "7a069e12b6f478187be66f8f65a3d5d66f5d309763c918ac06b59a9b72e7224a",
+            "draft_sha256": "666fd6c8ce763551c50fc5170c52c41f52c10a8984b6e10e17c9d1c2ed13d758"
+          },
+          "main_filter": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+            "proposal_sha256": "00ee0655d274e7cd2e86b4c3ff7225993cf2425ca1066b86eb8d22b6cd896154",
+            "draft_sha256": "66fcf954393a5f06fdceae1c84e3edab7d31bf88f2060216d80a70c00105d631"
+          }
+        },
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "4802b921b44e0e2c5111d67819ca5a1a3ee27a7ba9e0b8780ecb1f0d11977f01"
+          ],
+          "api": [
+            "4802b921b44e0e2c5111d67819ca5a1a3ee27a7ba9e0b8780ecb1f0d11977f01"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "65b942e9172aff1647d91c94c7c112c3190a71121e59b7ab8ab93cf367ecd4c0",
+        "candidate_sha256": "94ff649e9096999977a047400b3971425306c326ca54755673f6f1a09ee6a5d2",
+        "pending_payload_sha256": "1e3c24c6012cc86b0787badd5451246bfce862b2fae2f86cd59d2522cf382e41",
+        "authoring_kind": "domain",
+        "target_revision": 1,
+        "base_revision": null,
+        "base_bundle_sha256": null,
+        "base_package_sha256": null,
+        "prepared_at_sha256": "5c3fb7746085d126ddf03b50e18bca6d4f055fde0b2c6c0b5cd5049aecc13b38",
+        "expires_at_sha256": "1d4d8617192fcdb16a5b46067cd752f4dfc5bcd8f9a71a54640b91ff110f2100",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "4789a0305bb7a51ca0875c97cb1ec5bf6a41387b2c66e247f2c8924f6b221f8a",
+        "event_id_sha256": "688afc58d03144238523d66b50274e4b9fdfd2b5428ae63ef71dc32b3b43bcfd",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "960e9bfc6b83dc5712800f9ef72ef876b924125c5b2ce2361fb785473fcf0d07",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "365faac485c4501185c9ab07bf8f2d0ede9e1e3d698e199f8882c47f81b14918",
+          "http_response_sha256": "2156f2ea6929707c7d44dd08774ed694c7c6de91d66fcf6cfcd44f1d4ebfbde2",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "74f4adc562b65ab12cbb8cc617374951a5681205f7ad7b01a6ec290e59947db3",
+          "http_response_sha256": "8df981b7efd0a964e70a92b7d17a69c234f2c60fa1f34f59074b8f8d7dc95c9e",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "750e6bcc23d8dbd37ed5e2aca42de1045c25799349e0318c8aa6679743256179",
+          "http_response_sha256": "057fca271dcfa00691a355d3fe13dfa7b141162365f1d6a828a04587eda62d00",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "7a8531dbb7fca066e991416b64f5c654ca67643e1e173b01d89b4a3a5f5dea88",
+          "http_response_sha256": "b699476a8831befbcf9907b47d93a02d80927fa903dcbf73cf78ba5b1722a397",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "923786a3b74595e19f7f017d9e26bbb69791fe8d53dfaec7e41ed9b23561e1bf",
+      "execute": {
+        "response_sha256": "484dd8cf5ee48e2aa5b1a876bea98df6e8da0010346c8782b73afe6875900b5b",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 1,
+        "candidate_id": "candidate:94ff649e9096999977a047400b3971425306c326ca54755673f6f1a09ee6a5d2",
+        "candidate_sha256": "94ff649e9096999977a047400b3971425306c326ca54755673f6f1a09ee6a5d2",
+        "package_sha256": "3331d39959a48f434622088b3caa938ea64c06c3c2718d1eb2a15746261b0a30",
+        "bundle_sha256": "f4c1e3838941c6c68cb8c4c60d3b3feaa6f742281e06c425b1cb9e6f7d1f2c5a",
+        "catalog_sha256": "8ecd4a0fd52be80220b754dafc075192d6205e380e7899cfe5066dabd75e6e5b",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "484dd8cf5ee48e2aa5b1a876bea98df6e8da0010346c8782b73afe6875900b5b"
+          ],
+          "api": [
+            "484dd8cf5ee48e2aa5b1a876bea98df6e8da0010346c8782b73afe6875900b5b"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {
+        "branches_exact": true,
+        "domain_validation_contract_exact": true,
+        "domain_proposal_contract_exact": true,
+        "domain_status_complete": true,
+        "domain_source_hash_exact": true,
+        "domain_proposal_sealed": true,
+        "domain_draft_sealed": true,
+        "dataset_validation_contract_exact": true,
+        "dataset_proposal_contract_exact": true,
+        "dataset_status_complete": true,
+        "dataset_source_hash_exact": true,
+        "dataset_proposal_sealed": true,
+        "dataset_draft_sealed": true,
+        "main_filter_validation_contract_exact": true,
+        "main_filter_proposal_contract_exact": true,
+        "main_filter_status_complete": true,
+        "main_filter_source_hash_exact": true,
+        "main_filter_proposal_sealed": true,
+        "main_filter_draft_sealed": true
+      },
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        },
+        "committed_catalog": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        }
+      },
+      "ownership": null,
+      "policy_checks": {},
+      "after": {
+        "revision": 1,
+        "package_sha256": "3331d39959a48f434622088b3caa938ea64c06c3c2718d1eb2a15746261b0a30",
+        "bundle_sha256": "f4c1e3838941c6c68cb8c4c60d3b3feaa6f742281e06c425b1cb9e6f7d1f2c5a",
+        "catalog_sha256": "8ecd4a0fd52be80220b754dafc075192d6205e380e7899cfe5066dabd75e6e5b",
+        "section_hashes_sha256": "f648cabb8f13e5b9ab3f42ac8713719beed7087835eeebee62d4c440cefd173f"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "dataset",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "c51f03749c4c928cfb406e258104cf350923fdef5ca7a3c757b3267b4c5e9ac0",
+      "source_text_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 1,
+        "package_sha256": "3331d39959a48f434622088b3caa938ea64c06c3c2718d1eb2a15746261b0a30",
+        "bundle_sha256": "f4c1e3838941c6c68cb8c4c60d3b3feaa6f742281e06c425b1cb9e6f7d1f2c5a",
+        "catalog_sha256": "8ecd4a0fd52be80220b754dafc075192d6205e380e7899cfe5066dabd75e6e5b",
+        "section_hashes_sha256": "f648cabb8f13e5b9ab3f42ac8713719beed7087835eeebee62d4c440cefd173f"
+      },
+      "target_revision": 2,
+      "prepare_http_response_sha256": "86d4f0873473948e4ccd230ebf6d23d4051b1065d031d1d946c8222943b23521",
+      "prepare": {
+        "response_sha256": "6ac427f63e47494d30bc90019db3620c98823ffedb5705278ed7a47ab83f8f37",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "dataset",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 2,
+        "candidate_id": "candidate:05bd69aed277d39bdff90a482706b2baa787c1b1f583a0ffdca93d05a1b52fb2",
+        "candidate_sha256": "05bd69aed277d39bdff90a482706b2baa787c1b1f583a0ffdca93d05a1b52fb2",
+        "package_sha256": "6c1eed14d29ca0ad6f8104f539a0cf84556f8fee6c53c9a287c8f7eb5c0282b0",
+        "bundle_sha256": "3cef75af61e8009666f62d7866b86d349b90dc1165e22858838897db65f3f786",
+        "catalog_sha256": "682cdee7fc10c40c0ebf6f1c89aac7c246ffef7de6dd227338ddb4b9516a069f",
+        "draft_llm_calls": 1,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "dataset": {
+            "purpose": "metadata_dataset_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "b1d08b074de7f827e0595b4c969cf5276e8488c64c5b558a1a2a761d144e272a",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'proposal_sha256': '8cf0045ac3518a8bc3b07daefe06c3558ae710756b64499685fa32b24479ceb4', 'draft_sha256': 'f4577d67f160a644a6ffcc86c7226c218dbe1768be9691d7d0f79dd98d2dd603', 'compact_ir_sha256': 'f4577d67f160a644a6ffcc86c7226c218dbe1768be9691d7d0f79dd98d2dd603', 'expanded_draft_sha256': '0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c', 'section_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'section_ir_reconciliation': {'contract_version': 'metadata.dataset-registry-reconciliation.v1', 'approved_field_count': 186, 'model_field_count': 186, 'completed_field_count': 0, 'applied_exclusion_count': 0, 'applied_exclusions_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_binding_count': 0, 'corrected_bindings_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'compiler_owned_dataset_template_count': 10, 'compiler_owned_dataset_templates_sha256': '0f6b46a914bcb1ada5b7002fd1d934e751498d17938d95f4a2e12ca68057c143', 'completed_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'normalized_fields_sha256': '1b5381199d68b29b39a9e79b739b40d2a8b35bbed24dad310347f017f5ef098d'}}",
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_dataset_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'provider_schema_sha256': 'ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32', 'runtime_output_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'structured_proposal_sha256': '0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '682cdee7fc10c40c0ebf6f1c89aac7c246ffef7de6dd227338ddb4b9516a069f', 'coverage_sha256': '7d8dac7e130185e1af01ceb477e4af1a37aa4e0804fc8c76d1cb3a19b2e2d72c'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+          "structured_proposal_sha256": "0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "7d8dac7e130185e1af01ceb477e4af1a37aa4e0804fc8c76d1cb3a19b2e2d72c"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+          "proposal_sha256": "8cf0045ac3518a8bc3b07daefe06c3558ae710756b64499685fa32b24479ceb4",
+          "draft_sha256": "f4577d67f160a644a6ffcc86c7226c218dbe1768be9691d7d0f79dd98d2dd603",
+          "compact_ir_sha256": "f4577d67f160a644a6ffcc86c7226c218dbe1768be9691d7d0f79dd98d2dd603",
+          "expanded_draft_sha256": "0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c",
+          "section_ir_expander_version": "metadata.dataset-ir-expander.v1"
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 16,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "aliases",
+          "contract_version",
+          "description",
+          "display_name",
+          "entity_groups",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "output_profile",
+          "predicates",
+          "prompt_extensions",
+          "recipes",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "6ac427f63e47494d30bc90019db3620c98823ffedb5705278ed7a47ab83f8f37"
+          ],
+          "api": [
+            "6ac427f63e47494d30bc90019db3620c98823ffedb5705278ed7a47ab83f8f37"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "0735e67a8496008322928060ec4d95839f84c77b45205011b361938305f9ec98",
+        "candidate_sha256": "05bd69aed277d39bdff90a482706b2baa787c1b1f583a0ffdca93d05a1b52fb2",
+        "pending_payload_sha256": "3354186abcee9e7f9720de658c95fc5c2e2604b6111920b2de5b06446190a8d1",
+        "authoring_kind": "dataset",
+        "target_revision": 2,
+        "base_revision": 1,
+        "base_bundle_sha256": "f4c1e3838941c6c68cb8c4c60d3b3feaa6f742281e06c425b1cb9e6f7d1f2c5a",
+        "base_package_sha256": "3331d39959a48f434622088b3caa938ea64c06c3c2718d1eb2a15746261b0a30",
+        "prepared_at_sha256": "067ce96a4882b9d1cf556de20970b13c599cf2e886e9c4f350de71da6b5eceaf",
+        "expires_at_sha256": "2cb6bf404b735262e62f6cc3d6349cd13a721d16483ee60292d146b231721636",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "a92d3a685915f64411f4e29903aa8fe991028b92b441c7af0a11139b69077bf9",
+        "event_id_sha256": "5456631ca6e5677f0d7837f6e7b5dcde6fcce4f87d31b3f0868300e2dab61ce4",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "f1bd9bd32b077da378e08e8808353c3a3666837db1c20300f5f806c6e379d546",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "c1097dbcd38c07a203c79826ccf721910806414ca5abe518db65cea11ad00cf3",
+          "http_response_sha256": "c4e9ccdcccf274b0a51290addd03b8ea195c6e3ff3590dc4a6088ab6bb6abcba",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "8917b22d960099b216e87e06ff3cee824ce042f8be6dd134e3159f7fa9a44bff",
+          "http_response_sha256": "fdbcf56acc7d2176a7ed07e5ac1c4f16bd263bfc7cd89edbad440dab488bc97e",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "177ab59e2dd5a61dee378ff7b33021d80f5d39f7568d97a48cee0de1b693a553",
+          "http_response_sha256": "795e618810ebf94408c619ae49a7f85a7a516fc2f843346518a56ec7bfe12616",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "78a4041972a95a80533c9f1206362118ed0d26ff162f414cceef8dc7b6dce745",
+          "http_response_sha256": "7a646881ec355df032fdf605785839923dab031f6253fc2858dbd3381e281e9b",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "3cfedbd3ae7877a4091060caa1b8fee73536b89f0320659239beb169670ea6de",
+      "execute": {
+        "response_sha256": "8a39292f57fb98e57dd2bfabc74332a3a53afe12f4720d8f12cd0d2818bf73e3",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "dataset",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 2,
+        "candidate_id": "candidate:05bd69aed277d39bdff90a482706b2baa787c1b1f583a0ffdca93d05a1b52fb2",
+        "candidate_sha256": "05bd69aed277d39bdff90a482706b2baa787c1b1f583a0ffdca93d05a1b52fb2",
+        "package_sha256": "6c1eed14d29ca0ad6f8104f539a0cf84556f8fee6c53c9a287c8f7eb5c0282b0",
+        "bundle_sha256": "3cef75af61e8009666f62d7866b86d349b90dc1165e22858838897db65f3f786",
+        "catalog_sha256": "682cdee7fc10c40c0ebf6f1c89aac7c246ffef7de6dd227338ddb4b9516a069f",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "8a39292f57fb98e57dd2bfabc74332a3a53afe12f4720d8f12cd0d2818bf73e3"
+          ],
+          "api": [
+            "8a39292f57fb98e57dd2bfabc74332a3a53afe12f4720d8f12cd0d2818bf73e3"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        },
+        "committed_catalog": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "datasets"
+        ],
+        "unchanged_section_count": 20,
+        "unchanged_section_names": [
+          "aliases",
+          "compiler_version",
+          "contract_version",
+          "description",
+          "display_name",
+          "domain_id",
+          "entity_groups",
+          "environment",
+          "fields",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "output_profile",
+          "predicates",
+          "prompt_extensions",
+          "recipes",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": false
+        }
+      },
+      "policy_checks": {},
+      "after": {
+        "revision": 2,
+        "package_sha256": "6c1eed14d29ca0ad6f8104f539a0cf84556f8fee6c53c9a287c8f7eb5c0282b0",
+        "bundle_sha256": "3cef75af61e8009666f62d7866b86d349b90dc1165e22858838897db65f3f786",
+        "catalog_sha256": "682cdee7fc10c40c0ebf6f1c89aac7c246ffef7de6dd227338ddb4b9516a069f",
+        "section_hashes_sha256": "f648cabb8f13e5b9ab3f42ac8713719beed7087835eeebee62d4c440cefd173f"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "main_filter",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "0ca956894f790436f46351d0ea167eb4f3708e6b000e8bc7b105a243e123e1b6",
+      "source_text_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 2,
+        "package_sha256": "6c1eed14d29ca0ad6f8104f539a0cf84556f8fee6c53c9a287c8f7eb5c0282b0",
+        "bundle_sha256": "3cef75af61e8009666f62d7866b86d349b90dc1165e22858838897db65f3f786",
+        "catalog_sha256": "682cdee7fc10c40c0ebf6f1c89aac7c246ffef7de6dd227338ddb4b9516a069f",
+        "section_hashes_sha256": "f648cabb8f13e5b9ab3f42ac8713719beed7087835eeebee62d4c440cefd173f"
+      },
+      "target_revision": 3,
+      "prepare_http_response_sha256": "c71522480853dca5d1b2f3d4a37cf82e39a575186a8a5ac763b3eeb51650d5d3",
+      "prepare": {
+        "response_sha256": "c78f01af50db25b971acfabc33450e02e31ca10c3ac9089af258699e08ea5268",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "main_filter",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 3,
+        "candidate_id": "candidate:5886bf1987ac9e421d3a6317f01f4d015023e47cab954c09d03a1f1b3def8ba4",
+        "candidate_sha256": "5886bf1987ac9e421d3a6317f01f4d015023e47cab954c09d03a1f1b3def8ba4",
+        "package_sha256": "72b6fa7d39bf1143cf89f086e52cba25af23d3f7bad339b90696465e46d7cd2f",
+        "bundle_sha256": "86f7b963f583882f6bedab87d673d11a54dff3828ab05b9bcb651ba4e089c982",
+        "catalog_sha256": "2c3930f260c0a95687f8e55091b9e2c3b4c59910704f794a622b777c39273f50",
+        "draft_llm_calls": 1,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "main_filter": {
+            "purpose": "metadata_main_filter_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "504f7332d95a947304fed106a494fce0ecd18dbad4162b76795acf3c6b1c5382",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'proposal_sha256': 'd0842b051f1b2049c3bbf0762477de9ee8b1d1b9d4abe30802f32513c4a19b7f', 'draft_sha256': '77e3af9259b2de2ac4780b4261684f7f4403cc74785e5030fc84eafdf50dce51', 'compact_ir_sha256': '77e3af9259b2de2ac4780b4261684f7f4403cc74785e5030fc84eafdf50dce51', 'expanded_draft_sha256': '9dbf9731247a28f548d8c22ad894b745d26664081f8e41ede6369f998a644ffd', 'section_ir_expander_version': 'metadata.main-filter-ir-expansion.v1', 'section_ir_reconciliation': {'contract_version': 'metadata.main-filter-ir-expansion.v1', 'input_count': 21, 'canonical_alias_count': 21, 'canonical_targets_sha256': 'ccabb32bb014727281d7c9d354dbbda2f18ff2be989f0a016e671a66e21d7ded'}}",
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_main_filter_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'provider_schema_sha256': '175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868', 'runtime_output_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'structured_proposal_sha256': '9dbf9731247a28f548d8c22ad894b745d26664081f8e41ede6369f998a644ffd', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '2c3930f260c0a95687f8e55091b9e2c3b4c59910704f794a622b777c39273f50', 'coverage_sha256': '4fd0c2d69c7196cf7b129fe4d4d1276c5124a54afa3e5372c3af09be30b098f2'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+          "structured_proposal_sha256": "9dbf9731247a28f548d8c22ad894b745d26664081f8e41ede6369f998a644ffd",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "4fd0c2d69c7196cf7b129fe4d4d1276c5124a54afa3e5372c3af09be30b098f2"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+          "proposal_sha256": "d0842b051f1b2049c3bbf0762477de9ee8b1d1b9d4abe30802f32513c4a19b7f",
+          "draft_sha256": "77e3af9259b2de2ac4780b4261684f7f4403cc74785e5030fc84eafdf50dce51",
+          "compact_ir_sha256": "77e3af9259b2de2ac4780b4261684f7f4403cc74785e5030fc84eafdf50dce51",
+          "expanded_draft_sha256": "9dbf9731247a28f548d8c22ad894b745d26664081f8e41ede6369f998a644ffd",
+          "section_ir_expander_version": "metadata.main-filter-ir-expansion.v1"
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 11,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "locale",
+          "metrics",
+          "output_profile",
+          "prompt_extensions",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "c78f01af50db25b971acfabc33450e02e31ca10c3ac9089af258699e08ea5268"
+          ],
+          "api": [
+            "c78f01af50db25b971acfabc33450e02e31ca10c3ac9089af258699e08ea5268"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "42b38c8c9c7bffa5b18094a48ca002ccda325958fd49947cac0ba1c22d42e224",
+        "candidate_sha256": "5886bf1987ac9e421d3a6317f01f4d015023e47cab954c09d03a1f1b3def8ba4",
+        "pending_payload_sha256": "16c457f7d7e3baf94a1dc0eb640b8f407ed0e7e6176279e03329341387cdeb38",
+        "authoring_kind": "main_filter",
+        "target_revision": 3,
+        "base_revision": 2,
+        "base_bundle_sha256": "3cef75af61e8009666f62d7866b86d349b90dc1165e22858838897db65f3f786",
+        "base_package_sha256": "6c1eed14d29ca0ad6f8104f539a0cf84556f8fee6c53c9a287c8f7eb5c0282b0",
+        "prepared_at_sha256": "3e698af8b16673896fc63a3f434ff92b7ba06da3bb3441d9068fd9bf5a947ce8",
+        "expires_at_sha256": "decc878e8c562f00eecdd46d46a420de159ce06f140074e2d977aeafc747255d",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "ac0bc0cb5f4d9cedc7214356f2a6dc61d600ad1808634eb6fe57bf117df9f897",
+        "event_id_sha256": "f9d0f542f2a0d568c5cc2885f08f5ba7e2ed7d7c04eccd339c76a51f0f077651",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "3ac4ede01aa5bd5a2ed54c07eb649a2dd6315e5cdaf43f0985568dd73cbf2b64",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "c17076d934f48fe0abe7884931813126b9d10457cb16e2886382294f12ebc0d7",
+          "http_response_sha256": "80f7242bf93961a6ac29de1f4c82edae978cf5169c415c486c025d58f5e83f7d",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "d8ccd0be4c03d517f8c550538b4dde7b9202a541b88a3053c4131b0b5bf5ee5b",
+          "http_response_sha256": "e21de54afe44ae0f4c1a90863473cc0598763ec6309e66388ec2d34ae832f644",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "7761601db8c7d47f496085cc34d37a0592f4ca4c4ea169f20c9a80ab081f1c50",
+          "http_response_sha256": "131b4fb37176384e6a73542f45a5bee05626ee1cd87cf0b8e25cf386f0f29b35",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "d6523ba776b9939c388a5a102e2cbd9e3a4cab882993702925d03ccc0f9a071d",
+          "http_response_sha256": "9034ce400df3e454ee73b8f3356bce7d3caa31625c18157230a57fa9408d0665",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "f78b65130b601d3c6b7b6fa5dbe67d031f211dc432791b7fa686d814351e047a",
+      "execute": {
+        "response_sha256": "ec72c3fc19956fc8c46619bee91c6ae8a9213d6ecb187ecaca65497f950c99ca",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "main_filter",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 3,
+        "candidate_id": "candidate:5886bf1987ac9e421d3a6317f01f4d015023e47cab954c09d03a1f1b3def8ba4",
+        "candidate_sha256": "5886bf1987ac9e421d3a6317f01f4d015023e47cab954c09d03a1f1b3def8ba4",
+        "package_sha256": "72b6fa7d39bf1143cf89f086e52cba25af23d3f7bad339b90696465e46d7cd2f",
+        "bundle_sha256": "86f7b963f583882f6bedab87d673d11a54dff3828ab05b9bcb651ba4e089c982",
+        "catalog_sha256": "2c3930f260c0a95687f8e55091b9e2c3b4c59910704f794a622b777c39273f50",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "ec72c3fc19956fc8c46619bee91c6ae8a9213d6ecb187ecaca65497f950c99ca"
+          ],
+          "api": [
+            "ec72c3fc19956fc8c46619bee91c6ae8a9213d6ecb187ecaca65497f950c99ca"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        },
+        "committed_catalog": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 0,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "aliases",
+          "entity_groups",
+          "grains",
+          "orderings",
+          "predicates",
+          "recipes"
+        ],
+        "unchanged_section_count": 15,
+        "unchanged_section_names": [
+          "compiler_version",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "domain_id",
+          "environment",
+          "fields",
+          "locale",
+          "metrics",
+          "output_profile",
+          "prompt_extensions",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [
+          "aliases"
+        ],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": true
+        }
+      },
+      "policy_checks": {},
+      "after": {
+        "revision": 3,
+        "package_sha256": "72b6fa7d39bf1143cf89f086e52cba25af23d3f7bad339b90696465e46d7cd2f",
+        "bundle_sha256": "86f7b963f583882f6bedab87d673d11a54dff3828ab05b9bcb651ba4e089c982",
+        "catalog_sha256": "2c3930f260c0a95687f8e55091b9e2c3b4c59910704f794a622b777c39273f50",
+        "section_hashes_sha256": "7456cae1248cb40ebc88be98e2c4cb162310293271669606d2e9c91c58b275a3"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "domain_policy",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "9f85706387d6535c4c524d00641ee1d86cb2f9aa7f0accf3b7ffb812698be067",
+      "source_text_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 3,
+        "package_sha256": "72b6fa7d39bf1143cf89f086e52cba25af23d3f7bad339b90696465e46d7cd2f",
+        "bundle_sha256": "86f7b963f583882f6bedab87d673d11a54dff3828ab05b9bcb651ba4e089c982",
+        "catalog_sha256": "2c3930f260c0a95687f8e55091b9e2c3b4c59910704f794a622b777c39273f50",
+        "section_hashes_sha256": "7456cae1248cb40ebc88be98e2c4cb162310293271669606d2e9c91c58b275a3"
+      },
+      "target_revision": 4,
+      "prepare_http_response_sha256": "053bf49e82d5ec6d5662c95b9d74c9808a64ae38435742676eb17eeddbf71aee",
+      "prepare": {
+        "response_sha256": "042a361002b8c6f83f8bac73d848f18edbd85d13f0cb771bf970f462496989d5",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "domain_policy",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 4,
+        "candidate_id": "candidate:602bdd69e185ae06f3bccb55e364aa5c9a2335e9d0bfbf66cbdf596f37356997",
+        "candidate_sha256": "602bdd69e185ae06f3bccb55e364aa5c9a2335e9d0bfbf66cbdf596f37356997",
+        "package_sha256": "4075469aecef64f4084e186fe9d6177334da11110e0a5b7cab43d645b0d92f1b",
+        "bundle_sha256": "e8c613207c65d91f21faa4247289f168031f18ca7e622795bf6605c16a758a15",
+        "catalog_sha256": "40bc49148669ba0faf1e3a2cc5baefee332040db7b9868c5f5358909f12b77ff",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "2cacc890e48f1a63a44bdf18d63f8b1186d5da94268abc87fb4378aff10b1397",
+        "validation": {
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc', 'structured_proposal_sha256': 'f298566c54fad8a92f2678d055eff8ffa64a0200d362ec11fb97274020bc117d', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '40bc49148669ba0faf1e3a2cc5baefee332040db7b9868c5f5358909f12b77ff', 'coverage_sha256': 'a32ba51fdacfbeb2757da844c7c58347376d115bebdd27572e4291e7f7c13ce2'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+          "structured_proposal_sha256": "f298566c54fad8a92f2678d055eff8ffa64a0200d362ec11fb97274020bc117d",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "a32ba51fdacfbeb2757da844c7c58347376d115bebdd27572e4291e7f7c13ce2"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 14,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "aliases",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "entity_groups",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "predicates",
+          "recipes",
+          "relations",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "042a361002b8c6f83f8bac73d848f18edbd85d13f0cb771bf970f462496989d5"
+          ],
+          "api": [
+            "042a361002b8c6f83f8bac73d848f18edbd85d13f0cb771bf970f462496989d5"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "c9bd16e594addfe96f9248d491caaeec6f7e4f8c72df137de4d857632542137d",
+        "candidate_sha256": "602bdd69e185ae06f3bccb55e364aa5c9a2335e9d0bfbf66cbdf596f37356997",
+        "pending_payload_sha256": "5f6a464fc6bc10c30398e790fc4f2b708fec23730189d824200491c85cb87d93",
+        "authoring_kind": "domain_policy",
+        "target_revision": 4,
+        "base_revision": 3,
+        "base_bundle_sha256": "86f7b963f583882f6bedab87d673d11a54dff3828ab05b9bcb651ba4e089c982",
+        "base_package_sha256": "72b6fa7d39bf1143cf89f086e52cba25af23d3f7bad339b90696465e46d7cd2f",
+        "prepared_at_sha256": "0ce236217c76b144d07ba262cf3befd395bf321e2a7d263c6556585a7b935650",
+        "expires_at_sha256": "b6950c02f4b793db2a07fd5054528294ad0d590bfd13ef27768b2c4ba9b49d7e",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "1c6a2d2949fe9a43dbe61ad946d39117a7c17a6b0935ac6367949316ed5d9f4d",
+        "event_id_sha256": "07dbf610b95b0a140c838ad0ca2b73c5fc71c24e49686f61676c1228ad26ce6b",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "cdea8f02b4cfea0ff62d68152fe38510e319b062961ac2e21667d601366f3a83",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "80a5083355f0263822c0427c41277ba3f3d9de10af218904ff8986e78f11615c",
+          "http_response_sha256": "a65062b63201f757d7a40766940fccefbe9aa52f7ad7cb095f1d7870a08173f4",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "c9d23bc5dbe5b4970a5dcc6c9d86c63b1d64cf6ce49378e0092c83fe2206bcda",
+          "http_response_sha256": "a2d127a45a2f7eabdc4d11d15dbaf6aca8e30b04ad269dab60d8e428e72c98da",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "9e63b99fafd8582cab9bfa659981778b34574df9eba9de9066eade8027d69d19",
+          "http_response_sha256": "bff17330c01729014382ddd804cb601c0dfdf42769f3671cd05bf7930ee13e7f",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "75590a8f78149809e93dda4bd269ec63ac3e0538984d1779b612a52ad0a3f93a",
+          "http_response_sha256": "30fbc042900c9527248eb5e510ca9b4fe59fe5e9e5d8f799ee07a3af66a3e71b",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "69f12fcf4a14bd60a602d3bf14ec02d0f8e0e0934f2e5085dc65d64a6843541d",
+      "execute": {
+        "response_sha256": "89e3344494240bf78d0e33863eadff8c25563e200973b93e13ad53a9adcd9000",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain_policy",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_validation8_50c70b68",
+        "revision": 4,
+        "candidate_id": "candidate:602bdd69e185ae06f3bccb55e364aa5c9a2335e9d0bfbf66cbdf596f37356997",
+        "candidate_sha256": "602bdd69e185ae06f3bccb55e364aa5c9a2335e9d0bfbf66cbdf596f37356997",
+        "package_sha256": "4075469aecef64f4084e186fe9d6177334da11110e0a5b7cab43d645b0d92f1b",
+        "bundle_sha256": "e8c613207c65d91f21faa4247289f168031f18ca7e622795bf6605c16a758a15",
+        "catalog_sha256": "40bc49148669ba0faf1e3a2cc5baefee332040db7b9868c5f5358909f12b77ff",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "89e3344494240bf78d0e33863eadff8c25563e200973b93e13ad53a9adcd9000"
+          ],
+          "api": [
+            "89e3344494240bf78d0e33863eadff8c25563e200973b93e13ad53a9adcd9000"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {},
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 1,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        },
+        "committed_catalog": {
+          "reference_catalog_sha256": "149a1a5c19ee48ad274ab78ebd601fc1859cc0bd27460963ea03b9748d9a6bbe",
+          "required_manifest_sha256": "5a0eff1636935718c2264789aad4efc317342ec48b06cd2402a1a9a597bdb1ea",
+          "sections": {
+            "datasets": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "fields": {
+              "expected_count": 47,
+              "actual_count": 47,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "metrics": {
+              "expected_count": 17,
+              "actual_count": 17,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "recipes": {
+              "expected_count": 10,
+              "actual_count": 10,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "predicates": {
+              "expected_count": 7,
+              "actual_count": 7,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "grains": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "orderings": {
+              "expected_count": 1,
+              "actual_count": 1,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            },
+            "entity_groups": {
+              "expected_count": 25,
+              "actual_count": 25,
+              "missing_count": 0,
+              "missing_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "extra_count": 0,
+              "extra_ids_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+              "passed": true
+            }
+          },
+          "capability_projection_hashes": {
+            "boh": {
+              "expected_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26",
+              "actual_sha256": "37ff514f0b622a5b2ed31be56d311d6ba128a5c8b0aed28fe02d7a7c7e12bd26"
+            },
+            "join": {
+              "expected_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0",
+              "actual_sha256": "feac9a7e2dc33c58040e2bb34491c27e32bda8b61024cf7cf6519bca990c13b0"
+            },
+            "rank": {
+              "expected_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5",
+              "actual_sha256": "dee12661ecef42f9a975076e32651eb30e27cc0f2b71cbf2e3553e30c993cfe5"
+            },
+            "projection": {
+              "expected_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697",
+              "actual_sha256": "9bc69e2d87cb51553dc6d4e8386aff098ead7bb8ef8b74b39798c835120bd697"
+            }
+          },
+          "capability_checks": {
+            "boh_contract_exact": true,
+            "join_policy_exact": true,
+            "rank_policy_exact": true,
+            "projection_policy_exact": true,
+            "registered_function_cards_closed": true,
+            "registered_policy_maps_valid": true
+          },
+          "registered_function_count": 1,
+          "checks": {
+            "required_semantic_ids_present": true,
+            "core_capabilities_exact": true,
+            "runtime_catalog_valid": true
+          },
+          "raw_id_lists_persisted": false,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "output_profile",
+          "prompt_extensions",
+          "specialized_functions"
+        ],
+        "unchanged_section_count": 18,
+        "unchanged_section_names": [
+          "aliases",
+          "compiler_version",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "domain_id",
+          "entity_groups",
+          "environment",
+          "fields",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "predicates",
+          "recipes",
+          "relations",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [
+          "output_profile",
+          "prompt_extensions",
+          "specialized_functions"
+        ],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": true
+        }
+      },
+      "policy_checks": {
+        "intent_overlay_exact": true,
+        "answer_overlay_exact": true,
+        "specialized_function_exact": true,
+        "output_profile_overlay_exact": true
+      },
+      "after": {
+        "revision": 4,
+        "package_sha256": "4075469aecef64f4084e186fe9d6177334da11110e0a5b7cab43d645b0d92f1b",
+        "bundle_sha256": "e8c613207c65d91f21faa4247289f168031f18ca7e622795bf6605c16a758a15",
+        "catalog_sha256": "40bc49148669ba0faf1e3a2cc5baefee332040db7b9868c5f5358909f12b77ff",
+        "section_hashes_sha256": "a6783b0974e9a113b278598e41c8be7be4d284de5bd03402a5df3cb63072f58f"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    }
+  ],
+  "domain_bootstrap_checks": {
+    "freeform_mode": true,
+    "blueprint_not_flow_input": true,
+    "composed_source_hash_exact": true,
+    "domain_input_node_hash_exact": true,
+    "dataset_input_node_hash_exact": true,
+    "main_filter_input_node_hash_exact": true,
+    "draft_llm_three": true,
+    "annotation_llm_zero": true,
+    "repair_llm_zero": true,
+    "three_google_native_schema_bindings": true
+  },
+  "provider_schema_binding_validation": {
+    "branches": {
+      "domain": {
+        "purpose": "metadata_domain_draft",
+        "provider_schema_binding": "google_native_json_schema",
+        "binding_status": "google_native_json_schema",
+        "projection": "google_supported_json_schema_subset.v6",
+        "authoritative_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+        "provider_schema_sha256": "de9db1fc9582f3f1d25a16f03b84d7e47b917212763bd17dd3a0e89a1c1ac0a7",
+        "runtime_output_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+        "checks": {
+          "one_actual_invocation": true,
+          "google_native_provider_binding": true,
+          "binding_status_same": true,
+          "provider_projection_exact": true,
+          "authoritative_schema_hash_valid": true,
+          "provider_schema_hash_valid": true,
+          "one_runtime_output_schema": true,
+          "runtime_output_schema_hash_valid": true,
+          "authoritative_matches_runtime": true,
+          "raw_prompt_absent": true,
+          "raw_response_absent": true
+        },
+        "passed": true
+      },
+      "dataset": {
+        "purpose": "metadata_dataset_draft",
+        "provider_schema_binding": "google_native_json_schema",
+        "binding_status": "google_native_json_schema",
+        "projection": "google_supported_json_schema_subset.v6",
+        "authoritative_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+        "provider_schema_sha256": "ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32",
+        "runtime_output_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+        "checks": {
+          "one_actual_invocation": true,
+          "google_native_provider_binding": true,
+          "binding_status_same": true,
+          "provider_projection_exact": true,
+          "authoritative_schema_hash_valid": true,
+          "provider_schema_hash_valid": true,
+          "one_runtime_output_schema": true,
+          "runtime_output_schema_hash_valid": true,
+          "authoritative_matches_runtime": true,
+          "raw_prompt_absent": true,
+          "raw_response_absent": true
+        },
+        "passed": true
+      },
+      "main_filter": {
+        "purpose": "metadata_main_filter_draft",
+        "provider_schema_binding": "google_native_json_schema",
+        "binding_status": "google_native_json_schema",
+        "projection": "google_supported_json_schema_subset.v6",
+        "authoritative_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+        "provider_schema_sha256": "175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868",
+        "runtime_output_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+        "checks": {
+          "one_actual_invocation": true,
+          "google_native_provider_binding": true,
+          "binding_status_same": true,
+          "provider_projection_exact": true,
+          "authoritative_schema_hash_valid": true,
+          "provider_schema_hash_valid": true,
+          "one_runtime_output_schema": true,
+          "runtime_output_schema_hash_valid": true,
+          "authoritative_matches_runtime": true,
+          "raw_prompt_absent": true,
+          "raw_response_absent": true
+        },
+        "passed": true
+      }
+    },
+    "checks": {
+      "three_branches_exact": true,
+      "all_branches_passed": true
+    },
+    "raw_prompt_persisted": false,
+    "raw_response_persisted": false,
+    "passed": true
+  },
+  "proposal_hash_validation": [
+    {
+      "authoring_kind": "domain",
+      "source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+      "proposal_sha256": "7be3f10ccb791a89f31397a23093b4904e39a5f15b09596d54ed63583dd0e8da",
+      "draft_sha256": "287db731e3aa7e665bbb6e3e97d7dc5c7ffb0b1b82dd994e888290175a0ae074",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true,
+        "grounding_source_hash_exact": true,
+        "grounding_draft_hash_exact": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "dataset",
+      "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "proposal_sha256": "8cf0045ac3518a8bc3b07daefe06c3558ae710756b64499685fa32b24479ceb4",
+      "draft_sha256": "f4577d67f160a644a6ffcc86c7226c218dbe1768be9691d7d0f79dd98d2dd603",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true,
+        "grounding_source_hash_exact": true,
+        "grounding_draft_hash_exact": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "main_filter",
+      "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "proposal_sha256": "d0842b051f1b2049c3bbf0762477de9ee8b1d1b9d4abe30802f32513c4a19b7f",
+      "draft_sha256": "77e3af9259b2de2ac4780b4261684f7f4403cc74785e5030fc84eafdf50dce51",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true,
+        "grounding_source_hash_exact": true,
+        "grounding_draft_hash_exact": true
+      },
+      "passed": true
+    }
+  ],
+  "split_bootstrap_proposal_hash_validation": [
+    {
+      "branch": "domain",
+      "source_sha256": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+      "proposal_sha256": "4efcd211506651039d2f7f84407d989a379145dabab186b5069ac2440e2006da",
+      "draft_sha256": "d5974cb0baec866d29789c4628cb1372c08c86ef0ea8f2e5d3ea3fe355a305cf",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true
+      },
+      "passed": true
+    },
+    {
+      "branch": "dataset",
+      "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "proposal_sha256": "7a069e12b6f478187be66f8f65a3d5d66f5d309763c918ac06b59a9b72e7224a",
+      "draft_sha256": "666fd6c8ce763551c50fc5170c52c41f52c10a8984b6e10e17c9d1c2ed13d758",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true
+      },
+      "passed": true
+    },
+    {
+      "branch": "main_filter",
+      "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "proposal_sha256": "00ee0655d274e7cd2e86b4c3ff7225993cf2425ca1066b86eb8d22b6cd896154",
+      "draft_sha256": "66fcf954393a5f06fdceae1c84e3edab7d31bf88f2060216d80a70c00105d631",
+      "checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_hash_valid": true,
+        "draft_hash_valid": true
+      },
+      "passed": true
+    }
+  ],
+  "cycle_order_exact": true,
+  "revision_chain_exact": true,
+  "draft_llm_calls": 5,
+  "annotation_llm_calls": 0,
+  "repair_llm_calls": 0,
+  "domain_policy_llm_calls_zero": true,
+  "expected_llm_calls": {
+    "draft": 5,
+    "annotation": 0,
+    "repair": 0
+  },
+  "legacy_collection_checks": {
+    "collection_count": 5,
+    "before_sha256": "9f4c6e2248fc873e1a764c69140a8eecf8c4576d55d80dbaa5ff271fec5f02c4",
+    "after_sha256": "9f4c6e2248fc873e1a764c69140a8eecf8c4576d55d80dbaa5ff271fec5f02c4",
+    "unchanged": true,
+    "collection_names_persisted": false
+  },
+  "loader_roundtrip": {
+    "ok": true,
+    "stage": "domain_bundle",
+    "domain_id": "manufacturing",
+    "environment": "v6_release_validation8_50c70b68",
+    "revision": "4",
+    "package_sha256": "4075469aecef64f4084e186fe9d6177334da11110e0a5b7cab43d645b0d92f1b",
+    "bundle_sha256": "e8c613207c65d91f21faa4247289f168031f18ca7e622795bf6605c16a758a15",
+    "catalog_sha256": "40bc49148669ba0faf1e3a2cc5baefee332040db7b9868c5f5358909f12b77ff"
+  },
+  "loader_checks": {
+    "loader_ok": true,
+    "identity_exact": true,
+    "revision_exact": true,
+    "package_hash_exact": true,
+    "bundle_hash_exact": true,
+    "catalog_hash_exact": true
+  },
+  "production_pointer": {
+    "before": {
+      "environment": "production",
+      "domain_id": "manufacturing",
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "raw_pointer_persisted": false
+    },
+    "after": {
+      "environment": "production",
+      "domain_id": "manufacturing",
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "raw_pointer_persisted": false
+    },
+    "checks": {
+      "identity_exact": true,
+      "presence_unchanged": true,
+      "hash_unchanged": true
+    },
+    "passed": true
+  },
+  "all_passed": true
+}

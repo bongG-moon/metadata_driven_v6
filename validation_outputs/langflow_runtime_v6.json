@@ -1,0 +1,106 @@
+{
+  "status": "ok",
+  "runtime_assets": {
+    "python": "3.12.13",
+    "packages": {
+      "langflow": "1.9.2",
+      "langflow-base": "0.9.2",
+      "lfx": "0.4.2"
+    },
+    "distribution_inventory_sha256": "802fd6bb85d872d12f0d89ae5960647db89946be6ab6c9019286977b969e2c0d",
+    "language_model_source": {
+      "path": "tools/assets/langflow_1_9_2_language_model.py",
+      "sha256": "1d46e80acad2063ff1ca452e47c3daeef0c31697364b3b6e1e35e63c5eb88ae8"
+    },
+    "component_index": {
+      "path": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\.venv\\Lib\\site-packages\\lfx\\_assets\\component_index.json",
+      "sha256": "e747b684e578c340a203a59fb26ba5d5e814ba9e1347a425d48a3defcc9af24c"
+    }
+  },
+  "flow_count": 5,
+  "flows": [
+    {
+      "file": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\flow_exports\\metadata_v6_data_analysis_flow_v6_standalone.json",
+      "logical_key": "metadata_v6_data_analysis",
+      "id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+      "sha256": "719af8182997be21b822c94b9f9f26b5cb66bdd857681395dd0be38ca2fe529a",
+      "identity_errors": [],
+      "node_templates": {
+        "checked": 29,
+        "passed": 29,
+        "failed": 0,
+        "skipped_sticky_notes": [
+          "note_analysis_overview",
+          "note_prompt_authority",
+          "note_data_tools",
+          "note_answer_outputs"
+        ],
+        "failures": []
+      }
+    },
+    {
+      "file": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\flow_exports\\metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "logical_key": "metadata_v6_domain_authoring",
+      "id": "18ba3690-6b5e-522a-9ed7-3795161d1f11",
+      "sha256": "29f00d565813cc5ea305134894ac442fbc79758bc449c0b9df1b4b7196e41c0b",
+      "identity_errors": [],
+      "node_templates": {
+        "checked": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped_sticky_notes": [
+          "note_domain_authoring"
+        ],
+        "failures": []
+      }
+    },
+    {
+      "file": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\flow_exports\\metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "logical_key": "metadata_v6_dataset_catalog_authoring",
+      "id": "c207326f-3edf-5900-ae1f-40fb1062f1e1",
+      "sha256": "e4ed30a491fde1469fb9c95a26b6bf60e4d4f7b04208c07632099ebb01272a06",
+      "identity_errors": [],
+      "node_templates": {
+        "checked": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped_sticky_notes": [
+          "note_dataset_authoring"
+        ],
+        "failures": []
+      }
+    },
+    {
+      "file": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\flow_exports\\metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "logical_key": "metadata_v6_main_filter_authoring",
+      "id": "3c2dea0c-d508-5fed-95ad-b74aa3e8dca6",
+      "sha256": "92d7f9e0766fc3bbca772822ccdc080148e81fcf207ebb039ef93fc8e078c3aa",
+      "identity_errors": [],
+      "node_templates": {
+        "checked": 10,
+        "passed": 10,
+        "failed": 0,
+        "skipped_sticky_notes": [
+          "note_filter_authoring"
+        ],
+        "failures": []
+      }
+    },
+    {
+      "file": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\flow_exports\\metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
+      "logical_key": "metadata_v6_domain_policy_authoring",
+      "id": "d702b8c1-4d2d-5f6c-b59f-ffd826caf694",
+      "sha256": "b86da82e6627f4b8ff362e9d9b16b332f0aee8f1d6484b27c1e64a4307fa7557",
+      "identity_errors": [],
+      "node_templates": {
+        "checked": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped_sticky_notes": [
+          "note_domain_policy_admin"
+        ],
+        "failures": []
+      }
+    }
+  ]
+}

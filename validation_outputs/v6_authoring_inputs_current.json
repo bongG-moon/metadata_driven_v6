@@ -1,0 +1,68 @@
+{
+  "contract_version": "metadata.v6.authoring-input.validation.v1",
+  "input_count": 4,
+  "expected_input_count": 4,
+  "raw_text_persisted_in_report": false,
+  "rows": {
+    "domain": {
+      "path": "metadata/authoring/v6_inputs/domain_v6.txt",
+      "byte_count": 8827,
+      "line_count": 99,
+      "content_sha256": "fc579913bf2fc045aedaf8918522b2e13b50daab513342657a7d95b1fc10d8f2",
+      "nonempty": true,
+      "secret_literal_absent": true,
+      "lineage_path": "metadata/authoring/domain/domain_knowledge.txt",
+      "lineage_sha256": "dd5f53b5b6eb5ce92eac447ccdc476ca4d6448224cc0855925536b2087b2faae",
+      "lineage_source_present": true,
+      "lineage_relation": "freeform_operator_rewrite",
+      "freeform_rewrite_allowed": true,
+      "exact_line_equality_required": false,
+      "content_differs_from_lineage": true,
+      "passed": true
+    },
+    "dataset": {
+      "path": "metadata/authoring/v6_inputs/dataset_v6.txt",
+      "byte_count": 5931,
+      "line_count": 55,
+      "content_sha256": "2546efeb09ce803fd4681f031333e1b94b158cacdf688f2fce108d327578b4ab",
+      "nonempty": true,
+      "secret_literal_absent": true,
+      "lineage_path": "metadata/authoring/table_catalog/data_catalog.txt",
+      "lineage_sha256": "8ecbb8dd0b78276a0e5faf0ae468b47075ec3432c88051a4a216ce4fcb56dd9d",
+      "lineage_source_present": true,
+      "lineage_relation": "freeform_operator_rewrite",
+      "freeform_rewrite_allowed": true,
+      "exact_line_equality_required": false,
+      "content_differs_from_lineage": true,
+      "passed": true
+    },
+    "main_filter": {
+      "path": "metadata/authoring/v6_inputs/main_filter_v6.txt",
+      "byte_count": 1844,
+      "line_count": 17,
+      "content_sha256": "df1b0d75d6b0f331941cd595c4b6b960e55b025e20e5c0a83ace98d749f919b0",
+      "nonempty": true,
+      "secret_literal_absent": true,
+      "lineage_path": "metadata/authoring/main_filters/main_variable.txt",
+      "lineage_sha256": "c6d8fd3c2e23d4a860b86c0c09f57ea26f5526f78c21697a233a61d3b2d58ae3",
+      "lineage_source_present": true,
+      "lineage_relation": "freeform_operator_rewrite",
+      "freeform_rewrite_allowed": true,
+      "exact_line_equality_required": false,
+      "content_differs_from_lineage": true,
+      "passed": true
+    },
+    "domain_policy": {
+      "path": "metadata/authoring/v6_inputs/domain_policy_v6.txt",
+      "byte_count": 2954,
+      "line_count": 33,
+      "content_sha256": "ee4d1e554e6cdf33f46baea2713bbdf6f69e2f4b33a7bbb74cd56355e46e0c51",
+      "nonempty": true,
+      "secret_literal_absent": true,
+      "required_policy_sections_present": true,
+      "raw_python_registration_prohibited": true,
+      "passed": true
+    }
+  },
+  "all_passed": true
+}

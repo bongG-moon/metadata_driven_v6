@@ -1,0 +1,80 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/model-profile.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "model.profile.v1",
+      "type": "string"
+    },
+    "intent_route_only": {
+      "const": true
+    },
+    "model": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "profile_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "provider": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "runs": {
+      "minimum": 3,
+      "type": "integer"
+    },
+    "temperature": {
+      "const": 0,
+      "type": "number"
+    }
+  },
+  "required": [
+    "contract_version",
+    "profile_id",
+    "provider",
+    "model",
+    "temperature",
+    "runs",
+    "intent_route_only"
+  ],
+  "title": "model.profile.v1",
+  "type": "object"
+}

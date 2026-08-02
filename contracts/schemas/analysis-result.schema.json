@@ -1,0 +1,105 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/analysis-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "columns": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "maxItems": 256,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "contract_version": {
+      "const": "analysis.result.v1",
+      "type": "string"
+    },
+    "lineage": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "operation_trace": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 64,
+      "type": "array"
+    },
+    "plan_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "result_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "row_count": {
+      "minimum": 0,
+      "type": "integer"
+    },
+    "rows": {
+      "items": {
+        "$ref": "#/$defs/jsonObject"
+      },
+      "maxItems": 100000,
+      "type": "array"
+    },
+    "status": {
+      "enum": [
+        "ok",
+        "empty",
+        "partial"
+      ],
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "status",
+    "plan_id",
+    "columns",
+    "rows",
+    "row_count",
+    "lineage",
+    "operation_trace",
+    "result_sha256"
+  ],
+  "title": "analysis.result.v1",
+  "type": "object"
+}

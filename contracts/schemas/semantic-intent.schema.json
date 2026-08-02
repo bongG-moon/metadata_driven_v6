@@ -1,0 +1,89 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/semantic-intent.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidate_bundle_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "analysis.intent.v1",
+      "type": "string"
+    },
+    "intent_candidate_id": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "intent_generator": {
+      "enum": [
+        "deterministic",
+        "llm"
+      ],
+      "type": "string"
+    },
+    "intent_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "request_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "route": {
+      "enum": [
+        "deterministic",
+        "intent_llm"
+      ],
+      "type": "string"
+    },
+    "semantics": {
+      "$ref": "#/$defs/jsonObject"
+    }
+  },
+  "required": [
+    "contract_version",
+    "request_id",
+    "candidate_bundle_sha256",
+    "intent_candidate_id",
+    "semantics",
+    "intent_sha256"
+  ],
+  "title": "analysis.intent.v1",
+  "type": "object"
+}

@@ -1,0 +1,45 @@
+{
+  "contract_version": "langflow.http.authoring-e2e.validation.v3",
+  "model": "gemini-3.5-flash-lite",
+  "all_passed": false,
+  "failure": {
+    "type": "AuthoringValidationError",
+    "code": "freeform_clarification_probe_failed",
+    "stage": "freeform_clarification",
+    "details": {
+      "failed_checks": [
+        "clarification_contract_exact",
+        "missing_fields_reported",
+        "proposal_sealed",
+        "question_count_bounded",
+        "source_hash_exact",
+        "status_needs_clarification"
+      ],
+      "environment": "e2e_validation_0d10d25c",
+      "flow_import_count": 4,
+      "flow_id_sha256": [
+        "a6b422ad910556c303c9d5b1e316bbb2ee8c6eb533ad60eec775039dd8aafdd8",
+        "c51f03749c4c928cfb406e258104cf350923fdef5ca7a3c757b3267b4c5e9ac0",
+        "0ca956894f790436f46351d0ea167eb4f3708e6b000e8bc7b105a243e123e1b6",
+        "9f85706387d6535c4c524d00641ee1d86cb2f9aa7f0accf3b7ffb812698be067"
+      ],
+      "expected_source_sha256": "1ebea3551b98c74aec1ba55407668857947ec6555f455513ff1a5c5c0a6acd40",
+      "actual_source_sha256": "",
+      "actual_status": "error",
+      "error_code": "metadata_llm_unavailable",
+      "error_stage": "metadata_draft",
+      "error_reason": "INVALID_ARGUMENT",
+      "error_type": "ChatGoogleGenerativeAIError",
+      "error_path": "",
+      "error_message_sha256": "426d368bf110508c21ea5cae4838648e599d6725cc3d199d33ac5a171ce878d6",
+      "error_operator_sha256": "",
+      "error_metric_id_sha256": "",
+      "error_field_sha256": "",
+      "manifest_error_code": "",
+      "error_dataset_id_sha256": "",
+      "error_detail_value_sha256": "",
+      "error_candidate_count": 0,
+      "error_detail_index": 0
+    }
+  }
+}

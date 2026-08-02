@@ -1,0 +1,33 @@
+[v6 도메인 정책 등록 입력]
+
+기존 제조 도메인의 데이터셋, 필드, 지표, 관계, 별칭, 필터, 레시피와 실행 바인딩은 변경하지 않습니다.
+이번 입력은 운영자가 별도로 관리하는 도메인 특화 프롬프트, 출력 표시 정책과 등록형 함수 카드만 갱신하기 위한 자연어 기준 문서입니다.
+등록되지 않은 사실, 물리 컬럼, 데이터셋, 계산식 또는 실행 규칙을 새로 만들지 않습니다.
+
+[의도 분석 특화 프롬프트]
+
+제조 용어는 현재 활성 메타데이터에 등록된 데이터셋, 필드, 지표, 필터, 레시피와 후보 카드만 사용하세요.
+DP, DA, WB 같은 공정 그룹과 POP, MOBILE, HBM 같은 제품 조건은 등록된 canonical 항목과 별칭으로만 해석하세요.
+공정 구간, 제품 token 묶음, BOH 재공, 생산 달성률은 등록된 recipe 또는 predicate가 있을 때만 선택하세요.
+후보 카드가 하나로 확정되지 않으면 임의로 데이터셋이나 컬럼을 만들지 말고 허용된 후보 중 하나를 선택하거나 명확화가 필요하다고 판단하세요.
+
+[답변 생성 특화 프롬프트]
+
+응답은 결정론적 실행 결과와 검증된 fact만 사용하세요.
+조회 기준일, 실제 조회일, 공정 또는 제품 조건, 집계 단위와 단위를 필요한 경우 함께 표시하세요.
+정상적인 0건 결과와 조회 실패를 구분하고, 결과에 없는 숫자나 원인을 만들지 마세요.
+BOH 재공은 요청 기준일과 전일 조회 DATE가 다를 수 있으므로 둘을 구분해 표시하세요.
+
+[출력 표시 정책]
+
+요약, 결과 표 설명, 적용 기준, 근거, 알림, 다운로드, 후속 질문과 실행 계획 진단은 각각 독립적으로 표시 여부를 선택할 수 있어야 합니다.
+기존 show_pandas_code 호환 입력은 생성된 pandas 코드가 아니라 typed Execution IR과 등록 operator trace를 표시하는 용도로 해석합니다.
+Message, API Data, GaiA answer/metadata는 같은 canonical 결과를 참조해야 하며 결과 행을 중복 저장하지 않습니다.
+
+[등록형 함수 정책]
+
+현재 제조 기본 경로에서 공정 구간, 제품 token, 순위, 조인, 필드 비교는 metadata recipe, predicate와 typed operator로 실행합니다.
+따라서 이번 제조 정책 등록에서는 별도의 registered standalone 함수 카드를 추가하지 않습니다.
+향후 특화 함수를 추가할 때는 운영자가 검토한 function_id, version, implementation_sha256, input/output schema hash, required_fields, resource limits와 fail_closed 정책을 별도 노드 입력으로 등록해야 합니다.
+raw Python 코드, import 경로, eval 또는 exec 가능한 문자열은 메타데이터에 저장하지 않습니다.
+runtime allowlist에 같은 ID, 버전과 구현 hash가 없는 함수는 실행하지 않고 unsupported_operation으로 종료합니다.

@@ -1,0 +1,53 @@
+{
+  "contract_version": "domain.sample_rows.v1",
+  "domain_id": "order_sales",
+  "datasets": {
+    "orders": [
+      {"order_id": "O-001", "order_date": "2026-07-01", "customer_id": "C-01", "product_id": "P-100", "sales_amount": 1000},
+      {"order_id": "O-002", "order_date": "2026-07-01", "customer_id": "C-02", "product_id": "P-100", "sales_amount": 1500},
+      {"order_id": "O-003", "order_date": "2026-07-01", "customer_id": "C-03", "product_id": "P-200", "sales_amount": 2500},
+      {"order_id": "O-004", "order_date": "2026-07-02", "customer_id": "C-01", "product_id": "P-300", "sales_amount": 700},
+      {"order_id": "O-005", "order_date": "2026-07-02", "customer_id": "C-04", "product_id": "P-300", "sales_amount": 300},
+      {"order_id": "O-006", "order_date": "2026-07-02", "customer_id": "C-05", "product_id": "P-400", "sales_amount": 200}
+    ],
+    "products": [
+      {"product_id": "P-100", "product_name": "Alpha", "category": "A"},
+      {"product_id": "P-200", "product_name": "Beta", "category": "A"},
+      {"product_id": "P-300", "product_name": "Gamma", "category": "B"},
+      {"product_id": "P-400", "product_name": "Delta", "category": "B"}
+    ],
+    "refunds": [
+      {"order_id": "O-002", "product_id": "P-100", "refund_amount": 500},
+      {"order_id": "O-003", "product_id": "P-200", "refund_amount": 100},
+      {"order_id": "O-005", "product_id": "P-300", "refund_amount": 300}
+    ],
+    "targets": [
+      {"target_date": "2026-07-02", "product_id": "P-100", "target_amount": 2000},
+      {"target_date": "2026-07-02", "product_id": "P-200", "target_amount": 2000},
+      {"target_date": "2026-07-02", "product_id": "P-300", "target_amount": 1000},
+      {"target_date": "2026-07-02", "product_id": "P-400", "target_amount": 500}
+    ]
+  },
+  "expected_invariants": {
+    "total_sales_amount": 6200,
+    "total_refund_amount": 900,
+    "total_net_sales_amount": 5300,
+    "top_sales_amount": 2500,
+    "top_product_ids_with_ties": ["P-100", "P-200"],
+    "bottom_sales_amount": 200,
+    "bottom_product_ids_with_ties": ["P-400"],
+    "category_labels": {"A": "전자", "B": "생활"},
+    "net_sales_by_product": {
+      "P-100": 2000,
+      "P-200": 2400,
+      "P-300": 700,
+      "P-400": 200
+    },
+    "achievement_rate_percent_by_product": {
+      "P-100": 125,
+      "P-200": 125,
+      "P-300": 100,
+      "P-400": 40
+    }
+  }
+}

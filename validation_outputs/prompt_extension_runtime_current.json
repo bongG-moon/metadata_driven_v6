@@ -1,0 +1,37 @@
+{
+  "contract_version": "prompt-extension.runtime.validation.v1",
+  "domain_id": "order_sales",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "prompt_payloads_persisted": false,
+  "intent": {
+    "prompt_sha256": "418bddddbeebe5268cd804cf8a3fe08615bdcae12247e01eec6e855b923f9652",
+    "prompt_utf8_bytes": 1757,
+    "catalog_extension_sha256": "a0708b3682b7f602b47f32234f43ddc50ad28fe061a2d42de9be929ed8b4d338",
+    "catalog_extension_present": true,
+    "node_overlay_present": true,
+    "prompt_within_budget": true,
+    "model_calls_exactly_one": true,
+    "route_intent_llm": true,
+    "pipeline_passed": true,
+    "pipeline_failures": []
+  },
+  "answer": {
+    "prompt_sha256": "fd86b742773e4b7181043326570069f563f985feb83b267441a9380afc1b9040",
+    "prompt_utf8_bytes": 1992,
+    "catalog_extension_sha256": "b86e1bceb6336dc4a9c23c1f7db3937a96e9419052e93cf82b36abefc2ff2c33",
+    "catalog_extension_present": true,
+    "node_overlay_present": true,
+    "prompt_within_budget": true,
+    "model_calls_exactly_one": true,
+    "route_deterministic": true,
+    "pipeline_passed": true,
+    "pipeline_failures": []
+  },
+  "checks": {
+    "intent_catalog_and_overlay_merged": true,
+    "answer_catalog_and_overlay_merged": true,
+    "prompts_not_persisted": true,
+    "raw_extensions_not_persisted": true
+  },
+  "all_passed": true
+}

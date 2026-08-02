@@ -1,0 +1,102 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/display-options.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "display.options.v1",
+      "type": "string"
+    },
+    "include_diagnostics": {
+      "type": "boolean"
+    },
+    "profile": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "show_analysis_evidence": {
+      "type": "boolean"
+    },
+    "show_applied_criteria": {
+      "type": "boolean"
+    },
+    "show_data_retrieval": {
+      "type": "boolean"
+    },
+    "show_download_links": {
+      "type": "boolean"
+    },
+    "show_execution_plan": {
+      "type": "boolean"
+    },
+    "show_intent_analysis": {
+      "type": "boolean"
+    },
+    "show_next_questions": {
+      "type": "boolean"
+    },
+    "show_notices": {
+      "type": "boolean"
+    },
+    "show_result_table": {
+      "type": "boolean"
+    },
+    "table_preview_limit": {
+      "maximum": 20,
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "contract_version",
+    "profile",
+    "include_diagnostics",
+    "show_result_table",
+    "table_preview_limit",
+    "show_analysis_evidence",
+    "show_download_links",
+    "show_notices",
+    "show_applied_criteria",
+    "show_next_questions",
+    "show_intent_analysis",
+    "show_data_retrieval",
+    "show_execution_plan"
+  ],
+  "title": "display.options.v1",
+  "type": "object"
+}

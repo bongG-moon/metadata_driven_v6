@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/metadata-authoring-response.schema.json",
+  "title": "metadata.authoring.response.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "$defs": {
+    "jsonValue": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "maxItems": 2048, "items": {"$ref": "#/$defs/jsonValue"}},
+        {"$ref": "#/$defs/jsonObject"}
+      ]
+    },
+    "jsonObject": {
+      "type": "object",
+      "properties": {},
+      "required": [],
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {"$ref": "#/$defs/jsonValue"}
+      }
+    },
+    "clarificationPayload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["contract_version", "questions", "missing_fields", "source_sha256", "proposal_sha256"],
+      "properties": {
+        "contract_version": {
+          "const": "metadata.authoring.clarification.v1",
+          "type": "string"
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 400
+          }
+        },
+        "missing_fields": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          }
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "proposal_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      }
+    }
+  },
+  "properties": {
+    "contract_version": {"const": "metadata.authoring.response.v1", "type": "string"},
+    "response_type": {"const": "metadata_authoring", "type": "string"},
+    "status": {"enum": ["ok", "error", "needs_clarification"], "type": "string"},
+    "stage": {"minLength": 1, "maxLength": 128, "type": "string"},
+    "authoring_kind": {
+      "enum": ["domain", "dataset", "main_filter", "domain_policy"],
+      "type": "string"
+    },
+    "metadata_contract_mode": {
+      "const": "domain_package_v2",
+      "type": "string"
+    },
+    "domain_id": {"pattern": "^[a-z][a-z0-9_-]{1,63}$", "type": "string"},
+    "environment": {"pattern": "^[a-z][a-z0-9_-]{1,31}$", "type": "string"},
+    "candidate_id": {"pattern": "^candidate:[0-9a-f]{64}$", "type": "string"},
+    "candidate_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "package_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "bundle_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "catalog_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"},
+    "revision": {"minimum": 0, "type": "integer"},
+    "persisted": {"type": "boolean"},
+    "diff": {"$ref": "#/$defs/jsonObject"},
+    "unchanged_section_checks": {"$ref": "#/$defs/jsonObject"},
+    "validation": {"$ref": "#/$defs/jsonObject"},
+    "expires_at": {"format": "date-time", "type": "string"},
+    "idempotent_replay": {"type": "boolean"},
+    "error": {"$ref": "#/$defs/jsonObject"},
+    "clarification": {"$ref": "#/$defs/clarificationPayload"},
+    "llm_usage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["draft_llm_calls", "repair_llm_calls"],
+      "properties": {
+        "draft_llm_calls": {"minimum": 0, "maximum": 3, "type": "integer"},
+        "annotation_llm_calls": {"minimum": 0, "maximum": 1, "type": "integer"},
+        "repair_llm_calls": {"const": 0, "type": "integer"}
+      }
+    },
+    "response_sha256": {"pattern": "^[0-9a-f]{64}$", "type": "string"}
+  },
+  "required": [
+    "contract_version",
+    "response_type",
+    "status",
+    "stage",
+    "authoring_kind",
+    "metadata_contract_mode",
+    "domain_id",
+    "environment",
+    "llm_usage",
+    "response_sha256"
+  ],
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "error"}}, "required": ["status"]},
+      "then": {"required": ["error"]}
+    },
+    {
+      "if": {"properties": {"status": {"const": "ok"}}, "required": ["status"]},
+      "then": {"required": ["candidate_id", "candidate_sha256"]}
+    },
+    {
+      "if": {
+        "properties": {"status": {"const": "needs_clarification"}},
+        "required": ["status"]
+      },
+      "then": {
+        "required": ["clarification"],
+        "not": {
+          "anyOf": [
+            {"required": ["candidate_id"]},
+            {"required": ["candidate_sha256"]},
+            {"required": ["package_sha256"]},
+            {"required": ["bundle_sha256"]},
+            {"required": ["catalog_sha256"]},
+            {"required": ["revision"]},
+            {"required": ["persisted"]},
+            {"required": ["diff"]},
+            {"required": ["unchanged_section_checks"]},
+            {"required": ["validation"]},
+            {"required": ["expires_at"]},
+            {"required": ["idempotent_replay"]},
+            {"required": ["error"]}
+          ]
+        }
+      },
+      "else": {
+        "not": {"required": ["clarification"]}
+      }
+    },
+    {
+      "if": {"properties": {"stage": {"const": "prepared"}}, "required": ["stage"]},
+      "then": {"required": ["persisted", "diff", "validation", "expires_at"]}
+    },
+    {
+      "if": {"properties": {"stage": {"const": "committed"}}, "required": ["stage"]},
+      "then": {"required": ["revision", "idempotent_replay"]}
+    }
+  ]
+}

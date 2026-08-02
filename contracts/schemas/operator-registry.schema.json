@@ -1,0 +1,271 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/operator-registry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "aggregation_functions": {
+      "items": {
+        "enum": [
+          "sum",
+          "mean",
+          "min",
+          "max",
+          "count",
+          "nunique",
+          "median",
+          "std",
+          "var",
+          "list_unique"
+        ],
+        "type": "string"
+      },
+      "minItems": 10,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "contract_version": {
+      "const": "operator_registry.v1",
+      "type": "string"
+    },
+    "filter_connectives": {
+      "items": {
+        "enum": [
+          "all",
+          "any"
+        ],
+        "type": "string"
+      },
+      "minItems": 2,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "filter_operators": {
+      "items": {
+        "enum": [
+          "eq",
+          "in",
+          "ne",
+          "not_in",
+          "gt",
+          "gte",
+          "lt",
+          "lte",
+          "between",
+          "contains",
+          "starts_with",
+          "ends_with",
+          "is_null",
+          "is_not_null",
+          "is_blank",
+          "is_not_blank",
+          "null_or_blank"
+        ],
+        "type": "string"
+      },
+      "minItems": 17,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "formula_operators": {
+      "items": {
+        "enum": [
+          "add",
+          "subtract",
+          "multiply",
+          "safe_divide",
+          "abs",
+          "round",
+          "min_pair",
+          "max_pair",
+          "coalesce",
+          "coalesce_blank",
+          "datetime_diff_hours"
+        ],
+        "type": "string"
+      },
+      "minItems": 11,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "join_types": {
+      "items": {
+        "enum": [
+          "inner",
+          "left",
+          "right",
+          "outer",
+          "semi",
+          "anti"
+        ],
+        "type": "string"
+      },
+      "minItems": 6,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "limits": {
+      "additionalProperties": false,
+      "properties": {
+        "filter_max_depth": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "filter_max_leaves": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "formula_max_depth": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "formula_max_nodes": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "operation_max_count": {
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "filter_max_depth",
+        "filter_max_leaves",
+        "formula_max_depth",
+        "formula_max_nodes",
+        "operation_max_count"
+      ],
+      "type": "object"
+    },
+    "operations": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "description": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "input_kinds": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "op": {
+            "enum": [
+              "filter",
+              "ordered_range",
+              "product_token_match",
+              "project",
+              "derive",
+              "aggregate",
+              "compare_fields",
+              "compare_group_attributes",
+              "find_duplicate_groups",
+              "join",
+              "presence_filter",
+              "sort",
+              "rank",
+              "concat_segments",
+              "detail",
+              "dedupe",
+              "row_match_groups",
+              "enrich_previous_result",
+              "transform_previous_result",
+              "explain_previous",
+              "registered_call"
+            ],
+            "type": "string"
+          },
+          "operator_id": {
+            "pattern": "^[a-z][a-z0-9_]*\\.v[0-9]+$",
+            "type": "string"
+          },
+          "output_kind": {
+            "enum": [
+              "frame",
+              "facts",
+              "scalar"
+            ],
+            "type": "string"
+          },
+          "required_policy_keys": {
+            "items": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "type": "array",
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "operator_id",
+          "op",
+          "input_kinds",
+          "output_kind",
+          "required_policy_keys",
+          "description"
+        ],
+        "type": "object"
+      },
+      "minItems": 21,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "registry_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "registry_sha256",
+    "operations",
+    "filter_operators",
+    "filter_connectives",
+    "aggregation_functions",
+    "join_types",
+    "formula_operators",
+    "limits"
+  ],
+  "title": "operator_registry.v1",
+  "type": "object"
+}

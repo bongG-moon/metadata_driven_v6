@@ -1,0 +1,539 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/metadata-authoring-draft.schema.json",
+  "title": "metadata.authoring.draft.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "display_name",
+    "datasets"
+  ],
+  "properties": {
+    "contract_version": {
+      "const": "metadata.authoring.draft.v1"
+    },
+    "display_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 4000
+    },
+    "locale": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 32,
+      "default": "ko-KR"
+    },
+    "timezone": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "default": "Asia/Seoul"
+    },
+    "datasets": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 128,
+      "patternProperties": {
+        "^[A-Za-z][A-Za-z0-9_.-]{0,127}$": {
+          "$ref": "#/$defs/dataset"
+        }
+      },
+      "additionalProperties": false
+    },
+    "metrics": {
+      "type": "object",
+      "maxProperties": 512,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "entity_groups": {
+      "type": "object",
+      "maxProperties": 512,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "grains": {
+      "type": "object",
+      "maxProperties": 256,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "relations": {
+      "type": "object",
+      "maxProperties": 256,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "orderings": {
+      "type": "object",
+      "maxProperties": 128,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "predicates": {
+      "type": "object",
+      "maxProperties": 256,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "recipes": {
+      "type": "object",
+      "maxProperties": 256,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "aliases": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "prompt_extensions": {
+      "$ref": "#/$defs/promptExtensions"
+    },
+    "specialized_functions": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "#/$defs/specializedFunction"
+      },
+      "default": []
+    },
+    "output_profile": {
+      "type": "object",
+      "maxProperties": 128,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonValue"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    },
+    "source_provenance": {
+      "type": "object",
+      "maxProperties": 64,
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonValue"}
+      },
+      "additionalProperties": false,
+      "default": {}
+    }
+  },
+  "$defs": {
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "family",
+        "source_type",
+        "fields"
+      ],
+      "properties": {
+        "display_name": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "family": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "source_type": {
+          "enum": [
+            "oracle",
+            "sql",
+            "mongodb",
+            "http",
+            "datalake",
+            "goodocs",
+            "file",
+            "dummy",
+            "previous_result"
+          ]
+        },
+        "source_adapter": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "time_scope": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "config_ref": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "query_ref": {
+          "type": "string",
+          "maxLength": 256
+        },
+        "parameters": {
+          "type": "object",
+          "maxProperties": 128,
+          "patternProperties": {
+            "^.{1,256}$": {"$ref": "#/$defs/jsonObject"}
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "date_policy": {
+          "type": "object",
+          "maxProperties": 32,
+          "patternProperties": {
+            "^.{1,256}$": {"$ref": "#/$defs/jsonValue"}
+          },
+          "additionalProperties": false,
+          "default": {}
+        },
+        "date_filter_contract": {
+          "type": "object",
+          "maxProperties": 32,
+          "patternProperties": {
+            "^.{1,256}$": {"$ref": "#/$defs/jsonValue"}
+          },
+          "additionalProperties": false
+        },
+        "upstream_bindings": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "$ref": "#/$defs/jsonObject"
+          }
+        },
+        "fixture_only": {
+          "type": "boolean"
+        },
+        "fields": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1024,
+          "patternProperties": {
+            "^[A-Za-z][A-Za-z0-9_.-]{0,127}$": {
+              "$ref": "#/$defs/fieldBinding"
+            }
+          },
+          "additionalProperties": false
+        },
+        "default_detail_fields": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "read_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "read_only": {
+              "const": true
+            },
+            "timeout_seconds": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 120
+            },
+            "max_rows": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 1000000
+            }
+          },
+          "default": {
+            "read_only": true,
+            "timeout_seconds": 30,
+            "max_rows": 50000
+          }
+        }
+      }
+    },
+    "fieldBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "physical_column",
+        "semantic_type",
+        "roles"
+      ],
+      "properties": {
+        "physical_column": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "physical_aliases": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "default": []
+        },
+        "aliases": {
+          "type": "array",
+          "maxItems": 64,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "default": []
+        },
+        "semantic_type": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "filter",
+              "group",
+              "join",
+              "compare",
+              "aggregate",
+              "derive",
+              "project",
+              "sort",
+              "rank",
+              "metric",
+              "output"
+            ]
+          }
+        },
+        "required_in_source": {
+          "type": "boolean",
+          "default": false
+        },
+        "nullable": {
+          "type": "boolean",
+          "default": true
+        },
+        "coercion": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "timezone": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "unit": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "allowed_filter_operators": {
+          "type": "array",
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowed_rollups": {
+          "type": "array",
+          "maxItems": 16,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "null_policy": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "case_policy": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "multiplier": {
+          "type": "number"
+        }
+      }
+    },
+    "promptExtensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "intent": {
+          "type": "string",
+          "maxLength": 12000,
+          "default": ""
+        },
+        "answer": {
+          "type": "string",
+          "maxLength": 12000,
+          "default": ""
+        }
+      },
+      "default": {
+        "intent": "",
+        "answer": ""
+      }
+    },
+    "specializedFunction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "function_id",
+        "version",
+        "execution_mode",
+        "implementation_sha256",
+        "input_schema",
+        "output_schema"
+      ],
+      "properties": {
+        "function_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.:-]{0,127}$"
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "execution_mode": {
+          "const": "registered_standalone"
+        },
+        "implementation_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "input_schema": {
+          "$ref": "#/$defs/jsonObject"
+        },
+        "output_schema": {
+          "$ref": "#/$defs/jsonObject"
+        },
+        "required_fields": {
+          "type": "array",
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "limits": {
+          "$ref": "#/$defs/registeredFunctionLimits"
+        },
+        "failure_policy": {
+          "const": "fail_closed"
+        },
+        "aliases": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "call_template": {
+          "$ref": "#/$defs/registeredFunctionCallTemplate"
+        }
+      }
+    },
+    "registeredFunctionLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timeout_ms",
+        "max_input_rows",
+        "max_output_rows",
+        "max_output_bytes"
+      ],
+      "properties": {
+        "timeout_ms": {"type": "integer", "minimum": 1, "maximum": 5000},
+        "max_input_rows": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "max_output_rows": {"type": "integer", "minimum": 1, "maximum": 100000},
+        "max_output_bytes": {"type": "integer", "minimum": 1, "maximum": 8388608}
+      }
+    },
+    "registeredFunctionCallTemplate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_ref", "field_ref", "parameters", "output_fields"],
+      "properties": {
+        "dataset_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+        "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+        "parameters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["tokens", "operator", "match_mode", "case_sensitive"],
+          "properties": {
+            "tokens": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            },
+            "operator": {"enum": ["equals", "contains", "starts_with", "ends_with"]},
+            "match_mode": {"enum": ["any", "all"]},
+            "case_sensitive": {"type": "boolean"}
+          }
+        },
+        "output_fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 128}
+        }
+      }
+    },
+    "jsonObject": {
+      "type": "object",
+      "patternProperties": {
+        "^.{1,256}$": {"$ref": "#/$defs/jsonValue"}
+      },
+      "additionalProperties": false
+    },
+    "jsonValue": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "maxItems": 4096, "items": {"$ref": "#/$defs/jsonValue"}},
+        {"$ref": "#/$defs/jsonObject"}
+      ]
+    }
+  }
+}

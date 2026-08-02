@@ -1,0 +1,327 @@
+{
+  "contract_version": "langflow.http.order-sales.validation.v1",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "flow_sha256": "e87cb3aa4b62a5c2567a8cbce299eea3457cfdefdea0b2a6ddc6c89ccc6eeca1",
+  "uploaded_flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+  "domain_id": "order_sales",
+  "environment": "authoring_v6_finalretr_21b469d7",
+  "metadata_source_mode": "v6_active",
+  "data_mode": "inline",
+  "reference_instant": "2026-07-02T09:00:00+09:00",
+  "active_pointer": {
+    "revision": 4,
+    "package_sha256": "2e91fa57207c0f8a6f4162f992fec739e80954a9472751035f2f877bdd33cf1f",
+    "bundle_sha256": "75f2d1f373a7085719371ee0abf60364129f39963861915a7c22fad996a21414",
+    "checks": {
+      "contract_version": true,
+      "domain_id": true,
+      "environment": true,
+      "active_status": true,
+      "revision_positive": true,
+      "package_hash_present": true,
+      "bundle_hash_present": true
+    }
+  },
+  "source_payload_sha256": "bbd804971962baa4008b5e4520d111eec171a0d6b88f229f54e2fd1070f14f86",
+  "source_payload_persisted": false,
+  "raw_http_responses_persisted": false,
+  "secrets_persisted": false,
+  "case_count": 3,
+  "passed": 3,
+  "failed": 0,
+  "rows": [
+    {
+      "case_id": "OS01",
+      "http_status": 200,
+      "http_response_sha256": "14bbb022d8911075e6a58d526ceccad9199c5adb453cd935b207865fd29ec95e",
+      "canonical_response_sha256": "47a243740389263a1b6c6127d5aff420fbc92190335a0601ecc864747890908e",
+      "response_status": "ok",
+      "error_code": "",
+      "error_stage": "",
+      "result_sha256": "8ad6d3fd7e7bc81a4e46f4ebd11ba93be319ba4f3247938c629d91240cc4990d",
+      "route": "deterministic",
+      "usage": {
+        "intent_llm_calls": 0,
+        "intent_retry_calls": 0,
+        "answer_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0
+      },
+      "state_version": 1,
+      "persistence_contract": {
+        "state_present": true,
+        "data_ref_count": 2,
+        "data_ref_roles": [
+          "analysis_result",
+          "source_snapshot"
+        ],
+        "answer_download_count": 2,
+        "download_url_count": 0,
+        "all_data_ref_ids_valid": true,
+        "all_download_ref_ids_valid": true,
+        "download_refs_match_data_refs": true,
+        "one_analysis_result_ref": true,
+        "state_ref_matches_analysis_result": true,
+        "result_table_ref_matches_analysis_result": true
+      },
+      "terminal_hashes": {
+        "message": [
+          "47a243740389263a1b6c6127d5aff420fbc92190335a0601ecc864747890908e"
+        ],
+        "gaia": [
+          "47a243740389263a1b6c6127d5aff420fbc92190335a0601ecc864747890908e"
+        ],
+        "api": [
+          "47a243740389263a1b6c6127d5aff420fbc92190335a0601ecc864747890908e"
+        ],
+        "chat_output": []
+      },
+      "terminal_equivalent": true,
+      "retrieval_datasets": [
+        "orders"
+      ],
+      "operator_ids": [
+        "filter.v1",
+        "aggregate.v1",
+        "project.v1"
+      ],
+      "columns": [
+        "SALES_AMOUNT"
+      ],
+      "row_count": 1,
+      "result_rows": [
+        {
+          "SALES_AMOUNT": 1200
+        }
+      ],
+      "checks": {
+        "http_200": true,
+        "status_ok": true,
+        "route_deterministic": true,
+        "intent_llm_zero": true,
+        "answer_llm_zero": true,
+        "pandas_code_llm_zero": true,
+        "pandas_repair_llm_zero": true,
+        "state_version_one": true,
+        "persistent_state_present": true,
+        "persistent_data_refs_present": true,
+        "persistent_download_entries_exact": true,
+        "persistent_ref_ids_valid": true,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": true,
+        "terminal_hash_equivalent": true,
+        "datasets_exact": true,
+        "operators_covered": true,
+        "columns_exact": true,
+        "rows_exact": true
+      },
+      "passed": true
+    },
+    {
+      "case_id": "OS02",
+      "http_status": 200,
+      "http_response_sha256": "58fd439bf62af14ac24e832c7d24e532bdbc55b68723a1392fa9915177413bbf",
+      "canonical_response_sha256": "e69c481d687319bae7d0597f7cb1741473fb4c128e77d6226abdd7f6072c1a1c",
+      "response_status": "ok",
+      "error_code": "",
+      "error_stage": "",
+      "result_sha256": "d58003e494e17998af99a13ed030ababaffee3123e84e3692da7f8df1c72404e",
+      "route": "deterministic",
+      "usage": {
+        "intent_llm_calls": 0,
+        "intent_retry_calls": 0,
+        "answer_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0
+      },
+      "state_version": 1,
+      "persistence_contract": {
+        "state_present": true,
+        "data_ref_count": 3,
+        "data_ref_roles": [
+          "analysis_result",
+          "source_snapshot",
+          "source_snapshot"
+        ],
+        "answer_download_count": 3,
+        "download_url_count": 0,
+        "all_data_ref_ids_valid": true,
+        "all_download_ref_ids_valid": true,
+        "download_refs_match_data_refs": true,
+        "one_analysis_result_ref": true,
+        "state_ref_matches_analysis_result": true,
+        "result_table_ref_matches_analysis_result": true
+      },
+      "terminal_hashes": {
+        "message": [
+          "e69c481d687319bae7d0597f7cb1741473fb4c128e77d6226abdd7f6072c1a1c"
+        ],
+        "gaia": [
+          "e69c481d687319bae7d0597f7cb1741473fb4c128e77d6226abdd7f6072c1a1c"
+        ],
+        "api": [
+          "e69c481d687319bae7d0597f7cb1741473fb4c128e77d6226abdd7f6072c1a1c"
+        ],
+        "chat_output": []
+      },
+      "terminal_equivalent": true,
+      "retrieval_datasets": [
+        "orders",
+        "products"
+      ],
+      "operator_ids": [
+        "filter.v1",
+        "project.v1",
+        "join.v1",
+        "aggregate.v1",
+        "rank.v1",
+        "project.v1"
+      ],
+      "columns": [
+        "PRODUCT_ID",
+        "PRODUCT_NAME",
+        "SALES_AMOUNT"
+      ],
+      "row_count": 2,
+      "result_rows": [
+        {
+          "PRODUCT_ID": "P-300",
+          "PRODUCT_NAME": "Gamma",
+          "SALES_AMOUNT": 1000
+        },
+        {
+          "PRODUCT_ID": "P-400",
+          "PRODUCT_NAME": "Delta",
+          "SALES_AMOUNT": 200
+        }
+      ],
+      "checks": {
+        "http_200": true,
+        "status_ok": true,
+        "route_deterministic": true,
+        "intent_llm_zero": true,
+        "answer_llm_zero": true,
+        "pandas_code_llm_zero": true,
+        "pandas_repair_llm_zero": true,
+        "state_version_one": true,
+        "persistent_state_present": true,
+        "persistent_data_refs_present": true,
+        "persistent_download_entries_exact": true,
+        "persistent_ref_ids_valid": true,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": true,
+        "terminal_hash_equivalent": true,
+        "datasets_exact": true,
+        "operators_covered": true,
+        "columns_exact": true,
+        "rows_exact": true
+      },
+      "passed": true
+    },
+    {
+      "case_id": "OS08",
+      "http_status": 200,
+      "http_response_sha256": "e2f5526cdab49d7aa609306c408befe6efcee67b82ed3ead76e838cc902a8889",
+      "canonical_response_sha256": "f7717cec63818d99f0032ce09d571a895c937a46afb7dc8a60fb087b41b4966c",
+      "response_status": "ok",
+      "error_code": "",
+      "error_stage": "",
+      "result_sha256": "64c550c3864b57db5aec0bc4afbd44429d5b26ed8f8bb5afe3f8bd95e3000e6f",
+      "route": "deterministic",
+      "usage": {
+        "intent_llm_calls": 0,
+        "intent_retry_calls": 0,
+        "answer_llm_calls": 0,
+        "pandas_code_llm_calls": 0,
+        "pandas_repair_llm_calls": 0
+      },
+      "state_version": 1,
+      "persistence_contract": {
+        "state_present": true,
+        "data_ref_count": 3,
+        "data_ref_roles": [
+          "analysis_result",
+          "source_snapshot",
+          "source_snapshot"
+        ],
+        "answer_download_count": 3,
+        "download_url_count": 0,
+        "all_data_ref_ids_valid": true,
+        "all_download_ref_ids_valid": true,
+        "download_refs_match_data_refs": true,
+        "one_analysis_result_ref": true,
+        "state_ref_matches_analysis_result": true,
+        "result_table_ref_matches_analysis_result": true
+      },
+      "terminal_hashes": {
+        "message": [
+          "f7717cec63818d99f0032ce09d571a895c937a46afb7dc8a60fb087b41b4966c"
+        ],
+        "gaia": [
+          "f7717cec63818d99f0032ce09d571a895c937a46afb7dc8a60fb087b41b4966c"
+        ],
+        "api": [
+          "f7717cec63818d99f0032ce09d571a895c937a46afb7dc8a60fb087b41b4966c"
+        ],
+        "chat_output": []
+      },
+      "terminal_equivalent": true,
+      "retrieval_datasets": [
+        "orders",
+        "refunds"
+      ],
+      "operator_ids": [
+        "filter.v1",
+        "join.v1",
+        "aggregate.v1",
+        "derive.v1",
+        "derive.v1",
+        "project.v1"
+      ],
+      "columns": [
+        "PRODUCT_ID",
+        "SALES_AMOUNT",
+        "REFUND_AMOUNT",
+        "NET_SALES_AMOUNT"
+      ],
+      "row_count": 2,
+      "result_rows": [
+        {
+          "PRODUCT_ID": "P-300",
+          "SALES_AMOUNT": 1000,
+          "REFUND_AMOUNT": 300.0,
+          "NET_SALES_AMOUNT": 700.0
+        },
+        {
+          "PRODUCT_ID": "P-400",
+          "SALES_AMOUNT": 200,
+          "REFUND_AMOUNT": 0.0,
+          "NET_SALES_AMOUNT": 200.0
+        }
+      ],
+      "checks": {
+        "http_200": true,
+        "status_ok": true,
+        "route_deterministic": true,
+        "intent_llm_zero": true,
+        "answer_llm_zero": true,
+        "pandas_code_llm_zero": true,
+        "pandas_repair_llm_zero": true,
+        "state_version_one": true,
+        "persistent_state_present": true,
+        "persistent_data_refs_present": true,
+        "persistent_download_entries_exact": true,
+        "persistent_ref_ids_valid": true,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": true,
+        "terminal_hash_equivalent": true,
+        "datasets_exact": true,
+        "operators_covered": true,
+        "columns_exact": true,
+        "rows_exact": true
+      },
+      "passed": true
+    }
+  ],
+  "all_passed": true
+}

@@ -1,0 +1,177 @@
+{
+  "contract_version": "metadata.authoring.field-binding-overrides.v2",
+  "domain_id": "manufacturing",
+  "environment": "production",
+  "datasets": {
+    "equipment_assign": {
+      "DIE_ATTACH_QTY": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "strict_number",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "DIE_ATTACH_QTY",
+          "required_in_source": false,
+          "roles": ["filter", "aggregate", "output"],
+          "semantic_type": "number"
+        },
+        "replacement": null
+      },
+      "FAB": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "FAB",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      },
+      "FACTORY": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "FACTORY",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      },
+      "FAMILY": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "FAMILY",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      },
+      "NETDIE_300_CNT": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "strict_number",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "NETDIE_300_CNT",
+          "required_in_source": false,
+          "roles": ["filter", "aggregate", "derive", "output"],
+          "semantic_type": "number"
+        },
+        "replacement": null
+      },
+      "SHIFT": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "SHIFT",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      },
+      "TSV_DIE_TYP": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": ["TSV_DIE_TYPE"],
+          "physical_column": "TSV_DIE_TYP",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      }
+    },
+    "eqp_uph": {
+      "FAMILY": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "FAMILY",
+          "required_in_source": false,
+          "roles": ["filter", "group", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      },
+      "OPER_SEQ": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "strict_number",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "OPER_SEQ",
+          "required_in_source": false,
+          "roles": ["filter", "sort", "output"],
+          "semantic_type": "number"
+        },
+        "replacement": null
+      }
+    },
+    "lot_status": {
+      "DEVICE_DESC": {
+        "operation": "remove_descriptor",
+        "reason_code": "source_projection_not_registered",
+        "expected": {
+          "aliases": [],
+          "coercion": "string",
+          "nullable": true,
+          "physical_aliases": [],
+          "physical_column": "DEVICE_DESC",
+          "required_in_source": false,
+          "roles": ["filter", "output"],
+          "semantic_type": "string"
+        },
+        "replacement": null
+      }
+    },
+    "product_master": {
+      "DEN": {
+        "operation": "replace_binding",
+        "reason_code": "natural_source_binding_correction",
+        "expected": {
+          "physical_column": "DEN",
+          "physical_aliases": []
+        },
+        "replacement": {
+          "physical_column": "DENSITY",
+          "physical_aliases": ["DEN"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,3364 @@
+{
+  "contract_version": "metadata.authoring.source-manifest.v1",
+  "counts": {
+    "alias_bindings": 349,
+    "alias_targets": 112,
+    "aliases": 349,
+    "datasets": 10,
+    "field_bindings": 196,
+    "field_roles": 196,
+    "fields": 47,
+    "grain_display_fields": 0,
+    "grain_keys": 1,
+    "grains": 1,
+    "metrics": 17,
+    "operations": 11,
+    "recipes": 10,
+    "relation_endpoints": 0,
+    "relation_keys": 0,
+    "relation_policies": 0,
+    "relations": 0
+  },
+  "inventories": {
+    "alias_bindings": [
+      {
+        "alias": "07:00~15:00",
+        "target": "SHIFT_A"
+      },
+      {
+        "alias": "07시 기준 재공",
+        "target": "WIP_BOH_QTY"
+      },
+      {
+        "alias": "15:00~23:00",
+        "target": "SHIFT_B"
+      },
+      {
+        "alias": "1조",
+        "target": "SHIFT_A"
+      },
+      {
+        "alias": "23:00~07:00",
+        "target": "SHIFT_C"
+      },
+      {
+        "alias": "2hi",
+        "target": "STACK_2HI"
+      },
+      {
+        "alias": "2조",
+        "target": "SHIFT_B"
+      },
+      {
+        "alias": "3조",
+        "target": "SHIFT_C"
+      },
+      {
+        "alias": "4hi",
+        "target": "STACK_4HI"
+      },
+      {
+        "alias": "8hi",
+        "target": "STACK_8HI"
+      },
+      {
+        "alias": "auto향",
+        "target": "AUTO"
+      },
+      {
+        "alias": "a는 있으나 b는 없음",
+        "target": "presence.left_positive_right_zero"
+      },
+      {
+        "alias": "a조",
+        "target": "SHIFT_A"
+      },
+      {
+        "alias": "b/g",
+        "target": "BG"
+      },
+      {
+        "alias": "b/g 공정",
+        "target": "BG"
+      },
+      {
+        "alias": "b/g공정",
+        "target": "BG"
+      },
+      {
+        "alias": "b/m",
+        "target": "BM"
+      },
+      {
+        "alias": "b/m 공정",
+        "target": "BM"
+      },
+      {
+        "alias": "b/m공정",
+        "target": "BM"
+      },
+      {
+        "alias": "base_date",
+        "target": "BASE_DATE"
+      },
+      {
+        "alias": "bay_id",
+        "target": "BAY_ID"
+      },
+      {
+        "alias": "bg",
+        "target": "BG"
+      },
+      {
+        "alias": "bg 공정",
+        "target": "BG"
+      },
+      {
+        "alias": "bg공정",
+        "target": "BG"
+      },
+      {
+        "alias": "bm",
+        "target": "BM"
+      },
+      {
+        "alias": "bm 공정",
+        "target": "BM"
+      },
+      {
+        "alias": "bm공정",
+        "target": "BM"
+      },
+      {
+        "alias": "bottom n",
+        "target": "rank.bottom_n"
+      },
+      {
+        "alias": "b조",
+        "target": "SHIFT_B"
+      },
+      {
+        "alias": "cum tat",
+        "target": "CUM_TAT"
+      },
+      {
+        "alias": "cum_tat",
+        "target": "CUM_TAT"
+      },
+      {
+        "alias": "c조",
+        "target": "SHIFT_C"
+      },
+      {
+        "alias": "d/a",
+        "target": "DA"
+      },
+      {
+        "alias": "d/a 공정",
+        "target": "DA"
+      },
+      {
+        "alias": "d/a공정",
+        "target": "DA"
+      },
+      {
+        "alias": "d/c",
+        "target": "DC"
+      },
+      {
+        "alias": "d/c 공정",
+        "target": "DC"
+      },
+      {
+        "alias": "d/c공정",
+        "target": "DC"
+      },
+      {
+        "alias": "d/i",
+        "target": "DI"
+      },
+      {
+        "alias": "d/i 공정",
+        "target": "DI"
+      },
+      {
+        "alias": "d/i공정",
+        "target": "DI"
+      },
+      {
+        "alias": "d/p",
+        "target": "DP"
+      },
+      {
+        "alias": "d/p 공정",
+        "target": "DP"
+      },
+      {
+        "alias": "d/p공정",
+        "target": "DP"
+      },
+      {
+        "alias": "d/s",
+        "target": "DS"
+      },
+      {
+        "alias": "d/s 공정",
+        "target": "DS"
+      },
+      {
+        "alias": "d/s공정",
+        "target": "DS"
+      },
+      {
+        "alias": "da",
+        "target": "DA"
+      },
+      {
+        "alias": "da 공정",
+        "target": "DA"
+      },
+      {
+        "alias": "date",
+        "target": "DATE"
+      },
+      {
+        "alias": "da공정",
+        "target": "DA"
+      },
+      {
+        "alias": "dc",
+        "target": "DC"
+      },
+      {
+        "alias": "dc 공정",
+        "target": "DC"
+      },
+      {
+        "alias": "dc공정",
+        "target": "DC"
+      },
+      {
+        "alias": "den",
+        "target": "DEN"
+      },
+      {
+        "alias": "density",
+        "target": "DEN"
+      },
+      {
+        "alias": "device",
+        "target": "DEVICE"
+      },
+      {
+        "alias": "device code",
+        "target": "DEVICE"
+      },
+      {
+        "alias": "device_desc",
+        "target": "DEVICE_DESC"
+      },
+      {
+        "alias": "di",
+        "target": "DI"
+      },
+      {
+        "alias": "di 공정",
+        "target": "DI"
+      },
+      {
+        "alias": "die 수량",
+        "target": "UNIT_QTY"
+      },
+      {
+        "alias": "die_attach_qty",
+        "target": "DIE_ATTACH_QTY"
+      },
+      {
+        "alias": "di공정",
+        "target": "DI"
+      },
+      {
+        "alias": "dp",
+        "target": "DP"
+      },
+      {
+        "alias": "dp 공정",
+        "target": "DP"
+      },
+      {
+        "alias": "dp공정",
+        "target": "DP"
+      },
+      {
+        "alias": "ds",
+        "target": "DS"
+      },
+      {
+        "alias": "ds 공정",
+        "target": "DS"
+      },
+      {
+        "alias": "ds공정",
+        "target": "DS"
+      },
+      {
+        "alias": "dvi",
+        "target": "DI"
+      },
+      {
+        "alias": "dvi 공정",
+        "target": "DI"
+      },
+      {
+        "alias": "dvi공정",
+        "target": "DI"
+      },
+      {
+        "alias": "eqp_id",
+        "target": "EQP_ID"
+      },
+      {
+        "alias": "eqp_model",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "eqpid",
+        "target": "EQP_ID"
+      },
+      {
+        "alias": "equipment model",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "fab",
+        "target": "FAB"
+      },
+      {
+        "alias": "fac_in_at",
+        "target": "FAC_IN_AT"
+      },
+      {
+        "alias": "factory",
+        "target": "FACTORY"
+      },
+      {
+        "alias": "family",
+        "target": "FAMILY"
+      },
+      {
+        "alias": "fcb",
+        "target": "FCB"
+      },
+      {
+        "alias": "fcb 1차",
+        "target": "FCB1"
+      },
+      {
+        "alias": "fcb 2차",
+        "target": "FCB2"
+      },
+      {
+        "alias": "fcb 공정",
+        "target": "FCB"
+      },
+      {
+        "alias": "fcb/h",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcb/h 공정",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcb/h공정",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcb1",
+        "target": "FCB1"
+      },
+      {
+        "alias": "fcb1 공정",
+        "target": "FCB1"
+      },
+      {
+        "alias": "fcb1공정",
+        "target": "FCB1"
+      },
+      {
+        "alias": "fcb1차",
+        "target": "FCB1"
+      },
+      {
+        "alias": "fcb2",
+        "target": "FCB2"
+      },
+      {
+        "alias": "fcb2 공정",
+        "target": "FCB2"
+      },
+      {
+        "alias": "fcb2공정",
+        "target": "FCB2"
+      },
+      {
+        "alias": "fcb2차",
+        "target": "FCB2"
+      },
+      {
+        "alias": "fcbh",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcbh 공정",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcbh공정",
+        "target": "FCBH"
+      },
+      {
+        "alias": "fcb공정",
+        "target": "FCB"
+      },
+      {
+        "alias": "h/s",
+        "target": "HS"
+      },
+      {
+        "alias": "h/s 공정",
+        "target": "HS"
+      },
+      {
+        "alias": "h/s공정",
+        "target": "HS"
+      },
+      {
+        "alias": "hold lot",
+        "target": "lot_status"
+      },
+      {
+        "alias": "hold 발생 시각",
+        "target": "hold_history"
+      },
+      {
+        "alias": "hold 시간이 가장 오래된 lot",
+        "target": "hold.oldest_current_history"
+      },
+      {
+        "alias": "hold 이력",
+        "target": "hold_history"
+      },
+      {
+        "alias": "hold_cd",
+        "target": "HOLD_CD"
+      },
+      {
+        "alias": "hold_desc",
+        "target": "HOLD_DESC"
+      },
+      {
+        "alias": "hold_duration_hours",
+        "target": "HOLD_DURATION_HOURS"
+      },
+      {
+        "alias": "hold_event_at",
+        "target": "HOLD_EVENT_AT"
+      },
+      {
+        "alias": "hold_reason",
+        "target": "HOLD_REASON"
+      },
+      {
+        "alias": "hold_stat",
+        "target": "HOLD_STAT"
+      },
+      {
+        "alias": "hs",
+        "target": "HS"
+      },
+      {
+        "alias": "hs 공정",
+        "target": "HS"
+      },
+      {
+        "alias": "hs공정",
+        "target": "HS"
+      },
+      {
+        "alias": "in tat",
+        "target": "IN_TAT"
+      },
+      {
+        "alias": "in_tat",
+        "target": "IN_TAT"
+      },
+      {
+        "alias": "input 계획",
+        "target": "INPUT_PLAN_QTY"
+      },
+      {
+        "alias": "input 계획 대비 실적",
+        "target": "achievement.input_actual"
+      },
+      {
+        "alias": "input 공정",
+        "target": "INPUT"
+      },
+      {
+        "alias": "input 수량",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "input 실적",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "input_plan_qty",
+        "target": "INPUT_PLAN_QTY"
+      },
+      {
+        "alias": "input_qty",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "input공정",
+        "target": "INPUT"
+      },
+      {
+        "alias": "input생산량",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "input실적",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "l/t",
+        "target": "LT"
+      },
+      {
+        "alias": "l/t 공정",
+        "target": "LT"
+      },
+      {
+        "alias": "l/t공정",
+        "target": "LT"
+      },
+      {
+        "alias": "lead",
+        "target": "LEAD"
+      },
+      {
+        "alias": "lead count",
+        "target": "LEAD"
+      },
+      {
+        "alias": "load_date",
+        "target": "LOAD_DATE"
+      },
+      {
+        "alias": "lot id",
+        "target": "LOT_ID"
+      },
+      {
+        "alias": "lot 건수",
+        "target": "LOT_COUNT"
+      },
+      {
+        "alias": "lot 수",
+        "target": "LOT_COUNT"
+      },
+      {
+        "alias": "lot 현황",
+        "target": "lot_status"
+      },
+      {
+        "alias": "lot_id",
+        "target": "LOT_ID"
+      },
+      {
+        "alias": "lot_stat",
+        "target": "LOT_STAT"
+      },
+      {
+        "alias": "lt",
+        "target": "LT"
+      },
+      {
+        "alias": "lt 공정",
+        "target": "LT"
+      },
+      {
+        "alias": "lt공정",
+        "target": "LT"
+      },
+      {
+        "alias": "mcp no",
+        "target": "MCP_NO"
+      },
+      {
+        "alias": "mcp_no",
+        "target": "MCP_NO"
+      },
+      {
+        "alias": "mcp_sale_cd",
+        "target": "MCP_NO"
+      },
+      {
+        "alias": "mcp_sales_no",
+        "target": "MCP_NO"
+      },
+      {
+        "alias": "mcpsaleno",
+        "target": "MCP_NO"
+      },
+      {
+        "alias": "mobile",
+        "target": "MOBILE"
+      },
+      {
+        "alias": "mode",
+        "target": "MODE"
+      },
+      {
+        "alias": "netdie_300_cnt",
+        "target": "NETDIE_300_CNT"
+      },
+      {
+        "alias": "oper name",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "oper no",
+        "target": "OPER_NUM"
+      },
+      {
+        "alias": "oper num",
+        "target": "OPER_NUM"
+      },
+      {
+        "alias": "oper_in_at",
+        "target": "OPER_IN_AT"
+      },
+      {
+        "alias": "oper_name",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "oper_seq",
+        "target": "OPER_SEQ"
+      },
+      {
+        "alias": "oper_seq 범위",
+        "target": "ordered.process.range"
+      },
+      {
+        "alias": "operation",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "org",
+        "target": "ORG"
+      },
+      {
+        "alias": "organization code",
+        "target": "ORG"
+      },
+      {
+        "alias": "out put",
+        "target": "PKG_OUT_QTY"
+      },
+      {
+        "alias": "out 계획",
+        "target": "OUT_PLAN_QTY"
+      },
+      {
+        "alias": "out 실적",
+        "target": "PKG_OUT_QTY"
+      },
+      {
+        "alias": "out_plan_qty",
+        "target": "OUT_PLAN_QTY"
+      },
+      {
+        "alias": "out_qty",
+        "target": "OUT_QTY"
+      },
+      {
+        "alias": "output 실적",
+        "target": "PKG_OUT_QTY"
+      },
+      {
+        "alias": "p/c",
+        "target": "PC"
+      },
+      {
+        "alias": "p/c 공정",
+        "target": "PC"
+      },
+      {
+        "alias": "p/c공정",
+        "target": "PC"
+      },
+      {
+        "alias": "p/l",
+        "target": "PLH"
+      },
+      {
+        "alias": "p/l 공정",
+        "target": "PLH"
+      },
+      {
+        "alias": "p/l공정",
+        "target": "PLH"
+      },
+      {
+        "alias": "package type 1",
+        "target": "PKG_TYPE1"
+      },
+      {
+        "alias": "package type 2",
+        "target": "PKG_TYPE2"
+      },
+      {
+        "alias": "pc",
+        "target": "PC"
+      },
+      {
+        "alias": "pc 공정",
+        "target": "PC"
+      },
+      {
+        "alias": "pco",
+        "target": "PCO"
+      },
+      {
+        "alias": "pco 공정",
+        "target": "PCO"
+      },
+      {
+        "alias": "pco공정",
+        "target": "PCO"
+      },
+      {
+        "alias": "pc공정",
+        "target": "PC"
+      },
+      {
+        "alias": "pkg out 실적",
+        "target": "PKG_OUT_QTY"
+      },
+      {
+        "alias": "pkg out실적",
+        "target": "PKG_OUT_QTY"
+      },
+      {
+        "alias": "pkg1",
+        "target": "PKG_TYPE1"
+      },
+      {
+        "alias": "pkg2",
+        "target": "PKG_TYPE2"
+      },
+      {
+        "alias": "pkg_type1",
+        "target": "PKG_TYPE1"
+      },
+      {
+        "alias": "pkg_type2",
+        "target": "PKG_TYPE2"
+      },
+      {
+        "alias": "plh",
+        "target": "PLH"
+      },
+      {
+        "alias": "plh 공정",
+        "target": "PLH"
+      },
+      {
+        "alias": "plh공정",
+        "target": "PLH"
+      },
+      {
+        "alias": "pop",
+        "target": "POP"
+      },
+      {
+        "alias": "press_cnt",
+        "target": "PRESS_CNT"
+      },
+      {
+        "alias": "process",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "prod_qty",
+        "target": "PROD_QTY"
+      },
+      {
+        "alias": "product master",
+        "target": "product_master"
+      },
+      {
+        "alias": "production",
+        "target": "production"
+      },
+      {
+        "alias": "production 데이터",
+        "target": "production"
+      },
+      {
+        "alias": "production_qty",
+        "target": "PRODUCTION_QTY"
+      },
+      {
+        "alias": "qcspc",
+        "target": "QCSPC"
+      },
+      {
+        "alias": "qcspc 공정",
+        "target": "QCSPC"
+      },
+      {
+        "alias": "qcspc공정",
+        "target": "QCSPC"
+      },
+      {
+        "alias": "recipe id",
+        "target": "RECIPE_ID"
+      },
+      {
+        "alias": "recipe_id",
+        "target": "RECIPE_ID"
+      },
+      {
+        "alias": "s/g",
+        "target": "SG"
+      },
+      {
+        "alias": "s/g 공정",
+        "target": "SG"
+      },
+      {
+        "alias": "s/g공정",
+        "target": "SG"
+      },
+      {
+        "alias": "sat",
+        "target": "SAT"
+      },
+      {
+        "alias": "sat 공정",
+        "target": "SAT"
+      },
+      {
+        "alias": "sat공정",
+        "target": "SAT"
+      },
+      {
+        "alias": "sbm",
+        "target": "SBM"
+      },
+      {
+        "alias": "sbm 공정",
+        "target": "SBM"
+      },
+      {
+        "alias": "sbm공정",
+        "target": "SBM"
+      },
+      {
+        "alias": "schd",
+        "target": "target"
+      },
+      {
+        "alias": "sg",
+        "target": "SG"
+      },
+      {
+        "alias": "sg 공정",
+        "target": "SG"
+      },
+      {
+        "alias": "sg공정",
+        "target": "SG"
+      },
+      {
+        "alias": "shift",
+        "target": "SHIFT"
+      },
+      {
+        "alias": "shift a",
+        "target": "SHIFT_A"
+      },
+      {
+        "alias": "shift a조",
+        "target": "SHIFT_A"
+      },
+      {
+        "alias": "shift b",
+        "target": "SHIFT_B"
+      },
+      {
+        "alias": "shift b조",
+        "target": "SHIFT_B"
+      },
+      {
+        "alias": "shift c",
+        "target": "SHIFT_C"
+      },
+      {
+        "alias": "shift c조",
+        "target": "SHIFT_C"
+      },
+      {
+        "alias": "target",
+        "target": "OUT_PLAN_QTY"
+      },
+      {
+        "alias": "tech",
+        "target": "TECH"
+      },
+      {
+        "alias": "top n",
+        "target": "rank.top_n"
+      },
+      {
+        "alias": "tsv_die_typ",
+        "target": "TSV_DIE_TYP"
+      },
+      {
+        "alias": "unit 수량",
+        "target": "UNIT_QTY"
+      },
+      {
+        "alias": "w/b",
+        "target": "WB"
+      },
+      {
+        "alias": "w/b 공정",
+        "target": "WB"
+      },
+      {
+        "alias": "w/bm",
+        "target": "WBM"
+      },
+      {
+        "alias": "w/bm 공정",
+        "target": "WBM"
+      },
+      {
+        "alias": "w/bm공정",
+        "target": "WBM"
+      },
+      {
+        "alias": "w/b공정",
+        "target": "WB"
+      },
+      {
+        "alias": "w/s",
+        "target": "WS"
+      },
+      {
+        "alias": "w/s 공정",
+        "target": "WS"
+      },
+      {
+        "alias": "w/s공정",
+        "target": "WS"
+      },
+      {
+        "alias": "wafer 수량",
+        "target": "WAFER_QTY"
+      },
+      {
+        "alias": "wb",
+        "target": "WB"
+      },
+      {
+        "alias": "wb 공정",
+        "target": "WB"
+      },
+      {
+        "alias": "wbm",
+        "target": "WBM"
+      },
+      {
+        "alias": "wbm 공정",
+        "target": "WBM"
+      },
+      {
+        "alias": "wbm공정",
+        "target": "WBM"
+      },
+      {
+        "alias": "wb공정",
+        "target": "WB"
+      },
+      {
+        "alias": "wec",
+        "target": "WEC"
+      },
+      {
+        "alias": "wec 공정",
+        "target": "WEC"
+      },
+      {
+        "alias": "wec공정",
+        "target": "WEC"
+      },
+      {
+        "alias": "wet",
+        "target": "WET"
+      },
+      {
+        "alias": "wet 공정",
+        "target": "WET"
+      },
+      {
+        "alias": "wet공정",
+        "target": "WET"
+      },
+      {
+        "alias": "wf_qty",
+        "target": "WF_QTY"
+      },
+      {
+        "alias": "wip",
+        "target": "WIP_QTY"
+      },
+      {
+        "alias": "wip_qty",
+        "target": "WIP_QTY"
+      },
+      {
+        "alias": "wls",
+        "target": "WLS"
+      },
+      {
+        "alias": "wls 공정",
+        "target": "WLS"
+      },
+      {
+        "alias": "wls공정",
+        "target": "WLS"
+      },
+      {
+        "alias": "work date",
+        "target": "DATE"
+      },
+      {
+        "alias": "ws",
+        "target": "WS"
+      },
+      {
+        "alias": "ws 공정",
+        "target": "WS"
+      },
+      {
+        "alias": "wsd",
+        "target": "WSD"
+      },
+      {
+        "alias": "wsd 공정",
+        "target": "WSD"
+      },
+      {
+        "alias": "wsd공정",
+        "target": "WSD"
+      },
+      {
+        "alias": "ws공정",
+        "target": "WS"
+      },
+      {
+        "alias": "yield rate",
+        "target": "YIELD_RATE"
+      },
+      {
+        "alias": "yield_rate",
+        "target": "YIELD_RATE"
+      },
+      {
+        "alias": "가장 많은",
+        "target": "rank.top_n"
+      },
+      {
+        "alias": "가장 적은",
+        "target": "rank.bottom_n"
+      },
+      {
+        "alias": "계획",
+        "target": "target"
+      },
+      {
+        "alias": "공정",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "공정 구간",
+        "target": "ordered.process.range"
+      },
+      {
+        "alias": "공정 물량",
+        "target": "WIP_QTY"
+      },
+      {
+        "alias": "공정 범위",
+        "target": "ordered.process.range"
+      },
+      {
+        "alias": "공정 차수",
+        "target": "OPER_NUM"
+      },
+      {
+        "alias": "공정번호",
+        "target": "OPER_NUM"
+      },
+      {
+        "alias": "공정별",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "금일 현재 재공",
+        "target": "wip_today"
+      },
+      {
+        "alias": "기준일",
+        "target": "DATE"
+      },
+      {
+        "alias": "날짜",
+        "target": "DATE"
+      },
+      {
+        "alias": "누적 tat",
+        "target": "CUM_TAT"
+      },
+      {
+        "alias": "달성률",
+        "target": "ACHIEVEMENT_RATE"
+      },
+      {
+        "alias": "달성율",
+        "target": "ACHIEVEMENT_RATE"
+      },
+      {
+        "alias": "당일 생산",
+        "target": "production_today"
+      },
+      {
+        "alias": "레시피",
+        "target": "RECIPE_ID"
+      },
+      {
+        "alias": "몇 대",
+        "target": "EQP_COUNT"
+      },
+      {
+        "alias": "모바일",
+        "target": "MOBILE"
+      },
+      {
+        "alias": "배정 장비 uph",
+        "target": "equipment.assignment_uph"
+      },
+      {
+        "alias": "비엠",
+        "target": "BM"
+      },
+      {
+        "alias": "비엠 공정",
+        "target": "BM"
+      },
+      {
+        "alias": "비엠공정",
+        "target": "BM"
+      },
+      {
+        "alias": "상위 n개",
+        "target": "rank.top_n"
+      },
+      {
+        "alias": "생산 wip 비교",
+        "target": "join.operation.production_wip"
+      },
+      {
+        "alias": "생산 실적",
+        "target": "production"
+      },
+      {
+        "alias": "생산량",
+        "target": "PRODUCTION_QTY"
+      },
+      {
+        "alias": "생산량과 재공수량",
+        "target": "join.operation.production_wip"
+      },
+      {
+        "alias": "생산실적",
+        "target": "PRODUCTION_QTY"
+      },
+      {
+        "alias": "설비 기종",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "설비 모델",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "세부 공정별",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "수율",
+        "target": "YIELD_RATE"
+      },
+      {
+        "alias": "스케줄",
+        "target": "target"
+      },
+      {
+        "alias": "스케쥴",
+        "target": "target"
+      },
+      {
+        "alias": "실적",
+        "target": "PRODUCTION_QTY"
+      },
+      {
+        "alias": "실적 있음 재공 없음",
+        "target": "presence.left_positive_right_zero"
+      },
+      {
+        "alias": "오늘 생산",
+        "target": "production_today"
+      },
+      {
+        "alias": "오래된 hold 이력",
+        "target": "hold.oldest_current_history"
+      },
+      {
+        "alias": "오토모티브향",
+        "target": "AUTO"
+      },
+      {
+        "alias": "오토향",
+        "target": "AUTO"
+      },
+      {
+        "alias": "웨이퍼 수량",
+        "target": "WAFER_QTY"
+      },
+      {
+        "alias": "이력 생산",
+        "target": "production"
+      },
+      {
+        "alias": "이력 재공",
+        "target": "wip"
+      },
+      {
+        "alias": "일자",
+        "target": "DATE"
+      },
+      {
+        "alias": "작업공정",
+        "target": "OPER_NAME"
+      },
+      {
+        "alias": "작업일",
+        "target": "DATE"
+      },
+      {
+        "alias": "장비 id",
+        "target": "EQP_ID"
+      },
+      {
+        "alias": "장비 기종",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "장비 대수",
+        "target": "EQP_COUNT"
+      },
+      {
+        "alias": "장비 모델",
+        "target": "EQP_MODEL"
+      },
+      {
+        "alias": "장비 목록",
+        "target": "equipment.assignment_enrich"
+      },
+      {
+        "alias": "장비 수",
+        "target": "EQP_COUNT"
+      },
+      {
+        "alias": "장비 현황",
+        "target": "equipment_assign"
+      },
+      {
+        "alias": "장비별 uph",
+        "target": "equipment.assignment_uph"
+      },
+      {
+        "alias": "장비와 recipe uph",
+        "target": "equipment.assignment_uph"
+      },
+      {
+        "alias": "재공",
+        "target": "WIP_QTY"
+      },
+      {
+        "alias": "재공수량",
+        "target": "WIP_QTY"
+      },
+      {
+        "alias": "제품 master",
+        "target": "product_master"
+      },
+      {
+        "alias": "제품 기술",
+        "target": "TECH"
+      },
+      {
+        "alias": "제품 기준",
+        "target": "product.standard"
+      },
+      {
+        "alias": "제품 기준정보",
+        "target": "product_master"
+      },
+      {
+        "alias": "제품 마스터",
+        "target": "product_master"
+      },
+      {
+        "alias": "제품 모드",
+        "target": "MODE"
+      },
+      {
+        "alias": "제품 설명",
+        "target": "DEVICE_DESC"
+      },
+      {
+        "alias": "제품 용량",
+        "target": "DEN"
+      },
+      {
+        "alias": "제품 집계",
+        "target": "product.standard"
+      },
+      {
+        "alias": "제품별",
+        "target": "product.standard"
+      },
+      {
+        "alias": "조직",
+        "target": "ORG"
+      },
+      {
+        "alias": "존재 미존재",
+        "target": "presence.left_positive_right_zero"
+      },
+      {
+        "alias": "지금 재공",
+        "target": "wip_today"
+      },
+      {
+        "alias": "차수별",
+        "target": "OPER_NUM"
+      },
+      {
+        "alias": "첨자",
+        "target": "DEVICE"
+      },
+      {
+        "alias": "투입 실적",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "투입계획",
+        "target": "INPUT_PLAN_QTY"
+      },
+      {
+        "alias": "투입량",
+        "target": "INPUT_QTY"
+      },
+      {
+        "alias": "하위 n개",
+        "target": "rank.bottom_n"
+      },
+      {
+        "alias": "할당된 장비 대수와 list",
+        "target": "equipment.assignment_enrich"
+      },
+      {
+        "alias": "현재 lot",
+        "target": "lot_status"
+      },
+      {
+        "alias": "현재 tat",
+        "target": "IN_TAT"
+      },
+      {
+        "alias": "현재 공정 tat",
+        "target": "IN_TAT"
+      },
+      {
+        "alias": "현재 생산",
+        "target": "production_today"
+      },
+      {
+        "alias": "현재 재공",
+        "target": "wip_today"
+      }
+    ],
+    "alias_targets": [
+      "ACHIEVEMENT_RATE",
+      "AUTO",
+      "BASE_DATE",
+      "BAY_ID",
+      "BG",
+      "BM",
+      "CUM_TAT",
+      "DA",
+      "DATE",
+      "DC",
+      "DEN",
+      "DEVICE",
+      "DEVICE_DESC",
+      "DI",
+      "DIE_ATTACH_QTY",
+      "DP",
+      "DS",
+      "EQP_COUNT",
+      "EQP_ID",
+      "EQP_MODEL",
+      "FAB",
+      "FACTORY",
+      "FAC_IN_AT",
+      "FAMILY",
+      "FCB",
+      "FCB1",
+      "FCB2",
+      "FCBH",
+      "HOLD_CD",
+      "HOLD_DESC",
+      "HOLD_DURATION_HOURS",
+      "HOLD_EVENT_AT",
+      "HOLD_REASON",
+      "HOLD_STAT",
+      "HS",
+      "INPUT",
+      "INPUT_PLAN_QTY",
+      "INPUT_QTY",
+      "IN_TAT",
+      "LEAD",
+      "LOAD_DATE",
+      "LOT_COUNT",
+      "LOT_ID",
+      "LOT_STAT",
+      "LT",
+      "MCP_NO",
+      "MOBILE",
+      "MODE",
+      "NETDIE_300_CNT",
+      "OPER_IN_AT",
+      "OPER_NAME",
+      "OPER_NUM",
+      "OPER_SEQ",
+      "ORG",
+      "OUT_PLAN_QTY",
+      "OUT_QTY",
+      "PC",
+      "PCO",
+      "PKG_OUT_QTY",
+      "PKG_TYPE1",
+      "PKG_TYPE2",
+      "PLH",
+      "POP",
+      "PRESS_CNT",
+      "PRODUCTION_QTY",
+      "PROD_QTY",
+      "QCSPC",
+      "RECIPE_ID",
+      "SAT",
+      "SBM",
+      "SG",
+      "SHIFT",
+      "SHIFT_A",
+      "SHIFT_B",
+      "SHIFT_C",
+      "STACK_2HI",
+      "STACK_4HI",
+      "STACK_8HI",
+      "TECH",
+      "TSV_DIE_TYP",
+      "UNIT_QTY",
+      "WAFER_QTY",
+      "WB",
+      "WBM",
+      "WEC",
+      "WET",
+      "WF_QTY",
+      "WIP_BOH_QTY",
+      "WIP_QTY",
+      "WLS",
+      "WS",
+      "WSD",
+      "YIELD_RATE",
+      "achievement.input_actual",
+      "equipment.assignment_enrich",
+      "equipment.assignment_uph",
+      "equipment_assign",
+      "hold.oldest_current_history",
+      "hold_history",
+      "join.operation.production_wip",
+      "lot_status",
+      "ordered.process.range",
+      "presence.left_positive_right_zero",
+      "product.standard",
+      "product_master",
+      "production",
+      "production_today",
+      "rank.bottom_n",
+      "rank.top_n",
+      "target",
+      "wip",
+      "wip_today"
+    ],
+    "aliases": [
+      "07:00~15:00",
+      "07시 기준 재공",
+      "15:00~23:00",
+      "1조",
+      "23:00~07:00",
+      "2hi",
+      "2조",
+      "3조",
+      "4hi",
+      "8hi",
+      "auto향",
+      "a는 있으나 b는 없음",
+      "a조",
+      "b/g",
+      "b/g 공정",
+      "b/g공정",
+      "b/m",
+      "b/m 공정",
+      "b/m공정",
+      "base_date",
+      "bay_id",
+      "bg",
+      "bg 공정",
+      "bg공정",
+      "bm",
+      "bm 공정",
+      "bm공정",
+      "bottom n",
+      "b조",
+      "cum tat",
+      "cum_tat",
+      "c조",
+      "d/a",
+      "d/a 공정",
+      "d/a공정",
+      "d/c",
+      "d/c 공정",
+      "d/c공정",
+      "d/i",
+      "d/i 공정",
+      "d/i공정",
+      "d/p",
+      "d/p 공정",
+      "d/p공정",
+      "d/s",
+      "d/s 공정",
+      "d/s공정",
+      "da",
+      "da 공정",
+      "date",
+      "da공정",
+      "dc",
+      "dc 공정",
+      "dc공정",
+      "den",
+      "density",
+      "device",
+      "device code",
+      "device_desc",
+      "di",
+      "di 공정",
+      "die 수량",
+      "die_attach_qty",
+      "di공정",
+      "dp",
+      "dp 공정",
+      "dp공정",
+      "ds",
+      "ds 공정",
+      "ds공정",
+      "dvi",
+      "dvi 공정",
+      "dvi공정",
+      "eqp_id",
+      "eqp_model",
+      "eqpid",
+      "equipment model",
+      "fab",
+      "fac_in_at",
+      "factory",
+      "family",
+      "fcb",
+      "fcb 1차",
+      "fcb 2차",
+      "fcb 공정",
+      "fcb/h",
+      "fcb/h 공정",
+      "fcb/h공정",
+      "fcb1",
+      "fcb1 공정",
+      "fcb1공정",
+      "fcb1차",
+      "fcb2",
+      "fcb2 공정",
+      "fcb2공정",
+      "fcb2차",
+      "fcbh",
+      "fcbh 공정",
+      "fcbh공정",
+      "fcb공정",
+      "h/s",
+      "h/s 공정",
+      "h/s공정",
+      "hold lot",
+      "hold 발생 시각",
+      "hold 시간이 가장 오래된 lot",
+      "hold 이력",
+      "hold_cd",
+      "hold_desc",
+      "hold_duration_hours",
+      "hold_event_at",
+      "hold_reason",
+      "hold_stat",
+      "hs",
+      "hs 공정",
+      "hs공정",
+      "in tat",
+      "in_tat",
+      "input 계획",
+      "input 계획 대비 실적",
+      "input 공정",
+      "input 수량",
+      "input 실적",
+      "input_plan_qty",
+      "input_qty",
+      "input공정",
+      "input생산량",
+      "input실적",
+      "l/t",
+      "l/t 공정",
+      "l/t공정",
+      "lead",
+      "lead count",
+      "load_date",
+      "lot id",
+      "lot 건수",
+      "lot 수",
+      "lot 현황",
+      "lot_id",
+      "lot_stat",
+      "lt",
+      "lt 공정",
+      "lt공정",
+      "mcp no",
+      "mcp_no",
+      "mcp_sale_cd",
+      "mcp_sales_no",
+      "mcpsaleno",
+      "mobile",
+      "mode",
+      "netdie_300_cnt",
+      "oper name",
+      "oper no",
+      "oper num",
+      "oper_in_at",
+      "oper_name",
+      "oper_seq",
+      "oper_seq 범위",
+      "operation",
+      "org",
+      "organization code",
+      "out put",
+      "out 계획",
+      "out 실적",
+      "out_plan_qty",
+      "out_qty",
+      "output 실적",
+      "p/c",
+      "p/c 공정",
+      "p/c공정",
+      "p/l",
+      "p/l 공정",
+      "p/l공정",
+      "package type 1",
+      "package type 2",
+      "pc",
+      "pc 공정",
+      "pco",
+      "pco 공정",
+      "pco공정",
+      "pc공정",
+      "pkg out 실적",
+      "pkg out실적",
+      "pkg1",
+      "pkg2",
+      "pkg_type1",
+      "pkg_type2",
+      "plh",
+      "plh 공정",
+      "plh공정",
+      "pop",
+      "press_cnt",
+      "process",
+      "prod_qty",
+      "product master",
+      "production",
+      "production 데이터",
+      "production_qty",
+      "qcspc",
+      "qcspc 공정",
+      "qcspc공정",
+      "recipe id",
+      "recipe_id",
+      "s/g",
+      "s/g 공정",
+      "s/g공정",
+      "sat",
+      "sat 공정",
+      "sat공정",
+      "sbm",
+      "sbm 공정",
+      "sbm공정",
+      "schd",
+      "sg",
+      "sg 공정",
+      "sg공정",
+      "shift",
+      "shift a",
+      "shift a조",
+      "shift b",
+      "shift b조",
+      "shift c",
+      "shift c조",
+      "target",
+      "tech",
+      "top n",
+      "tsv_die_typ",
+      "unit 수량",
+      "w/b",
+      "w/b 공정",
+      "w/bm",
+      "w/bm 공정",
+      "w/bm공정",
+      "w/b공정",
+      "w/s",
+      "w/s 공정",
+      "w/s공정",
+      "wafer 수량",
+      "wb",
+      "wb 공정",
+      "wbm",
+      "wbm 공정",
+      "wbm공정",
+      "wb공정",
+      "wec",
+      "wec 공정",
+      "wec공정",
+      "wet",
+      "wet 공정",
+      "wet공정",
+      "wf_qty",
+      "wip",
+      "wip_qty",
+      "wls",
+      "wls 공정",
+      "wls공정",
+      "work date",
+      "ws",
+      "ws 공정",
+      "wsd",
+      "wsd 공정",
+      "wsd공정",
+      "ws공정",
+      "yield rate",
+      "yield_rate",
+      "가장 많은",
+      "가장 적은",
+      "계획",
+      "공정",
+      "공정 구간",
+      "공정 물량",
+      "공정 범위",
+      "공정 차수",
+      "공정번호",
+      "공정별",
+      "금일 현재 재공",
+      "기준일",
+      "날짜",
+      "누적 tat",
+      "달성률",
+      "달성율",
+      "당일 생산",
+      "레시피",
+      "몇 대",
+      "모바일",
+      "배정 장비 uph",
+      "비엠",
+      "비엠 공정",
+      "비엠공정",
+      "상위 n개",
+      "생산 wip 비교",
+      "생산 실적",
+      "생산량",
+      "생산량과 재공수량",
+      "생산실적",
+      "설비 기종",
+      "설비 모델",
+      "세부 공정별",
+      "수율",
+      "스케줄",
+      "스케쥴",
+      "실적",
+      "실적 있음 재공 없음",
+      "오늘 생산",
+      "오래된 hold 이력",
+      "오토모티브향",
+      "오토향",
+      "웨이퍼 수량",
+      "이력 생산",
+      "이력 재공",
+      "일자",
+      "작업공정",
+      "작업일",
+      "장비 id",
+      "장비 기종",
+      "장비 대수",
+      "장비 모델",
+      "장비 목록",
+      "장비 수",
+      "장비 현황",
+      "장비별 uph",
+      "장비와 recipe uph",
+      "재공",
+      "재공수량",
+      "제품 master",
+      "제품 기술",
+      "제품 기준",
+      "제품 기준정보",
+      "제품 마스터",
+      "제품 모드",
+      "제품 설명",
+      "제품 용량",
+      "제품 집계",
+      "제품별",
+      "조직",
+      "존재 미존재",
+      "지금 재공",
+      "차수별",
+      "첨자",
+      "투입 실적",
+      "투입계획",
+      "투입량",
+      "하위 n개",
+      "할당된 장비 대수와 list",
+      "현재 lot",
+      "현재 tat",
+      "현재 공정 tat",
+      "현재 생산",
+      "현재 재공"
+    ],
+    "dataset_fields": {
+      "eqp_uph": [
+        "BASE_DATE",
+        "DEN",
+        "EQP_MODEL",
+        "FAMILY",
+        "LEAD",
+        "LOAD_DATE",
+        "MCP_NO",
+        "MODE",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PRESS_CNT",
+        "RECIPE_ID",
+        "TECH",
+        "UPH"
+      ],
+      "equipment_assign": [
+        "BAY_ID",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "DIE_ATTACH_QTY",
+        "EQP_ID",
+        "EQP_MODEL",
+        "FAB",
+        "FACTORY",
+        "FAMILY",
+        "LEAD",
+        "LOT_ID",
+        "MCP_NO",
+        "MODE",
+        "NETDIE_300_CNT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PRESS_CNT",
+        "RECIPE_ID",
+        "SHIFT",
+        "TECH",
+        "TSV_DIE_TYP"
+      ],
+      "hold_history": [
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "FAMILY",
+        "HOLD_CD",
+        "HOLD_DESC",
+        "HOLD_EVENT_AT",
+        "LEAD",
+        "LOT_ID",
+        "MCP_NO",
+        "MODE",
+        "OPER_NAME",
+        "OPER_NUM",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PROD_QTY",
+        "TECH"
+      ],
+      "lot_status": [
+        "CUM_TAT",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "EQP_ID",
+        "FAB",
+        "FAC_IN_AT",
+        "FAMILY",
+        "HOLD_REASON",
+        "HOLD_STAT",
+        "IN_TAT",
+        "LEAD",
+        "LOT_ID",
+        "LOT_STAT",
+        "MCP_NO",
+        "MODE",
+        "OPER_IN_AT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PROD_QTY",
+        "TECH",
+        "TSV_DIE_TYP",
+        "WF_QTY"
+      ],
+      "product_master": [
+        "DEN",
+        "DEVICE",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "TECH",
+        "YIELD_RATE"
+      ],
+      "production": [
+        "DATE",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "DIE_ATTACH_QTY",
+        "FAB",
+        "FACTORY",
+        "FAMILY",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "NETDIE_300_CNT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PRODUCTION_QTY",
+        "SHIFT",
+        "TECH",
+        "TSV_DIE_TYP"
+      ],
+      "production_today": [
+        "DATE",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "DIE_ATTACH_QTY",
+        "FAB",
+        "FACTORY",
+        "FAMILY",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "NETDIE_300_CNT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "PRODUCTION_QTY",
+        "SHIFT",
+        "TECH",
+        "TSV_DIE_TYP"
+      ],
+      "target": [
+        "DATE",
+        "DEN",
+        "INPUT_PLAN_QTY",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "ORG",
+        "OUT_PLAN_QTY",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "TECH"
+      ],
+      "wip": [
+        "DATE",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "DIE_ATTACH_QTY",
+        "FAB",
+        "FACTORY",
+        "FAMILY",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "NETDIE_300_CNT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "SHIFT",
+        "TECH",
+        "TSV_DIE_TYP",
+        "WIP_QTY"
+      ],
+      "wip_today": [
+        "DATE",
+        "DEN",
+        "DEVICE",
+        "DEVICE_DESC",
+        "DIE_ATTACH_QTY",
+        "FAB",
+        "FACTORY",
+        "FAMILY",
+        "LEAD",
+        "MCP_NO",
+        "MODE",
+        "NETDIE_300_CNT",
+        "OPER_NAME",
+        "OPER_NUM",
+        "OPER_SEQ",
+        "ORG",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "SHIFT",
+        "TECH",
+        "TSV_DIE_TYP",
+        "WIP_QTY"
+      ]
+    },
+    "datasets": [
+      "eqp_uph",
+      "equipment_assign",
+      "hold_history",
+      "lot_status",
+      "product_master",
+      "production",
+      "production_today",
+      "target",
+      "wip",
+      "wip_today"
+    ],
+    "field_roles": {
+      "eqp_uph": {
+        "BASE_DATE": [
+          "filter",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "EQP_MODEL": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LOAD_DATE": [
+          "filter",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PRESS_CNT": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "RECIPE_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "UPH": [
+          "filter",
+          "aggregate",
+          "rank",
+          "output"
+        ]
+      },
+      "equipment_assign": {
+        "BAY_ID": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "DIE_ATTACH_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "EQP_ID": [
+          "filter",
+          "group",
+          "join",
+          "aggregate",
+          "output"
+        ],
+        "EQP_MODEL": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FACTORY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LOT_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "NETDIE_300_CNT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PRESS_CNT": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "RECIPE_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "SHIFT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ]
+      },
+      "hold_history": {
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "HOLD_CD": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "HOLD_DESC": [
+          "filter",
+          "output"
+        ],
+        "HOLD_EVENT_AT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "sort",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LOT_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PROD_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ]
+      },
+      "lot_status": {
+        "CUM_TAT": [
+          "filter",
+          "aggregate",
+          "sort",
+          "rank",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "EQP_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAC_IN_AT": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "HOLD_REASON": [
+          "filter",
+          "output"
+        ],
+        "HOLD_STAT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "IN_TAT": [
+          "filter",
+          "aggregate",
+          "sort",
+          "rank",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LOT_ID": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LOT_STAT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "OPER_IN_AT": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PROD_QTY": [
+          "filter",
+          "aggregate",
+          "rank",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "WF_QTY": [
+          "filter",
+          "aggregate",
+          "rank",
+          "output"
+        ]
+      },
+      "product_master": {
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "YIELD_RATE": [
+          "filter",
+          "rank",
+          "output"
+        ]
+      },
+      "production": {
+        "DATE": [
+          "filter",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "DIE_ATTACH_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FACTORY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "NETDIE_300_CNT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PRODUCTION_QTY": [
+          "filter",
+          "aggregate",
+          "derive",
+          "rank",
+          "output"
+        ],
+        "SHIFT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ]
+      },
+      "production_today": {
+        "DATE": [
+          "filter",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "DIE_ATTACH_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FACTORY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "NETDIE_300_CNT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PRODUCTION_QTY": [
+          "filter",
+          "aggregate",
+          "derive",
+          "rank",
+          "output"
+        ],
+        "SHIFT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ]
+      },
+      "target": {
+        "DATE": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "INPUT_PLAN_QTY": [
+          "filter",
+          "aggregate",
+          "derive",
+          "rank",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "OUT_PLAN_QTY": [
+          "filter",
+          "aggregate",
+          "derive",
+          "rank",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ]
+      },
+      "wip": {
+        "DATE": [
+          "filter",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "DIE_ATTACH_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FACTORY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "NETDIE_300_CNT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "SHIFT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "WIP_QTY": [
+          "filter",
+          "aggregate",
+          "rank",
+          "output"
+        ]
+      },
+      "wip_today": {
+        "DATE": [
+          "filter",
+          "output"
+        ],
+        "DEN": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "DEVICE_DESC": [
+          "filter",
+          "output"
+        ],
+        "DIE_ATTACH_QTY": [
+          "filter",
+          "aggregate",
+          "output"
+        ],
+        "FAB": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FACTORY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "FAMILY": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "LEAD": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MCP_NO": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "MODE": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "NETDIE_300_CNT": [
+          "filter",
+          "aggregate",
+          "derive",
+          "output"
+        ],
+        "OPER_NAME": [
+          "filter",
+          "group",
+          "join",
+          "sort",
+          "output"
+        ],
+        "OPER_NUM": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "OPER_SEQ": [
+          "filter",
+          "sort",
+          "output"
+        ],
+        "ORG": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE1": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "PKG_TYPE2": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "SHIFT": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "TECH": [
+          "filter",
+          "group",
+          "join",
+          "output"
+        ],
+        "TSV_DIE_TYP": [
+          "filter",
+          "group",
+          "output"
+        ],
+        "WIP_QTY": [
+          "filter",
+          "aggregate",
+          "rank",
+          "output"
+        ]
+      }
+    },
+    "fields": [
+      "BASE_DATE",
+      "BAY_ID",
+      "CUM_TAT",
+      "DATE",
+      "DEN",
+      "DEVICE",
+      "DEVICE_DESC",
+      "DIE_ATTACH_QTY",
+      "EQP_ID",
+      "EQP_MODEL",
+      "FAB",
+      "FACTORY",
+      "FAC_IN_AT",
+      "FAMILY",
+      "HOLD_CD",
+      "HOLD_DESC",
+      "HOLD_EVENT_AT",
+      "HOLD_REASON",
+      "HOLD_STAT",
+      "INPUT_PLAN_QTY",
+      "IN_TAT",
+      "LEAD",
+      "LOAD_DATE",
+      "LOT_ID",
+      "LOT_STAT",
+      "MCP_NO",
+      "MODE",
+      "NETDIE_300_CNT",
+      "OPER_IN_AT",
+      "OPER_NAME",
+      "OPER_NUM",
+      "OPER_SEQ",
+      "ORG",
+      "OUT_PLAN_QTY",
+      "PKG_TYPE1",
+      "PKG_TYPE2",
+      "PRESS_CNT",
+      "PRODUCTION_QTY",
+      "PROD_QTY",
+      "RECIPE_ID",
+      "SHIFT",
+      "TECH",
+      "TSV_DIE_TYP",
+      "UPH",
+      "WF_QTY",
+      "WIP_QTY",
+      "YIELD_RATE"
+    ],
+    "grain_display_fields": {},
+    "grain_keys": {
+      "product": [
+        "TECH",
+        "DEN",
+        "MODE",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "LEAD",
+        "MCP_NO"
+      ]
+    },
+    "grains": [
+      "product"
+    ],
+    "metrics": [
+      "ACHIEVEMENT_RATE",
+      "CUM_TAT",
+      "EQP_COUNT",
+      "HOLD_DURATION_HOURS",
+      "INPUT_PLAN_QTY",
+      "INPUT_QTY",
+      "IN_TAT",
+      "LOT_COUNT",
+      "OUT_PLAN_QTY",
+      "OUT_QTY",
+      "PKG_OUT_QTY",
+      "PRODUCTION_QTY",
+      "UNIT_QTY",
+      "UPH",
+      "WAFER_QTY",
+      "WIP_BOH_QTY",
+      "WIP_QTY"
+    ],
+    "operations": [
+      "aggregate",
+      "compare_fields",
+      "derive",
+      "filter",
+      "join",
+      "ordered_range",
+      "presence_filter",
+      "project",
+      "rank",
+      "sort",
+      "transform_previous_result"
+    ],
+    "recipes": [
+      "achievement.input_actual",
+      "equipment.assignment_enrich",
+      "equipment.assignment_uph",
+      "hold.oldest_current_history",
+      "join.operation.production_wip",
+      "ordered.process.range",
+      "presence.left_positive_right_zero",
+      "product.standard",
+      "rank.bottom_n",
+      "rank.top_n"
+    ],
+    "relation_endpoints": {},
+    "relation_keys": {},
+    "relation_policies": {},
+    "relations": []
+  },
+  "manifest_sha256": "96cba65beedd3246c158f858e4e356a0fa4e27eb15be31593ec86b9c739d5576",
+  "required_sections": [
+    "aliases",
+    "datasets",
+    "field_roles",
+    "fields",
+    "grain_keys",
+    "grains",
+    "metrics",
+    "operations",
+    "recipes"
+  ],
+  "source_sha256": "ab44a1a305d5c4d745e6b810d979e057c9a307b80c566b7c48a876423ddf1f88"
+}

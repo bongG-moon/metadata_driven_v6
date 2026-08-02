@@ -1,0 +1,173 @@
+{
+  "contract_version": "live.intent.model.validation.v1",
+  "models": [
+    "gemini-3.5-flash-lite"
+  ],
+  "model_contract": {
+    "requested_model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "candidate_count": 1,
+    "fallback_enabled": false,
+    "fallback_models": []
+  },
+  "runs_per_model": 1,
+  "intent_case_count": 3,
+  "total_executions": 3,
+  "passed": 3,
+  "failed": 0,
+  "pandas_code_llm_calls": 0,
+  "pandas_repair_llm_calls": 0,
+  "provider_model_evidence_passed": true,
+  "rows": [
+    {
+      "case_id": "MT04-02",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "semantic_choice_required",
+      "actual_selected_candidate_id": "intent:aggregate:5dc4557967bcc159",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "35d6fc45e51a8eb15bee1174ec2e77d826da6f9b88969760a64f6d5ade0d6392",
+        "candidate_count": 2,
+        "candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159",
+          "intent:detail:e5eb4c0eb669b529"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:aggregate:5dc4557967bcc159": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+          "intent:detail:e5eb4c0eb669b529": "e5eb4c0eb669b5292981d54c3fcb34f3120b845a1e57f04cd94de859e21eac7f"
+        },
+        "expected_analysis_kind": "filter_replacement_requery",
+        "expected_candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159"
+        ]
+      },
+      "actual_semantics_sha256": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "aggregate",
+      "plan_fingerprint": null,
+      "result_sha256": "c8efefaff74e6ed1879bce889cfdf7ef35f6cf24daf4c32b15de3fb3e739c4f7",
+      "response_sha256": "047c51f0ea665a26ba3370d995a9c1b4fc8959fc59e19ad82a5db25db0de03ea",
+      "provider_response_sha256": "334b1b7a63cedfcad16460d7392e5b23843f7a54b633750252a9a21ffafb7106",
+      "provider_usage": {
+        "prompt_tokens": 384,
+        "candidate_tokens": 31,
+        "total_tokens": 415
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "provider_model_versions_exact": true,
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    },
+    {
+      "case_id": "BR-A01",
+      "passed": true,
+      "failures": [],
+      "actual_status": "needs_clarification",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "ambiguous_candidate_selection",
+      "actual_selected_candidate_id": "intent:clarification:64369eb179f7f1b9",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "ce5a5b0494912977dcbe8b85cb3079125f47f433b671e8c5d212871ddad89bb8",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:clarification:64369eb179f7f1b9": "64369eb179f7f1b9d30acbe7846dff2956ecb991d2d9383bb6ca266f971c3ce9"
+        },
+        "expected_analysis_kind": "clarification",
+        "expected_candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ]
+      },
+      "actual_semantics_sha256": null,
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 0,
+      "actual_error_code": null,
+      "analysis_kind": null,
+      "plan_fingerprint": null,
+      "result_sha256": null,
+      "response_sha256": "07c28e0a0cc094623af2ede233981ec929e7c07faed7ed2759884079a932eeda",
+      "provider_response_sha256": "ae98a5ce862811ed4d248cfdd0760b2da7826ced61d284540779c99a5cfd3579",
+      "provider_usage": {
+        "prompt_tokens": 233,
+        "candidate_tokens": 28,
+        "total_tokens": 261
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "provider_model_versions_exact": true,
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    },
+    {
+      "case_id": "BR-EQL",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "forced_equivalence_probe",
+      "actual_selected_candidate_id": "intent:rank:b934672323f04e48",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "c2b8fc0081e0ddeddf896d25795d240042a0b8c55108c1bfb88789caf36346fe",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:rank:b934672323f04e48": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92"
+        },
+        "expected_analysis_kind": "rank",
+        "expected_candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ]
+      },
+      "actual_semantics_sha256": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "rank",
+      "plan_fingerprint": null,
+      "result_sha256": "91cdfe0a3a3846796c9db1e7aaeedb96d8b1f5651dffa0f190a5882340329e0f",
+      "response_sha256": "e92906ec1ee65166460c6876039a2db0481de6dcf794ae37dd35e65f1d20bc0f",
+      "provider_response_sha256": "0a8d46ab9d5f2d8b6f206bc9fc3c90f470a9174bd486c8a43e728884931de4f5",
+      "provider_usage": {
+        "prompt_tokens": 256,
+        "candidate_tokens": 28,
+        "total_tokens": 284
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "provider_model_versions_exact": true,
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    }
+  ]
+}

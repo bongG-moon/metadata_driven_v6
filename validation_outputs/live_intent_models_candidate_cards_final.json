@@ -1,0 +1,456 @@
+{
+  "contract_version": "live.intent.model.validation.v1",
+  "models": [
+    "gemini-3.5-flash-lite"
+  ],
+  "runs_per_model": 3,
+  "intent_case_count": 3,
+  "total_executions": 9,
+  "passed": 9,
+  "failed": 0,
+  "pandas_code_llm_calls": 0,
+  "pandas_repair_llm_calls": 0,
+  "rows": [
+    {
+      "case_id": "MT04-02",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "semantic_choice_required",
+      "actual_selected_candidate_id": "intent:aggregate:5dc4557967bcc159",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "35d6fc45e51a8eb15bee1174ec2e77d826da6f9b88969760a64f6d5ade0d6392",
+        "candidate_count": 2,
+        "candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159",
+          "intent:detail:e5eb4c0eb669b529"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:aggregate:5dc4557967bcc159": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+          "intent:detail:e5eb4c0eb669b529": "e5eb4c0eb669b5292981d54c3fcb34f3120b845a1e57f04cd94de859e21eac7f"
+        },
+        "expected_analysis_kind": "filter_replacement_requery",
+        "expected_candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159"
+        ]
+      },
+      "actual_semantics_sha256": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "aggregate",
+      "plan_fingerprint": null,
+      "result_sha256": "c8efefaff74e6ed1879bce889cfdf7ef35f6cf24daf4c32b15de3fb3e739c4f7",
+      "response_sha256": "56579f9f2179d2662c268ef4ee1d6df5dd7601b08a0277bfa1c95101813a5696",
+      "provider_response_sha256": "34039fc2e97db73f58b436ef5e3c839cacd9b91afed2badbf5b069a6ad28b305",
+      "provider_usage": {
+        "prompt_tokens": 384,
+        "candidate_tokens": 25,
+        "total_tokens": 409
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    },
+    {
+      "case_id": "BR-A01",
+      "passed": true,
+      "failures": [],
+      "actual_status": "needs_clarification",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "ambiguous_candidate_selection",
+      "actual_selected_candidate_id": "intent:clarification:64369eb179f7f1b9",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "ce5a5b0494912977dcbe8b85cb3079125f47f433b671e8c5d212871ddad89bb8",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:clarification:64369eb179f7f1b9": "64369eb179f7f1b9d30acbe7846dff2956ecb991d2d9383bb6ca266f971c3ce9"
+        },
+        "expected_analysis_kind": "clarification",
+        "expected_candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ]
+      },
+      "actual_semantics_sha256": null,
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 0,
+      "actual_error_code": null,
+      "analysis_kind": null,
+      "plan_fingerprint": null,
+      "result_sha256": null,
+      "response_sha256": "07c28e0a0cc094623af2ede233981ec929e7c07faed7ed2759884079a932eeda",
+      "provider_response_sha256": "db00e10b5555f6cc5f511d3e214484e09413c1be90850cf487b8611602684ab7",
+      "provider_usage": {
+        "prompt_tokens": 233,
+        "candidate_tokens": 28,
+        "total_tokens": 261
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    },
+    {
+      "case_id": "BR-EQL",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "forced_equivalence_probe",
+      "actual_selected_candidate_id": "intent:rank:b934672323f04e48",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "c2b8fc0081e0ddeddf896d25795d240042a0b8c55108c1bfb88789caf36346fe",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:rank:b934672323f04e48": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92"
+        },
+        "expected_analysis_kind": "rank",
+        "expected_candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ]
+      },
+      "actual_semantics_sha256": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "rank",
+      "plan_fingerprint": null,
+      "result_sha256": "91cdfe0a3a3846796c9db1e7aaeedb96d8b1f5651dffa0f190a5882340329e0f",
+      "response_sha256": "462f4203f4f2d6ae02c3cb93ce3a151c0326aa972b670c199f17bbd17aa16ada",
+      "provider_response_sha256": "96e9180f4029ae438d3ee9634a9eb04f7fd6fdd0bc8b5b0f1320b84ebcad131a",
+      "provider_usage": {
+        "prompt_tokens": 256,
+        "candidate_tokens": 28,
+        "total_tokens": 284
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 1
+    },
+    {
+      "case_id": "MT04-02",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "semantic_choice_required",
+      "actual_selected_candidate_id": "intent:aggregate:5dc4557967bcc159",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "c963b6b351905bca8c9f7ef3a40b314d3ce5c6c63f8243930ecf53893503e51a",
+        "candidate_count": 2,
+        "candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159",
+          "intent:detail:e5eb4c0eb669b529"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:aggregate:5dc4557967bcc159": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+          "intent:detail:e5eb4c0eb669b529": "e5eb4c0eb669b5292981d54c3fcb34f3120b845a1e57f04cd94de859e21eac7f"
+        },
+        "expected_analysis_kind": "filter_replacement_requery",
+        "expected_candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159"
+        ]
+      },
+      "actual_semantics_sha256": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "aggregate",
+      "plan_fingerprint": null,
+      "result_sha256": "c8efefaff74e6ed1879bce889cfdf7ef35f6cf24daf4c32b15de3fb3e739c4f7",
+      "response_sha256": "0af19a1f370a89eed00493c166a697cce732131f18870af2f885f1ca8dc1685b",
+      "provider_response_sha256": "a24a8b9123ba9059c55530d6727695dd0f42bd102e15f3bcdfdf7a2beffe5df4",
+      "provider_usage": {
+        "prompt_tokens": 384,
+        "candidate_tokens": 25,
+        "total_tokens": 409
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 2
+    },
+    {
+      "case_id": "BR-A01",
+      "passed": true,
+      "failures": [],
+      "actual_status": "needs_clarification",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "ambiguous_candidate_selection",
+      "actual_selected_candidate_id": "intent:clarification:64369eb179f7f1b9",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "56168fa09caa4a8b715039e44bfd4a040e57a7b55ab3d8559b9d225e102b6bc4",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:clarification:64369eb179f7f1b9": "64369eb179f7f1b9d30acbe7846dff2956ecb991d2d9383bb6ca266f971c3ce9"
+        },
+        "expected_analysis_kind": "clarification",
+        "expected_candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ]
+      },
+      "actual_semantics_sha256": null,
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 0,
+      "actual_error_code": null,
+      "analysis_kind": null,
+      "plan_fingerprint": null,
+      "result_sha256": null,
+      "response_sha256": "9e664bd612dfe448edb4024d8fe46e8b8ed9755608a930c0165e51f7974900d5",
+      "provider_response_sha256": "bbd5689f0497ffad975d50c9fc48155f406edea1272027637c6a8fb0eb009e69",
+      "provider_usage": {
+        "prompt_tokens": 233,
+        "candidate_tokens": 28,
+        "total_tokens": 261
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 2
+    },
+    {
+      "case_id": "BR-EQL",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "forced_equivalence_probe",
+      "actual_selected_candidate_id": "intent:rank:b934672323f04e48",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "338d9d8cf86d8c9fef2dc44e09518ae2c2346a1a6636106ae6f6287ce4c4d417",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:rank:b934672323f04e48": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92"
+        },
+        "expected_analysis_kind": "rank",
+        "expected_candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ]
+      },
+      "actual_semantics_sha256": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "rank",
+      "plan_fingerprint": null,
+      "result_sha256": "91cdfe0a3a3846796c9db1e7aaeedb96d8b1f5651dffa0f190a5882340329e0f",
+      "response_sha256": "f933226b3fbd7c506065ad2e48726f08dbf5cde074dedad684bac22c8cf62cdc",
+      "provider_response_sha256": "8b2d9dfc0bebdb4838c265aab8284253b0fe8f41a4a7658a313a7b21b4e77f32",
+      "provider_usage": {
+        "prompt_tokens": 256,
+        "candidate_tokens": 28,
+        "total_tokens": 284
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 2
+    },
+    {
+      "case_id": "MT04-02",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "semantic_choice_required",
+      "actual_selected_candidate_id": "intent:aggregate:5dc4557967bcc159",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "642fc29df200b4c952b050a42ca7bcd2f5e481924298078eab8626d59c2b61f4",
+        "candidate_count": 2,
+        "candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159",
+          "intent:detail:e5eb4c0eb669b529"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:aggregate:5dc4557967bcc159": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+          "intent:detail:e5eb4c0eb669b529": "e5eb4c0eb669b5292981d54c3fcb34f3120b845a1e57f04cd94de859e21eac7f"
+        },
+        "expected_analysis_kind": "filter_replacement_requery",
+        "expected_candidate_ids": [
+          "intent:aggregate:5dc4557967bcc159"
+        ]
+      },
+      "actual_semantics_sha256": "5dc4557967bcc159a1933d3afb9523a2a42253a28cd4143c7d5d1c89a803116e",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "aggregate",
+      "plan_fingerprint": null,
+      "result_sha256": "c8efefaff74e6ed1879bce889cfdf7ef35f6cf24daf4c32b15de3fb3e739c4f7",
+      "response_sha256": "f7af02209c6aa05cc95ef6e79f10139c4a9ab2c1827933e2effd27b2b249f501",
+      "provider_response_sha256": "a5243fa97a7fe01e76280b945035d574a7eac0b6af5e0d6519d7da5c4eb5f276",
+      "provider_usage": {
+        "prompt_tokens": 384,
+        "candidate_tokens": 25,
+        "total_tokens": 409
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 3
+    },
+    {
+      "case_id": "BR-A01",
+      "passed": true,
+      "failures": [],
+      "actual_status": "needs_clarification",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "ambiguous_candidate_selection",
+      "actual_selected_candidate_id": "intent:clarification:64369eb179f7f1b9",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "731921662b7848cd1910e4ab0baf304ea7a17bb97e55cd4ed6b3d75fc2702061",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:clarification:64369eb179f7f1b9": "64369eb179f7f1b9d30acbe7846dff2956ecb991d2d9383bb6ca266f971c3ce9"
+        },
+        "expected_analysis_kind": "clarification",
+        "expected_candidate_ids": [
+          "intent:clarification:64369eb179f7f1b9"
+        ]
+      },
+      "actual_semantics_sha256": null,
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 0,
+      "actual_error_code": null,
+      "analysis_kind": null,
+      "plan_fingerprint": null,
+      "result_sha256": null,
+      "response_sha256": "41d047e7f6d58104e630ad11af0a46601c2d5ae6ca17fbf06ed0cb7fd22bea60",
+      "provider_response_sha256": "9ce38b7359452450d72e0bd00f88583de2b96924259f8aaf794e89f42bc9e712",
+      "provider_usage": {
+        "prompt_tokens": 233,
+        "candidate_tokens": 28,
+        "total_tokens": 261
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 3
+    },
+    {
+      "case_id": "BR-EQL",
+      "passed": true,
+      "failures": [],
+      "actual_status": "ok",
+      "actual_route": "intent_llm",
+      "actual_route_reason": "forced_equivalence_probe",
+      "actual_selected_candidate_id": "intent:rank:b934672323f04e48",
+      "candidate_evidence": {
+        "candidate_bundle_sha256": "b6ec8cc39286e14c688e566bf7c6e6d21d415b47246b3293d70edbb28341236e",
+        "candidate_count": 1,
+        "candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ],
+        "candidate_semantics_sha256": {
+          "intent:rank:b934672323f04e48": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92"
+        },
+        "expected_analysis_kind": "rank",
+        "expected_candidate_ids": [
+          "intent:rank:b934672323f04e48"
+        ]
+      },
+      "actual_semantics_sha256": "b934672323f04e480c786c545d24644df4a222aab7f8063d5981a570c2ab7d92",
+      "semantic_checks": {
+        "selected_candidate_registered": true,
+        "expected_candidate_unique": true,
+        "selected_candidate_exact": true,
+        "selected_semantics_sealed": true,
+        "expected_semantics_exact": true
+      },
+      "intent_llm_calls": 1,
+      "retrieval_calls": 1,
+      "actual_error_code": null,
+      "analysis_kind": "rank",
+      "plan_fingerprint": null,
+      "result_sha256": "91cdfe0a3a3846796c9db1e7aaeedb96d8b1f5651dffa0f190a5882340329e0f",
+      "response_sha256": "36b69e6cd55d09f31c8f930c12dcd9d80abe198680cfd2b87df93d1ca2f0e38b",
+      "provider_response_sha256": "bab419b25979690cc498b770493c5f28fa520493cad7323c412a55c0e9a0c1ec",
+      "provider_usage": {
+        "prompt_tokens": 256,
+        "candidate_tokens": 28,
+        "total_tokens": 284
+      },
+      "provider_model_versions": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model": "gemini-3.5-flash-lite",
+      "run_index": 3
+    }
+  ]
+}

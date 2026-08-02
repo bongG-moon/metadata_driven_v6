@@ -1,0 +1,82 @@
+{
+  "contract_version": "generic-v2.support-pipeline.validation.v1",
+  "domain_id": "support_tickets",
+  "question_sha256": "daf76d7bc881bc91b5ee5d834f745183ae2f248f5e88f0559648aeb88f17f801",
+  "catalog_sha256": "edb8b3adb89633f05eb5f52390552a9c000c907415c876828b1e1fea66b89e17",
+  "candidate_bundle_sha256": "7b6c64be13071ffc618791c88e2e334b08ff6db0ee5b5dd3e8a15bfd3988646b",
+  "intent_sha256": "443462d2e42e88fe0ab1b35779c30cb5fcf81f0cd9620e8a5aed1a9cdf5fffd9",
+  "plan_fingerprint": "512ecf2dad809d92a66289d92a025de35686750a85eec36944b98eeac5fd425e",
+  "result_sha256": "f9c1fdb6cf6cca59f158177ee37e1e0e8858d7f5c39ebdf6f6a9629baf7bfb87",
+  "datasets": [
+    "ticket_events"
+  ],
+  "operators": [
+    "filter.v1",
+    "aggregate.v1",
+    "rank.v1",
+    "project.v1"
+  ],
+  "result_columns": [
+    "QUEUE",
+    "WAIT_MINUTES"
+  ],
+  "result_row_count": 2,
+  "happy_checks": {
+    "route_deterministic": true,
+    "intent_calls_zero": true,
+    "intent_generator_deterministic": true,
+    "dataset_exact": true,
+    "typed_operator_coverage": true,
+    "columns_exact": true,
+    "rows_exact": true,
+    "result_hash_present": true
+  },
+  "negative_cases": {
+    "bundle_hash_tamper": {
+      "blocked": true,
+      "code": "route_contract_error",
+      "stage": "candidate_bundle_validation"
+    },
+    "prompt_card_extra_field": {
+      "blocked": true,
+      "code": "route_contract_error",
+      "stage": "candidate_bundle_validation"
+    },
+    "candidate_semantics_tamper": {
+      "blocked": true,
+      "code": "route_contract_error",
+      "stage": "candidate_bundle_validation"
+    },
+    "catalog_hash_tamper": {
+      "blocked": true,
+      "code": "metadata_dependency_error",
+      "stage": "candidate_bundle_validation"
+    },
+    "unknown_candidate_selection": {
+      "blocked": true,
+      "code": "intent_contract_error",
+      "stage": "intent_normalization"
+    },
+    "unregistered_plan_operator": {
+      "blocked": true,
+      "code": "metadata_dependency_error",
+      "stage": "plan_compilation"
+    }
+  },
+  "negative_checks": {
+    "all_fail_closed": true,
+    "candidate_boundary_errors_typed": true,
+    "plan_boundary_error_typed": true
+  },
+  "static_checks": {
+    "candidate_module_no_support_identifiers": true,
+    "planner_no_support_identifiers": true,
+    "no_code_generation_lane": true
+  },
+  "checks": {
+    "happy_path": true,
+    "negative_boundaries": true,
+    "domain_neutral_static": true
+  },
+  "all_passed": true
+}

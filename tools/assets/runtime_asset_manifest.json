@@ -1,0 +1,18 @@
+{
+  "contract_version": "runtime.assets.v1",
+  "python_version": "3.12",
+  "packages": {
+    "langflow": "1.9.2",
+    "langflow-base": "0.9.2",
+    "lfx": "0.4.2"
+  },
+  "language_model_source": {
+    "path": "tools/assets/langflow_1_9_2_language_model.py",
+    "sha256": "1d46e80acad2063ff1ca452e47c3daeef0c31697364b3b6e1e35e63c5eb88ae8"
+  },
+  "component_index": {
+    "distribution": "lfx",
+    "relative_path": "_assets/component_index.json",
+    "sha256": "e747b684e578c340a203a59fb26ba5d5e814ba9e1347a425d48a3defcc9af24c"
+  }
+}

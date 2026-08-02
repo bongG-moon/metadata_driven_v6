@@ -1,0 +1,141 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^.{1,256}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 4096,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/pending-metadata-write.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authoring_kind": {
+      "enum": [
+        "domain",
+        "dataset",
+        "main_filter",
+        "domain_policy"
+      ],
+      "type": "string"
+    },
+    "base_bundle_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "base_package_sha256": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "base_revision": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "candidate_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
+      "type": "string"
+    },
+    "candidate_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "contract_version": {
+      "const": "pending.metadata.write.v1",
+      "type": "string"
+    },
+    "domain_id": {
+      "pattern": "^[a-z][a-z0-9_-]{1,63}$",
+      "type": "string"
+    },
+    "environment": {
+      "pattern": "^[a-z][a-z0-9_-]{1,31}$",
+      "type": "string"
+    },
+    "expires_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "hash_material": {
+      "$ref": "#/$defs/jsonObject"
+    },
+    "prepared_at": {
+      "format": "date-time",
+      "type": "string"
+    },
+    "status": {
+      "const": "prepared",
+      "type": "string"
+    },
+    "target_revision": {
+      "minimum": 1,
+      "type": "integer"
+    }
+  },
+  "required": [
+    "contract_version",
+    "authoring_kind",
+    "domain_id",
+    "environment",
+    "candidate_id",
+    "candidate_sha256",
+    "status",
+    "target_revision",
+    "base_revision",
+    "base_bundle_sha256",
+    "base_package_sha256",
+    "prepared_at",
+    "expires_at",
+    "hash_material"
+  ],
+  "title": "pending.metadata.write.v1",
+  "type": "object"
+}

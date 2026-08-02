@@ -1,0 +1,3333 @@
+{
+  "contract_version": "langflow.http.v6-authoring-analysis-e2e.validation.v2",
+  "model": "gemini-3.5-flash-lite",
+  "model_contract": {
+    "requested_model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "candidate_count": 1,
+    "fallback_enabled": false,
+    "fallback_models": []
+  },
+  "exact_gemini_no_fallback": true,
+  "domain_id": "manufacturing",
+  "environment": "v6_release_pass_e3df1a7d",
+  "fresh_environment": true,
+  "source_hashes": {
+    "domain": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+    "domain_policy": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+    "dataset": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+    "main_filter": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278"
+  },
+  "authoring_sources": {
+    "domain": {
+      "path": "metadata/authoring/v6_inputs/domain_v6.txt",
+      "content_sha256": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+      "byte_count": 8826,
+      "line_count": 99,
+      "source_text_persisted": false
+    },
+    "domain_policy": {
+      "path": "metadata/authoring/v6_inputs/domain_policy_v6.txt",
+      "content_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+      "byte_count": 2953,
+      "line_count": 33,
+      "source_text_persisted": false
+    },
+    "dataset": {
+      "path": "metadata/authoring/v6_inputs/dataset_v6.txt",
+      "content_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "byte_count": 5930,
+      "line_count": 55,
+      "source_text_persisted": false
+    },
+    "main_filter": {
+      "path": "metadata/authoring/v6_inputs/main_filter_v6.txt",
+      "content_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "byte_count": 1843,
+      "line_count": 17,
+      "source_text_persisted": false
+    }
+  },
+  "domain_bootstrap_source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+  "trusted_source_manifest": {
+    "path": "metadata/domain_packs/manufacturing/trusted_source_manifest.json",
+    "contract_version": "metadata.authoring.source-manifest.v1",
+    "manifest_sha256": "96cba65beedd3246c158f858e4e356a0fa4e27eb15be31593ec86b9c739d5576",
+    "source_sha256": "ab44a1a305d5c4d745e6b810d979e057c9a307b80c566b7c48a876423ddf1f88",
+    "counts": {
+      "alias_bindings": 349,
+      "alias_targets": 112,
+      "aliases": 349,
+      "datasets": 10,
+      "field_bindings": 196,
+      "field_roles": 196,
+      "fields": 47,
+      "grain_display_fields": 0,
+      "grain_keys": 1,
+      "grains": 1,
+      "metrics": 17,
+      "operations": 11,
+      "recipes": 10,
+      "relation_endpoints": 0,
+      "relation_keys": 0,
+      "relation_policies": 0,
+      "relations": 0
+    },
+    "manifest_body_persisted": false,
+    "user_raw_txt_used_as_manifest": false
+  },
+  "approved_source_registry": {
+    "path": "metadata/domain_packs/manufacturing/approved_source_registry.json",
+    "pin_path": "metadata/domain_packs/manufacturing/approved_source_registry.sha256",
+    "contract_version": "metadata.authoring.source-registry.v3",
+    "registry_file_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310",
+    "pinned_registry_file_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310",
+    "registry_file_pin_exact": true,
+    "semantic_templates_sha256": "66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55",
+    "semantic_templates_blueprint_sha256": "58533edfe3489336d9829b1ff1ac1ece328d7a50233ba9ba19abf5b07bd877af",
+    "semantic_templates_executable_sha256": "f5d01711cde703260e4932e4b62dd2435529a567cf730335a1054a787aadeeb4",
+    "semantic_templates_projection_sha256": "b60754412a5d6e1b2e37d4a440fd939799d8d3113daeb4cb971c60fe385c2b16",
+    "counts": {
+      "datasets": 10,
+      "field_descriptors": 186
+    },
+    "registry_body_persisted": false
+  },
+  "source_text_persisted": false,
+  "trusted_blueprint_json_persisted": false,
+  "provider_output_persisted": false,
+  "approval_payload_persisted": false,
+  "secrets_persisted": false,
+  "flow_defaults": [
+    {
+      "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_domain_authoring",
+      "authoring_kind": "domain",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 3,
+      "context_builder_node_count": 3,
+      "composer_node_count": 3,
+      "invoker_node_count": 3,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input",
+        "dataset_source_input",
+        "main_filter_source_input"
+      ],
+      "natural_source_bundle_node_count": 1,
+      "node_count": 23
+    },
+    {
+      "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_dataset_catalog_authoring",
+      "authoring_kind": "dataset",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 1,
+      "context_builder_node_count": 1,
+      "composer_node_count": 1,
+      "invoker_node_count": 1,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_main_filter_authoring",
+      "authoring_kind": "main_filter",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [
+        "gemini-3.5-flash-lite"
+      ],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      },
+      "prompt_node_count": 1,
+      "context_builder_node_count": 1,
+      "composer_node_count": 1,
+      "invoker_node_count": 1,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
+      "endpoint_name": "metadata_v6_domain_policy_authoring",
+      "authoring_kind": "domain_policy",
+      "metadata_contract_mode": "domain_package_v2",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_json_default_empty": true,
+      "trusted_blueprint_pin_default_empty": true,
+      "model_names": [],
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": false,
+        "model_node_count": 0,
+        "nodes": [],
+        "passed": true
+      },
+      "prompt_node_count": 0,
+      "context_builder_node_count": 0,
+      "composer_node_count": 0,
+      "invoker_node_count": 0,
+      "domain_bootstrap_input_node_ids": [
+        "chat_input"
+      ],
+      "natural_source_bundle_node_count": 0,
+      "node_count": 7
+    }
+  ],
+  "flow_defaults_passed": true,
+  "imports": [
+    {
+      "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "flow_sha256": "ede31bdbd13d4df8014abf647fad69816f77b7b9ec8370b5308d94f501ce64b0",
+      "flow_id_sha256": "a6b422ad910556c303c9d5b1e316bbb2ee8c6eb533ad60eec775039dd8aafdd8",
+      "endpoint_name": "metadata_v6_domain_authoring",
+      "node_count": 23
+    },
+    {
+      "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "flow_sha256": "4d1ded6087ece8f98354abd22e039acd1e5e7b83d193a22ef98ee3f6fb8a0106",
+      "flow_id_sha256": "c51f03749c4c928cfb406e258104cf350923fdef5ca7a3c757b3267b4c5e9ac0",
+      "endpoint_name": "metadata_v6_dataset_catalog_authoring",
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "flow_sha256": "7ede44849a08448f92109e92d8a1b6c2ff89aa136056a2c3b851d0568b070091",
+      "flow_id_sha256": "0ca956894f790436f46351d0ea167eb4f3708e6b000e8bc7b105a243e123e1b6",
+      "endpoint_name": "metadata_v6_main_filter_authoring",
+      "node_count": 12
+    },
+    {
+      "file": "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
+      "flow_sha256": "f9834ffcc7c04cc1622045e788e28ced8ec8d42f6afe839f995c94091784aafc",
+      "flow_id_sha256": "9f85706387d6535c4c524d00641ee1d86cb2f9aa7f0accf3b7ffb812698be067",
+      "endpoint_name": "metadata_v6_domain_policy_authoring",
+      "node_count": 7
+    }
+  ],
+  "blueprint_trust": {
+    "checked_in_blueprint_sha256": "58533edfe3489336d9829b1ff1ac1ece328d7a50233ba9ba19abf5b07bd877af",
+    "target_blueprint_sha256": "577699cd19f9ceea99525424a42ece303db6eef2d2f1cc0f62377e69bcc32862",
+    "executable_sha256": "f5d01711cde703260e4932e4b62dd2435529a567cf730335a1054a787aadeeb4",
+    "source_manifest_sha256": "96cba65beedd3246c158f858e4e356a0fa4e27eb15be31593ec86b9c739d5576",
+    "environment_rebound_by_admin_build": true,
+    "checked_in_pin_source": "separate_admin_sidecar",
+    "target_pin_source": "trusted_admin_build_output"
+  },
+  "blueprint_trust_checks": {
+    "checked_in_pin_sha256": true,
+    "target_pin_exact": true,
+    "executable_sha256_exact": true,
+    "source_manifest_sha256_exact": true,
+    "identity_exact": true
+  },
+  "freeform_clarification_probe": {
+    "source_text_sha256": "31796d406364caee5bdf6b8793ed2b727a2bcc8887ba8638f6c917da08b44b0f",
+    "source_text_persisted": false,
+    "http_response_sha256": "345cbd5359107aee0cdbfd27be75996e20c40816e2b0d418151214bb7cf16127",
+    "clarification": {
+      "contract_version": "metadata.authoring.clarification.v1",
+      "source_sha256": "31796d406364caee5bdf6b8793ed2b727a2bcc8887ba8638f6c917da08b44b0f",
+      "proposal_sha256": "05afd3d82dc673174541677035a5a8bb6e5522657da038ce8399319e18cac836",
+      "questions_count": 2,
+      "missing_fields_count": 1,
+      "questions_sha256": "259d5f7659ba2bd39ea35684b8f6d5d55bc3cfc1bdd83501a1d7d295f3e52895",
+      "missing_fields_sha256": "c12185b296ee28f8c3d4fcb98d45b9e182eefd5ea23d79a8563590cd68ded149",
+      "raw_clarification_persisted": false,
+      "branches": [],
+      "safe_missing_fields": []
+    },
+    "forbidden_response_fields": {
+      "candidate_fields": [],
+      "package_fields": [],
+      "persistence_fields": []
+    },
+    "mongo_document_count_before": 437,
+    "mongo_document_count_after": 437,
+    "mongo_write_count_increase": 0,
+    "collection_snapshot_before_sha256": "903d1ec85bb4102bb34fc725030aaeac3fb072a57f0f8714e8f48cdbaa89b08b",
+    "collection_snapshot_after_sha256": "903d1ec85bb4102bb34fc725030aaeac3fb072a57f0f8714e8f48cdbaa89b08b",
+    "diagnostics": {
+      "status": "needs_clarification",
+      "error_code": "",
+      "error_stage": "",
+      "error_reason": "",
+      "error_type": "",
+      "error_path": "",
+      "error_message_sha256": "",
+      "error_operator_sha256": "",
+      "error_metric_id_sha256": "",
+      "error_field_sha256": "",
+      "manifest_error_code": "",
+      "error_dataset_id_sha256": "",
+      "error_detail_value_sha256": "",
+      "error_candidate_count": 0,
+      "error_detail_index": 0
+    },
+    "checks": {
+      "http_200": true,
+      "status_needs_clarification": true,
+      "response_hash_valid": true,
+      "terminal_equivalent": true,
+      "identity_exact": true,
+      "draft_llm_three": true,
+      "annotation_llm_zero": true,
+      "repair_llm_zero": true,
+      "clarification_contract_exact": true,
+      "source_hash_exact": true,
+      "proposal_sealed": true,
+      "question_count_bounded": true,
+      "missing_fields_reported": true,
+      "candidate_fields_absent": true,
+      "package_fields_absent": true,
+      "persist_fields_absent": true,
+      "mongo_document_count_increase_zero": true,
+      "collections_unchanged": true
+    },
+    "passed": true
+  },
+  "cycles": [
+    {
+      "authoring_kind": "domain",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "a6b422ad910556c303c9d5b1e316bbb2ee8c6eb533ad60eec775039dd8aafdd8",
+      "source_text_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+      "source_input_node_hashes": {
+        "chat_input": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+        "dataset_source_input": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+        "main_filter_source_input": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278"
+      },
+      "source_text_persisted": false,
+      "before": {
+        "revision": 0
+      },
+      "target_revision": 1,
+      "prepare_http_response_sha256": "0bc01c8f57f35194780a803653d2e1a7a66ae706b1cf88ccda33c8a612ed5569",
+      "prepare": {
+        "response_sha256": "f14a744c11d3f4210968d4c7d41468bef4780e748616cf90a54f3785ae1c3e56",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "domain",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 1,
+        "candidate_id": "candidate:5d87e9414fbca3d3d70e632e404f13e173033c77fae089df2a7c476f379ea680",
+        "candidate_sha256": "5d87e9414fbca3d3d70e632e404f13e173033c77fae089df2a7c476f379ea680",
+        "package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+        "bundle_sha256": "f56f9d0317e1dbf8c09d62d34d9f9f847bb199be5e41ffdf6d4278b6a648f954",
+        "catalog_sha256": "7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348",
+        "draft_llm_calls": 3,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "domain": {
+            "purpose": "metadata_domain_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "de9db1fc9582f3f1d25a16f03b84d7e47b917212763bd17dd3a0e89a1c1ac0a7",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          },
+          "dataset": {
+            "purpose": "metadata_dataset_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          },
+          "main_filter": {
+            "purpose": "metadata_main_filter_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "ca048102951780ac8ac7725399cc368e41a63a9436cbd213361d21a08b2620f0",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268', 'proposal_sha256': '84e6885297a5c721aa25b89442dfe39fd162e5d0b952df44453ece8090eaa496', 'draft_sha256': '9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5', 'expanded_draft_sha256': '9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5', 'dataset_ir_sha256': '3dbc9ff6be425f8f57743501db2188ac948f8842e7ead7b987050e79e9d21413', 'dataset_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'domain_template_expander_version': 'metadata.domain-template-expansion.v1', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'sealed_authoring_sha256': 'd042052119b165e92e4a2c1cfe57b0d427bba86b0650611734247d175c12ed2c'}",
+          "authoring_proposals": "{'domain': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6', 'proposal_sha256': '17f7b076a2d36330426dbbe301d2dcc7202d77382346d1dc375ef40f071abcd6', 'draft_sha256': 'cab2e534da9dab038836eaff711c6d5a5c7a782e90fb40a1703583a709ca28e2', 'template_expansion': {'contract_version': 'metadata.domain-template-expansion.v1', 'template_contract_version': 'metadata.authoring.semantic-templates.v1', 'annotation_sha256': 'cab2e534da9dab038836eaff711c6d5a5c7a782e90fb40a1703583a709ca28e2', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'planner_policy_sha256': 'aeb92080976fb1abcebd259abc224baac8746a7e4fa2be498de6c75f281e5425', 'section_counts': {'metrics': 17, 'relations': 0, 'entity_groups': 25, 'grains': 1, 'orderings': 1, 'predicates': 7, 'recipes': 10, 'aliases': 141}}}, 'dataset': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'proposal_sha256': '1da81a42ba010eb953b99ac22e2152659e336a15f43fe4e3ced6eb27f88fb355', 'draft_sha256': '3dbc9ff6be425f8f57743501db2188ac948f8842e7ead7b987050e79e9d21413', 'dataset_ir_contract_version': 'metadata.bootstrap.dataset-ir.v1', 'dataset_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'dataset_ir_sha256': '3dbc9ff6be425f8f57743501db2188ac948f8842e7ead7b987050e79e9d21413', 'registry_reconciliation': {'contract_version': 'metadata.dataset-registry-reconciliation.v1', 'approved_field_count': 186, 'model_field_count': 72, 'completed_field_count': 114, 'applied_exclusion_count': 0, 'applied_exclusions_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_binding_count': 0, 'corrected_bindings_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'compiler_owned_dataset_template_count': 10, 'compiler_owned_dataset_templates_sha256': '0f6b46a914bcb1ada5b7002fd1d934e751498d17938d95f4a2e12ca68057c143', 'completed_fields_sha256': 'a579e00afe52ea616535a530ebb36903a6bca859e5f27c0b95a718accb9afbcf', 'normalized_fields_sha256': '5fa30d4630fa253e3d6c856222109c64f9199884e01622f82addb6d3cf04fbe7'}}, 'main_filter': {'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'proposal_sha256': '23676b77cbad1579df4b422ae450182aa1d4e531baffea966614bc37f26b6a68', 'draft_sha256': 'cc774de89f22af1fb9ad6861800ec73c8a5ecc27433989728948f62f897ccea8', 'main_filter_ir_expansion': {'contract_version': 'metadata.main-filter-ir-expansion.v1', 'input_count': 21, 'canonical_alias_count': 21, 'canonical_targets_sha256': '6dfdc23a30845f8c6c1b558f06101ed804ca0f6309b8c103a02931b85aa047c8', 'alias_conflict_resolution': {'contract_version': 'metadata.alias-conflict-resolution.v1', 'baseline_card_count': 141, 'candidate_card_count': 144, 'resolved_card_count': 141, 'accepted_delta_count': 11, 'redundant_delta_count': 0, 'discarded_baseline_conflict_count': 3, 'discarded_cross_target_count': 0, 'duplicate_same_target_count': 0, 'resolved_aliases_sha256': 'a561d0a3ec02439fe9d523a4f3c348f0aeca876c24dc89f81d030c79d0309a98'}}}}",
+          "dependency_closure": "passed",
+          "domain_template_expansion": "{'contract_version': 'metadata.domain-template-expansion.v1', 'template_contract_version': 'metadata.authoring.semantic-templates.v1', 'annotation_sha256': 'cab2e534da9dab038836eaff711c6d5a5c7a782e90fb40a1703583a709ca28e2', 'semantic_templates_sha256': '66b40ab9b20be84c9d31a6d9b23a93b21fe5be0a4a5b57609d8f1068b3d5ca55', 'planner_policy_sha256': 'aeb92080976fb1abcebd259abc224baac8746a7e4fa2be498de6c75f281e5425', 'section_counts': {'metrics': 17, 'relations': 0, 'entity_groups': 25, 'grains': 1, 'orderings': 1, 'predicates': 7, 'recipes': 10, 'aliases': 141}}",
+          "filter_operator_normalization": "{'contract_version': 'metadata.filter-operator-normalization.v1', 'replacement_count': 0, 'replacements_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_dataset_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'provider_schema_sha256': 'ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32', 'runtime_output_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'raw_prompt_persisted': False, 'raw_response_persisted': False}, {'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_domain_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f', 'provider_schema_sha256': 'de9db1fc9582f3f1d25a16f03b84d7e47b917212763bd17dd3a0e89a1c1ac0a7', 'runtime_output_schema_sha256': 'adab84e04146c2706ca907c6f12f8c66c08e5b4a61b31aff594869213054771f', 'raw_prompt_persisted': False, 'raw_response_persisted': False}, {'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_main_filter_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'provider_schema_sha256': '175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868', 'runtime_output_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "metric_binding_completion": "{'contract_version': 'metadata.metric-binding-reconciliation.v1', 'resolution_mode': 'approved_semantic_vocabulary_exact', 'completed_count': 0, 'completed_metric_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_count': 0, 'corrected_metric_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'preserved_full_card_count': 15, 'preserved_full_card_ids_sha256': '9cbb7c526b2475ac2b98eed87517f104e56779a61111addb75277ed8785ae1dd'}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_alias_normalization": "{'contract_version': 'metadata.alias-semantic-reconciliation.v1', 'resolution_mode': 'approved_semantic_vocabulary_exact', 'normalized_count': 0, 'normalized_alias_ids_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268', 'structured_proposal_sha256': '9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348', 'coverage_sha256': '87276031b537284dadd9e3c2b84c3231fd024432f861bbaeeac57deab324a9bc'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+          "structured_proposal_sha256": "9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "87276031b537284dadd9e3c2b84c3231fd024432f861bbaeeac57deab324a9bc"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "910317c9319b9ddbd94a0f2bc40edf2238b3ce7222cef429aba8dc0a386b8268",
+          "proposal_sha256": "84e6885297a5c721aa25b89442dfe39fd162e5d0b952df44453ece8090eaa496",
+          "draft_sha256": "9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "9bbae3ac8a7d8a9a0e2d31e61a82f5096ae0735e24716fa2a6d356281c1fbbd5",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {
+          "domain": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "e9107ba6d1dc50977736edbe23faefcbe40cbd05871821ff6336d94f99f58fb6",
+            "proposal_sha256": "17f7b076a2d36330426dbbe301d2dcc7202d77382346d1dc375ef40f071abcd6",
+            "draft_sha256": "cab2e534da9dab038836eaff711c6d5a5c7a782e90fb40a1703583a709ca28e2"
+          },
+          "dataset": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+            "proposal_sha256": "1da81a42ba010eb953b99ac22e2152659e336a15f43fe4e3ced6eb27f88fb355",
+            "draft_sha256": "3dbc9ff6be425f8f57743501db2188ac948f8842e7ead7b987050e79e9d21413"
+          },
+          "main_filter": {
+            "contract_version": "metadata.authoring.proposal.validation.v1",
+            "proposal_contract_version": "metadata.authoring.proposal.v1",
+            "status": "complete",
+            "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+            "proposal_sha256": "23676b77cbad1579df4b422ae450182aa1d4e531baffea966614bc37f26b6a68",
+            "draft_sha256": "cc774de89f22af1fb9ad6861800ec73c8a5ecc27433989728948f62f897ccea8"
+          }
+        },
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "f14a744c11d3f4210968d4c7d41468bef4780e748616cf90a54f3785ae1c3e56"
+          ],
+          "api": [
+            "f14a744c11d3f4210968d4c7d41468bef4780e748616cf90a54f3785ae1c3e56"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "368fe88f4ae4cea2f55f2d5b975534b4b2b45321687ca51129621b85efaf3221",
+        "candidate_sha256": "5d87e9414fbca3d3d70e632e404f13e173033c77fae089df2a7c476f379ea680",
+        "pending_payload_sha256": "69ee1e5a6c8f65d9d7b17112843664841a422b43206a5989d3b41e6c39b0be0f",
+        "authoring_kind": "domain",
+        "target_revision": 1,
+        "base_revision": null,
+        "base_bundle_sha256": null,
+        "base_package_sha256": null,
+        "prepared_at_sha256": "730e4ec5c85c3bdd60c89163f6d6f82aaa864baba776d0f2774c1fbf3ad26fbc",
+        "expires_at_sha256": "431703ecce46f4862231d6f866afeb35f4abb1bea1aeeb2a64f40e5e10efee29",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "baacd42f41eabaacf5979588dcf42d756df715766c4bb70b1cbdf071b8705a06",
+        "event_id_sha256": "44f5bc315c7624dd08063effe1f7a360bba64045b0f35a399c115bb2c504764c",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "bbf44638a8f546711421b3f50184111fbb422504dcd6103e4dadd52704290db7",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "0506fdce8ee63aece4664eef88419f237df591f335e11161d00a0f6bf385000f",
+          "http_response_sha256": "8338428d140848d00157d984b1871bd6f8c51e8e295ee47d09f8b239f6d075f4",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "87414543b68c25b41134675b249992bf45a6127b223f5e339084fb8a7a453b96",
+          "http_response_sha256": "43da9bef69b2d01b0cd76b1af7426b63218a918eb77beee0e0f6e0dacd2efbd5",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "cd48139c044b249e08ef63c5a05d52d087d55d8f2c70663c57440daec9738ffa",
+          "http_response_sha256": "863e933d664ed7e59bd8ed83ea4638ec5a0c32c3b0e1eb0fd8020f860b0a73cf",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "4d0620a8671d8a079cf933430b8ebc54394ac6a6c2acabe6dd58703bceba995f",
+          "http_response_sha256": "f05c644ddb41af8995662126dd460ff3561badd812a8f13da29a2419555ac5b8",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "670e29ff5941ba85a95c1b7f68bfbf5aa229fbc536b3759ff0280f39f970d1ff",
+      "execute": {
+        "response_sha256": "0aaf2ad9956d0354ad3644769caac34e1b90d2ca3dc52cbf32210c6999d5e53c",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 1,
+        "candidate_id": "candidate:5d87e9414fbca3d3d70e632e404f13e173033c77fae089df2a7c476f379ea680",
+        "candidate_sha256": "5d87e9414fbca3d3d70e632e404f13e173033c77fae089df2a7c476f379ea680",
+        "package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+        "bundle_sha256": "f56f9d0317e1dbf8c09d62d34d9f9f847bb199be5e41ffdf6d4278b6a648f954",
+        "catalog_sha256": "7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "0aaf2ad9956d0354ad3644769caac34e1b90d2ca3dc52cbf32210c6999d5e53c"
+          ],
+          "api": [
+            "0aaf2ad9956d0354ad3644769caac34e1b90d2ca3dc52cbf32210c6999d5e53c"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {
+        "branches_exact": true,
+        "domain_validation_contract_exact": true,
+        "domain_proposal_contract_exact": true,
+        "domain_status_complete": true,
+        "domain_source_hash_exact": true,
+        "domain_proposal_sealed": true,
+        "domain_draft_sealed": true,
+        "dataset_validation_contract_exact": true,
+        "dataset_proposal_contract_exact": true,
+        "dataset_status_complete": true,
+        "dataset_source_hash_exact": true,
+        "dataset_proposal_sealed": true,
+        "dataset_draft_sealed": true,
+        "main_filter_validation_contract_exact": true,
+        "main_filter_proposal_contract_exact": true,
+        "main_filter_status_complete": true,
+        "main_filter_source_hash_exact": true,
+        "main_filter_proposal_sealed": true,
+        "main_filter_draft_sealed": true
+      },
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "not_applicable": true,
+          "passed": true
+        },
+        "committed_catalog": {
+          "not_applicable": true,
+          "passed": true
+        }
+      },
+      "ownership": null,
+      "policy_checks": {},
+      "after": {
+        "revision": 1,
+        "package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+        "bundle_sha256": "f56f9d0317e1dbf8c09d62d34d9f9f847bb199be5e41ffdf6d4278b6a648f954",
+        "catalog_sha256": "7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348",
+        "section_hashes_sha256": "7681d0184aae8eabf57743b6f69e0f2060577c0d901922ea26ee64da91eec770"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "domain_policy",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "9f85706387d6535c4c524d00641ee1d86cb2f9aa7f0accf3b7ffb812698be067",
+      "source_text_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 1,
+        "package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+        "bundle_sha256": "f56f9d0317e1dbf8c09d62d34d9f9f847bb199be5e41ffdf6d4278b6a648f954",
+        "catalog_sha256": "7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348",
+        "section_hashes_sha256": "7681d0184aae8eabf57743b6f69e0f2060577c0d901922ea26ee64da91eec770"
+      },
+      "target_revision": 2,
+      "prepare_http_response_sha256": "ecb86e352d10f9e3e7d89aa3df12a364da6b6cbbd80e61fe4068c632de2aa85a",
+      "prepare": {
+        "response_sha256": "072f1fb60ca5a968529ba9037b5767e182e10621a256b84972f59f83921ba558",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "domain_policy",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 2,
+        "candidate_id": "candidate:3b83f7c969d4bb53425956ffd5cfa0f00630fae349e0fb60c7519dad5df56c8a",
+        "candidate_sha256": "3b83f7c969d4bb53425956ffd5cfa0f00630fae349e0fb60c7519dad5df56c8a",
+        "package_sha256": "e2fe5ca961ec753fd6dd8a6750e498f56c64e457ad3ec7a3b1c5b9abafb367b5",
+        "bundle_sha256": "1f9b18c67d3bbbef9fe350625a9edb59a383ea0da21f1de43a7641436f55bf65",
+        "catalog_sha256": "fa25f6ad19a2d86a56d4c9f7eda70423d91d11c56450605472467ee220b81c50",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "2cacc890e48f1a63a44bdf18d63f8b1186d5da94268abc87fb4378aff10b1397",
+        "validation": {
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc', 'structured_proposal_sha256': 'd4c735d688648133d2513654cd2e5006341eb5e7cf5b568e935bec054515add7', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': 'fa25f6ad19a2d86a56d4c9f7eda70423d91d11c56450605472467ee220b81c50', 'coverage_sha256': '14606ca4d974913609390b68e3be8da4d3de491da6e294684c05de4e65203479'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "331d09e2039faab51e41d94b5d3863e504ec03dcdefa6701becaca5f5e35d1dc",
+          "structured_proposal_sha256": "d4c735d688648133d2513654cd2e5006341eb5e7cf5b568e935bec054515add7",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "14606ca4d974913609390b68e3be8da4d3de491da6e294684c05de4e65203479"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 14,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "aliases",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "entity_groups",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "predicates",
+          "recipes",
+          "relations",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "072f1fb60ca5a968529ba9037b5767e182e10621a256b84972f59f83921ba558"
+          ],
+          "api": [
+            "072f1fb60ca5a968529ba9037b5767e182e10621a256b84972f59f83921ba558"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "50f1ada855eaeaec38923cd2cb4c6f27ff53c89b25da28b6a03f9f5255850788",
+        "candidate_sha256": "3b83f7c969d4bb53425956ffd5cfa0f00630fae349e0fb60c7519dad5df56c8a",
+        "pending_payload_sha256": "3f0aa9d6f02329bf7685a7eefd645d7067576a157abf646fe664eaa3044f288b",
+        "authoring_kind": "domain_policy",
+        "target_revision": 2,
+        "base_revision": 1,
+        "base_bundle_sha256": "f56f9d0317e1dbf8c09d62d34d9f9f847bb199be5e41ffdf6d4278b6a648f954",
+        "base_package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+        "prepared_at_sha256": "a5496c6b8a8c93efe4568a220b6e0f84667fd42223926d928c7ce1e41d05422d",
+        "expires_at_sha256": "9ca14e6bbca5e10690c228962ff0452c7e8b64c058005b8813e3b0dee01d63ed",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "16ef18d9dd9b951fdd26ef43fa6a1a02d77bfc2efe79ef03d44b0618958c3df9",
+        "event_id_sha256": "ff2465e9d2a7fb39d3e127c2c9a4fdb3bb92fb247e52dc81e87a126376d22280",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "daaceb4885db46f572f1e13b193215a5ed0e8cbeaec0fa823c7374292c49c9b1",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "b24a5a63544022a5ccaa9534afd903a01729e303e9a047ee65515626d8526f35",
+          "http_response_sha256": "ad0a22611674e960d30f8c4ce986d90691ee7e265e2626738e192913f7256b67",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "60ae5a882b90a6e044212700f2a9e64e57d0fadc5bfaf403b2fe1e4834c6fe6d",
+          "http_response_sha256": "8b248a6004a5ffaadccc0cd3ba4a0b2671d383f6e8645b93256cbd51bf9a5ca8",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "25cfeff6f27533a668490c8e231f63abe79562a9c728a965418f10bd16ca78b5",
+          "http_response_sha256": "835ab2e23d151cc43886288a66ffc57d7b88c8eac2273196062224585f6d8946",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "f825b860655028661c04dbf452f853eb59bb6429bf9e196db489fc9aff0eb1fc",
+          "http_response_sha256": "f20bd36070838313b828de7541f406671c2f932abf7ec5e5b8cd5ad240434627",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "2c84966b21fee248d5a1f09604663ca9d71aa9c4d7bb479bbea2729b96450524",
+      "execute": {
+        "response_sha256": "f548c2a5ef3b05d7923fb7dd1826e520ae56fce4580bffc44901dbf1ff2e3cf6",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain_policy",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 2,
+        "candidate_id": "candidate:3b83f7c969d4bb53425956ffd5cfa0f00630fae349e0fb60c7519dad5df56c8a",
+        "candidate_sha256": "3b83f7c969d4bb53425956ffd5cfa0f00630fae349e0fb60c7519dad5df56c8a",
+        "package_sha256": "e2fe5ca961ec753fd6dd8a6750e498f56c64e457ad3ec7a3b1c5b9abafb367b5",
+        "bundle_sha256": "1f9b18c67d3bbbef9fe350625a9edb59a383ea0da21f1de43a7641436f55bf65",
+        "catalog_sha256": "fa25f6ad19a2d86a56d4c9f7eda70423d91d11c56450605472467ee220b81c50",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "f548c2a5ef3b05d7923fb7dd1826e520ae56fce4580bffc44901dbf1ff2e3cf6"
+          ],
+          "api": [
+            "f548c2a5ef3b05d7923fb7dd1826e520ae56fce4580bffc44901dbf1ff2e3cf6"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {},
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "not_applicable": true,
+          "passed": true
+        },
+        "committed_catalog": {
+          "not_applicable": true,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "output_profile",
+          "prompt_extensions",
+          "specialized_functions"
+        ],
+        "unchanged_section_count": 18,
+        "unchanged_section_names": [
+          "aliases",
+          "compiler_version",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "domain_id",
+          "entity_groups",
+          "environment",
+          "fields",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "predicates",
+          "recipes",
+          "relations",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [
+          "output_profile",
+          "prompt_extensions",
+          "specialized_functions"
+        ],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": true
+        }
+      },
+      "policy_checks": {
+        "intent_overlay_exact": true,
+        "answer_overlay_exact": true,
+        "specialized_function_exact": true,
+        "output_profile_overlay_exact": true
+      },
+      "after": {
+        "revision": 2,
+        "package_sha256": "e2fe5ca961ec753fd6dd8a6750e498f56c64e457ad3ec7a3b1c5b9abafb367b5",
+        "bundle_sha256": "1f9b18c67d3bbbef9fe350625a9edb59a383ea0da21f1de43a7641436f55bf65",
+        "catalog_sha256": "fa25f6ad19a2d86a56d4c9f7eda70423d91d11c56450605472467ee220b81c50",
+        "section_hashes_sha256": "e1172fac3e696e005f33bd5fe217783bd6866eea81ab456408b04198fbbf47b4"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "dataset",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "c51f03749c4c928cfb406e258104cf350923fdef5ca7a3c757b3267b4c5e9ac0",
+      "source_text_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 2,
+        "package_sha256": "e2fe5ca961ec753fd6dd8a6750e498f56c64e457ad3ec7a3b1c5b9abafb367b5",
+        "bundle_sha256": "1f9b18c67d3bbbef9fe350625a9edb59a383ea0da21f1de43a7641436f55bf65",
+        "catalog_sha256": "fa25f6ad19a2d86a56d4c9f7eda70423d91d11c56450605472467ee220b81c50",
+        "section_hashes_sha256": "e1172fac3e696e005f33bd5fe217783bd6866eea81ab456408b04198fbbf47b4"
+      },
+      "target_revision": 3,
+      "prepare_http_response_sha256": "0e17a13cc5d2b65e58f9353903d3fa66a23c5652729a745299795454fdd4b14a",
+      "prepare": {
+        "response_sha256": "f695b10e40169c743b59dcc402e9d5997f47cd84ca873510f6898411ac5d6838",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "dataset",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 3,
+        "candidate_id": "candidate:5af48880ee1b2fd5dd54c550cbe4999b9ccb8a73e369f2d6bddb48b43b6b8c86",
+        "candidate_sha256": "5af48880ee1b2fd5dd54c550cbe4999b9ccb8a73e369f2d6bddb48b43b6b8c86",
+        "package_sha256": "a651331c8e81052f80431b326b2f335a0a8469d583ca28ddcc5fb67b011a421e",
+        "bundle_sha256": "3aee910b44b712f9ab3e64604ac39a72f1c9e1ab06879e9b6c79eaca67d95a36",
+        "catalog_sha256": "65f50b129f40b8a92f335e0837d74e628040c433d29a112babd59edbbbfcfb65",
+        "draft_llm_calls": 1,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "dataset": {
+            "purpose": "metadata_dataset_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "b1d08b074de7f827e0595b4c969cf5276e8488c64c5b558a1a2a761d144e272a",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'proposal_sha256': '199810d84f941335a4421c4c8c6166fbf2199533753f7fcefec8f07bb25b80b1', 'draft_sha256': 'f47e20ce18386a9341268de7871b1269b0cc4fe8b1b7325f19ca52428dae7d0f', 'compact_ir_sha256': 'f47e20ce18386a9341268de7871b1269b0cc4fe8b1b7325f19ca52428dae7d0f', 'expanded_draft_sha256': '0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c', 'section_ir_expander_version': 'metadata.dataset-ir-expander.v1', 'section_ir_reconciliation': {'contract_version': 'metadata.dataset-registry-reconciliation.v1', 'approved_field_count': 186, 'model_field_count': 186, 'completed_field_count': 0, 'applied_exclusion_count': 0, 'applied_exclusions_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'corrected_binding_count': 0, 'corrected_bindings_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'compiler_owned_dataset_template_count': 10, 'compiler_owned_dataset_templates_sha256': '0f6b46a914bcb1ada5b7002fd1d934e751498d17938d95f4a2e12ca68057c143', 'completed_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945', 'normalized_fields_sha256': '1b5381199d68b29b39a9e79b739b40d2a8b35bbed24dad310347f017f5ef098d'}}",
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_dataset_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'provider_schema_sha256': 'ac531eba6fd74203b2cd58631fafa504e92e77cdc41dd4f071902ee6e75b3c32', 'runtime_output_schema_sha256': 'ee4058e44c59d9eb5f2e78df2da011693b56362733f428c7afac1f8db6bd23d3', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': '858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc', 'structured_proposal_sha256': '0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '65f50b129f40b8a92f335e0837d74e628040c433d29a112babd59edbbbfcfb65', 'coverage_sha256': '1213407c1d19c06d727f0039f22d1b9903ecd2ccce259d60ceac76e27ff09e5e'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+          "structured_proposal_sha256": "0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "1213407c1d19c06d727f0039f22d1b9903ecd2ccce259d60ceac76e27ff09e5e"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "858e80755f008c52e4b7a0c9ae77560de1f674db60329b7988ac2a27d5b530bc",
+          "proposal_sha256": "199810d84f941335a4421c4c8c6166fbf2199533753f7fcefec8f07bb25b80b1",
+          "draft_sha256": "f47e20ce18386a9341268de7871b1269b0cc4fe8b1b7325f19ca52428dae7d0f",
+          "compact_ir_sha256": "f47e20ce18386a9341268de7871b1269b0cc4fe8b1b7325f19ca52428dae7d0f",
+          "expanded_draft_sha256": "0eccabb03ac6cf99208c0c027a6402c634d3c2895d2a18f8c5ecec3fc164bb6c",
+          "section_ir_expander_version": "metadata.dataset-ir-expander.v1"
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 16,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "aliases",
+          "contract_version",
+          "description",
+          "display_name",
+          "entity_groups",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "output_profile",
+          "predicates",
+          "prompt_extensions",
+          "recipes",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "f695b10e40169c743b59dcc402e9d5997f47cd84ca873510f6898411ac5d6838"
+          ],
+          "api": [
+            "f695b10e40169c743b59dcc402e9d5997f47cd84ca873510f6898411ac5d6838"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "32b07dd7e0318d18a090361b620f3fc5b9aec7913cc6176d1b90a0f6eed86af9",
+        "candidate_sha256": "5af48880ee1b2fd5dd54c550cbe4999b9ccb8a73e369f2d6bddb48b43b6b8c86",
+        "pending_payload_sha256": "f2f1630bffac3e3e068ba25f8cc9fae73e379e253cdb2e01528d6f8267b1f106",
+        "authoring_kind": "dataset",
+        "target_revision": 3,
+        "base_revision": 2,
+        "base_bundle_sha256": "1f9b18c67d3bbbef9fe350625a9edb59a383ea0da21f1de43a7641436f55bf65",
+        "base_package_sha256": "e2fe5ca961ec753fd6dd8a6750e498f56c64e457ad3ec7a3b1c5b9abafb367b5",
+        "prepared_at_sha256": "88f0dbc5c22b7a5318f82de098a1ff9e45a463c0cee162b4f01661998a8cd2eb",
+        "expires_at_sha256": "0a86b3a8ef0effa293ca3d183e352214d4fe558e17aa6db6cb424e2fcbe46aed",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "2dd004ba4483ec29a8b32acebb2d5c78370fc49739375aeaecaa910f01ca7c2d",
+        "event_id_sha256": "839e64f42b37694c0a5514cca0babb94c9cb042a74221921d46543e19f8c5aa1",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "dcf4ff14544db6a603b254553dc2fc107e4aa779121a4bc8874118795d95a5a3",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "cbc097bad712e0aafbc979ee2fca1e70148a8ea64d4662c82feb7bbb1b9bc1ae",
+          "http_response_sha256": "8076edc94a4b10e7536fc489ba56021b663a4febb14131b03e1c2e600ac42a00",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "86456c44b2c2e0fd9ac067389500c36d9ecdbd12654ba5ae683e5d3c88da561e",
+          "http_response_sha256": "288357ecf76f9ac0fa5bf73b717095155b3d8cf21ed6a06ef711c715c8ca3173",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "6cccd11e03292bad38712fca5cada541b7f73e7846417c5cdda659e2dcbaab0f",
+          "http_response_sha256": "83e0374a7156ae56adeab32a3a250218ee0de641686084312e2c683064e9ef18",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "f20392524a93fc896d25f58433e043b8d7afadc6817e6a7b1d70bb20ea585361",
+          "http_response_sha256": "100aaad439b29021b0f4d057067000d1c0f3e9fe5e09801dade59e92b7f3b5b2",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "bb8074a92f32b88c2d5dc8b0fdf20bfb11abe27032956190feadd9da2d7587c1",
+      "execute": {
+        "response_sha256": "fd1c2d54b02a68dc6cd0e4a86f91f8c9407eac35b7848113027ad636a08c1ca6",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "dataset",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 3,
+        "candidate_id": "candidate:5af48880ee1b2fd5dd54c550cbe4999b9ccb8a73e369f2d6bddb48b43b6b8c86",
+        "candidate_sha256": "5af48880ee1b2fd5dd54c550cbe4999b9ccb8a73e369f2d6bddb48b43b6b8c86",
+        "package_sha256": "a651331c8e81052f80431b326b2f335a0a8469d583ca28ddcc5fb67b011a421e",
+        "bundle_sha256": "3aee910b44b712f9ab3e64604ac39a72f1c9e1ab06879e9b6c79eaca67d95a36",
+        "catalog_sha256": "65f50b129f40b8a92f335e0837d74e628040c433d29a112babd59edbbbfcfb65",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "fd1c2d54b02a68dc6cd0e4a86f91f8c9407eac35b7848113027ad636a08c1ca6"
+          ],
+          "api": [
+            "fd1c2d54b02a68dc6cd0e4a86f91f8c9407eac35b7848113027ad636a08c1ca6"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "not_applicable": true,
+          "passed": true
+        },
+        "committed_catalog": {
+          "not_applicable": true,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "datasets"
+        ],
+        "unchanged_section_count": 20,
+        "unchanged_section_names": [
+          "aliases",
+          "compiler_version",
+          "contract_version",
+          "description",
+          "display_name",
+          "domain_id",
+          "entity_groups",
+          "environment",
+          "fields",
+          "grains",
+          "locale",
+          "metrics",
+          "orderings",
+          "output_profile",
+          "predicates",
+          "prompt_extensions",
+          "recipes",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": false
+        }
+      },
+      "policy_checks": {},
+      "after": {
+        "revision": 3,
+        "package_sha256": "a651331c8e81052f80431b326b2f335a0a8469d583ca28ddcc5fb67b011a421e",
+        "bundle_sha256": "3aee910b44b712f9ab3e64604ac39a72f1c9e1ab06879e9b6c79eaca67d95a36",
+        "catalog_sha256": "65f50b129f40b8a92f335e0837d74e628040c433d29a112babd59edbbbfcfb65",
+        "section_hashes_sha256": "e1172fac3e696e005f33bd5fe217783bd6866eea81ab456408b04198fbbf47b4"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    },
+    {
+      "authoring_kind": "main_filter",
+      "source_grounding_mode": "freeform_llm",
+      "trusted_blueprint_configured": false,
+      "flow_id_sha256": "0ca956894f790436f46351d0ea167eb4f3708e6b000e8bc7b105a243e123e1b6",
+      "source_text_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+      "source_input_node_hashes": {},
+      "source_text_persisted": false,
+      "before": {
+        "revision": 3,
+        "package_sha256": "a651331c8e81052f80431b326b2f335a0a8469d583ca28ddcc5fb67b011a421e",
+        "bundle_sha256": "3aee910b44b712f9ab3e64604ac39a72f1c9e1ab06879e9b6c79eaca67d95a36",
+        "catalog_sha256": "65f50b129f40b8a92f335e0837d74e628040c433d29a112babd59edbbbfcfb65",
+        "section_hashes_sha256": "e1172fac3e696e005f33bd5fe217783bd6866eea81ab456408b04198fbbf47b4"
+      },
+      "target_revision": 4,
+      "prepare_http_response_sha256": "b31e5abf09aac7772f8d75a47f887b2941d2ecc8ee0d97bdb606f7ecbc3e5832",
+      "prepare": {
+        "response_sha256": "7ceee1d891e70bbd3d2d2f868428865b3956a6f2a40ed007228304c62dc5f444",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "prepared",
+        "authoring_kind": "main_filter",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 4,
+        "candidate_id": "candidate:9276e057388104023e7ea10dd01d81d7243126ec04bbc94388f11a2698a07ddc",
+        "candidate_sha256": "9276e057388104023e7ea10dd01d81d7243126ec04bbc94388f11a2698a07ddc",
+        "package_sha256": "c17fb9f4a8d77c5d6727384a85fbd5f477e672baf7bbc953f66c3528797e67f8",
+        "bundle_sha256": "9cbd3f44d65b0f4a4639ef87271748aa1295ad9695343835e19c614cdabd7a31",
+        "catalog_sha256": "1e0cbb58e4f76f3fc7ae82cf0b66e1a81a0576d891ef735cfabbf5a08a746607",
+        "draft_llm_calls": 1,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {
+          "main_filter": {
+            "purpose": "metadata_main_filter_draft",
+            "invocation_count": 1,
+            "provider_schema_binding": "google_native_json_schema",
+            "provider_schema_binding_distinct_count": 1,
+            "binding_status": "google_native_json_schema",
+            "binding_status_distinct_count": 1,
+            "projection": "google_supported_json_schema_subset.v6",
+            "projection_distinct_count": 1,
+            "authoritative_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "authoritative_schema_hash_distinct_count": 1,
+            "provider_schema_sha256": "175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868",
+            "provider_schema_hash_distinct_count": 1,
+            "runtime_output_schema_sha256": "7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027",
+            "runtime_output_schema_hash_distinct_count": 1,
+            "raw_prompt_persisted": false,
+            "raw_response_persisted": false
+          }
+        },
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "504f7332d95a947304fed106a494fce0ecd18dbad4162b76795acf3c6b1c5382",
+        "validation": {
+          "authoring_proposal": "{'contract_version': 'metadata.authoring.proposal.validation.v1', 'proposal_contract_version': 'metadata.authoring.proposal.v1', 'status': 'complete', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'proposal_sha256': 'd4b967bc694e8fc150b78949961518583bc30105a58a39d76ac07fe6970465b4', 'draft_sha256': 'e9f64cf60417ecc4e20c4338aa389f9e3a7f031d25d263d771b7a4c676b6ac78', 'compact_ir_sha256': 'e9f64cf60417ecc4e20c4338aa389f9e3a7f031d25d263d771b7a4c676b6ac78', 'expanded_draft_sha256': '7e5e1c3c60feffd4cfec0cba6cb21b20ecfe57c56d55c69155d95cad69b9a2d6', 'section_ir_expander_version': 'metadata.main-filter-ir-expansion.v1', 'section_ir_reconciliation': {'contract_version': 'metadata.main-filter-ir-expansion.v1', 'input_count': 20, 'canonical_alias_count': 20, 'canonical_targets_sha256': '2ab8a9eac9226b0f8c098f602bb8ff3a41720a4034cf10c4ef7532521f3bb6dc'}}",
+          "dependency_closure": "passed",
+          "hash_seal": "passed",
+          "llm_schema_bindings": "{'contract_version': 'metadata.llm-schema-bindings.v1', 'bindings': [{'contract_version': 'metadata.llm-schema-binding-summary.v1', 'purpose': 'metadata_main_filter_draft', 'invocation_count': 1, 'provider_schema_binding': 'google_native_json_schema', 'binding_status': 'google_native_json_schema', 'projection': 'google_supported_json_schema_subset.v6', 'authoritative_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'provider_schema_sha256': '175ab517ca0a7f299e07b0ebdda18f3b4a90874d0e0e5c303e4da0d263a61868', 'runtime_output_schema_sha256': '7d07097c57b16f083a04dcde01d1483e971b7cd8fc729835784250060b8c7027', 'raw_prompt_persisted': False, 'raw_response_persisted': False}]}",
+          "schema": "passed",
+          "section_ownership": "passed",
+          "semantic_lint": "passed",
+          "source_bindings": "{'contract_version': 'metadata.source-binding.validation.v1', 'status': 'approved_registry_exact', 'binding_authority': 'approved_registry', 'dataset_count': 10, 'bindings_sha256': '5ee86fc569d24bdb117950523a09bdd301ae5c24af590b7bb3403929dc29c87c', 'registry_sha256': '648df2505dbc825fe496a3944581a2497be1fe425846cb3116bfca5d3b458218', 'dataset_descriptors_sha256': '488ddbdffe767142b95cc2ef010178b3d61902bf7c250d4f76590425a5e28382', 'registry_resolution': 'passed', 'discarded_untrusted_fields': [], 'completed_registry_field_count': 0, 'completed_registry_fields_sha256': '4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945'}",
+          "source_coverage": "{'contract_version': 'source.grounding.evidence.v1', 'mode': 'freeform_llm', 'source_sha256': 'b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278', 'structured_proposal_sha256': '7e5e1c3c60feffd4cfec0cba6cb21b20ecfe57c56d55c69155d95cad69b9a2d6', 'explicit_inventory_coverage': 'not_requested', 'schema_validation': 'passed', 'dependency_closure': 'passed', 'human_approval_required': True, 'compiled_catalog_sha256': '1e0cbb58e4f76f3fc7ae82cf0b66e1a81a0576d891ef735cfabbf5a08a746607', 'coverage_sha256': 'e14f7647ea8d655d2d0141f00d84ab0beb39e83bca3ea3811e513f2c9e855ddd'}"
+        },
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "source.grounding.evidence.v1",
+          "mode": "freeform_llm",
+          "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+          "structured_proposal_sha256": "7e5e1c3c60feffd4cfec0cba6cb21b20ecfe57c56d55c69155d95cad69b9a2d6",
+          "explicit_inventory_coverage": "not_requested",
+          "schema_validation": "passed",
+          "dependency_closure": "passed",
+          "human_approval_required": true,
+          "coverage_sha256": "e14f7647ea8d655d2d0141f00d84ab0beb39e83bca3ea3811e513f2c9e855ddd"
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "metadata.authoring.proposal.validation.v1",
+          "proposal_contract_version": "metadata.authoring.proposal.v1",
+          "status": "complete",
+          "source_sha256": "b2501674b732f51cd63fb097776aedb1bc442978c2cc39529a8d321dd6be5278",
+          "proposal_sha256": "d4b967bc694e8fc150b78949961518583bc30105a58a39d76ac07fe6970465b4",
+          "draft_sha256": "e9f64cf60417ecc4e20c4338aa389f9e3a7f031d25d263d771b7a4c676b6ac78",
+          "compact_ir_sha256": "e9f64cf60417ecc4e20c4338aa389f9e3a7f031d25d263d771b7a4c676b6ac78",
+          "expanded_draft_sha256": "7e5e1c3c60feffd4cfec0cba6cb21b20ecfe57c56d55c69155d95cad69b9a2d6",
+          "section_ir_expander_version": "metadata.main-filter-ir-expansion.v1"
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "diff",
+            "expires_at",
+            "persisted",
+            "revision",
+            "validation"
+          ]
+        },
+        "unchanged_section_count": 11,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "locale",
+          "metrics",
+          "output_profile",
+          "prompt_extensions",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "7ceee1d891e70bbd3d2d2f868428865b3956a6f2a40ed007228304c62dc5f444"
+          ],
+          "api": [
+            "7ceee1d891e70bbd3d2d2f868428865b3956a6f2a40ed007228304c62dc5f444"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "prepare_checks": {
+        "http_200": true,
+        "status_prepared": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "contract_mode_v2": true,
+        "identity_exact": true,
+        "revision_exact": true,
+        "draft_llm_exact": true,
+        "annotation_llm_exact": true,
+        "repair_llm_zero": true,
+        "section_ownership_reported": true
+      },
+      "pending": {
+        "contract_version": "pending.metadata.write.v1",
+        "candidate_id_sha256": "1a0e892d1b87cceb31bd7c05a3cdd8bd7d622c0dea232641d81816b4eecc9b49",
+        "candidate_sha256": "9276e057388104023e7ea10dd01d81d7243126ec04bbc94388f11a2698a07ddc",
+        "pending_payload_sha256": "7211b37143742544b316ba9ad94ee94050b4576eebcd2b11ed397ed9fe1c8825",
+        "authoring_kind": "main_filter",
+        "target_revision": 4,
+        "base_revision": 3,
+        "base_bundle_sha256": "3aee910b44b712f9ab3e64604ac39a72f1c9e1ab06879e9b6c79eaca67d95a36",
+        "base_package_sha256": "a651331c8e81052f80431b326b2f335a0a8469d583ca28ddcc5fb67b011a421e",
+        "prepared_at_sha256": "0d4d68d25c72867cc23f177ff61f5f5e3171556e4b37329963923369590b3873",
+        "expires_at_sha256": "c37d43ed984a9de0d173ac4d700f003be015bb4fff2d43c709f85d8c08107c1e",
+        "raw_pending_payload_persisted": false,
+        "checks": {
+          "schema_exact": true,
+          "wrapper_payload_sha256_exact": true,
+          "candidate_hash_material_exact": true,
+          "authoring_kind_exact": true,
+          "identity_exact": true,
+          "target_revision_exact": true,
+          "base_revision_exact": true,
+          "base_bundle_hash_exact": true,
+          "base_package_hash_exact": true,
+          "hash_material_base_pin_exact": true,
+          "workflow_prepared": true,
+          "bson_expiry_present": true
+        },
+        "passed": true
+      },
+      "approval": {
+        "contract_version": "approval.event.v1",
+        "event_sha256": "9375da1a7673b94d17a359245af6ab19bfbe055df43217a0a7c8f9f3d52506ed",
+        "event_id_sha256": "c293d1709081adab57a537faa06592a21d4252dc90b6d35a01058615df317c03",
+        "subject_id_sha256": "1a3011befaeee0dac09e5073dab3f52ad23fb8c6023191d7c89db2dfe7c7dc9a",
+        "idempotency_key_sha256": "d28983cced68387fb3369af170c35cdcfbe848d71cb44a193f37bd7ed810aa1b",
+        "raw_event_persisted": false,
+        "checks": {
+          "approval_schema_exact": true,
+          "transitioned_once": true,
+          "workflow_approved": true,
+          "pending_payload_immutable": true,
+          "pending_payload_seal_immutable": true,
+          "event_hash_exact": true,
+          "event_id_exact": true
+        }
+      },
+      "approval_tamper_negatives": [
+        {
+          "mutated_field": "event_id",
+          "event_sha256": "4f58a01a5cf0b816db2b80055975b961aca059e4b2f408dad56aa47b026803b9",
+          "http_response_sha256": "012fbd1e0db1d37a4b89cecee3e3e27f1fb1829d8df40e19e0345f0c85386345",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "subject_id",
+          "event_sha256": "95b9fa42f1d42696a12a6f9aa1dcb7f0db49a2a0c99c7ed46c58ada53a527942",
+          "http_response_sha256": "b847a52e3b65adb731a416cb006370e76d3368773b8cfd5b32fa78b2aa482a48",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "decided_at",
+          "event_sha256": "b40591216116c985231399e4491ac916eec8d92141888e8904b449ddc37a7dac",
+          "http_response_sha256": "68fa3a71faee14f6dc91000db03feefde0b1bd55ca26536317da289d21037192",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        },
+        {
+          "mutated_field": "idempotency_key",
+          "event_sha256": "19d993490b2f3e6f1df1c979771d4eb05cebb42df5ab812a035ee0e0e1b4b374",
+          "http_response_sha256": "8c08a54288390b460f5631eea311d21ad146abaa59945021a6135052d02027cc",
+          "error_code": "approval_hash_mismatch",
+          "error_stage": "metadata_execute",
+          "error_invariant": "approval_event_external_seal",
+          "error_message_sha256": "85ea1103aadfa8619891ea8a1beb54def79ee29aa8fcd80a2f0b0b24a8ea6a51",
+          "raw_event_persisted": false,
+          "checks": {
+            "http_200": true,
+            "status_error": true,
+            "approval_hash_mismatch": true,
+            "approval_event_seal_invariant": true,
+            "no_llm_calls": true,
+            "wrapper_still_approved": true,
+            "wrapper_seal_unchanged": true,
+            "pending_payload_unchanged": true,
+            "active_revision_unchanged": true,
+            "active_package_unchanged": true
+          },
+          "passed": true
+        }
+      ],
+      "execute_http_response_sha256": "18b84d2c19f42489a889213cb151551c340deb0b06f8848c57df084dfefaf743",
+      "execute": {
+        "response_sha256": "f9b126f5e032002419151ff8716d984d2ee906ccfab38093008e5f704d599651",
+        "response_hash_valid": true,
+        "response_count": 1,
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "main_filter",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "manufacturing",
+        "environment": "v6_release_pass_e3df1a7d",
+        "revision": 4,
+        "candidate_id": "candidate:9276e057388104023e7ea10dd01d81d7243126ec04bbc94388f11a2698a07ddc",
+        "candidate_sha256": "9276e057388104023e7ea10dd01d81d7243126ec04bbc94388f11a2698a07ddc",
+        "package_sha256": "c17fb9f4a8d77c5d6727384a85fbd5f477e672baf7bbc953f66c3528797e67f8",
+        "bundle_sha256": "9cbd3f44d65b0f4a4639ef87271748aa1295ad9695343835e19c614cdabd7a31",
+        "catalog_sha256": "1e0cbb58e4f76f3fc7ae82cf0b66e1a81a0576d891ef735cfabbf5a08a746607",
+        "draft_llm_calls": 0,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+        "llm_invocation_count": 0,
+        "llm_response_byte_sizes": [],
+        "llm_schema_bindings": {},
+        "error_code": "",
+        "error_stage": "",
+        "error_location": "",
+        "error_reason": "",
+        "error_framing_reason": "",
+        "error_input_name": "",
+        "error_expected_purpose": "",
+        "error_response_bytes": 0,
+        "error_path": "",
+        "error_detail_keys": [],
+        "error_type": "",
+        "error_message_sha256": "",
+        "error_operator_sha256": "",
+        "error_metric_id_sha256": "",
+        "error_field_sha256": "",
+        "manifest_error_code": "",
+        "error_dataset_id_sha256": "",
+        "error_detail_value_sha256": "",
+        "error_field_id_sha256": "",
+        "error_physical_column_sha256": "",
+        "error_candidate_count": 0,
+        "error_detail_index": 0,
+        "error_invariant": "",
+        "diff_sha256": "",
+        "validation": {},
+        "trusted_blueprint_validation": {
+          "contract_version": "",
+          "blueprint_sha256": "",
+          "executable_sha256": "",
+          "annotation_proposal_sha256": "",
+          "external_pin": "",
+          "executable_immutable": ""
+        },
+        "source_grounding_validation": {
+          "contract_version": "",
+          "mode": "",
+          "source_sha256": "",
+          "structured_proposal_sha256": "",
+          "explicit_inventory_coverage": "",
+          "schema_validation": "",
+          "dependency_closure": "",
+          "human_approval_required": null,
+          "coverage_sha256": ""
+        },
+        "authoring_proposal_validation": {
+          "contract_version": "",
+          "proposal_contract_version": "",
+          "status": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "draft_sha256": "",
+          "compact_ir_sha256": "",
+          "expanded_draft_sha256": "",
+          "section_ir_expander_version": ""
+        },
+        "authoring_proposals_validation": {},
+        "clarification_validation": {
+          "contract_version": "",
+          "source_sha256": "",
+          "proposal_sha256": "",
+          "questions_count": 0,
+          "missing_fields_count": 0,
+          "questions_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "missing_fields_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "raw_clarification_persisted": false,
+          "branches": [],
+          "safe_missing_fields": []
+        },
+        "response_field_presence": {
+          "candidate_fields": [
+            "candidate_id",
+            "candidate_sha256"
+          ],
+          "package_fields": [
+            "bundle_sha256",
+            "catalog_sha256",
+            "package_sha256"
+          ],
+          "persistence_fields": [
+            "revision"
+          ]
+        },
+        "unchanged_section_count": 0,
+        "unchanged_sections_all": true,
+        "unchanged_section_names": [],
+        "terminal_blocks": {
+          "message": 1,
+          "api": 1
+        },
+        "terminal_hashes": {
+          "message": [
+            "f9b126f5e032002419151ff8716d984d2ee906ccfab38093008e5f704d599651"
+          ],
+          "api": [
+            "f9b126f5e032002419151ff8716d984d2ee906ccfab38093008e5f704d599651"
+          ]
+        },
+        "terminal_equivalent": true
+      },
+      "execute_checks": {
+        "http_200": true,
+        "status_committed": true,
+        "authoring_kind_exact": true,
+        "response_hash_valid": true,
+        "terminal_equivalent": true,
+        "draft_llm_zero": true,
+        "annotation_llm_zero": true,
+        "repair_llm_zero": true,
+        "candidate_hash_exact": true,
+        "revision_exact": true
+      },
+      "continuity_checks": {
+        "fresh_base_for_domain": true,
+        "revision_contiguous": true,
+        "active_revision_exact": true,
+        "prepared_package_exact": true,
+        "prepared_bundle_exact": true,
+        "response_package_exact": true,
+        "response_bundle_exact": true,
+        "response_catalog_exact": true,
+        "package_hash_changed": true
+      },
+      "trusted_blueprint_checks": {},
+      "authoring_proposal_checks": {
+        "validation_contract_exact": true,
+        "proposal_contract_exact": true,
+        "status_complete": true,
+        "source_hash_exact": true,
+        "proposal_sealed": true,
+        "draft_sealed": true,
+        "expanded_draft_sealed": true
+      },
+      "split_authoring_proposal_checks": {},
+      "semantic_completeness": {
+        "prepared_provider_candidate": {
+          "not_applicable": true,
+          "passed": true
+        },
+        "committed_catalog": {
+          "not_applicable": true,
+          "passed": true
+        }
+      },
+      "ownership": {
+        "owned_sections": [
+          "aliases",
+          "entity_groups",
+          "grains",
+          "orderings",
+          "predicates",
+          "recipes"
+        ],
+        "unchanged_section_count": 15,
+        "unchanged_section_names": [
+          "compiler_version",
+          "contract_version",
+          "datasets",
+          "description",
+          "display_name",
+          "domain_id",
+          "environment",
+          "fields",
+          "locale",
+          "metrics",
+          "output_profile",
+          "prompt_extensions",
+          "relations",
+          "specialized_functions",
+          "timezone"
+        ],
+        "changed_outside_ownership": [],
+        "changed_owned_sections": [],
+        "checks": {
+          "other_sections_unchanged": true,
+          "at_least_one_owned_section_changed": false
+        }
+      },
+      "policy_checks": {},
+      "after": {
+        "revision": 4,
+        "package_sha256": "c17fb9f4a8d77c5d6727384a85fbd5f477e672baf7bbc953f66c3528797e67f8",
+        "bundle_sha256": "9cbd3f44d65b0f4a4639ef87271748aa1295ad9695343835e19c614cdabd7a31",
+        "catalog_sha256": "1e0cbb58e4f76f3fc7ae82cf0b66e1a81a0576d891ef735cfabbf5a08a746607",
+        "section_hashes_sha256": "e1172fac3e696e005f33bd5fe217783bd6866eea81ab456408b04198fbbf47b4"
+      },
+      "checks": {
+        "prepare": true,
+        "pending": true,
+        "approval": true,
+        "approval_tamper_negatives": true,
+        "execute": true,
+        "continuity": true,
+        "trusted_blueprint": true,
+        "freeform_proposal": true,
+        "split_freeform_proposals": true,
+        "freeform_grounding": true,
+        "ownership": true,
+        "policy_overlay": true,
+        "prepared_semantic_completeness": true,
+        "committed_semantic_completeness": true
+      },
+      "passed": true
+    }
+  ],
+  "domain_bootstrap_checks": {
+    "evaluated": true,
+    "package_sha256": "5f95de018ef427d91579606ba3fc110ccd8fd807721e2ad0ad9d9ca9c2766875",
+    "catalog_sha256": "7fbfcaf56abe6fe2e0edb4b0767c74e9317427438445116bc6ac5b7caef3b348",
+    "counts": {
+      "datasets": 10,
+      "fields": 47,
+      "metrics": 17,
+      "relations": 0,
+      "recipes": 10
+    },
+    "checks": {
+      "revision_one": true,
+      "identity_exact": true,
+      "compiler_pinned": true,
+      "datasets_nonempty": true,
+      "fields_nonempty": true,
+      "composed_source_hash_exact": true,
+      "domain_input_node_hash_exact": true,
+      "dataset_input_node_hash_exact": true,
+      "main_filter_input_node_hash_exact": true,
+      "blueprint_not_flow_input": true
+    },
+    "passed": true
+  },
+  "domain_oracle_checks": {
+    "evaluated": true,
+    "actual_executable_projection_sha256": "5ac2d521b20c7e463380c7fa85cfb9a006a96e77b9370c2d4e10626ca63a8cac",
+    "oracle_executable_projection_sha256": "5ac2d521b20c7e463380c7fa85cfb9a006a96e77b9370c2d4e10626ca63a8cac",
+    "actual_section_hashes": {
+      "compiler_version": "d02ab83fb2c3ab9b36ecea2bf194f2ba3a2acaf64d4c39a12a9e9af7a57c5003",
+      "contract_version": "2eb2fce6fc2996cd489c11b72a0bba63d74c0f1b731704c8680b1af59d515783",
+      "datasets": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+      "domain_id": "0a6359ee898be8d4f20ebd3c772ac7af2be6faee0ea0b4af5b8e02dd68144273",
+      "entity_groups": "fe25811a9f6e724b9a14a45536774b6035143718b181ae58332cc8f10a5b42a3",
+      "environment": "e1b7439b1ae9cbaa125b65f84471bb857e76691aa0ef36adb79550f0ef5bc0fc",
+      "fields": "571ab20051473f83cfa0ae5c1866ed6bdc24c9b272f09daf8b0a172ee30924a3",
+      "grains": "f70b7264a83a1ee868fdcdb3b5568435e1027cf3cf079275796312a9648e85d5",
+      "locale": "35f1c75fc23ec6465b08b1c51fd564f83a2f3948ddad6d766e649b6ef9778134",
+      "metrics": "b5b472839aa27b18169c4c4adcbeb6e81e8b674a8c2dcc7494d0aa4548268d6a",
+      "orderings": "802ee5e0bb9c4caf3625b9a9c370bc2be630c474b29ecc04239bccdba4ba3173",
+      "predicates": "36e049e67510ca4d653d6aca0100817bb49e2a6bf6ab538fe9ee780897c5e135",
+      "recipes": "86748335e437cb4766dc2a3876a1a513c7372b251ee1dc3031c54c4c641e5e49",
+      "relations": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "revision": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+      "timezone": "a2e20fe1cfe5c0af6359f40b445dd4941ab8ac393e4f8983aa738ebfcc4618a7"
+    },
+    "oracle_section_hashes": {
+      "compiler_version": "d02ab83fb2c3ab9b36ecea2bf194f2ba3a2acaf64d4c39a12a9e9af7a57c5003",
+      "contract_version": "2eb2fce6fc2996cd489c11b72a0bba63d74c0f1b731704c8680b1af59d515783",
+      "datasets": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+      "domain_id": "0a6359ee898be8d4f20ebd3c772ac7af2be6faee0ea0b4af5b8e02dd68144273",
+      "entity_groups": "fe25811a9f6e724b9a14a45536774b6035143718b181ae58332cc8f10a5b42a3",
+      "environment": "e1b7439b1ae9cbaa125b65f84471bb857e76691aa0ef36adb79550f0ef5bc0fc",
+      "fields": "571ab20051473f83cfa0ae5c1866ed6bdc24c9b272f09daf8b0a172ee30924a3",
+      "grains": "f70b7264a83a1ee868fdcdb3b5568435e1027cf3cf079275796312a9648e85d5",
+      "locale": "35f1c75fc23ec6465b08b1c51fd564f83a2f3948ddad6d766e649b6ef9778134",
+      "metrics": "b5b472839aa27b18169c4c4adcbeb6e81e8b674a8c2dcc7494d0aa4548268d6a",
+      "orderings": "802ee5e0bb9c4caf3625b9a9c370bc2be630c474b29ecc04239bccdba4ba3173",
+      "predicates": "36e049e67510ca4d653d6aca0100817bb49e2a6bf6ab538fe9ee780897c5e135",
+      "recipes": "86748335e437cb4766dc2a3876a1a513c7372b251ee1dc3031c54c4c641e5e49",
+      "relations": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "revision": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a",
+      "timezone": "a2e20fe1cfe5c0af6359f40b445dd4941ab8ac393e4f8983aa738ebfcc4618a7"
+    },
+    "actual_counts": {
+      "datasets": 10,
+      "entity_groups": 25,
+      "fields": 47,
+      "grains": 1,
+      "metrics": 17,
+      "orderings": 1,
+      "predicates": 7,
+      "recipes": 10,
+      "relations": 0
+    },
+    "oracle_counts": {
+      "datasets": 10,
+      "entity_groups": 25,
+      "fields": 47,
+      "grains": 1,
+      "metrics": 17,
+      "orderings": 1,
+      "predicates": 7,
+      "recipes": 10,
+      "relations": 0
+    },
+    "actual_dataset_projection_sha256": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+    "oracle_dataset_projection_sha256": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+    "source_registry_sha256": "878f53f475632474c9ee70b85620d038ca43c09c4b86d9c0b031a3dcd1078de1",
+    "field_role_normalization": {
+      "mode": "compiler_canonical_order",
+      "order_sha256": "4072fba7fc897dc3dfab1dc7acec5daa1987ed6c79f5e7c51425248eb8e3c9a8",
+      "set_only_comparison_used": false
+    },
+    "alias_delta": {
+      "closed_schema": true,
+      "registered_targets": true,
+      "baseline_preserved": true,
+      "additive_only": true,
+      "worker_delta_policy_exact": true,
+      "delta_shape_priority_exact": true,
+      "delta_source_grounded": true,
+      "delta_labels_unique": true,
+      "delta_value_count": 11,
+      "delta_source_unmatched_count": 0,
+      "delta_duplicate_normalized_count": 0,
+      "delta_cross_target_count": 0,
+      "delta_baseline_conflict_count": 0,
+      "actual_count": 141,
+      "baseline_count": 141,
+      "added_card_count": 0,
+      "extended_card_count": 7,
+      "actual_aliases_sha256": "a561d0a3ec02439fe9d523a4f3c348f0aeca876c24dc89f81d030c79d0309a98",
+      "baseline_aliases_sha256": "860d2b7e833d31061bad27639ccf786430f5ca8b054b1191c546769b5a70edff",
+      "alias_payload_persisted": false,
+      "main_filter_source_persisted": false
+    },
+    "display_annotations": {
+      "display_annotations_sha256": "a6e5a666be00a1be6ceecaa05741600d4ab59d15957a2f39c01fb6bcad8696cc",
+      "annotation_payload_persisted": false,
+      "checks": {
+        "root_display_name_valid": true,
+        "root_description_valid": true,
+        "dataset_display_names_complete": true
+      },
+      "passed": true
+    },
+    "policy_overlay": {
+      "actual_policy_sha256": "16d06b052e8126f687e9ced25796930c288e037ffeb0803cd27e75ab6c59af35",
+      "expected_policy_sha256": "16d06b052e8126f687e9ced25796930c288e037ffeb0803cd27e75ab6c59af35",
+      "policy_payload_persisted": false,
+      "checks": {
+        "prompt_extensions_closed": true,
+        "prompt_extensions_exact": true,
+        "specialized_functions_exact": true,
+        "output_profile_exact": true
+      },
+      "passed": true
+    },
+    "excluded_sections": [
+      "aliases",
+      "catalog_sha256",
+      "description",
+      "display_name",
+      "output_profile",
+      "prompt_extensions",
+      "specialized_functions"
+    ],
+    "oracle_blueprint_sha256": "577699cd19f9ceea99525424a42ece303db6eef2d2f1cc0f62377e69bcc32862",
+    "oracle_payload_persisted": false,
+    "checks": {
+      "revision_exact": true,
+      "identity_exact": true,
+      "compiler_exact": true,
+      "section_keys_exact": true,
+      "section_counts_exact": true,
+      "section_hashes_exact": true,
+      "executable_runtime_projection_exact": true,
+      "registry_dataset_binding_exact": true,
+      "compiler_derived_fields_exact": true,
+      "alias_closed_schema": true,
+      "alias_registered_targets": true,
+      "baseline_aliases_preserved": true,
+      "worker_alias_delta_additive_only": true,
+      "worker_alias_delta_policy_exact": true,
+      "worker_alias_delta_shape_priority_exact": true,
+      "worker_alias_delta_source_grounded": true,
+      "worker_alias_delta_labels_unique": true,
+      "display_annotations_valid": true,
+      "policy_overlay_exact": true,
+      "oracle_not_flow_input": true
+    },
+    "passed": true
+  },
+  "dataset_patch_checks": {
+    "evaluated": true,
+    "execution_projection_before_sha256": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+    "execution_projection_after_sha256": "a36a8ff4cadb05013d81919f7591aa0881f90c41e7fa47d5ced145fba90e7bf2",
+    "checks": {
+      "dataset_keys_exact": true,
+      "execution_projection_unchanged": true,
+      "display_annotations_stable": true
+    },
+    "passed": true
+  },
+  "cycle_order_exact": true,
+  "revision_chain_exact": true,
+  "draft_llm_calls": 5,
+  "annotation_llm_calls": 0,
+  "repair_llm_calls": 0,
+  "domain_policy_llm_calls_zero": true,
+  "domain_freeform_contract": {
+    "cycle_present": true,
+    "freeform_mode_requested": true,
+    "blueprint_not_flow_input": true,
+    "split_draft_llm_three": true,
+    "annotation_llm_zero": true,
+    "repair_llm_zero": true,
+    "grounding_mode_evidenced": true,
+    "structured_proposal_sealed": true,
+    "proposal_contract_exact": true,
+    "source_hash_exact": true,
+    "proposal_hash_sealed": true,
+    "draft_hash_sealed": true,
+    "draft_hash_matches_grounding": true,
+    "split_proposal_branches_exact": true,
+    "split_proposal_source_hashes_exact": true,
+    "split_proposal_hashes_sealed": true
+  },
+  "expected_llm_calls": {
+    "draft": 5,
+    "annotation": 0,
+    "repair": 0
+  },
+  "loader_roundtrip": {
+    "ok": true,
+    "stage": "domain_bundle",
+    "domain_id": "manufacturing",
+    "environment": "v6_release_pass_e3df1a7d",
+    "revision": "4",
+    "package_sha256": "c17fb9f4a8d77c5d6727384a85fbd5f477e672baf7bbc953f66c3528797e67f8",
+    "bundle_sha256": "9cbd3f44d65b0f4a4639ef87271748aa1295ad9695343835e19c614cdabd7a31",
+    "catalog_sha256": "1e0cbb58e4f76f3fc7ae82cf0b66e1a81a0576d891ef735cfabbf5a08a746607"
+  },
+  "loader_checks": {
+    "loader_ok": true,
+    "identity_exact": true,
+    "revision_exact": true,
+    "package_hash_exact": true,
+    "bundle_hash_exact": true
+  },
+  "production_pointer": {
+    "before": {
+      "environment": "production",
+      "domain_id": "manufacturing",
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "raw_pointer_persisted": false
+    },
+    "after": {
+      "environment": "production",
+      "domain_id": "manufacturing",
+      "present": false,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+      "raw_pointer_persisted": false
+    },
+    "checks": {
+      "identity_exact": true,
+      "presence_unchanged": true,
+      "hash_unchanged": true
+    },
+    "passed": true
+  },
+  "data_analysis_flow_sha256": "0b8f8a078685448506557345928f413905ab259c003758fb834416fca7d794bd",
+  "data_analysis": {
+    "contract_version": "langflow.http.e2e.validation.v1",
+    "server_url_sha256": "afcb26583a5c2db7bcde7dd5545241f2fe3de50c387c4051d5c52c0b4927d675",
+    "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+    "flow_sha256": "0b8f8a078685448506557345928f413905ab259c003758fb834416fca7d794bd",
+    "uploaded_flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+    "uploaded_endpoint_name": "metadata_v6_data_analysis",
+    "upload_node_count": 33,
+    "model": "gemini-3.5-flash-lite",
+    "model_contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "flow_model_contract": {
+      "contract": {
+        "requested_model": "gemini-3.5-flash-lite",
+        "temperature": 0,
+        "candidate_count": 1,
+        "fallback_enabled": false,
+        "fallback_models": []
+      },
+      "required": true,
+      "model_node_count": 1,
+      "nodes": [
+        {
+          "node_id": "intent_language_model",
+          "model_names": [
+            "gemini-3.5-flash-lite"
+          ],
+          "providers": [
+            "Google Generative AI"
+          ],
+          "temperature": 0.0,
+          "stream": false,
+          "configured_fallback_fields": [],
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    "domain_id": "manufacturing",
+    "environment": "v6_release_pass_e3df1a7d",
+    "metadata_source_mode": "v6_active",
+    "anonymous_multiturn_export_defaults": {
+      "request_state_capsule": false,
+      "response_state_commit": false
+    },
+    "anonymous_multiturn_validation_opt_in": true,
+    "raw_langflow_responses_persisted": false,
+    "prompts_persisted": false,
+    "secrets_persisted": false,
+    "case_count": 4,
+    "passed": 4,
+    "failed": 0,
+    "multiturn_state_progression": true,
+    "rows": [
+      {
+        "case_id": "HTTP-DETERMINISTIC",
+        "session_group": "deterministic",
+        "http_status": 200,
+        "http_response_sha256": "1e3a38f0fd58ffad90e55834d3306bb30766670be877aef43be532ea00ca1f8e",
+        "expected_route": "deterministic",
+        "expected_intent_llm_calls": 0,
+        "evidence": {
+          "canonical_response_sha256": "b57cf98292021983f05cd6beae8ebec53d29adc8987a3f754fd77d1ca27aa3ab",
+          "canonical_hash_count": 1,
+          "terminal_hashes": {
+            "message": [
+              "b57cf98292021983f05cd6beae8ebec53d29adc8987a3f754fd77d1ca27aa3ab"
+            ],
+            "gaia": [
+              "b57cf98292021983f05cd6beae8ebec53d29adc8987a3f754fd77d1ca27aa3ab"
+            ],
+            "api": [
+              "b57cf98292021983f05cd6beae8ebec53d29adc8987a3f754fd77d1ca27aa3ab"
+            ],
+            "chat_output": []
+          },
+          "gaia_metadata_response_sha256": [
+            "b57cf98292021983f05cd6beae8ebec53d29adc8987a3f754fd77d1ca27aa3ab"
+          ],
+          "terminal_block_counts": {
+            "message": 1,
+            "gaia": 1,
+            "api": 1,
+            "chat_output": 0
+          },
+          "terminal_equivalent": true,
+          "status": "ok",
+          "route": "deterministic",
+          "error": {
+            "code": "",
+            "stage": "",
+            "detail_keys": []
+          },
+          "usage": {
+            "intent_llm_calls": 0,
+            "intent_retry_calls": 0,
+            "answer_llm_calls": 0,
+            "pandas_code_llm_calls": 0,
+            "pandas_repair_llm_calls": 0
+          },
+          "state_version": 1,
+          "executed_result_ref_sha256": "a5452ab97dae495df7ea0f4be41545b82cf74934d7797ba8451295088095dd1c",
+          "persistence_contract": {
+            "state_present": true,
+            "data_ref_count": 2,
+            "data_ref_roles": [
+              "analysis_result",
+              "source_snapshot"
+            ],
+            "answer_download_count": 2,
+            "download_url_count": 0,
+            "all_data_ref_ids_valid": true,
+            "all_download_ref_ids_valid": true,
+            "download_refs_match_data_refs": true,
+            "one_analysis_result_ref": true,
+            "state_ref_matches_analysis_result": true,
+            "result_table_ref_matches_analysis_result": true
+          }
+        },
+        "checks": {
+          "http_200": true,
+          "status_ok_or_empty": true,
+          "route_exact": true,
+          "intent_calls_exact": true,
+          "intent_retry_zero": true,
+          "answer_calls_zero": true,
+          "pandas_code_calls_zero": true,
+          "pandas_repair_calls_zero": true,
+          "state_version_exact": true,
+          "persistent_state_present": true,
+          "persistent_data_refs_present": true,
+          "persistent_download_entries_present": true,
+          "persistent_ref_ids_valid": true,
+          "persistent_ref_sets_exact": true,
+          "persistent_analysis_ref_exact": true,
+          "terminal_equivalent": true
+        },
+        "passed": true
+      },
+      {
+        "case_id": "HTTP-INTENT",
+        "session_group": "intent",
+        "http_status": 200,
+        "http_response_sha256": "198765ae8fde1df4db15a745c02403a6fd5c0ec38fb2a98839b748e9f6bc4681",
+        "expected_route": "intent_llm",
+        "expected_intent_llm_calls": 1,
+        "evidence": {
+          "canonical_response_sha256": "7ad6d2d67db940e14797a6da4bbd39e5ba6afd5862891b0243b01e651e55baec",
+          "canonical_hash_count": 1,
+          "terminal_hashes": {
+            "message": [
+              "7ad6d2d67db940e14797a6da4bbd39e5ba6afd5862891b0243b01e651e55baec"
+            ],
+            "gaia": [
+              "7ad6d2d67db940e14797a6da4bbd39e5ba6afd5862891b0243b01e651e55baec"
+            ],
+            "api": [
+              "7ad6d2d67db940e14797a6da4bbd39e5ba6afd5862891b0243b01e651e55baec"
+            ],
+            "chat_output": []
+          },
+          "gaia_metadata_response_sha256": [
+            "7ad6d2d67db940e14797a6da4bbd39e5ba6afd5862891b0243b01e651e55baec"
+          ],
+          "terminal_block_counts": {
+            "message": 1,
+            "gaia": 1,
+            "api": 1,
+            "chat_output": 0
+          },
+          "terminal_equivalent": true,
+          "status": "ok",
+          "route": "intent_llm",
+          "error": {
+            "code": "",
+            "stage": "",
+            "detail_keys": []
+          },
+          "usage": {
+            "intent_llm_calls": 1,
+            "intent_retry_calls": 0,
+            "answer_llm_calls": 0,
+            "pandas_code_llm_calls": 0,
+            "pandas_repair_llm_calls": 0
+          },
+          "state_version": 1,
+          "executed_result_ref_sha256": "35e74334f253fae6680dbf5d22c470762dff8c5ea392a06986fdd5bbaf9d3bb3",
+          "persistence_contract": {
+            "state_present": true,
+            "data_ref_count": 2,
+            "data_ref_roles": [
+              "analysis_result",
+              "source_snapshot"
+            ],
+            "answer_download_count": 2,
+            "download_url_count": 0,
+            "all_data_ref_ids_valid": true,
+            "all_download_ref_ids_valid": true,
+            "download_refs_match_data_refs": true,
+            "one_analysis_result_ref": true,
+            "state_ref_matches_analysis_result": true,
+            "result_table_ref_matches_analysis_result": true
+          }
+        },
+        "checks": {
+          "http_200": true,
+          "status_ok_or_empty": true,
+          "route_exact": true,
+          "intent_calls_exact": true,
+          "intent_retry_zero": true,
+          "answer_calls_zero": true,
+          "pandas_code_calls_zero": true,
+          "pandas_repair_calls_zero": true,
+          "state_version_exact": true,
+          "persistent_state_present": true,
+          "persistent_data_refs_present": true,
+          "persistent_download_entries_present": true,
+          "persistent_ref_ids_valid": true,
+          "persistent_ref_sets_exact": true,
+          "persistent_analysis_ref_exact": true,
+          "terminal_equivalent": true
+        },
+        "passed": true
+      },
+      {
+        "case_id": "HTTP-MULTITURN-1",
+        "session_group": "multiturn",
+        "http_status": 200,
+        "http_response_sha256": "9f6a04a289f5b2be2dfec95770c183454b0697e09712777202426f9ead7a310f",
+        "expected_route": "deterministic",
+        "expected_intent_llm_calls": 0,
+        "evidence": {
+          "canonical_response_sha256": "71a86ea49b861e1775293bf28e605862e29f7de9a68ab9f08f3594ecf4ff1a40",
+          "canonical_hash_count": 1,
+          "terminal_hashes": {
+            "message": [
+              "71a86ea49b861e1775293bf28e605862e29f7de9a68ab9f08f3594ecf4ff1a40"
+            ],
+            "gaia": [
+              "71a86ea49b861e1775293bf28e605862e29f7de9a68ab9f08f3594ecf4ff1a40"
+            ],
+            "api": [
+              "71a86ea49b861e1775293bf28e605862e29f7de9a68ab9f08f3594ecf4ff1a40"
+            ],
+            "chat_output": []
+          },
+          "gaia_metadata_response_sha256": [
+            "71a86ea49b861e1775293bf28e605862e29f7de9a68ab9f08f3594ecf4ff1a40"
+          ],
+          "terminal_block_counts": {
+            "message": 1,
+            "gaia": 1,
+            "api": 1,
+            "chat_output": 0
+          },
+          "terminal_equivalent": true,
+          "status": "ok",
+          "route": "deterministic",
+          "error": {
+            "code": "",
+            "stage": "",
+            "detail_keys": []
+          },
+          "usage": {
+            "intent_llm_calls": 0,
+            "intent_retry_calls": 0,
+            "answer_llm_calls": 0,
+            "pandas_code_llm_calls": 0,
+            "pandas_repair_llm_calls": 0
+          },
+          "state_version": 1,
+          "executed_result_ref_sha256": "e9c032806fc059b79ab3165477e0b1034e0369e866c0831d68a72913a1979226",
+          "persistence_contract": {
+            "state_present": true,
+            "data_ref_count": 2,
+            "data_ref_roles": [
+              "analysis_result",
+              "source_snapshot"
+            ],
+            "answer_download_count": 2,
+            "download_url_count": 0,
+            "all_data_ref_ids_valid": true,
+            "all_download_ref_ids_valid": true,
+            "download_refs_match_data_refs": true,
+            "one_analysis_result_ref": true,
+            "state_ref_matches_analysis_result": true,
+            "result_table_ref_matches_analysis_result": true
+          }
+        },
+        "checks": {
+          "http_200": true,
+          "status_ok_or_empty": true,
+          "route_exact": true,
+          "intent_calls_exact": true,
+          "intent_retry_zero": true,
+          "answer_calls_zero": true,
+          "pandas_code_calls_zero": true,
+          "pandas_repair_calls_zero": true,
+          "state_version_exact": true,
+          "persistent_state_present": true,
+          "persistent_data_refs_present": true,
+          "persistent_download_entries_present": true,
+          "persistent_ref_ids_valid": true,
+          "persistent_ref_sets_exact": true,
+          "persistent_analysis_ref_exact": true,
+          "terminal_equivalent": true
+        },
+        "passed": true
+      },
+      {
+        "case_id": "HTTP-MULTITURN-2",
+        "session_group": "multiturn",
+        "http_status": 200,
+        "http_response_sha256": "c27164caa93da62641a3844c766a3872ceebc2302299592d0239925a29c44576",
+        "expected_route": "deterministic",
+        "expected_intent_llm_calls": 0,
+        "evidence": {
+          "canonical_response_sha256": "eafb8b2a9edcdc80ff8071ace612b21430609212a468bbe52a355e38e2611f9c",
+          "canonical_hash_count": 1,
+          "terminal_hashes": {
+            "message": [
+              "eafb8b2a9edcdc80ff8071ace612b21430609212a468bbe52a355e38e2611f9c"
+            ],
+            "gaia": [
+              "eafb8b2a9edcdc80ff8071ace612b21430609212a468bbe52a355e38e2611f9c"
+            ],
+            "api": [
+              "eafb8b2a9edcdc80ff8071ace612b21430609212a468bbe52a355e38e2611f9c"
+            ],
+            "chat_output": []
+          },
+          "gaia_metadata_response_sha256": [
+            "eafb8b2a9edcdc80ff8071ace612b21430609212a468bbe52a355e38e2611f9c"
+          ],
+          "terminal_block_counts": {
+            "message": 1,
+            "gaia": 1,
+            "api": 1,
+            "chat_output": 0
+          },
+          "terminal_equivalent": true,
+          "status": "ok",
+          "route": "deterministic",
+          "error": {
+            "code": "",
+            "stage": "",
+            "detail_keys": []
+          },
+          "usage": {
+            "intent_llm_calls": 0,
+            "intent_retry_calls": 0,
+            "answer_llm_calls": 0,
+            "pandas_code_llm_calls": 0,
+            "pandas_repair_llm_calls": 0
+          },
+          "state_version": 2,
+          "executed_result_ref_sha256": "6f1afd1e6afb1e456db7c71a38a3498000e45f02f001e62354ecb86f88f3b7c2",
+          "persistence_contract": {
+            "state_present": true,
+            "data_ref_count": 1,
+            "data_ref_roles": [
+              "analysis_result"
+            ],
+            "answer_download_count": 1,
+            "download_url_count": 0,
+            "all_data_ref_ids_valid": true,
+            "all_download_ref_ids_valid": true,
+            "download_refs_match_data_refs": true,
+            "one_analysis_result_ref": true,
+            "state_ref_matches_analysis_result": true,
+            "result_table_ref_matches_analysis_result": true
+          }
+        },
+        "checks": {
+          "http_200": true,
+          "status_ok_or_empty": true,
+          "route_exact": true,
+          "intent_calls_exact": true,
+          "intent_retry_zero": true,
+          "answer_calls_zero": true,
+          "pandas_code_calls_zero": true,
+          "pandas_repair_calls_zero": true,
+          "state_version_exact": true,
+          "persistent_state_present": true,
+          "persistent_data_refs_present": true,
+          "persistent_download_entries_present": true,
+          "persistent_ref_ids_valid": true,
+          "persistent_ref_sets_exact": true,
+          "persistent_analysis_ref_exact": true,
+          "terminal_equivalent": true
+        },
+        "passed": true
+      }
+    ],
+    "all_passed": true
+  },
+  "all_passed": true
+}

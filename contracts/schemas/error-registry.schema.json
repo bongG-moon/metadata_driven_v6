@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/error-registry.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "error_registry.v1",
+      "type": "string"
+    },
+    "errors": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "enum": [
+              "request_invalid",
+              "route_contract_error",
+              "intent_contract_error",
+              "metadata_dependency_error",
+              "metadata_budget_exceeded",
+              "plan_contract_error",
+              "missing_required_param",
+              "parameter_value_limit_exceeded",
+              "ambiguous_alias",
+              "ambiguous_field_binding",
+              "source_missing",
+              "source_retrieval_failed",
+              "source_timeout",
+              "source_row_limit_exceeded",
+              "source_acl_denied",
+              "source_schema_mismatch",
+              "source_coverage_incomplete",
+              "unsupported_operation",
+              "execution_memory_limit_exceeded",
+              "metric_rollup_violation",
+              "metric_lineage_violation",
+              "join_cardinality_violation",
+              "result_schema_violation",
+              "state_reference_expired",
+              "state_reference_forbidden",
+              "state_conflict",
+              "state_policy_mismatch",
+              "answer_claim_violation",
+              "approval_not_found",
+              "approval_expired",
+              "approval_hash_mismatch",
+              "approval_already_claimed",
+              "stale_candidate"
+            ],
+            "type": "string"
+          },
+          "public_message": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "retryable": {
+            "type": "boolean"
+          },
+          "stage": {
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "stage",
+          "retryable",
+          "public_message"
+        ],
+        "type": "object"
+      },
+      "minItems": 33,
+      "type": "array",
+      "uniqueItems": true
+    },
+    "registry_sha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "registry_sha256",
+    "errors"
+  ],
+  "title": "error_registry.v1",
+  "type": "object"
+}

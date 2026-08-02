@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+validation/evidence/*
+!validation/evidence/.gitkeep
+validation/runtime_store/
+validation_outputs/langflow_*_profile/
+validation_outputs/.pytest_tmp*/
+validation_outputs/.pytest_release_*/
+validation_outputs/pytest_tmp*/
+*.log

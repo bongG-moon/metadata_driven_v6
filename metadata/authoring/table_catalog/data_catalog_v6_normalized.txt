@@ -1,0 +1,34 @@
+기존 제조 도메인의 원본 연결 정보와 실행 바인딩은 그대로 유지하고, 아래 등록 항목의 표시 이름만 자연어 설명에 맞게 갱신합니다.
+
+eqp_uph 데이터셋은 장비별 UPH 조회용이며 표시 이름은 '장비별 UPH'입니다.
+canonical 필드는 BASE_DATE, DEN, EQP_MODEL, FAMILY, LEAD, LOAD_DATE, MCP_NO, MODE, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRESS_CNT, RECIPE_ID, TECH, UPH입니다.
+
+equipment_assign 데이터셋은 장비 배정 현황 조회용이며 표시 이름은 '장비 배정 현황'입니다.
+canonical 필드는 BAY_ID, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, EQP_ID, EQP_MODEL, FAB, FACTORY, FAMILY, LEAD, LOT_ID, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, ORG, PKG_TYPE1, PKG_TYPE2, PRESS_CNT, RECIPE_ID, SHIFT, TECH, TSV_DIE_TYP입니다.
+
+hold_history 데이터셋은 HOLD 이력 조회용이며 표시 이름은 'HOLD 이력'입니다.
+canonical 필드는 DEN, DEVICE, DEVICE_DESC, FAMILY, HOLD_CD, HOLD_DESC, HOLD_EVENT_AT, LEAD, LOT_ID, MCP_NO, MODE, OPER_NAME, OPER_NUM, ORG, PKG_TYPE1, PKG_TYPE2, PROD_QTY, TECH입니다.
+
+lot_status 데이터셋은 LOT 현황 조회용이며 표시 이름은 'LOT 현황'입니다.
+canonical 필드는 CUM_TAT, DEN, DEVICE, DEVICE_DESC, EQP_ID, FAB, FAC_IN_AT, FAMILY, HOLD_REASON, HOLD_STAT, IN_TAT, LEAD, LOT_ID, LOT_STAT, MCP_NO, MODE, OPER_IN_AT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PROD_QTY, TECH, TSV_DIE_TYP, WF_QTY입니다.
+
+product_master 데이터셋은 제품 기준정보 조회용이며 표시 이름은 '제품 기준정보'입니다.
+canonical 필드는 DEN, DEVICE, LEAD, MCP_NO, MODE, PKG_TYPE1, PKG_TYPE2, TECH, YIELD_RATE입니다.
+
+production 데이터셋은 생산 실적 이력 조회용이며 표시 이름은 '생산 실적 이력'입니다.
+canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRODUCTION_QTY, SHIFT, TECH, TSV_DIE_TYP입니다.
+
+production_today 데이터셋은 당일 생산 실적 조회용이며 표시 이름은 '당일 생산 실적'입니다.
+canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, PRODUCTION_QTY, SHIFT, TECH, TSV_DIE_TYP입니다.
+
+target 데이터셋은 생산 목표 조회용이며 표시 이름은 '생산 목표'입니다.
+canonical 필드는 DATE, DEN, INPUT_PLAN_QTY, LEAD, MCP_NO, MODE, ORG, OUT_PLAN_QTY, PKG_TYPE1, PKG_TYPE2, TECH입니다.
+
+wip 데이터셋은 재공 이력 조회용이며 표시 이름은 '재공 이력'입니다.
+canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, SHIFT, TECH, TSV_DIE_TYP, WIP_QTY입니다.
+
+wip_today 데이터셋은 현재 재공 조회용이며 표시 이름은 '현재 재공'입니다.
+canonical 필드는 DATE, DEN, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, FAB, FACTORY, FAMILY, LEAD, MCP_NO, MODE, NETDIE_300_CNT, OPER_NAME, OPER_NUM, OPER_SEQ, ORG, PKG_TYPE1, PKG_TYPE2, SHIFT, TECH, TSV_DIE_TYP, WIP_QTY입니다.
+
+위에 명시한 등록 ID와 canonical 필드만 이번 변경의 대상입니다. 기존 physical column, physical alias, semantic type, role, coercion, source 연결 바인딩은 그대로 유지합니다.
+equipment_assign의 EQUIP_ID는 canonical 필드 EQP_ID에 이미 연결된 physical column 이름이며, 새 canonical 필드가 아닙니다.

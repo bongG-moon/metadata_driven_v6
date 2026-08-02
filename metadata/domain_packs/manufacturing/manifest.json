@@ -1,0 +1,14 @@
+{
+  "contract_version": "domain.pack.manifest.v1",
+  "domain_id": "manufacturing",
+  "display_name": "제조 데이터 분석",
+  "environment": "production",
+  "revision": 1,
+  "legacy_runtime_catalog": "runtime_catalog.v1.json",
+  "authoring_sources": {
+    "domain": "../../authoring/domain/domain_knowledge.txt",
+    "table_catalog": "../../authoring/table_catalog/data_catalog.txt",
+    "main_filters": "../../authoring/main_filters/main_variable.txt"
+  },
+  "notes": "기존 제조 전용 metadata.runtime.catalog.v1은 범용 compiler 코드가 아니라 이 Domain Pack에 고정합니다. 신규 등록은 authoring draft를 domain.package.v1로 컴파일합니다."
+}

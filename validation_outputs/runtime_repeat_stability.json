@@ -1,0 +1,15 @@
+{
+  "contract_version": "runtime.repeat.stability.v1",
+  "runs": 3,
+  "cases_per_run": 70,
+  "stable_cases": 70,
+  "mismatches": [],
+  "route_counts_per_run": {
+    "deterministic": 65,
+    "intent_llm": 3,
+    "unsupported": 2
+  },
+  "provider_execution": "not_run_external_tool_usage_limit",
+  "pandas_code_llm_calls": 0,
+  "pandas_repair_llm_calls": 0
+}

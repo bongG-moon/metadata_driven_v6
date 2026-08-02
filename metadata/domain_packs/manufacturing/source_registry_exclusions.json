@@ -1,0 +1,48 @@
+{
+  "contract_version": "metadata.authoring.source-registry-exclusions.v1",
+  "domain_id": "manufacturing",
+  "datasets": {
+    "equipment_assign": {
+      "PKGSIZE": {"reason_code": "source_projection_not_registered"}
+    },
+    "eqp_uph": {
+      "AVG_UPH_VAL": {"reason_code": "source_expression_before_alias", "target_field_id": "UPH"},
+      "LEAD_CNT": {"reason_code": "source_expression_before_alias", "target_field_id": "LEAD"},
+      "PKG_TYP": {"reason_code": "source_expression_before_alias", "target_field_id": "PKG_TYPE1"},
+      "PKG_TYP_2": {"reason_code": "source_expression_before_alias", "target_field_id": "PKG_TYPE2"},
+      "PROD_TYP": {"reason_code": "source_expression_before_alias", "target_field_id": "MODE"},
+      "WORK_DT": {"reason_code": "source_expression_before_alias", "target_field_id": "LOAD_DATE"}
+    },
+    "hold_history": {
+      "FAB": {"reason_code": "source_projection_not_registered"},
+      "FLOW_ID": {"reason_code": "source_projection_not_registered"},
+      "GRADE": {"reason_code": "source_projection_not_registered"},
+      "HOLD_USER": {"reason_code": "source_projection_not_registered"},
+      "OWNER": {"reason_code": "source_projection_not_registered"},
+      "PKG_SIZE": {"reason_code": "source_projection_not_registered"},
+      "THK_CD": {"reason_code": "source_projection_not_registered"}
+    },
+    "lot_status": {
+      "DURABLE_ID": {"reason_code": "source_projection_not_registered"},
+      "DURABLE_TYP": {"reason_code": "source_projection_not_registered"},
+      "ERM_ID": {"reason_code": "source_projection_not_registered"},
+      "EVENT_DESC": {"reason_code": "source_projection_not_registered"},
+      "FLOW_ID": {"reason_code": "source_projection_not_registered"},
+      "GRADE": {"reason_code": "source_projection_not_registered"},
+      "HOT_LEVEL": {"reason_code": "source_projection_not_registered"},
+      "HOT_LOT": {"reason_code": "source_projection_not_registered"},
+      "INSP_TARGET": {"reason_code": "source_projection_not_registered"},
+      "LOT_GRP": {"reason_code": "source_projection_not_registered"},
+      "MOVE_IN_TM": {"reason_code": "source_projection_not_registered"},
+      "OWNER": {"reason_code": "source_projection_not_registered"},
+      "PAD_ABNORMAL": {"reason_code": "source_projection_not_registered"},
+      "PKG3": {"reason_code": "source_projection_not_registered"},
+      "PKG_COMPOSIT": {"reason_code": "source_projection_not_registered"},
+      "PKG_SIZE": {"reason_code": "source_projection_not_registered"},
+      "SUB_LOT_ID": {"reason_code": "source_projection_not_registered"},
+      "SUB_QTY": {"reason_code": "source_projection_not_registered"},
+      "SWR_REQ_NO": {"reason_code": "source_projection_not_registered"},
+      "THK_CD": {"reason_code": "source_projection_not_registered"}
+    }
+  }
+}

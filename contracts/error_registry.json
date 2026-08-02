@@ -1,0 +1,204 @@
+{
+  "contract_version": "error_registry.v1",
+  "errors": [
+    {
+      "code": "request_invalid",
+      "public_message": "request invalid",
+      "retryable": false,
+      "stage": "request"
+    },
+    {
+      "code": "route_contract_error",
+      "public_message": "route contract error",
+      "retryable": false,
+      "stage": "route_eligibility"
+    },
+    {
+      "code": "intent_contract_error",
+      "public_message": "intent contract error",
+      "retryable": false,
+      "stage": "intent_validation"
+    },
+    {
+      "code": "metadata_dependency_error",
+      "public_message": "metadata dependency error",
+      "retryable": false,
+      "stage": "metadata_resolution"
+    },
+    {
+      "code": "metadata_budget_exceeded",
+      "public_message": "metadata budget exceeded",
+      "retryable": false,
+      "stage": "metadata_resolution"
+    },
+    {
+      "code": "plan_contract_error",
+      "public_message": "plan contract error",
+      "retryable": false,
+      "stage": "plan_validation"
+    },
+    {
+      "code": "missing_required_param",
+      "public_message": "missing required param",
+      "retryable": false,
+      "stage": "parameter_binding"
+    },
+    {
+      "code": "parameter_value_limit_exceeded",
+      "public_message": "parameter value limit exceeded",
+      "retryable": false,
+      "stage": "parameter_binding"
+    },
+    {
+      "code": "ambiguous_alias",
+      "public_message": "ambiguous alias",
+      "retryable": false,
+      "stage": "candidate_selection"
+    },
+    {
+      "code": "ambiguous_field_binding",
+      "public_message": "ambiguous field binding",
+      "retryable": false,
+      "stage": "source_contract"
+    },
+    {
+      "code": "source_missing",
+      "public_message": "source missing",
+      "retryable": false,
+      "stage": "retrieval"
+    },
+    {
+      "code": "source_retrieval_failed",
+      "public_message": "source retrieval failed",
+      "retryable": true,
+      "stage": "retrieval"
+    },
+    {
+      "code": "source_timeout",
+      "public_message": "source timeout",
+      "retryable": true,
+      "stage": "retrieval"
+    },
+    {
+      "code": "source_row_limit_exceeded",
+      "public_message": "source row limit exceeded",
+      "retryable": false,
+      "stage": "retrieval"
+    },
+    {
+      "code": "source_acl_denied",
+      "public_message": "source acl denied",
+      "retryable": false,
+      "stage": "retrieval"
+    },
+    {
+      "code": "source_schema_mismatch",
+      "public_message": "source schema mismatch",
+      "retryable": false,
+      "stage": "source_contract"
+    },
+    {
+      "code": "source_coverage_incomplete",
+      "public_message": "source coverage incomplete",
+      "retryable": false,
+      "stage": "source_contract"
+    },
+    {
+      "code": "unsupported_operation",
+      "public_message": "unsupported operation",
+      "retryable": false,
+      "stage": "route_eligibility"
+    },
+    {
+      "code": "execution_memory_limit_exceeded",
+      "public_message": "execution memory limit exceeded",
+      "retryable": false,
+      "stage": "execution"
+    },
+    {
+      "code": "metric_rollup_violation",
+      "public_message": "metric rollup violation",
+      "retryable": false,
+      "stage": "plan_validation"
+    },
+    {
+      "code": "metric_lineage_violation",
+      "public_message": "metric lineage violation",
+      "retryable": false,
+      "stage": "result_validation"
+    },
+    {
+      "code": "join_cardinality_violation",
+      "public_message": "join cardinality violation",
+      "retryable": false,
+      "stage": "execution"
+    },
+    {
+      "code": "result_schema_violation",
+      "public_message": "result schema violation",
+      "retryable": false,
+      "stage": "result_validation"
+    },
+    {
+      "code": "state_reference_expired",
+      "public_message": "state reference expired",
+      "retryable": false,
+      "stage": "state_load"
+    },
+    {
+      "code": "state_reference_forbidden",
+      "public_message": "state reference forbidden",
+      "retryable": false,
+      "stage": "state_load"
+    },
+    {
+      "code": "state_conflict",
+      "public_message": "state conflict",
+      "retryable": true,
+      "stage": "state_commit"
+    },
+    {
+      "code": "state_policy_mismatch",
+      "public_message": "state policy mismatch",
+      "retryable": false,
+      "stage": "state_store_config"
+    },
+    {
+      "code": "answer_claim_violation",
+      "public_message": "answer claim violation",
+      "retryable": false,
+      "stage": "answer_validation"
+    },
+    {
+      "code": "approval_not_found",
+      "public_message": "approval not found",
+      "retryable": false,
+      "stage": "metadata_execute"
+    },
+    {
+      "code": "approval_expired",
+      "public_message": "approval expired",
+      "retryable": false,
+      "stage": "metadata_execute"
+    },
+    {
+      "code": "approval_hash_mismatch",
+      "public_message": "approval hash mismatch",
+      "retryable": false,
+      "stage": "metadata_execute"
+    },
+    {
+      "code": "approval_already_claimed",
+      "public_message": "approval already claimed",
+      "retryable": false,
+      "stage": "metadata_execute"
+    },
+    {
+      "code": "stale_candidate",
+      "public_message": "stale candidate",
+      "retryable": false,
+      "stage": "metadata_execute"
+    }
+  ],
+  "registry_sha256": "31c7e7bf277abe0baa9a9a4fdb45b4324e549992776919cd3f5fa7bd35869f41"
+}

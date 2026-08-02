@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven-v6.local/schemas/executable-blueprint.schema.json",
+  "title": "metadata.executable-blueprint.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "contract_version",
+    "domain_id",
+    "environment",
+    "executable",
+    "default_annotations",
+    "source_manifest_sha256",
+    "executable_sha256",
+    "blueprint_sha256"
+  ],
+  "properties": {
+    "contract_version": {"const": "metadata.executable-blueprint.v1"},
+    "domain_id": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{1,63}$"},
+    "environment": {"type": "string", "pattern": "^[a-z][a-z0-9_-]{1,31}$"},
+    "executable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract_version",
+        "locale",
+        "timezone",
+        "datasets",
+        "metrics",
+        "entity_groups",
+        "grains",
+        "relations",
+        "orderings",
+        "predicates",
+        "recipes",
+        "aliases",
+        "prompt_extensions",
+        "specialized_functions",
+        "output_profile",
+        "source_provenance"
+      ],
+      "properties": {
+        "contract_version": {"const": "metadata.authoring.draft.v1"},
+        "locale": {"type": "string", "minLength": 2, "maxLength": 32},
+        "timezone": {"type": "string", "minLength": 1, "maxLength": 64},
+        "datasets": {"$ref": "#/$defs/jsonObject"},
+        "metrics": {"$ref": "#/$defs/jsonObject"},
+        "entity_groups": {"$ref": "#/$defs/jsonObject"},
+        "grains": {"$ref": "#/$defs/jsonObject"},
+        "relations": {"$ref": "#/$defs/jsonObject"},
+        "orderings": {"$ref": "#/$defs/jsonObject"},
+        "predicates": {"$ref": "#/$defs/jsonObject"},
+        "recipes": {"$ref": "#/$defs/jsonObject"},
+        "aliases": {"$ref": "#/$defs/jsonObject"},
+        "prompt_extensions": {"$ref": "#/$defs/jsonObject"},
+        "specialized_functions": {"type": "array", "maxItems": 64, "items": {"$ref": "#/$defs/jsonObject"}},
+        "output_profile": {"$ref": "#/$defs/jsonObject"},
+        "source_provenance": {"$ref": "#/$defs/jsonObject"}
+      }
+    },
+    "default_annotations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["display_name", "description"],
+      "properties": {
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 200},
+        "description": {"type": "string", "maxLength": 4000}
+      }
+    },
+    "source_manifest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "executable_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "blueprint_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "jsonValue": {
+      "anyOf": [
+        {"type": ["string", "number", "boolean", "null"]},
+        {"type": "array", "maxItems": 4096, "items": {"$ref": "#/$defs/jsonValue"}},
+        {"$ref": "#/$defs/jsonObject"}
+      ]
+    },
+    "jsonObject": {
+      "type": "object",
+      "maxProperties": 4096,
+      "patternProperties": {"^.{1,256}$": {"$ref": "#/$defs/jsonValue"}},
+      "additionalProperties": false
+    }
+  }
+}

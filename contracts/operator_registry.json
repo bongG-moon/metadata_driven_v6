@@ -1,0 +1,359 @@
+{
+  "aggregation_functions": [
+    "sum",
+    "mean",
+    "min",
+    "max",
+    "count",
+    "nunique",
+    "median",
+    "std",
+    "var",
+    "list_unique"
+  ],
+  "contract_version": "operator_registry.v1",
+  "filter_connectives": [
+    "all",
+    "any"
+  ],
+  "filter_operators": [
+    "eq",
+    "in",
+    "ne",
+    "not_in",
+    "gt",
+    "gte",
+    "lt",
+    "lte",
+    "between",
+    "contains",
+    "starts_with",
+    "ends_with",
+    "is_null",
+    "is_not_null",
+    "is_blank",
+    "is_not_blank",
+    "null_or_blank"
+  ],
+  "formula_operators": [
+    "add",
+    "subtract",
+    "multiply",
+    "safe_divide",
+    "abs",
+    "round",
+    "min_pair",
+    "max_pair",
+    "coalesce",
+    "coalesce_blank",
+    "datetime_diff_hours"
+  ],
+  "join_types": [
+    "inner",
+    "left",
+    "right",
+    "outer",
+    "semi",
+    "anti"
+  ],
+  "limits": {
+    "filter_max_depth": 3,
+    "filter_max_leaves": 32,
+    "formula_max_depth": 6,
+    "formula_max_nodes": 32,
+    "operation_max_count": 64
+  },
+  "operations": [
+    {
+      "description": "Bounded typed all/any predicate tree.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "filter",
+      "operator_id": "filter.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "max_depth",
+        "max_leaves",
+        "null_policy"
+      ]
+    },
+    {
+      "description": "Inclusive ordered process range.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "ordered_range",
+      "operator_id": "ordered_range.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Metadata-declared product-token matching.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "product_token_match",
+      "operator_id": "product_token_match.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Exact registered field projection and order.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "project",
+      "operator_id": "project.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Closed typed formula AST evaluation.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "derive",
+      "operator_id": "derive.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "formula_version",
+        "zero_division",
+        "rounding",
+        "max_depth",
+        "max_nodes"
+      ]
+    },
+    {
+      "description": "Declared rollup over a validated grain.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "aggregate",
+      "operator_id": "aggregate.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "rollup",
+        "null_policy",
+        "grain"
+      ]
+    },
+    {
+      "description": "Typed row-wise field comparison.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "compare_fields",
+      "operator_id": "compare_fields.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "type_compatibility",
+        "null_policy"
+      ]
+    },
+    {
+      "description": "Any/all comparison inside declared groups.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "compare_group_attributes",
+      "operator_id": "compare_group_attributes.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Stable duplicate-key group detection.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "find_duplicate_groups",
+      "operator_id": "find_duplicate_groups.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Policy-pinned binary join.",
+      "input_kinds": [
+        "left_frame",
+        "right_frame"
+      ],
+      "op": "join",
+      "operator_id": "join.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "join_type",
+        "cardinality",
+        "null_key",
+        "multi_match",
+        "empty_side",
+        "suffix"
+      ]
+    },
+    {
+      "description": "Positive-left and missing/zero-right anti-join.",
+      "input_kinds": [
+        "left_frame",
+        "right_frame"
+      ],
+      "op": "presence_filter",
+      "operator_id": "presence_filter.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Stable multi-key ordering with null placement.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "sort",
+      "operator_id": "sort.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Global/per-group top, bottom, argmax, or argmin.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "rank",
+      "operator_id": "rank.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "scope",
+        "tie_policy",
+        "null_placement",
+        "stable_tie_break"
+      ]
+    },
+    {
+      "description": "Ordered labeled result segment concatenation.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "concat_segments",
+      "operator_id": "concat_segments.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Registered detail/entity/history projection.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "detail",
+      "operator_id": "detail.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Stable distinct by declared identity fields.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "dedupe",
+      "operator_id": "dedupe.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "AND-within-row, OR-across-row source restriction.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "row_match_groups",
+      "operator_id": "row_match_groups.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Left-preserving enrichment of a prior result.",
+      "input_kinds": [
+        "left_frame",
+        "right_frame"
+      ],
+      "op": "enrich_previous_result",
+      "operator_id": "enrich_previous_result.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "No-retrieval transform of a prior result.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "transform_previous_result",
+      "operator_id": "transform_previous_result.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Trace/lineage explanation without retrieval or execution.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "explain_previous",
+      "operator_id": "explain_previous.v1",
+      "output_kind": "facts",
+      "required_policy_keys": [
+        "grain",
+        "ordering"
+      ]
+    },
+    {
+      "description": "Hash-pinned dispatch to a statically allowlisted standalone function.",
+      "input_kinds": [
+        "frame"
+      ],
+      "op": "registered_call",
+      "operator_id": "registered_call.v1",
+      "output_kind": "frame",
+      "required_policy_keys": [
+        "function_id",
+        "version",
+        "implementation_sha256",
+        "limits",
+        "failure_policy"
+      ]
+    }
+  ],
+  "registry_sha256": "aad6fc2c3924c26571a7619612943aa44ef5dd09b30e4d6a4d83b4f85f7e6d1d"
+}

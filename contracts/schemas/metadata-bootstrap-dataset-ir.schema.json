@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven.local/contracts/metadata-bootstrap-dataset-ir.schema.json",
+  "title": "Compact Dataset Bootstrap Authoring IR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dataset_cards"],
+  "properties": {
+    "dataset_cards": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 128,
+      "items": {"$ref": "#/$defs/datasetCard"}
+    }
+  },
+  "$defs": {
+    "datasetCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_id", "fields"],
+      "properties": {
+        "dataset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$"
+        },
+        "display_name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1024,
+          "items": {"$ref": "#/$defs/fieldCard"}
+        }
+      }
+    },
+    "fieldCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "col"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$"
+        },
+        "col": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      }
+    }
+  }
+}

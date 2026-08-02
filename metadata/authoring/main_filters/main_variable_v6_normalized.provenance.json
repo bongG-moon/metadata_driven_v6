@@ -1,0 +1,23 @@
+{
+  "contract_version": "metadata.normalized-authoring-source-provenance.v1",
+  "source_kind": "main_filter",
+  "original_source": {
+    "path": "metadata/authoring/main_filters/main_variable.txt",
+    "encoding": "utf-8",
+    "content_sha256": "c6d8fd3c2e23d4a860b86c0c09f57ea26f5526f78c21697a233a61d3b2d58ae3"
+  },
+  "normalized_companion": {
+    "path": "metadata/authoring/main_filters/main_variable_v6_normalized.txt",
+    "encoding": "utf-8",
+    "content_sha256": "64ab5b98280fa680bab33004443524c4f369857fa68d94cff7524b548d8a6d77",
+    "source_manifest_contract_version": "metadata.authoring.source-manifest.v1",
+    "source_manifest_source_sha256": "d62146b0fb5643561b6571c1c29660fa8f64276ed31bb18e9fa76b9f4d7e754a",
+    "source_manifest_sha256": "488f4f281e9620afb7fe0fe3deb6be9381e63df2b196667299b52716f205dd89"
+  },
+  "normalization": {
+    "method": "reviewed-explicit-alias-cards.v1",
+    "facts_only": true,
+    "executable_content_allowed": false,
+    "secrets_allowed": false
+  }
+}

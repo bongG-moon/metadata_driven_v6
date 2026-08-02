@@ -1,0 +1,320 @@
+{
+  "contract_version": "live.blueprint-authoring.validation.v1",
+  "model": "gemini-3.5-flash-lite",
+  "execution_mode": "trusted_blueprint_annotation_only",
+  "full_draft_generation_used": false,
+  "provider_payloads_persisted": false,
+  "prompts_persisted": false,
+  "source_text_persisted": false,
+  "blueprint_json_persisted": false,
+  "annotation_values_persisted": false,
+  "case_count": 1,
+  "passed": 1,
+  "failed": 0,
+  "external_provider_calls": 1,
+  "repair_llm_calls": 0,
+  "rows": [
+    {
+      "domain_id": "order_sales",
+      "environment": "live_blueprint_20260801_final",
+      "revision": 1,
+      "source_file": "validation/order_sales_metadata_input.txt",
+      "source_bytes": 7056,
+      "source_sha256": "91a614ed6aa4520c60ac6adee2e6ca9211bff2d2dd6ddb1e6324d441f0f02d65",
+      "source_manifest_sha256": "e1b1b90b2ac34602b314038f5274b6779125b28001f316edd218f7d45e480221",
+      "trust": {
+        "checked_in_blueprint_sha256": "3892caf87323b97e303dfbe700721ef63035ff6b7be3d0cca09b52b51f16d35d",
+        "target_blueprint_sha256": "7186652bc503d903773cbadefc0e95b848c2b249395f85114713e6c6389f34c2",
+        "executable_sha256": "65e208972f9665f0278523f4a2e2bcdbafe55b123e42360dde023f136d978b45",
+        "source_manifest_sha256": "e1b1b90b2ac34602b314038f5274b6779125b28001f316edd218f7d45e480221",
+        "environment_rebound_by_admin_build": true,
+        "checked_in_pin_source": "separate_admin_sidecar",
+        "target_pin_source": "trusted_admin_build_output"
+      },
+      "expected_external_provider_calls": 1,
+      "expected_repair_calls": 0,
+      "direct_fail_closed_negatives": [
+        {
+          "case_id": "missing_blueprint",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "blueprint_not_object"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "missing_external_pin",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "sha256_invalid"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "wrong_external_pin",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "blueprint_external_pin_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "simple_executable_tamper",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "executable_hash_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "recomputed_executable_tamper",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "blueprint_external_pin_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "wrong_domain_pin",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "domain_pin_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "wrong_environment_pin",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "environment_pin_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "wrong_source_manifest",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "source_manifest_pin_mismatch"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "annotation_executable_injection",
+          "failure": {
+            "code": "metadata_dependency_error",
+            "stage": "metadata_blueprint_validation",
+            "reason": "annotation_key_not_allowed"
+          },
+          "model_calls": 0,
+          "checks": {
+            "rejected": true,
+            "reason_exact": true,
+            "model_calls_zero": true
+          },
+          "passed": true
+        }
+      ],
+      "standalone_fail_closed_negatives": [
+        {
+          "case_id": "missing_blueprint",
+          "error_code": "metadata_blueprint_required",
+          "error_stage": "metadata_blueprint",
+          "error_reason": "",
+          "model_calls": 0,
+          "checks": {
+            "status_error": true,
+            "model_calls_zero": true,
+            "repair_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "missing_external_pin",
+          "error_code": "metadata_blueprint_required",
+          "error_stage": "metadata_blueprint",
+          "error_reason": "",
+          "model_calls": 0,
+          "checks": {
+            "status_error": true,
+            "model_calls_zero": true,
+            "repair_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "wrong_external_pin",
+          "error_code": "metadata_dependency_error",
+          "error_stage": "metadata_blueprint_validation",
+          "error_reason": "blueprint_external_pin_mismatch",
+          "model_calls": 0,
+          "checks": {
+            "status_error": true,
+            "model_calls_zero": true,
+            "repair_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "simple_executable_tamper",
+          "error_code": "metadata_dependency_error",
+          "error_stage": "metadata_blueprint_validation",
+          "error_reason": "executable_hash_mismatch",
+          "model_calls": 0,
+          "checks": {
+            "status_error": true,
+            "model_calls_zero": true,
+            "repair_calls_zero": true
+          },
+          "passed": true
+        },
+        {
+          "case_id": "recomputed_executable_tamper",
+          "error_code": "metadata_dependency_error",
+          "error_stage": "metadata_blueprint_validation",
+          "error_reason": "blueprint_external_pin_mismatch",
+          "model_calls": 0,
+          "checks": {
+            "status_error": true,
+            "model_calls_zero": true,
+            "repair_calls_zero": true
+          },
+          "passed": true
+        }
+      ],
+      "passed": true,
+      "prompt_sha256": "b0865f29fc9c8e4f0da2ba7d89978df142586cb666371366fb6defce144dfc29",
+      "proposal_contract": "metadata-annotation-proposal.schema.json",
+      "proposal_keys": [
+        "description",
+        "display_name"
+      ],
+      "annotation_values_persisted": false,
+      "executable_bytes_before_sha256": "65e208972f9665f0278523f4a2e2bcdbafe55b123e42360dde023f136d978b45",
+      "executable_bytes_after_sha256": "65e208972f9665f0278523f4a2e2bcdbafe55b123e42360dde023f136d978b45",
+      "package_sha256": "b1a0ff721e655cb90ccefb89e772e29758b2d50e2b8681725df5b76dbe7a2c89",
+      "bundle_sha256": "23141fece28616f9fbc3c7f072607a573af666e3b773786966c5272c07a0ebd2",
+      "catalog_sha256": "cca092dae82b815e15a3ddd93754685ff178f44d1bd9073419830de8105030ef",
+      "counts": {
+        "datasets": 4,
+        "fields": 10,
+        "metrics": 5,
+        "relations": 3,
+        "recipes": 6,
+        "aliases": 9
+      },
+      "standalone_replay": {
+        "status": "ok",
+        "stage": "prepared",
+        "replay_calls": 1,
+        "llm_usage": {
+          "draft_llm_calls": 0,
+          "annotation_llm_calls": 1,
+          "repair_llm_calls": 0
+        },
+        "package_sha256": "b1a0ff721e655cb90ccefb89e772e29758b2d50e2b8681725df5b76dbe7a2c89",
+        "bundle_sha256": "23141fece28616f9fbc3c7f072607a573af666e3b773786966c5272c07a0ebd2",
+        "catalog_sha256": "cca092dae82b815e15a3ddd93754685ff178f44d1bd9073419830de8105030ef"
+      },
+      "provider": {
+        "model": "gemini-3.5-flash-lite",
+        "calls": 1,
+        "prompt_sha256": [
+          "b0865f29fc9c8e4f0da2ba7d89978df142586cb666371366fb6defce144dfc29"
+        ],
+        "provider_response_sha256": [
+          "f29e11b3be9b95da0ee52c0ba60f3da25a482fae28add4da460402f7b5e901d9"
+        ],
+        "provider_model_versions": [
+          "gemini-3.5-flash-lite"
+        ],
+        "finish_reasons": [
+          "STOP"
+        ],
+        "candidate_text_bytes": [
+          291
+        ],
+        "usage": {
+          "prompt_tokens": 2082,
+          "candidate_tokens": 76,
+          "total_tokens": 2158
+        }
+      },
+      "checks": {
+        "exact_model": true,
+        "external_provider_call_exact": true,
+        "proposal_contract_exact": true,
+        "annotation_allowlist_exact": true,
+        "blueprint_validated_with_external_pin": true,
+        "executable_canonical_bytes_unchanged": true,
+        "executable_hash_unchanged": true,
+        "domain_package_valid": true,
+        "runtime_catalog_v2": true,
+        "identity_pinned": true,
+        "bundle_hash_pinned": true,
+        "active_pointer_pinned": true,
+        "standalone_prepare_replayed": true,
+        "standalone_package_parity": true,
+        "standalone_annotation_call_exact": true,
+        "repair_llm_zero": true,
+        "direct_negatives_passed": true,
+        "standalone_negatives_passed": true
+      }
+    }
+  ]
+}

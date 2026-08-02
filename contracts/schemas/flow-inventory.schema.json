@@ -1,0 +1,94 @@
+{
+  "$defs": {
+    "jsonObject": {
+      "additionalProperties": false,
+      "patternProperties": {
+        "^[A-Za-z_][A-Za-z0-9_.:/-]{0,127}$": {
+          "$ref": "#/$defs/jsonValue"
+        }
+      },
+      "properties": {},
+      "required": [],
+      "type": "object"
+    },
+    "jsonValue": {
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          },
+          "maxItems": 2048,
+          "type": "array"
+        },
+        {
+          "$ref": "#/$defs/jsonObject"
+        }
+      ]
+    }
+  },
+  "$id": "https://metadata-driven-v6.local/schemas/flow-inventory.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contract_version": {
+      "const": "flow.inventory.v1",
+      "type": "string"
+    },
+    "flows": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "display_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "endpoint_name": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "flow_uuid": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "logical_key": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "trusted_core": {
+            "const": true
+          }
+        },
+        "required": [
+          "logical_key",
+          "endpoint_name",
+          "flow_uuid",
+          "display_name",
+          "trusted_core"
+        ],
+        "type": "object"
+      },
+      "maxItems": 5,
+      "minItems": 5,
+      "type": "array"
+    },
+    "namespace_uuid": {
+      "minLength": 1,
+      "type": "string"
+    }
+  },
+  "required": [
+    "contract_version",
+    "namespace_uuid",
+    "flows"
+  ],
+  "title": "flow.inventory.v1",
+  "type": "object"
+}
