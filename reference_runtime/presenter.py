@@ -95,27 +95,6 @@ def _usage(route: dict[str, Any]) -> dict[str, int]:
     }
 
 
-def _response_hash_material(response: dict[str, Any]) -> dict[str, Any]:
-    return {key: value for key, value in response.items() if key != "response_sha256"}
-
-
-def validate_response_hash(response: dict[str, Any]) -> dict[str, Any]:
-    """Reject adapter input that is not the immutable engine response."""
-
-    if not isinstance(response, dict) or response.get("contract_version") != "response.v1":
-        raise ContractError("answer_claim_violation", "response_adapter", "response.v1 payload가 필요합니다.")
-    expected = sha256_json(_response_hash_material(response))
-    if response.get("response_sha256") != expected:
-        raise ContractError(
-            "answer_claim_violation",
-            "response_adapter",
-            "응답 해시가 일치하지 않습니다.",
-            {"expected_sha256": expected, "actual_sha256": response.get("response_sha256")},
-        )
-    validate_contract(response, "response.schema.json", stage="response_adapter")
-    return response
-
-
 def validate_authoring_response_hash(response: dict[str, Any]) -> dict[str, Any]:
     """Validate the closed authoring terminal contract and its immutable hash."""
 
@@ -144,9 +123,9 @@ def validate_authoring_response_hash(response: dict[str, Any]) -> dict[str, Any]
 
 
 def _finalize_response(material: dict[str, Any]) -> dict[str, Any]:
-    # The hash is the last field added after all trace/fanout information exists.
-    bounded(material, 256 * 1024 - 128, "response")
-    response = {**material, "response_sha256": sha256_json(material)}
+    # Output nodes exchange ordinary JSON. Durable content hashes are maintained
+    # only by the result store and are referenced through data_refs.
+    response = deepcopy(material)
     validate_contract(response, "response.schema.json", stage="response_assembly")
     return bounded(response, 256 * 1024, "response")
 
@@ -368,8 +347,7 @@ def _table(rows: list[dict[str, Any]], columns: list[str]) -> str:
 
 
 def render_message(response: dict[str, Any], options: Any = None) -> str:
-    if response.get("contract_version") == "response.v1":
-        validate_response_hash(response)
+    response = deepcopy(response) if isinstance(response, dict) else {}
     display = normalize_display_options(options)
     sections = [f"### 응답\n{response.get('message', '')}".strip()]
     data = response.get("data") if isinstance(response.get("data"), dict) else {}
@@ -401,12 +379,13 @@ def render_message(response: dict[str, Any], options: Any = None) -> str:
 
 
 def api_output(response: dict[str, Any]) -> dict[str, Any]:
-    return deepcopy(validate_response_hash(response))
+    return deepcopy(response) if isinstance(response, dict) else {}
 
 
 def gaia_output(response: dict[str, Any]) -> dict[str, Any]:
-    canonical = validate_response_hash(response)
+    canonical = deepcopy(response) if isinstance(response, dict) else {}
     sections = canonical.get("answer_sections") if isinstance(canonical.get("answer_sections"), dict) else {}
+    trace = canonical.get("trace") if isinstance(canonical.get("trace"), dict) else {}
     urls = [
         {"title": str(item.get("label") or "다운로드"), "url": str(item.get("url") or "")}
         for item in sections.get("downloads", [])
@@ -419,9 +398,8 @@ def gaia_output(response: dict[str, Any]) -> dict[str, Any]:
         "knowhows": [],
         "followup_questions": [deepcopy(item) for item in sections.get("next_questions", [])[:3]],
         "urls": urls,
-        "trace_id": str(canonical.get("trace", {}).get("trace_id") or ""),
-        "usage": deepcopy(canonical.get("trace", {}).get("usage", {})),
-        "response_sha256": str(canonical.get("response_sha256") or ""),
+        "trace_id": str(trace.get("trace_id") or ""),
+        "usage": deepcopy(trace.get("usage", {})),
     }
     validate_contract(metadata, "gaia-metadata.schema.json", stage="gaia_output")
     return {"answer": str(canonical.get("message") or ""), "metadata": metadata}

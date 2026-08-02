@@ -1,8 +1,8 @@
 """Run OS01/OS02/OS08 through the real Langflow Data Analysis Flow.
 
-This gate is intentionally ordered after the HTTP authoring E2E: it requires
-the active ``order_sales/e2e_validation`` pointer produced from natural text.
-The Flow uses its trusted inline retrieval lane for the synthetic fixture.
+This gate is intentionally ordered after metadata authoring or seeding: the
+latest complete three-collection release must be ``order_sales``.  The Flow
+uses the Datalake adapter lane for the synthetic physical-row fixture.
 Reports keep only bounded result projections and hashes, never raw HTTP bodies,
 provider credentials, or the full source payload.
 """
@@ -38,7 +38,9 @@ from tools.validate_langflow_http_e2e import (
     _bounded_error,
     _canonical_responses,
     _run_url,
+    _three_collection_release_evidence,
     _upload_flow,
+    _validation_clock_evidence,
     extract_terminal_evidence,
 )
 
@@ -93,44 +95,7 @@ CASES: tuple[dict[str, Any], ...] = (
 )
 
 
-def _active_pointer(
-    mongo_uri: str,
-    database_name: str,
-    *,
-    domain_id: str,
-    environment: str,
-) -> dict[str, Any]:
-    from pymongo import MongoClient
-
-    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=10000)
-    try:
-        document = client[database_name]["agent_v6_metadata_active"].find_one(
-            {"_id": f"active:{environment}:{domain_id}"}
-        ) or {}
-    finally:
-        client.close()
-    if not document:
-        raise BuildContractError("order_sales_active_pointer_missing_run_authoring_first")
-    checks = {
-        "contract_version": document.get("contract_version") == "metadata.active-domain-pointer.v1",
-        "domain_id": document.get("domain_id") == domain_id,
-        "environment": document.get("environment") == environment,
-        "active_status": document.get("status") == "active",
-        "revision_positive": int(document.get("revision") or 0) >= 1,
-        "package_hash_present": len(str(document.get("package_sha256") or "")) == 64,
-        "bundle_hash_present": len(str(document.get("bundle_sha256") or "")) == 64,
-    }
-    if not all(checks.values()):
-        raise BuildContractError("order_sales_active_pointer_invalid")
-    return {
-        "revision": int(document["revision"]),
-        "package_sha256": str(document["package_sha256"]),
-        "bundle_sha256": str(document["bundle_sha256"]),
-        "checks": checks,
-    }
-
-
-def _inline_fixture(path: Path) -> dict[str, Any]:
+def _datalake_fixture(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     datasets = payload.get("datasets") if isinstance(payload.get("datasets"), dict) else {}
     order_products = {
@@ -178,27 +143,26 @@ def _run_case(
     case: dict[str, Any],
     *,
     source_payload: dict[str, Any],
-    domain_id: str,
-    environment: str,
+    mongo_uri: str,
+    mongo_database: str,
+    mongo_timeout_ms: int,
     timeout_seconds: int,
 ) -> dict[str, Any]:
     session_id = f"v6-http-order-sales-{case['case_id'].lower()}-{uuid.uuid4().hex}"
     tweaks = {
         "domain_bundle_loader": {
-            "domain_id": domain_id,
-            "environment": environment,
-            "metadata_source_mode": "v6_active",
+            "mongo_uri": mongo_uri,
+            "mongo_database": mongo_database,
+            "mongo_timeout_ms": mongo_timeout_ms,
         },
         "request_state_capsule": {
-            "reference_instant": REFERENCE_INSTANT,
             # Validation-only opt-in. Production Flow export must stay false.
             "allow_anonymous_multiturn": True,
         },
-        "retrieval_job_router": {"data_mode": "inline"},
-        "inline_source_retriever": {
+        "retrieval_job_router": {"data_mode": "live"},
+        "datalake_source_retriever": {
             "source_payload": _json_input_tweak(source_payload),
             "source_row_limit": 50000,
-            "source_memory_limit_mb": 16,
         },
         "answer_facts_narrative": {"narrative_enabled": False},
         "response_state_commit": {"allow_anonymous_multiturn": True},
@@ -315,13 +279,29 @@ def run(
     langflow_key = str(os.getenv("LANGFLOW_API_KEY") or env.get("LANGFLOW_API_KEY") or "")
     if not mongo_uri:
         raise BuildContractError("mongodb_uri_not_configured")
-    active = _active_pointer(
+    validation_clock = _validation_clock_evidence(
+        env, reference_instant=REFERENCE_INSTANT
+    )
+    mongo_timeout_ms = 10000
+    metadata_release = _three_collection_release_evidence(
         mongo_uri,
         database_name,
-        domain_id=domain_id,
-        environment=environment,
+        expected_domain_id=domain_id,
+        expected_environment=environment,
+        timeout_ms=mongo_timeout_ms,
     )
-    source_payload = _inline_fixture(sample_path)
+    required_datasets = {
+        dataset
+        for case in CASES
+        for dataset in case["expected_datasets"]
+    }
+    source_types = metadata_release.get("dataset_source_types") or {}
+    if any(
+        source_types.get(dataset) not in {"datalake", "file", "mongodb"}
+        for dataset in required_datasets
+    ):
+        raise BuildContractError("order_sales_datalake_release_required")
+    source_payload = _datalake_fixture(sample_path)
     source_payload_sha256 = sha256(
         json.dumps(source_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
     ).hexdigest()
@@ -339,8 +319,9 @@ def run(
                 str(uploaded["id"]),
                 case,
                 source_payload=source_payload,
-                domain_id=domain_id,
-                environment=environment,
+                mongo_uri=mongo_uri,
+                mongo_database=database_name,
+                mongo_timeout_ms=mongo_timeout_ms,
                 timeout_seconds=timeout_seconds,
             )
         except Exception as exc:
@@ -354,12 +335,12 @@ def run(
         "flow_file": flow_path.name,
         "flow_sha256": sha256_file(flow_path),
         "uploaded_flow_id": str(uploaded.get("id") or ""),
-        "domain_id": domain_id,
-        "environment": environment,
-        "metadata_source_mode": "v6_active",
-        "data_mode": "inline",
-        "reference_instant": REFERENCE_INSTANT,
-        "active_pointer": active,
+        "domain_id": metadata_release["domain_id"],
+        "environment": metadata_release["environment"],
+        "metadata_release": metadata_release,
+        "metadata_source_mode": "three_collections_auto_latest",
+        "data_mode": "live",
+        "validation_clock": validation_clock,
         "source_payload_sha256": source_payload_sha256,
         "source_payload_persisted": False,
         "raw_http_responses_persisted": False,
@@ -381,8 +362,16 @@ def main() -> int:
     parser.add_argument("--sample", type=Path, default=DEFAULT_SAMPLE)
     parser.add_argument("--server-url", default="http://127.0.0.1:7873")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
-    parser.add_argument("--domain-id", default="order_sales")
-    parser.add_argument("--environment", default="e2e_validation")
+    parser.add_argument(
+        "--domain-id",
+        default="order_sales",
+        help="Expected identity of the latest usable three-collection release.",
+    )
+    parser.add_argument(
+        "--environment",
+        default="e2e_validation",
+        help="Expected environment of the latest usable three-collection release.",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     args = parser.parse_args()

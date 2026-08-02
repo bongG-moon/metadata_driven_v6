@@ -1,0 +1,35 @@
+{
+  "contract_version": "prompt-extension.runtime.validation.v1",
+  "domain_id": "order_sales",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "prompt_payloads_persisted": false,
+  "intent": {
+    "prompt_sha256": "030b07a92fde9de6fc0cb620c0d57cddf58f12b869492c49547c86f1d13e3c15",
+    "prompt_utf8_bytes": 1596,
+    "specialized_template_present": true,
+    "dynamic_domain_prompt_port_absent": true,
+    "prompt_within_budget": true,
+    "model_calls_exactly_one": true,
+    "route_intent_llm": true,
+    "pipeline_passed": true,
+    "pipeline_failures": []
+  },
+  "answer": {
+    "prompt_sha256": "dc3cfd92f1064a9533e9d9f97a4506a5c38064f80b998aa6529d6b583ad60a4d",
+    "prompt_utf8_bytes": 1878,
+    "specialized_template_present": true,
+    "dynamic_domain_prompt_port_absent": true,
+    "prompt_within_budget": true,
+    "model_calls_exactly_one": true,
+    "route_deterministic": true,
+    "pipeline_passed": true,
+    "pipeline_failures": []
+  },
+  "checks": {
+    "intent_direct_specialized_template_merged": true,
+    "answer_direct_specialized_template_merged": true,
+    "prompts_not_persisted": true,
+    "dynamic_prompt_extensions_not_required": true
+  },
+  "all_passed": true
+}

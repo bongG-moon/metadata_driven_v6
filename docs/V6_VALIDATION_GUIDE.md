@@ -26,7 +26,7 @@ Phase 1 변환은 완료됐다. `validation/cases.jsonl`이 70개 canonical case
 - `오늘`: `2026-07-30`
 - `어제`: `2026-07-29`
 
-개발 PC 시각이나 provider timezone에 따라 oracle이 달라지면 실패다.
+개발 PC 시각이나 provider timezone에 따라 oracle이 달라지면 실패다. 이 고정 instant는 검증 harness의 fixture다. 운영 `02 요청 및 세션 상태 고정` node에는 기준시각·시간대 UI input이 없고 내부 현재 시각을 항상 `Asia/Seoul`로 해석한다.
 
 ## 3. 검증 단계
 
@@ -119,13 +119,13 @@ Acceptance Matrix §5의 모든 `OP-*` question shape는 prebuilt intent/plan fi
 - 기존 Domain·Dataset·Main Filter 원문 bundle 또는 동등하게 완전한 도메인 설명을 순서·말투·제목·표기가 다른 비정형 fixture로 입력
 - 제조 live fixture는 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` bundle과 exact `gemini-3.5-flash-lite`, temperature 0, provider/model fallback 0, repair 0을 사용
 - 일반 작업자 입력에 JSON, explicit inventory 문장, relation/field-role 문법, Blueprint/pin을 요구하지 않음
-- LLM 출력은 원문별 closed fragment contract, 최초 bootstrap 호출 정확히 3회, repair/fallback 0. 세 작업별 공통 Prompt Template이 기본이며 승인된 반복 실패 overlay가 있을 때만 해당 분기의 optional segment를 허용
+- LLM 출력은 원문별 closed fragment contract, 최초 bootstrap 호출 정확히 3회, repair/fallback 0. 세 작업별 공통·특화 Prompt Template pair가 별도 node/source/hash/edge로 존재하고 특화 규칙은 Template 본문에 직접 작성
 - schema·identity·field/source binding·semantic type·relation/cardinality·dependency·read-only/secret/registry security compile 통과 전 candidate 저장 0
 - 부족한 설명은 특정 포맷 재작성을 요구하지 않고 `status=needs_clarification`의 누락 항목/질문을 반환하며 draft/candidate/persist는 0
 - `metadata.authoring.proposal.v1`의 complete/needs-clarification two-variant contract, exact source hash, recursive closed keys와 mixed/extra-key negative fixture를 검증
-- Dataset은 exact active package의 dataset section만 작업 전용 공통 Prompt와 자연어 patch LLM 1회로 변경한다. Main Filter 기본 lane은 작업 전용 공통 Prompt와 bounded LLM 최대 1회이며, optional `explicit_inventory` proof가 완전할 때만 Prompt/Composer/envelope/LLM 0회다. 두 경로 모두 나머지 section/hash dependency를 재검증한다.
+- Dataset은 최신 완전 3컬렉션 package의 dataset section만 작업 전용 공통·특화 Prompt pair와 자연어 patch LLM 1회로 변경한다. Main Filter 기본 lane도 작업 전용 공통·특화 Prompt pair와 bounded LLM 최대 1회이며, optional `explicit_inventory` proof가 완전할 때만 Prompt/Composer/envelope/LLM 0회다. 두 경로 모두 나머지 section/hash dependency를 재검증한다.
 - Optional `source_grounding_mode=explicit_inventory` profile은 완전한 inventory의 zero-LLM compile과 관리자 검토 `metadata.executable-blueprint.v1`/external SHA-256 pin의 annotation-only merge를 별도로 검증한다. Blueprint/pin 누락·tamper의 provider-call-0 gate는 이 profile에만 적용한다.
-- Authoring optional overlay는 같은 normalized failure shape 승인 case 3개 이상, 서로 다른 자연어 source 2개 이상, language-interpretation root cause, 관리자 approval purpose/domain/revision/hash를 모두 검사하고 하나라도 없으면 Flow build/prepare를 거부
+- 모든 공통·특화 Template의 예상 변수는 빈 집합이고 사용자 입력·metadata로 특화 본문을 교체하는 dynamic port/edge가 없으며 runtime context가 Composer에 정확히 한 번 연결되는지 검사
 - Domain Policy는 별도 Flow의 explicit 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 사용하고 prompt node/Composer/envelope/LLM 0회
 - 모든 authoring kind가 immutable prepare → external approval → 별도 atomic execute를 사용하며 execute 시 candidate/base/dependency hash를 재검증
 
@@ -134,6 +134,8 @@ Acceptance Matrix §5의 모든 `OP-*` question shape는 prebuilt intent/plan fi
 read-only로 source schema와 parameter를 검증한다. 실데이터 값 전체를 golden row로 고정하기보다 schema, non-empty/empty policy, aggregation invariant, required-param 오류를 본다.
 
 live smoke와 별개로 Oracle, H-API, Datalake, Goodocs, Dummy 5개 adapter type 모두 fixture contract와 security test를 가진다. 9개 live dataset이 배포된 일부 adapter만 사용해도 나머지 adapter fixture를 생략하지 않는다.
+
+Flow graph에는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각각 하나씩 있어야 한다. 각 source node는 자기 lane의 연결 payload만 처리하고, 운영자가 조절하는 source scalar는 실제 source별 `조회 행 수 제한` 하나뿐이어야 한다.
 
 필수 adapter 판정:
 
@@ -165,8 +167,9 @@ isolated exact 1.9.2 environment에 generated Flow를 import하고 Chat/API/GaiA
 - 네 authoring Flow는 각각 immutable prepare와 fake/contract approval 후 second-run atomic execute smoke 통과
 - Domain Flow의 기본 free-form full-draft lane은 빈 Blueprint/pin으로도 실행하고, optional explicit-inventory profile에서만 missing/tampered Blueprint pin zero-model fail-closed와 annotation allowlist를 통과
 - Domain Policy와 optional explicit-inventory Main Filter는 prompt node/Composer/envelope/provider 호출 0을 정적 graph와 runtime counter 양쪽에서 통과
-- Runtime Intent/Answer는 공통·특화 Prompt Template의 node ID/prompt ID/revision/source/hash/edge가 물리적으로 분리되고, runtime context는 Composer에 한 번만 전달
-- Domain/Dataset/Main Filter는 작업별 공통 Prompt 한 개가 기본이며 default export에는 specialized overlay/empty specialized Message가 없음
+- Runtime Intent/Answer와 Domain/Dataset/Main Filter는 공통·특화 Prompt Template의 node ID/prompt ID/revision/source/hash/edge가 물리적으로 분리되고, 모든 Template의 변수 집합이 비어 있으며 runtime context는 Composer에 한 번만 전달
+- `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 노출하고 고정 3컬렉션의 최신 완전 release를 자동 결합하며, domain/environment/source mode/collection 입력은 없음
+- Data Analysis 실행 node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용하고 병렬 단계만 `A/B/C`로 구분한다. `24` 채팅은 schema만, `25` API와 `26` GaiA는 schema+response hash를 검사
 - 각 Flow/node/input/output의 사용자 가시 이름·설명은 한글이고 input `info`/output 설명이 기능·필수 여부·contract/consumer를 명시. 역할별 Sticky Note는 deterministic ID/layout/content revision이며 secret/query/raw row/prompt 원문을 포함하지 않음
 - exploration Flow/endpoint/worker는 초기 bundle에 없고 Data Analysis에서 `exploration.*` 자동 호출 edge가 0
 
@@ -285,6 +288,9 @@ Intent provider payload는 recursive closed schema로 검증한다. 모든 `*_re
 - v5 API wire key `request/intent_plan/analysis/data/data_refs/state/trace`, `data.rows`, `data_refs[]` 유지
 - result/source CSV ref/URL은 owner/session/expiry/content hash를 가짐
 - Message, API `Data(is_output=True)`, GaiA answer/URL/follow-up/trace/usage 모두 존재
+- `24 채팅 메시지 표시 설정`은 유효한 `response.v1` schema를 표시하고 top-level response hash mismatch를 presentation 오류로 만들지 않음
+- `24·25·26`은 수신 `response_sha256`을 요구하거나 비교하지 않고 일반 JSON 응답을 처리
+- MongoDB result store의 결과 및 source snapshot `content_sha256` 검증은 유지
 - deterministic intent 진단은 LLM 분석으로 표시하지 않고 route/reason/selected candidate와 `intent_llm_calls=0`을 유지
 - result/source store → state CAS → runtime release → output fan-out 순서
 - Message body를 API/GaiA가 역파싱하지 않음
@@ -364,7 +370,7 @@ MongoDB SRV `_resolve_uri`가 장시간 실행 프로세스에서 반복되지�
 - 재생성 manifest의 physical standalone source/node/edge count와 모든 Flow custom-node source instance parity
 - Full-domain 자유형 TXT→closed full draft→deterministic compile gate, Dataset/Main Filter section ownership, Domain Policy prompt/envelope/provider 0회, optional explicit-inventory/Blueprint annotation-only profile
 - 제목·bullet 없는 수동 재작성 자유형 corpus까지 실제 Langflow authoring HTTP에서 성공하고, 모호한 입력은 repair나 임의 저장 없이 `needs_clarification`으로 종료
-- Runtime Prompt 공통·특화 pair, authoring 작업별 공통 Prompt 한 개 기본·승인 overlay gate
+- Runtime과 authoring의 고정 공통·특화 Prompt pair, 직접 작성된 특화 본문, 빈 변수 집합과 단일 runtime-context edge
 - registered function descriptor→registry→candidate→Intent→`registered_call`→Gateway→output/lineage positive·negative E2E
 - 5개 Flow의 사용자 가시 한글 이름/설명/input `info`/output 설명과 역할별 Sticky Note 정적·import 검증
 - exploration runtime/Flow/edge 0; future schema는 disabled namespace로만 존재

@@ -103,7 +103,7 @@ Historical authoring HTTP prepare/approve/execute 검증은 실제 authoring Flo
 
 제조 migration→analysis HTTP 검증은 v5 원본 자연어 TXT 3종의 byte/hash를 그대로 보존하고, 각각 source-manifest로 pin한 domain-policy, dataset, main-filter normalized companion을 입력했다. 격리 environment의 seed revision 1에서 세 patch를 commit해 revision 4가 되었고, 호출 수는 dataset draft 1회, domain-policy/main-filter LLM 0회, repair 0회다. dataset의 실행 projection hash는 이관 전후 동일했으며 final loader와 production pointer 불변 gate를 통과했다. 이어 같은 active metadata로 Data Analysis Flow를 4회 실행해 deterministic 3회, Intent LLM 1회, 2-turn state `1 → 2`, pandas code/repair 0회를 확인했다. 증적은 `validation_outputs/langflow_http_migration_final_pass.json`이다.
 
-Data Analysis HTTP validator는 Langflow JSON/Data tweak가 `NestedDict`로 전달되는 경우를 실제 standalone input contract로 복원하고, compact GaiA의 `metadata.response_sha256`도 같은 canonical response hash로 비교한다. OS08 oracle은 inline source의 매출 1,000, 환불 300에 따라 순매출 700을 기대하며, 잘못된 환불 0/순매출 1,000 fixture를 사용하지 않는다. 원본 source payload, raw HTTP response와 secret은 report에 저장하지 않았다.
+Data Analysis HTTP validator는 Langflow JSON/Data tweak가 `NestedDict`로 전달되는 경우를 당시 standalone input contract로 복원하고, compact GaiA의 `metadata.response_sha256`도 같은 canonical response hash로 비교했다. OS08 oracle은 연결된 source payload의 매출 1,000, 환불 300에 따라 순매출 700을 기대하며, 잘못된 환불 0/순매출 1,000 fixture를 사용하지 않았다. 원본 source payload, raw HTTP response와 secret은 report에 저장하지 않았다.
 
 격리 Langflow import 재실행:
 

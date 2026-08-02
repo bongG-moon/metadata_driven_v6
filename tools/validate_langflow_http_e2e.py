@@ -37,10 +37,114 @@ from tools.gemini_validation_support import (
     require_exact_gemini_model,
     resolve_gemini_api_key,
 )
+from reference_runtime.metadata_collections import (
+    METADATA_COLLECTIONS,
+    load_available_domain_package_from_three_collections,
+)
 
 DEFAULT_FLOW = ROOT / "flow_exports" / "metadata_v6_data_analysis_flow_v6_standalone.json"
 REFERENCE_INSTANT = "2026-07-30T09:00:00+09:00"
 CONTENT_REF_PATTERN = re.compile(r"^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$")
+
+
+def _validation_clock_evidence(
+    env: dict[str, str], *, reference_instant: str = REFERENCE_INSTANT
+) -> dict[str, Any]:
+    """Require the server-side-only deterministic clock seam for relative dates.
+
+    ``request_state_capsule`` intentionally exposes no clock or timezone Flow
+    input.  The Langflow server used by this validator must therefore be
+    started with the same two validation-only environment values.
+    """
+
+    mode = str(os.getenv("V6_VALIDATION_MODE") or env.get("V6_VALIDATION_MODE") or "").strip()
+    reference = str(
+        os.getenv("V6_VALIDATION_REFERENCE_INSTANT")
+        or env.get("V6_VALIDATION_REFERENCE_INSTANT")
+        or ""
+    ).strip()
+    checks = {
+        "validation_mode_enabled": mode == "1",
+        "reference_instant_exact": reference == reference_instant,
+        "timezone_internal": True,
+        "flow_clock_tweak_used": False,
+    }
+    if not all(checks.values()):
+        raise BuildContractError("validation_clock_environment_not_configured")
+    return {
+        "mode": "environment_only",
+        "reference_instant": reference,
+        "timezone": "Asia/Seoul",
+        "checks": checks,
+    }
+
+
+def _three_collection_release_evidence(
+    mongo_uri: str,
+    database_name: str,
+    *,
+    expected_domain_id: str,
+    expected_environment: str,
+    timeout_ms: int = 10000,
+) -> dict[str, Any]:
+    """Validate the same auto-selected three-collection release as the Flow."""
+
+    from pymongo import MongoClient
+
+    client = MongoClient(mongo_uri, serverSelectionTimeoutMS=timeout_ms)
+    try:
+        database = client[database_name]
+        package = load_available_domain_package_from_three_collections(database)
+        current_id = f"{package['environment']}:{package['domain_id']}"
+        documents = {
+            kind: database[name].find_one({"_id": current_id})
+            for kind, name in METADATA_COLLECTIONS.items()
+        }
+    finally:
+        client.close()
+
+    release_ids = {
+        str(document.get("release_id") or "")
+        for document in documents.values()
+        if isinstance(document, dict)
+    }
+    revision = int(package.get("revision") or 0)
+    checks = {
+        "three_documents_present": all(isinstance(value, dict) for value in documents.values()),
+        "fixed_collection_roles": set(documents) == set(METADATA_COLLECTIONS),
+        "one_sealed_release": len(release_ids) == 1 and all(release_ids),
+        "expected_domain": package.get("domain_id") == expected_domain_id,
+        "expected_environment": package.get("environment") == expected_environment,
+        "revision_positive": revision >= 1,
+        "package_sha256_valid": len(str(package.get("package_sha256") or "")) == 64,
+        "bundle_sha256_valid": len(str(package.get("bundle_sha256") or "")) == 64,
+        "catalog_sha256_valid": len(
+            str((package.get("runtime_catalog") or {}).get("catalog_sha256") or "")
+        )
+        == 64,
+    }
+    if not all(checks.values()):
+        raise BuildContractError("three_collection_release_precondition_failed")
+    release_id = next(iter(release_ids))
+    catalog = package.get("runtime_catalog") if isinstance(package.get("runtime_catalog"), dict) else {}
+    datasets = catalog.get("datasets") if isinstance(catalog.get("datasets"), dict) else {}
+    return {
+        "selection": "latest_available_release",
+        "domain_id": str(package["domain_id"]),
+        "environment": str(package["environment"]),
+        "revision": revision,
+        "package_sha256": str(package["package_sha256"]),
+        "bundle_sha256": str(package["bundle_sha256"]),
+        "catalog_sha256": str((package.get("runtime_catalog") or {}).get("catalog_sha256") or ""),
+        "dataset_source_types": {
+            str(key): str(value.get("source_type") or "")
+            for key, value in sorted(datasets.items())
+            if isinstance(value, dict)
+        },
+        "release_id_sha256": sha256(release_id.encode("utf-8")).hexdigest(),
+        "collections": dict(METADATA_COLLECTIONS),
+        "checks": checks,
+    }
 
 
 CASES: tuple[dict[str, Any], ...] = (
@@ -362,18 +466,18 @@ def _run_case(
     case: dict[str, Any],
     *,
     session_id: str,
-    domain_id: str,
-    environment: str,
+    mongo_uri: str,
+    mongo_database: str,
+    mongo_timeout_ms: int,
     timeout_seconds: int,
 ) -> dict[str, Any]:
     tweaks = {
         "domain_bundle_loader": {
-            "domain_id": domain_id,
-            "environment": environment,
-            "metadata_source_mode": "v6_active",
+            "mongo_uri": mongo_uri,
+            "mongo_database": mongo_database,
+            "mongo_timeout_ms": mongo_timeout_ms,
         },
         "request_state_capsule": {
-            "reference_instant": REFERENCE_INSTANT,
             # Validation-only opt-in. Production Flow export must stay false.
             "allow_anonymous_multiturn": True,
         },
@@ -459,6 +563,21 @@ def run(
     langflow_api_key = str(
         os.getenv("LANGFLOW_API_KEY") or env.get("LANGFLOW_API_KEY") or ""
     )
+    mongo_uri = str(os.getenv("MONGODB_URI") or env.get("MONGODB_URI") or "").strip()
+    mongo_database = str(
+        os.getenv("MONGODB_DATABASE") or env.get("MONGODB_DATABASE") or "datagov"
+    ).strip()
+    mongo_timeout_ms = 10000
+    if not mongo_uri:
+        raise BuildContractError("mongodb_uri_not_configured")
+    validation_clock = _validation_clock_evidence(env)
+    metadata_release = _three_collection_release_evidence(
+        mongo_uri,
+        mongo_database,
+        expected_domain_id=domain_id,
+        expected_environment=environment,
+        timeout_ms=mongo_timeout_ms,
+    )
     flow = json.loads(flow_path.read_text(encoding="utf-8"))
     flow_model_contract = langflow_gemini_contract_evidence(flow)
     if flow_model_contract.get("passed") is not True:
@@ -512,8 +631,9 @@ def run(
                 str(uploaded["id"]),
                 case,
                 session_id=sessions[str(case["session_group"])],
-                domain_id=domain_id,
-                environment=environment,
+                mongo_uri=mongo_uri,
+                mongo_database=mongo_database,
+                mongo_timeout_ms=mongo_timeout_ms,
                 timeout_seconds=timeout_seconds,
             )
         except Exception as exc:
@@ -541,9 +661,11 @@ def run(
         "model": DEFAULT_GEMINI_MODEL,
         "model_contract": gemini_model_contract_evidence(model),
         "flow_model_contract": flow_model_contract,
-        "domain_id": domain_id,
-        "environment": environment,
-        "metadata_source_mode": "v6_active",
+        "domain_id": metadata_release["domain_id"],
+        "environment": metadata_release["environment"],
+        "metadata_release": metadata_release,
+        "metadata_source_mode": "three_collections_auto_latest",
+        "validation_clock": validation_clock,
         "anonymous_multiturn_export_defaults": state_defaults,
         "anonymous_multiturn_validation_opt_in": True,
         "raw_langflow_responses_persisted": False,
@@ -558,6 +680,7 @@ def run(
     report["all_passed"] = report["failed"] == 0 and multiturn_check
     assert_secret_absent(report, gemini_api_key)
     assert_secret_absent(report, langflow_api_key)
+    assert_secret_absent(report, mongo_uri)
     return report
 
 
@@ -567,8 +690,16 @@ def main() -> int:
     parser.add_argument("--server-url", default="http://127.0.0.1:7873")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
     parser.add_argument("--model", default=DEFAULT_GEMINI_MODEL)
-    parser.add_argument("--domain-id", default="manufacturing")
-    parser.add_argument("--environment", default="validation")
+    parser.add_argument(
+        "--domain-id",
+        default="manufacturing",
+        help="Expected identity of the latest usable three-collection release.",
+    )
+    parser.add_argument(
+        "--environment",
+        default="validation",
+        help="Expected environment of the latest usable three-collection release.",
+    )
     parser.add_argument("--timeout-seconds", type=int, default=300)
     parser.add_argument(
         "--output",

@@ -1,7 +1,7 @@
 # metadata_driven_v6
 
-범용 Domain Package v2의 자연어 authoring, deterministic compile, Mongo bundle/active-pointer 계약은
-[`docs/V6_DOMAIN_PACKAGE_CONTRACT.md`](docs/V6_DOMAIN_PACKAGE_CONTRACT.md)를 기준으로 한다.
+범용 Domain Package v2의 자연어 authoring, deterministic compile, MongoDB 3컬렉션 저장 계약은
+[`docs/V6_THREE_COLLECTION_METADATA.md`](docs/V6_THREE_COLLECTION_METADATA.md)를 기준으로 한다.
 
 `metadata_driven_v6`는 v5 Data Analysis Flow를 부분 수정해서 이어 붙이는 프로젝트가 아니라, 검증된 기능 요구사항을 typed contract와 결정론적 실행기로 다시 구현하는 Langflow 프로젝트다.
 
@@ -26,14 +26,18 @@
 - 정보가 부족하거나 모호하면 포맷 오류로 몰지 않고 draft/candidate 없이 `status=needs_clarification`의 누락 항목과 짧은 확인 질문을 반환한다.
 - 선택적 고신뢰 등록: `source_grounding_mode=explicit_inventory`를 명시한 운영자 lane에서만 reviewed Blueprint+별도 SHA-256 pin의 annotation-only 방식 또는 완전한 inventory의 zero-LLM compile을 사용한다. 일반 작업자에게 이 문법이나 Blueprint/pin을 요구하지 않는다.
 - live authoring model policy: 정확히 `gemini-3.5-flash-lite`, temperature 0, provider/model fallback 0, repair LLM 0. 제조 bootstrap은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` 자연어 bundle을 사용
-- Prompt topology: Runtime Intent/Answer만 물리적으로 분리된 공통·특화 Prompt pair를 사용. Domain/Dataset/Main Filter authoring은 작업별 공통 Prompt 한 개가 기본이며 승인된 반복 실패에서만 optional overlay를 사용
+- Prompt topology: Runtime Intent/Answer와 Domain/Dataset/Main Filter authoring 모두 공통·특화 Prompt Template을 별도 node/source/hash/edge로 유지한다. 특화 규칙은 각 특화 Template 본문에 직접 작성하고, runtime context는 Composer에만 한 번 연결한다. 동적 특화 본문 포트는 사용하지 않는다.
 - Domain Policy Authoring: 별도 Flow의 explicit 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json` 전용. Prompt Template/Composer/envelope/LLM 0회
 - 특화 함수: descriptor→build-time standalone registry attestation→candidate→Intent→`registered_call` Typed IR→Registered Function Gateway→output schema/lineage 검증의 닫힌 실행 chain을 사용하며 metadata code/dynamic import/fallback은 금지
 - v5 사용자 출력 기능: 결과표/근거/다운로드/알림/적용 기준/후속 질문/의도·조회·실행 진단 표시 선택, 구조화 API output, GaiA metadata, CSV ref, 멀티턴을 호환 계약으로 유지
-- 실데이터 경계: 범용 Flow는 분리된 Oracle/API/데이터레이크 도구가 조회한 payload를 검증해 받는다. 서버 측 config/query resolver가 없는 개발 환경의 dummy 검증을 물리 Oracle 조회 완료로 과장하지 않는다.
+- Langflow UI: Data Analysis node는 `00`~`27`, 네 등록 Flow는 각 Flow의 `00` 입력부터 최종 출력까지 실행 순서가 드러나는 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분한다. Metadata loader에는 MongoDB URI·database·timeout만, 실제 source node에는 조회 행 수 제한만 운영 조절값으로 노출한다.
+- metadata read: `01 사용 가능 메타데이터 불러오기`가 고정된 도메인·테이블 카탈로그·메인필터 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·검증·결합한다. domain/environment/source mode/collection 선택은 UI에 없다.
+- 요청 시간: `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없고, 실행 시각을 내부에서 생성해 `Asia/Seoul`로 고정한다. 검증의 고정 시각은 harness fixture다.
+- 데이터 source 경계: `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 연결된 payload는 각 node가 자기 source 계약으로만 검증하며, 개발 dummy 검증을 실제 원천 조회 완료로 과장하지 않는다.
+- 출력 전달 경계: `23 → 24·25·26`은 전송용 해시가 없는 일반 JSON 응답을 전달한다. 24·25·26은 수신 payload의 해시나 전체 응답 schema를 다시 검사하지 않으며, 결과 무결성 hash는 MongoDB result store 내부에서만 유지한다.
 - MVP Flow inventory: Data Analysis 1개 + Domain/Dataset/Main Filter/Domain Policy authoring 4개, 총 5개
-- metadata write: immutable prepare → 외부 승인 → 별도 execute run의 atomic claim
-- v5 MongoDB 문서: 직접 덮어쓰지 않고 v6 versioned collection으로 컴파일·이관
+- metadata write: 자연어 해석 → deterministic compile/validation → 도메인·테이블 카탈로그·메인필터 3컬렉션 transaction 저장
+- v5 MongoDB 문서: 직접 덮어쓰지 않고 v6 고정 3컬렉션 current release로 컴파일·이관
 
 실행 계층은 다음과 같다.
 
@@ -70,12 +74,13 @@ v6의 목표는 단순 node 수 축소가 아니다. LLM이 결정하던 실행 
 6. [harness/contracts/INTENT_PLAN_EXECUTION.md](harness/contracts/INTENT_PLAN_EXECUTION.md)
 7. [harness/contracts/PAYLOAD_STATE.md](harness/contracts/PAYLOAD_STATE.md)
 8. [harness/contracts/VALIDATION.md](harness/contracts/VALIDATION.md)
-9. [docs/V6_FINAL_MODIFICATION_PLAN.md](docs/V6_FINAL_MODIFICATION_PLAN.md)
-10. [docs/V6_FUNCTIONAL_DESIGN.md](docs/V6_FUNCTIONAL_DESIGN.md)
-11. [docs/V5_REBUILD_EVIDENCE.md](docs/V5_REBUILD_EVIDENCE.md)
-12. [docs/V6_IMPLEMENTATION_GUIDE.md](docs/V6_IMPLEMENTATION_GUIDE.md)
-13. [docs/V6_METADATA_AUTHORING_GUIDE.md](docs/V6_METADATA_AUTHORING_GUIDE.md)
-14. [docs/V6_VALIDATION_GUIDE.md](docs/V6_VALIDATION_GUIDE.md)
+9. [docs/V6_THREE_COLLECTION_METADATA.md](docs/V6_THREE_COLLECTION_METADATA.md)
+10. [docs/V6_FINAL_MODIFICATION_PLAN.md](docs/V6_FINAL_MODIFICATION_PLAN.md)
+11. [docs/V6_FUNCTIONAL_DESIGN.md](docs/V6_FUNCTIONAL_DESIGN.md)
+12. [docs/V5_REBUILD_EVIDENCE.md](docs/V5_REBUILD_EVIDENCE.md)
+13. [docs/V6_IMPLEMENTATION_GUIDE.md](docs/V6_IMPLEMENTATION_GUIDE.md)
+14. [docs/V6_METADATA_AUTHORING_GUIDE.md](docs/V6_METADATA_AUTHORING_GUIDE.md)
+15. [docs/V6_VALIDATION_GUIDE.md](docs/V6_VALIDATION_GUIDE.md)
 
 ## 구현 상태와 검증 결과
 
@@ -89,14 +94,14 @@ v6의 목표는 단순 node 수 축소가 아니다. LLM이 결정하던 실행 
 | 유연 조회 | projection, typed filter, aggregate, formula, join, presence, top/bottom, argmax ties, group rank, field compare, duplicate group, detail/history 지원 |
 | state / multi-turn | owner·session-bound TTL ref, CAS, executed-result contract, MT-1~MT-5 통과 |
 | v5 output 호환 | Message 표시 toggle, structured API Data, GaiA, CSV ref, follow-up 유지 |
-| Python test | 전체 497/497 통과, failure/error/skip 0 (`pytest_v6_current.xml`) |
+| Python test | 전체 suite 통과, failure/error 0; 3컬렉션 round-trip/tamper/collection/session 테스트 4건 포함 |
 | 반복 안정성 | 70건 × 3회, 70개 case 모두 plan/result signature 동일 |
-| Langflow 1.9.2 artifact | generated artifact 41/41, Flow source parity 162 instance/25 unique, 5개 Flow의 node template 79/79 parse, import 5/5 |
+| Langflow 1.9.2 artifact | standalone component 25/25, 3개 artifact layer의 Flow source parity 168 instance/27 unique, 5개 Flow의 source-export node template 86/86 parse, import-ready 5/5 생성 |
 | 주문·매출 범용 도메인 | 19/19 통과, 제조 도메인과 session/result ref 격리 확인 |
-| MongoDB migration | v6 candidate/report 생성, v5 write 0회; 실제 apply는 별도 승인 단계 |
+| MongoDB metadata | 격리 DB `datagov_v6_validation`에 정확히 도메인·테이블 카탈로그·메인필터 3문서 저장, 자연어 원문 3/3 보존, 동일 release 1개, loader round-trip 통과 |
 | 실제 Gemini API | exact `gemini-3.5-flash-lite`, temperature 0, fallback 0. 기본 corpus와 제목·bullet 0개 재작성 corpus 모두 실제 authoring 4/4 cycle 통과; 각 run draft 5, annotation 0, repair 0 |
-| 실제 Langflow authoring HTTP | Domain/Dataset/Main Filter/Domain Policy Flow 4개 import·prepare/approve/execute, revision 0→4, Mongo active pointer·loader round-trip 통과 |
-| 실제 Langflow Data Analysis HTTP | authoring revision 4의 `order_sales` active metadata를 로드해 OS01/OS02/OS08 3/3 통과; deterministic route, state 1, Message/API/GaiA hash 동치, 모든 LLM 0회 |
-| 실제 Langflow 제조 registration→analysis HTTP | 자유형 TXT→Gemini typed proposal→승인 레지스트리 compile→Mongo revision 4→Data Analysis 4/4 통과; deterministic/Intent LLM/멀티턴, pandas code·repair 0 |
+| 실제 Gemini + Mongo 등록 | exact `gemini-3.5-flash-lite` 3회, fallback/repair 0; 자유형 TXT→standalone Langflow component 순서→compile→3컬렉션 commit revision 2→loader 통과 (`three_collection_live_validation.json`) |
+| Langflow runtime | 정확한 1.9.2/0.9.2/0.4.2에서 5개 Flow, 실행 node template 86/86 parse, Flow/source parity 통과 |
+| Data Analysis 동등 실행 | canonical 70/70, component pipeline, 멀티턴/state owner 격리, zero-LLM follow-up 모두 통과 (`three_collection_equivalent_pipeline.json`) |
 
 최신 명령과 증적은 [V6_FINAL_VALIDATION_CURRENT.md](docs/V6_FINAL_VALIDATION_CURRENT.md)를 따른다. [V6_FINAL_VALIDATION.md](docs/V6_FINAL_VALIDATION.md)는 2026-08-01의 4-Flow historical baseline이다.

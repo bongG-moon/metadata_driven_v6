@@ -70,7 +70,6 @@ def sample_response() -> dict:
             "commit_order": [],
         },
     }
-    response["response_sha256"] = sha256_json(response)
     return response
 
 
@@ -95,24 +94,33 @@ def test_show_pandas_code_is_execution_plan_alias_only():
     assert "generated_code" not in message
 
 
-def test_message_api_and_gaia_consume_same_hash_valid_response():
+def test_message_api_and_gaia_consume_same_json_response():
     response = sample_response()
     api_value = api_output(response)
     value = gaia_output(response)
     assert api_value == response and api_value is not response
     assert value["answer"] == "2건입니다."
     assert value["metadata"]["followup_questions"] == [{"id": "f1", "text": "가장 큰 항목만 보여줘"}]
-    assert value["metadata"]["response_sha256"] == response["response_sha256"]
+    assert "response_sha256" not in value["metadata"]
     assert value["metadata"]["usage"] == response["trace"]["usage"]
 
 
-def test_output_adapters_reject_response_mutation():
+def test_output_adapters_accept_response_mutation_without_hash_comparison():
     response = sample_response()
     tampered = deepcopy(response)
     tampered["message"] = "mutated"
-    with pytest.raises(ContractError) as error:
-        api_output(tampered)
-    assert error.value.code == "answer_claim_violation"
+    assert api_output(tampered)["message"] == "mutated"
+    assert gaia_output(tampered)["answer"] == "mutated"
+
+
+def test_chat_and_api_output_do_not_fail_on_presentation_changes():
+    response = sample_response()
+    response["message"] = "표시 단계에서 사용할 답변입니다."
+
+    rendered = render_message(response, {"show_result_table": False})
+
+    assert "표시 단계에서 사용할 답변입니다." in rendered
+    assert api_output(response)["message"] == response["message"]
 
 
 @pytest.mark.parametrize(

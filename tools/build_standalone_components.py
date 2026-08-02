@@ -602,7 +602,7 @@ def _shared_memory_store():
 
 
 class RequestStateCapsule(Component):
-    display_name = "요청 및 세션 상태 고정"
+    display_name = "02 요청 및 세션 상태 고정"
     description = "질문 원문과 인증된 세션 상태를 검증해 이후 노드가 사용하는 간결한 요청 컨텍스트로 고정합니다."
     icon = "scan-text"
     metadata = {"logical_stage": "request_state"}
@@ -610,8 +610,6 @@ class RequestStateCapsule(Component):
     inputs = [
         MessageInput(name="input_message", display_name="사용자 질문", required=True, info="분석할 자연어 질문과 세션 식별 정보가 담긴 메시지입니다."),
         DataInput(name="domain_bundle", display_name="도메인 실행 번들", required=True, info="승인된 데이터셋·필드·지표 정의가 포함된 불변 도메인 번들입니다."),
-        StrInput(name="reference_instant", display_name="기준 시각", value="", required=False, info="상대 날짜 해석의 기준 시각입니다. 비워 두면 런타임 기본값을 사용합니다."),
-        StrInput(name="reference_timezone", display_name="기준 시간대", value="Asia/Seoul", info="기준 시각과 날짜 조건을 해석할 시간대입니다. v6 기본값은 Asia/Seoul입니다."),
         SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="인증된 멀티턴 상태와 결과를 저장할 MongoDB 연결 문자열입니다."),
         StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="datagov", info="세션 상태 및 결과 컬렉션이 위치한 데이터베이스 이름입니다."),
         StrInput(name="result_collection", display_name="분석 결과 컬렉션", value="agent_v6_result_store", info="불변 분석 결과를 저장하는 v6 전용 컬렉션입니다."),
@@ -703,9 +701,7 @@ class RequestStateCapsule(Component):
                 "anonymous_multiturn_enabled": anonymous_multiturn_enabled,
             }
             state_policy = {**state_policy_material, "policy_sha256": sha256_json(state_policy_material)}
-            timezone_name = str(getattr(self, "reference_timezone", "") or os.getenv("AGENT_TIMEZONE", "Asia/Seoul"))
-            if timezone_name != "Asia/Seoul":
-                raise ContractError("request_invalid", "request", "v6 기준 timezone은 Asia/Seoul이어야 합니다.")
+            timezone_name = "Asia/Seoul"
             store = self._state_store(subject_id, anonymous_multiturn_enabled)
             prior_state = store.load_state(subject_id, storage_session_id)
             prior_version = int(prior_state.get("state_version", 0)) if isinstance(prior_state, dict) else 0
@@ -724,7 +720,12 @@ class RequestStateCapsule(Component):
                 question,
                 session_id=session_id,
                 subject_id=subject_id,
-                reference_instant=str(getattr(self, "reference_instant", "") or os.getenv("AGENT_DEFAULT_DATE", "")) or None,
+                reference_instant=(
+                    str(os.getenv("V6_VALIDATION_REFERENCE_INSTANT", "") or "")
+                    if os.getenv("V6_VALIDATION_MODE", "") == "1"
+                    else ""
+                ) or None,
+                timezone_name=timezone_name,
                 previous_state_ref=prior_ref,
                 upstream_result_ref=upstream_ref,
             )
@@ -755,7 +756,7 @@ DOMAIN_BUNDLE_COMPONENT = r'''
 import os
 
 from lfx.custom.custom_component.component import Component
-from lfx.io import DataInput, DropdownInput, IntInput, Output, SecretStrInput, StrInput
+from lfx.io import IntInput, Output, SecretStrInput, StrInput
 from lfx.schema.data import Data
 
 
@@ -763,21 +764,6 @@ def _secret_text(value):
     if hasattr(value, "get_secret_value"):
         value = value.get_secret_value()
     return str(value or "").strip()
-
-
-def _runtime_catalog(value):
-    if not isinstance(value, dict):
-        return None
-    for candidate in (
-        value,
-        value.get("runtime_catalog"),
-        value.get("compiled_catalog"),
-        value.get("catalog"),
-        (value.get("domain_bundle") or {}).get("runtime_catalog") if isinstance(value.get("domain_bundle"), dict) else None,
-    ):
-        if isinstance(candidate, dict) and {"datasets", "fields", "metrics"}.issubset(candidate):
-            return deepcopy(candidate)
-    return None
 
 
 def _validate_catalog(catalog):
@@ -795,20 +781,14 @@ def _validate_catalog(catalog):
 
 
 class DomainBundleLoader(Component):
-    display_name = "도메인 실행 번들 불러오기"
-    description = "승인된 v6 활성 번들 또는 인라인 번들을 검증해 하나의 불변 실행 카탈로그로 제공합니다. 내장 제조 기준본은 회귀 검증 전용입니다."
+    display_name = "01 사용 가능 메타데이터 불러오기"
+    description = "가장 최근 등록된 도메인·테이블 카탈로그·메인필터의 동일 release를 자동으로 찾아 하나의 실행 카탈로그로 결합합니다."
     icon = "package-open"
     metadata = {"logical_stage": "domain_bundle"}
 
     inputs = [
-        StrInput(name="domain_id", display_name="도메인 ID", value="default", info="불러올 업무 도메인의 고유 식별자입니다. 공유 Flow에서는 각 업무 도메인 ID로 바꿉니다."),
-        StrInput(name="environment", display_name="운영 환경", value="production", info="활성 번들을 구분하는 실행 환경 이름입니다."),
-        DropdownInput(name="metadata_source_mode", display_name="메타데이터 원본 방식", options=["v6_active", "inline", "embedded_baseline"], value="v6_active", info="일반 운영은 MongoDB 활성 번들을 사용합니다. embedded_baseline은 내장 제조 회귀 fixture 전용입니다."),
-        DataInput(name="inline_domain_bundle", display_name="인라인 도메인 번들", required=False, info="원본 방식이 inline일 때 직접 전달할 검증 대상 도메인 번들입니다."),
-        SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="v6 활성 번들을 읽을 MongoDB 연결 문자열입니다."),
-        StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="datagov", info="활성 포인터와 도메인 번들이 저장된 데이터베이스입니다."),
-        StrInput(name="active_collection", display_name="활성 포인터 컬렉션", value="agent_v6_metadata_active", info="도메인별 현재 활성 리비전을 가리키는 컬렉션입니다."),
-        StrInput(name="bundle_collection", display_name="도메인 번들 컬렉션", value="agent_v6_metadata_bundles", info="검증·컴파일된 불변 도메인 번들을 저장하는 컬렉션입니다."),
+        SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="세 메타데이터 컬렉션을 읽을 MongoDB 연결 문자열입니다."),
+        StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="datagov", info="운영 메타데이터가 저장된 데이터베이스입니다."),
         IntInput(name="mongo_timeout_ms", display_name="MongoDB 제한 시간(ms)", value=5000, info="MongoDB 연결 및 조회에 적용할 제한 시간(밀리초)입니다."),
     ]
     outputs = [Output(name="domain_bundle", display_name="검증된 도메인 실행 번들", method="load_bundle", types=["Data"])]
@@ -816,61 +796,36 @@ class DomainBundleLoader(Component):
     def load_bundle(self) -> Data:
         context = {"contract_version": PIPELINE_VERSION, "ok": True, "stage": "domain_bundle"}
         try:
-            mode = str(getattr(self, "metadata_source_mode", "v6_active") or "v6_active")
-            domain_id = str(getattr(self, "domain_id", "") or "default").strip()
-            environment = str(getattr(self, "environment", "") or "production").strip()
-            revision = "embedded"
-            source = mode
-            package = None
-            if mode == "embedded_baseline":
-                catalog = deepcopy(EMBEDDED_RUNTIME_CATALOG)
-            elif mode == "inline":
-                inline_value = _payload(getattr(self, "inline_domain_bundle", None))
-                inline_package = inline_value.get("domain_package") if isinstance(inline_value.get("domain_package"), dict) else inline_value
-                if inline_package.get("contract_version") == "domain.package.v1":
-                    package = validate_domain_package(inline_package)
-                    if package["domain_id"] != domain_id or package["environment"] != environment:
-                        raise ContractError("metadata_dependency_error", "domain_bundle", "inline package identity가 node domain/environment와 일치하지 않습니다.")
-                    catalog = deepcopy(package["runtime_catalog"])
-                    revision = str(package["revision"])
-                else:
-                    catalog = _runtime_catalog(inline_value)
-                    revision = "inline"
-            elif mode == "v6_active":
-                uri = _secret_text(getattr(self, "mongo_uri", "")) or os.getenv("MONGODB_URI", "").strip()
-                if not uri:
-                    raise ContractError("metadata_dependency_error", "domain_bundle", "v6_active mode에는 MongoDB URI가 필요합니다.")
-                try:
-                    from pymongo import MongoClient
-                except ImportError as exc:
-                    raise ContractError("metadata_dependency_error", "domain_bundle", "pymongo를 사용할 수 없습니다.") from exc
-                client = MongoClient(uri, serverSelectionTimeoutMS=max(500, min(int(getattr(self, "mongo_timeout_ms", 5000)), 30000)))
+            uri = _secret_text(getattr(self, "mongo_uri", "")) or os.getenv("MONGODB_URI", "").strip()
+            if not uri:
+                raise ContractError("metadata_dependency_error", "domain_bundle", "사용 가능한 메타데이터를 읽으려면 MongoDB URI가 필요합니다.")
+            try:
+                from pymongo import MongoClient
+            except ImportError as exc:
+                raise ContractError("metadata_dependency_error", "domain_bundle", "pymongo를 사용할 수 없습니다.") from exc
+            client = MongoClient(uri, serverSelectionTimeoutMS=max(500, min(int(getattr(self, "mongo_timeout_ms", 5000)), 30000)))
+            try:
                 database = client[str(getattr(self, "mongo_database", "") or os.getenv("MONGODB_DATABASE", "datagov"))]
-                package = load_active_domain_bundle(
-                    database,
-                    domain_id,
-                    environment,
-                    active_collection=str(getattr(self, "active_collection", "agent_v6_metadata_active")),
-                    bundle_collection=str(getattr(self, "bundle_collection", "agent_v6_metadata_bundles")),
-                )
-                catalog = deepcopy(package["runtime_catalog"])
-                revision = str(package["revision"])
-            else:
-                raise ContractError("metadata_dependency_error", "domain_bundle", "지원하지 않는 metadata source mode입니다.")
+                package = load_available_domain_package_from_three_collections(database)
+            finally:
+                client.close()
+            domain_id = str(package["domain_id"])
+            environment = str(package["environment"])
+            revision = str(package["revision"])
+            catalog = deepcopy(package["runtime_catalog"])
             catalog = _validate_catalog(catalog)
             context["domain_bundle"] = {
                 "contract_version": "domain.bundle.runtime.v1",
                 "domain_id": domain_id,
                 "environment": environment,
                 "revision": revision,
-                "source_mode": source,
+                "source_mode": "three_collections",
                 "catalog_sha256": str(catalog.get("catalog_sha256") or sha256_json(catalog)),
                 "runtime_catalog": catalog,
             }
-            if isinstance(package, dict):
-                context["domain_bundle"].update(
-                    {"package_sha256": package.get("package_sha256"), "bundle_sha256": package.get("bundle_sha256")}
-                )
+            context["domain_bundle"].update(
+                {"package_sha256": package.get("package_sha256"), "bundle_sha256": package.get("bundle_sha256")}
+            )
         except Exception as exc:
             context = _pipeline_error(context, exc, "domain_bundle")
         return Data(data=context)
@@ -884,7 +839,7 @@ from lfx.schema.data import Data
 
 
 class CandidateRouteGate(Component):
-    display_name = "의도 후보 및 분기 판정"
+    display_name = "03 의도 후보 및 분기 판정"
     description = "질문과 등록 메타데이터를 바탕으로 허용된 의도 후보와 LLM 호출 여부를 결정론적으로 계산합니다."
     icon = "route"
     metadata = {"logical_stage": "candidate_route"}
@@ -956,19 +911,15 @@ import json
 from lfx.custom.custom_component.component import Component
 from lfx.io import DataInput, Output
 from lfx.schema.data import Data
-from lfx.schema.message import Message
 
 
 class IntentPromptContextBuilder(Component):
-    display_name = "의도 분석 프롬프트 컨텍스트"
-    description = "등록 후보와 질문만 bounded runtime context로 만들고 도메인 특화 지침을 별도 Message로 분리합니다."
+    display_name = "04 의도 분석 런타임 컨텍스트 구성"
+    description = "등록 후보와 질문만 bounded runtime context로 만들며 프롬프트 본문은 외부 Prompt Template 노드가 소유합니다."
     icon = "braces"
     metadata = {"logical_stage": "intent_prompt_context"}
     inputs = [DataInput(name="selection_context", display_name="후보 및 분기 컨텍스트", required=True, info="결정론적으로 계산된 의도 후보와 LLM 호출 필요 여부가 담긴 컨텍스트입니다.")]
-    outputs = [
-        Output(name="intent_prompt_context", display_name="의도 분석 실행 컨텍스트", method="build_context", types=["Data"]),
-        Output(name="intent_specialized_prompt_text", display_name="의도 분석 특화 프롬프트 원문", method="build_specialized_text", types=["Message"]),
-    ]
+    outputs = [Output(name="intent_prompt_context", display_name="의도 분석 실행 컨텍스트", method="build_context", types=["Data"])]
 
     def _selection(self):
         current = _require_context(getattr(self, "selection_context", None), "intent_prompt_context")
@@ -999,11 +950,6 @@ class IntentPromptContextBuilder(Component):
             }
         )
 
-    def build_specialized_text(self) -> Message:
-        current = self._selection()
-        text = str(((current.get("domain_prompt_extensions") or {}).get("intent") or "")) if current.get("ok") else ""
-        text = text.encode("utf-8")[:8192].decode("utf-8", errors="ignore")
-        return Message(text=text)
 '''
 
 
@@ -1033,7 +979,7 @@ def _intent_selection_id(response_text):
 
 
 class CommonIntentResolver(Component):
-    display_name = "공통 의도 결과 검증기"
+    display_name = "08 공통 의도 결과 검증"
     description = "외부 조건부 LLM 결과 또는 결정론적 후보를 동일한 closed semantic intent로 검증합니다."
     icon = "brain-circuit"
     metadata = {"logical_stage": "intent_resolution"}
@@ -1103,7 +1049,7 @@ from lfx.schema.data import Data
 
 
 class PlanCompilerValidator(Component):
-    display_name = "실행 계획 컴파일 및 검증"
+    display_name = "09 실행 계획 컴파일 및 검증"
     description = "검증된 의미 의도를 허용된 연산자로만 구성된 불변 Typed Execution IR로 컴파일하고 계약을 검증합니다."
     icon = "list-checks"
     metadata = {"logical_stage": "plan_compilation"}
@@ -1157,22 +1103,33 @@ from lfx.schema.data import Data
 
 
 class RetrievalJobRouter(Component):
-    display_name = "데이터 조회 작업 분기"
-    description = "실행 계획에 포함된 최소 조회 작업만 선택된 더미·인라인·실데이터 경로로 전달합니다."
+    display_name = "10 데이터 조회 작업 라우터"
+    description = "실행 계획의 최소 조회 작업을 더미·Oracle·H-API·Datalake·Goodocs 전용 출력으로 분리합니다."
     icon = "split"
     metadata = {"logical_stage": "job_routing"}
     inputs = [
         DataInput(name="plan_context", display_name="검증된 실행 계획 컨텍스트", required=True, info="데이터 조회 작업이 포함된 검증 완료 Typed Execution IR입니다."),
-        DropdownInput(name="data_mode", display_name="데이터 조회 방식", options=["dummy", "inline", "live"], value="dummy", info="검증용 더미 데이터, 전달된 인라인 데이터, 외부 도구가 조회한 실데이터 중 하나를 선택합니다."),
+        DropdownInput(name="data_mode", display_name="데이터 조회 방식", options=["dummy", "live"], value="dummy", info="검증용 더미 데이터 또는 원천별 실데이터 조회 경로를 선택합니다."),
     ]
-    outputs = [Output(name="job_bundle", display_name="조회 작업 묶음", method="route_jobs", types=["Data"])]
+    outputs = [
+        Output(name="dummy_jobs", display_name="더미 조회 작업", method="dummy_jobs_out", types=["Data"], group_outputs=True),
+        Output(name="oracle_jobs", display_name="Oracle 조회 작업", method="oracle_jobs_out", types=["Data"], group_outputs=True),
+        Output(name="h_api_jobs", display_name="H-API 조회 작업", method="h_api_jobs_out", types=["Data"], group_outputs=True),
+        Output(name="datalake_jobs", display_name="Datalake 조회 작업", method="datalake_jobs_out", types=["Data"], group_outputs=True),
+        Output(name="goodocs_jobs", display_name="Goodocs 조회 작업", method="goodocs_jobs_out", types=["Data"], group_outputs=True),
+    ]
 
-    def route_jobs(self) -> Data:
+    def _routes_once(self):
         current = _payload(getattr(self, "plan_context", None))
+        cache_key = id(getattr(self, "plan_context", None))
+        if getattr(self, "_routes_cache_key", None) == cache_key:
+            return self._routes_cache
         try:
             current = _require_context(current, "job_routing")
             if not current.get("ok"):
-                return Data(data=current)
+                routes = {name: current for name in ("dummy", "oracle", "h_api", "datalake", "goodocs")}
+                self._routes_cache_key, self._routes_cache = cache_key, routes
+                return routes
             mode = str(getattr(self, "data_mode", "dummy") or "dummy")
             jobs = deepcopy((current.get("plan") or {}).get("retrieval_jobs") or [])
             candidate_lane = str(current.get("candidate_lane") or "")
@@ -1183,16 +1140,71 @@ class RetrievalJobRouter(Component):
                     "A closed candidate lane is required before retrieval routing.",
                     {"candidate_lane": candidate_lane},
                 )
-            return Data(data={
-                "contract_version": PIPELINE_VERSION,
-                "ok": True,
-                "stage": "job_routing",
-                "data_mode": mode,
-                "candidate_lane": candidate_lane,
-                "jobs": jobs,
-            })
+            aliases = {
+                "oracle": {"oracle", "sql"},
+                "h_api": {"h_api", "http"},
+                "datalake": {"datalake", "file", "mongodb"},
+                "goodocs": {"goodocs"},
+            }
+            if mode == "live":
+                unsupported = sorted(
+                    {
+                        str(job.get("source_type") or "")
+                        for job in jobs
+                        if not any(str(job.get("source_type") or "") in values for values in aliases.values())
+                    }
+                )
+                if unsupported:
+                    raise ContractError("source_contract_error", "job_routing", "지원하지 않는 실데이터 source type입니다.", {"source_types": unsupported})
+            routes = {}
+            for source_type in ("dummy", "oracle", "h_api", "datalake", "goodocs"):
+                selected = (
+                    jobs
+                    if source_type == "dummy" and mode == "dummy"
+                    else [job for job in jobs if mode == "live" and str(job.get("source_type") or "") in aliases.get(source_type, set())]
+                )
+                routes[source_type] = {
+                    "contract_version": PIPELINE_VERSION,
+                    "ok": True,
+                    "stage": "job_routing",
+                    "data_mode": mode,
+                    "candidate_lane": candidate_lane,
+                    "source_type": source_type,
+                    "jobs": deepcopy(selected),
+                }
         except Exception as exc:
-            return Data(data=_pipeline_error(current, exc, "job_routing"))
+            failed = _pipeline_error(current, exc, "job_routing")
+            routes = {name: failed for name in ("dummy", "oracle", "h_api", "datalake", "goodocs")}
+        self._routes_cache_key, self._routes_cache = cache_key, routes
+        return routes
+
+    def dummy_jobs_out(self) -> Data:
+        return Data(data=self._routes_once()["dummy"])
+
+    def oracle_jobs_out(self) -> Data:
+        return Data(data=self._routes_once()["oracle"])
+
+    def h_api_jobs_out(self) -> Data:
+        return Data(data=self._routes_once()["h_api"])
+
+    def datalake_jobs_out(self) -> Data:
+        return Data(data=self._routes_once()["datalake"])
+
+    def goodocs_jobs_out(self) -> Data:
+        return Data(data=self._routes_once()["goodocs"])
+
+    def route_jobs(self) -> Data:
+        """Backward-compatible deterministic entrypoint for local harnesses."""
+        routes = self._routes_once()
+        mode = str(getattr(self, "data_mode", "dummy") or "dummy")
+        return Data(data=routes["dummy"] if mode == "dummy" else {
+            "contract_version": PIPELINE_VERSION,
+            "ok": all(bool(item.get("ok")) for item in routes.values()),
+            "stage": "job_routing",
+            "data_mode": mode,
+            "candidate_lane": next(iter(routes.values())).get("candidate_lane"),
+            "jobs": [job for name in ("oracle", "h_api", "datalake", "goodocs") for job in routes[name].get("jobs", [])],
+        })
 '''
 
 
@@ -1203,7 +1215,7 @@ from lfx.schema.data import Data
 
 
 class DummySourceRetriever(Component):
-    display_name = "검증용 더미 데이터 조회"
+    display_name = "11 검증용 더미 데이터 조회"
     description = "테스트와 검증 환경에서만 실행 계획에 맞는 결정론적 더미 원천 결과를 생성합니다."
     icon = "database-zap"
     metadata = {"logical_stage": "dummy_retrieval"}
@@ -1353,7 +1365,7 @@ def _project_physical(row, job, catalog):
     return projected
 
 
-def _source_rows(payload, job, catalog, max_rows, max_bytes):
+def _source_rows(payload, job, catalog, max_rows):
     job_id = str(job.get("job_id") or "")
     dataset_key = str(job.get("dataset_key") or "")
     value = None
@@ -1375,8 +1387,6 @@ def _source_rows(payload, job, catalog, max_rows, max_bytes):
     if len(value) > max_rows:
         raise ContractError("source_row_limit_exceeded", "retrieval", "source row limit을 초과했습니다.", {"limit": max_rows})
     rows = deepcopy(value)
-    if len(canonical_bytes(rows)) > max_bytes:
-        raise ContractError("executor_memory_limit_exceeded", "retrieval", "source payload memory limit을 초과했습니다.", {"limit_bytes": max_bytes})
     required_fields = [str(field) for field in job.get("required_fields") or []]
     canonical_rows, _ = canonicalize_rows(
         dataset_key,
@@ -1390,8 +1400,6 @@ def _source_rows(payload, job, catalog, max_rows, max_bytes):
         for physical, canonical in zip(rows, canonical_rows, strict=True)
         if _parameter_match(canonical, job, catalog) and _filter_match(canonical, job.get("filters") or {})
     ]
-    if len(canonical_bytes(selected)) > max_bytes:
-        raise ContractError("executor_memory_limit_exceeded", "retrieval", "Projected source payload exceeds the configured limit.", {"limit_bytes": max_bytes})
     return selected
 
 
@@ -1529,6 +1537,98 @@ class LiveSourceRetriever(Component):
 '''
 
 
+SOURCE_SPECIFIC_RETRIEVER_TEMPLATE = r'''
+from lfx.custom.custom_component.component import Component
+from lfx.io import DataInput, IntInput, NestedDictInput, Output
+from lfx.schema.data import Data
+
+
+class __CLASS_NAME__(Component):
+    display_name = "__DISPLAY_NAME__"
+    description = "__DESCRIPTION__"
+    icon = "database"
+    metadata = {"logical_stage": "__STAGE__", "source_type": "__SOURCE_TYPE__"}
+    inputs = [
+        DataInput(name="job_bundle", display_name="__JOB_LABEL__", required=True, info="라우터가 __SOURCE_LABEL__에만 배정한 최소 조회 작업입니다."),
+        DataInput(name="domain_bundle", display_name="사용 가능 메타데이터", required=True, info="조회 행의 데이터셋·필드 계약을 검증할 현재 메타데이터입니다."),
+        NestedDictInput(
+            name="source_payload",
+            display_name="__PAYLOAD_LABEL__",
+            value={},
+            required=False,
+            info="검토된 __SOURCE_LABEL__ 연동 코드가 query_ref/config_ref에 따라 반환한 데이터셋별 행입니다. 비밀값이나 연결 문자열을 넣지 않습니다.",
+        ),
+        IntInput(name="source_row_limit", display_name="조회 행 수 제한", value=50000, info="이 원천 노드가 한 번에 수신할 수 있는 최대 행 수입니다."),
+    ]
+    outputs = [Output(name="__OUTPUT_NAME__", display_name="__OUTPUT_LABEL__", method="retrieve", types=["Data"])]
+
+    def retrieve(self) -> Data:
+        jobs = _payload(getattr(self, "job_bundle", None))
+        lane = {
+            "contract_version": PIPELINE_VERSION,
+            "ok": True,
+            "stage": "__STAGE__",
+            "lane": "__SOURCE_TYPE__",
+            "status": "skipped",
+            "source_results": [],
+        }
+        try:
+            jobs = _require_context(jobs, "__STAGE__")
+            if not jobs.get("ok"):
+                return Data(data=jobs)
+            selected_jobs = list(jobs.get("jobs") or [])
+            if jobs.get("data_mode") != "live" or not selected_jobs:
+                return Data(data=lane)
+            if str(jobs.get("source_type") or "") != "__SOURCE_TYPE__":
+                raise ContractError("source_contract_error", "__STAGE__", "라우터의 source type이 노드 역할과 일치하지 않습니다.")
+            domain = _require_context(getattr(self, "domain_bundle", None), "__STAGE__")
+            if not domain.get("ok"):
+                raise ContractError("metadata_dependency_error", "__STAGE__", "사용 가능 메타데이터를 불러오지 못했습니다.")
+            catalog = (domain.get("domain_bundle") or {}).get("runtime_catalog")
+            payload = _payload(getattr(self, "source_payload", None))
+            max_rows = max(1, min(int(getattr(self, "source_row_limit", 50000)), 100000))
+            results = [
+                _physical_result(job, _source_rows(payload, job, catalog, max_rows), "__SOURCE_TYPE__")
+                for job in selected_jobs
+            ]
+            lane.update({"status": "selected", "source_results": results, "data_mode": "live"})
+        except Exception as exc:
+            lane = _pipeline_error(lane, exc, "__STAGE__")
+        return Data(data=lane)
+'''
+
+
+def _source_specific_retriever_component(
+    *,
+    class_name: str,
+    display_name: str,
+    description: str,
+    stage: str,
+    source_type: str,
+    source_label: str,
+    job_label: str,
+    payload_label: str,
+    output_name: str,
+    output_label: str,
+) -> str:
+    values = {
+        "__CLASS_NAME__": class_name,
+        "__DISPLAY_NAME__": display_name,
+        "__DESCRIPTION__": description,
+        "__STAGE__": stage,
+        "__SOURCE_TYPE__": source_type,
+        "__SOURCE_LABEL__": source_label,
+        "__JOB_LABEL__": job_label,
+        "__PAYLOAD_LABEL__": payload_label,
+        "__OUTPUT_NAME__": output_name,
+        "__OUTPUT_LABEL__": output_label,
+    }
+    source = SOURCE_SPECIFIC_RETRIEVER_TEMPLATE
+    for marker, value in values.items():
+        source = source.replace(marker, value)
+    return source
+
+
 SOURCE_MERGER_COMPONENT = r'''
 from lfx.custom.custom_component.component import Component
 from lfx.io import DataInput, IntInput, Output
@@ -1536,7 +1636,7 @@ from lfx.schema.data import Data
 
 
 class SourceContractMerger(Component):
-    display_name = "원천 결과 계약 병합"
+    display_name = "16 원천 결과 계약 병합"
     description = "선택된 데이터 경로의 결과만 표준화하고 Typed IR 실행기가 소비하는 프레임으로 변환합니다."
     icon = "combine"
     metadata = {"logical_stage": "source_merge"}
@@ -1544,9 +1644,10 @@ class SourceContractMerger(Component):
         DataInput(name="plan_context", display_name="검증된 실행 계획 컨텍스트", required=True, info="선택된 조회 작업과 Typed Execution IR이 포함된 컨텍스트입니다."),
         DataInput(name="domain_bundle", display_name="도메인 실행 번들", required=True, info="원천 결과를 표준화할 데이터셋·필드 계약입니다."),
         DataInput(name="dummy_results", display_name="더미 원천 조회 결과", required=True, info="더미 경로가 선택되지 않았으면 skipped 상태로 연결합니다."),
-        DataInput(name="inline_results", display_name="인라인 원천 조회 결과", required=True, info="인라인 경로가 선택되지 않았으면 skipped 상태로 연결합니다."),
-        DataInput(name="live_results", display_name="실데이터 원천 조회 결과", required=True, info="실데이터 경로가 선택되지 않았으면 skipped 상태로 연결합니다."),
-        IntInput(name="peak_payload_limit_mb", display_name="병합 payload 제한(MB)", value=128, info="병합된 실행 프레임에 허용할 최대 payload 크기입니다."),
+        DataInput(name="oracle_results", display_name="Oracle 조회 결과", required=True, info="Oracle 작업이 없으면 skipped 상태로 연결합니다."),
+        DataInput(name="h_api_results", display_name="H-API 조회 결과", required=True, info="H-API 작업이 없으면 skipped 상태로 연결합니다."),
+        DataInput(name="datalake_results", display_name="Datalake 조회 결과", required=True, info="Datalake 작업이 없으면 skipped 상태로 연결합니다."),
+        DataInput(name="goodocs_results", display_name="Goodocs 조회 결과", required=True, info="Goodocs 작업이 없으면 skipped 상태로 연결합니다."),
     ]
     outputs = [Output(name="execution_context", display_name="Typed IR 실행 컨텍스트", method="merge", types=["Data"])]
 
@@ -1558,31 +1659,30 @@ class SourceContractMerger(Component):
                 return Data(data=current)
             domain = _require_context(getattr(self, "domain_bundle", None), "source_merge")
             catalog = (domain.get("domain_bundle") or {}).get("runtime_catalog")
-            lanes = {name: _payload(getattr(self, f"{name}_results", None)) for name in ("dummy", "inline", "live")}
-            selected = next((value for value in lanes.values() if value.get("status") == "selected"), None)
+            lanes = {
+                name: _payload(getattr(self, f"{name}_results", None))
+                for name in ("dummy", "oracle", "h_api", "datalake", "goodocs")
+            }
+            failed = next((value for value in lanes.values() if value.get("ok") is False), None)
+            if failed:
+                current.update({"ok": False, "stage": failed.get("stage"), "error": failed.get("error")})
+                return Data(data=current)
+            selected = [value for value in lanes.values() if value.get("status") == "selected"]
             jobs = (current.get("plan") or {}).get("retrieval_jobs") or []
             if jobs and not selected:
-                failed = next((value for value in lanes.values() if value.get("ok") is False), None)
-                if failed:
-                    current.update({"ok": False, "stage": failed.get("stage"), "error": failed.get("error")})
-                    return Data(data=current)
                 raise ContractError("source_missing", "source_merge", "선택된 source lane 결과가 없습니다.")
-            source_results = (selected or {}).get("source_results") or []
+            source_results = [
+                item
+                for lane in selected
+                for item in (lane.get("source_results") or [])
+                if isinstance(item, dict)
+            ]
             if source_results:
                 bundle = merge_source_results(source_results, catalog, retrieval_jobs=jobs)
                 # The immutable source bundle owns row lists.  Executor frame
                 # descriptors share those lists until pandas materialization;
                 # no second full-row deepcopy is retained in the pipeline.
                 snapshots = list(bundle.get("frames", {}).values())
-                payload_bytes = sum(len(canonical_bytes(item.get("rows") or [])) for item in snapshots)
-                payload_limit = max(1, min(int(getattr(self, "peak_payload_limit_mb", 128)), 512)) * 1024 * 1024
-                if payload_bytes > payload_limit:
-                    raise ContractError(
-                        "executor_memory_limit_exceeded",
-                        "source_merge",
-                        "Merged source payload exceeds the configured budget.",
-                        {"payload_bytes": payload_bytes, "limit_bytes": payload_limit},
-                    )
                 frames = executor_frames(bundle, catalog, copy_rows=False)
                 diagnostics = [
                     {
@@ -1595,7 +1695,7 @@ class SourceContractMerger(Component):
                     for item in bundle.get("source_manifest", [])
                 ]
             else:
-                frames, snapshots, diagnostics, payload_bytes = {}, [], [], 0
+                frames, snapshots, diagnostics = {}, [], []
             if "previous" in ((current.get("plan") or {}).get("input_refs") or []):
                 prior = current.get("prior_result") or {}
                 frames["previous"] = {"rows": deepcopy(prior.get("rows") or [])}
@@ -1606,11 +1706,11 @@ class SourceContractMerger(Component):
                     "source_snapshots": snapshots,
                     "source_diagnostics": diagnostics,
                     "payload_telemetry": {
-                        "source_row_bytes": payload_bytes,
+                        "source_row_count": sum(len(item.get("rows") or []) for item in snapshots),
                         "row_copy_count": 1,
                         "raw_rows_in_llm_prompt": False,
                     },
-                    "data_mode": str((selected or {}).get("data_mode") or "dummy"),
+                    "data_mode": "live" if any(item.get("data_mode") == "live" for item in selected) else "dummy",
                 }
             )
         except Exception as exc:
@@ -1626,7 +1726,7 @@ from lfx.schema.data import Data
 
 
 class TypedExecutorPublisher(Component):
-    display_name = "Typed IR 실행 및 결과 발행"
+    display_name = "17 Typed IR 실행 및 결과 발행"
     description = "등록된 타입 연산자 DAG만 결정론적으로 실행하고 해시가 포함된 불변 분석 결과를 발행합니다."
     icon = "play-circle"
     metadata = {"logical_stage": "typed_execution"}
@@ -1763,12 +1863,11 @@ import json
 from lfx.custom.custom_component.component import Component
 from lfx.io import BoolInput, DataInput, Output
 from lfx.schema.data import Data
-from lfx.schema.message import Message
 
 
 class AnswerFactsContextBuilder(Component):
-    display_name = "답변 사실 및 프롬프트 컨텍스트"
-    description = "실행 결과에서 검증 가능한 사실을 만들고, 선택적 답변 LLM에 전달할 제한된 컨텍스트와 도메인 특화 문구를 분리해 제공합니다."
+    display_name = "18 답변 사실 및 런타임 컨텍스트 구성"
+    description = "실행 결과에서 검증 가능한 사실과 선택적 답변 LLM용 bounded context를 만들며 프롬프트 본문은 외부 Prompt Template 노드가 소유합니다."
     icon = "text-quote"
     metadata = {"logical_stage": "answer_facts_context", "logical_capabilities": ["answer_facts", "prompt_context"]}
     inputs = [
@@ -1776,9 +1875,20 @@ class AnswerFactsContextBuilder(Component):
         BoolInput(name="narrative_enabled", display_name="LLM 답변 문장 사용", value=False, info="활성화하면 결정론적 사실만 전달해 선택적으로 자연어 답변 문장을 생성합니다."),
     ]
     outputs = [
-        Output(name="answer_facts_context", display_name="답변 사실 컨텍스트", method="build_facts_context", types=["Data"]),
-        Output(name="answer_prompt_context", display_name="답변 LLM 실행 컨텍스트", method="build_prompt_context", types=["Data"]),
-        Output(name="answer_specialized_prompt_text", display_name="답변 특화 프롬프트 원문", method="build_specialized_text", types=["Message"]),
+        Output(
+            name="answer_facts_context",
+            display_name="답변 사실 컨텍스트",
+            method="build_facts_context",
+            types=["Data"],
+            group_outputs=True,
+        ),
+        Output(
+            name="answer_prompt_context",
+            display_name="답변 LLM 실행 컨텍스트",
+            method="build_prompt_context",
+            types=["Data"],
+            group_outputs=True,
+        ),
     ]
 
     def _current_and_facts(self):
@@ -1834,14 +1944,6 @@ class AnswerFactsContextBuilder(Component):
         except Exception as exc:
             return Data(data=_pipeline_error({}, exc, "answer_prompt_context"))
 
-    def build_specialized_text(self) -> Message:
-        try:
-            current, _ = self._current_and_facts()
-            text = str(((current.get("domain_prompt_extensions") or {}).get("answer") or "")) if current.get("ok") else ""
-            text = text.encode("utf-8")[:8192].decode("utf-8", errors="ignore")
-            return Message(text=text)
-        except Exception:
-            return Message(text="")
 '''
 
 
@@ -1868,7 +1970,7 @@ def _answer_json_object(text):
 
 
 class AnswerClaimValidator(Component):
-    display_name = "답변 문장 주장 검증기"
+    display_name = "22 답변 문장 주장 검증"
     description = "외부 Prompt/LLM 노드의 JSON 답변이 결정론적 사실만 인용하는지 검증하고, 실패하면 안전한 기본 답변으로 전환합니다."
     icon = "badge-check"
     metadata = {"logical_stage": "answer_claim_validation", "logical_capabilities": ["narrative_claim"]}
@@ -2006,7 +2108,7 @@ def _executed_result(result, plan, source_snapshots):
 
 
 class ResponseStateCommit(Component):
-    display_name = "응답 조립 및 세션 상태 저장"
+    display_name = "23 응답 조립 및 세션 상태 저장"
     description = "검증된 답변과 분석 결과를 표준 응답으로 조립하고 결과 저장 및 멀티턴 세션 상태 갱신을 원자적으로 수행합니다."
     icon = "save"
     metadata = {"logical_stage": "state_commit"}
@@ -2113,7 +2215,7 @@ class ResponseStateCommit(Component):
                     source_diagnostics=current.get("source_diagnostics") or [], data_mode=str(current.get("data_mode") or "dummy"),
                     download_base_url="", events=["ephemeral_inline_response", "runtime_release", "terminal_fanout"],
                 )
-                ephemeral = {key: deepcopy(value) for key, value in response.items() if key != "response_sha256"}
+                ephemeral = deepcopy(response)
                 ephemeral["data_refs"] = []
                 ephemeral["state"] = None
                 ephemeral["answer_sections"]["result_table"]["data_ref"] = ""
@@ -2124,7 +2226,7 @@ class ResponseStateCommit(Component):
                 response = _finalize_response(ephemeral)
             narrative = current.get("narrative") if isinstance(current.get("narrative"), dict) else {}
             if narrative.get("attempted"):
-                material = {key: deepcopy(value) for key, value in response.items() if key != "response_sha256"}
+                material = deepcopy(response)
                 material["trace"]["usage"]["answer_llm_calls"] = int(narrative.get("llm_calls") or 0)
                 if narrative.get("claim_status") == "verified" and narrative.get("message"):
                     material["message"] = str(narrative["message"])
@@ -2150,12 +2252,12 @@ from lfx.schema.message import Message
 
 
 class MessagePresentation(Component):
-    display_name = "채팅 메시지 표시 설정"
-    description = "표준 응답 데이터는 그대로 보존하면서 채팅 Markdown에 표시할 결과·근거·진단 항목을 선택합니다."
+    display_name = "24 채팅 메시지 표시 설정"
+    description = "23번의 일반 JSON 응답을 받아 채팅 Markdown에 표시할 결과·근거·진단 항목만 선택합니다. 노드 사이 해시 검증은 수행하지 않습니다."
     icon = "message-square-text"
 
     inputs = [
-        DataInput(name="response", display_name="표준 분석 응답", required=True, info="표시할 답변·결과·근거·진단 정보를 모두 포함한 원본 응답입니다."),
+        DataInput(name="response", display_name="분석 JSON 응답", required=True, info="23번에서 전달한 일반 JSON 응답입니다. 표시 단계에서는 해시나 전체 스키마를 다시 검증하지 않습니다."),
         BoolInput(name="include_diagnostics", display_name="모든 진단 표시", value=False, info="의도 분석, 조회 진단, 실행 계획을 한 번에 표시합니다."),
         BoolInput(name="show_result_table", display_name="결과표 표시", value=True, info="분석 결과의 표 미리보기를 채팅 메시지에 포함합니다."),
         IntInput(name="table_preview_limit", display_name="표 미리보기 행 수", value=10, info="채팅 메시지에 표시할 결과표의 최대 행 수입니다."),
@@ -2190,11 +2292,8 @@ class MessagePresentation(Component):
             text=render_message(response, options),
             sender="Machine",
             sender_name="Metadata Analysis",
-            session_id=str(response.get("request", {}).get("session_id") or ""),
-            session_metadata={
-                "contract_version": "response.message-link.v1",
-                "response_sha256": str(response.get("response_sha256") or ""),
-            },
+            session_id=str((response.get("request") if isinstance(response.get("request"), dict) else {}).get("session_id") or ""),
+            session_metadata={"contract_version": "response.message-link.v1"},
         )
         message.data = {"response": response, "display_options": normalize_display_options(options)}
         return message
@@ -2211,7 +2310,7 @@ from lfx.schema.message import Message
 
 
 class GaiAOutput(Component):
-    display_name = "GaiA 형식 출력"
+    display_name = "26 GaiA 형식 출력"
     description = "표준 분석 응답을 직접 사용해 GaiA 연동용 답변 메시지와 구조화된 메타데이터를 생성합니다."
     icon = "bot"
     group_outputs = True
@@ -2220,7 +2319,7 @@ class GaiAOutput(Component):
         super().__init__(**kwargs)
         self.is_output = True
 
-    inputs = [DataInput(name="response", display_name="표준 분석 응답", required=True, info="GaiA 답변과 메타데이터로 변환할 검증 완료 표준 응답입니다.")]
+    inputs = [DataInput(name="response", display_name="분석 JSON 응답", required=True, info="23번에서 전달한 일반 JSON 응답입니다. 수신 해시는 비교하지 않습니다.")]
     outputs = [
         Output(name="message", display_name="GaiA 채팅 메시지", method="build_message", types=["Message"]),
         Output(name="gaia_response", display_name="GaiA 구조화 응답", method="build_gaia", types=["Data"]),
@@ -2237,11 +2336,8 @@ class GaiAOutput(Component):
             text=str(response.get("message") or ""),
             sender="Machine",
             sender_name="Metadata Analysis",
-            session_id=str((response.get("request") or {}).get("session_id") or ""),
-            session_metadata={
-                "contract_version": "response.message-link.v1",
-                "response_sha256": str(response.get("response_sha256") or ""),
-            },
+            session_id=str((response.get("request") if isinstance(response.get("request"), dict) else {}).get("session_id") or ""),
+            session_metadata={"contract_version": "response.message-link.v1"},
         )
         message.data = {"response": response, "gaia": deepcopy(gaia)}
         message.metadata = deepcopy(gaia.get("metadata", {}))
@@ -2260,34 +2356,20 @@ from lfx.schema.data import Data
 
 
 class APIResponseTerminal(Component):
-    display_name = "API 표준 응답 출력"
-    description = "검증된 표준 분석 또는 메타데이터 등록 응답을 변경 없이 API용 Data 출력으로 제공합니다."
+    display_name = "25 API 표준 응답 출력"
+    description = "분석 또는 메타데이터 등록 JSON 응답을 변경 없이 API용 Data 출력으로 제공합니다. 노드 사이 해시 비교는 수행하지 않습니다."
     icon = "braces"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.is_output = True
 
-    inputs = [DataInput(name="response", display_name="표준 응답", required=True, info="계약과 해시 검증을 거쳐 API 호출자에게 반환할 표준 응답입니다.")]
+    inputs = [DataInput(name="response", display_name="JSON 응답", required=True, info="API 호출자에게 반환할 일반 JSON 응답입니다. 출력 단계에서 수신 해시를 검증하지 않습니다.")]
     outputs = [Output(name="api_response", display_name="API용 표준 응답", method="build_response", types=["Data"])]
 
     def build_response(self) -> Data:
         raw = getattr(getattr(self, "response", None), "data", getattr(self, "response", None))
-        if not isinstance(raw, dict):
-            raise ContractError("response_contract_error", "api_terminal", "Canonical response must be an object.")
-        contract_version = str(raw.get("contract_version") or "")
-        if contract_version == "response.v1":
-            validated = validate_response_hash(raw)
-        elif contract_version == "metadata.authoring.response.v1":
-            validated = validate_authoring_response_hash(raw)
-        else:
-            raise ContractError(
-                "response_contract_error",
-                "api_terminal",
-                "Unsupported canonical response contract.",
-                {"contract_version": contract_version},
-            )
-        return Data(data=validated)
+        return Data(data=api_output(raw))
 '''
 
 
@@ -3597,7 +3679,7 @@ class AuthoringPromptContextBuilder(Component):
         DataInput(name="approved_reference_context", display_name="승인 원천 참조 컨텍스트", required=False, info="LLM에는 승인 데이터셋 ID allowlist와 hash만 제공하고, 실행 참조는 엔진이 별도 입력에서 봉인하는 운영자 승인 정보입니다."),
         BoolInput(name="bootstrap_fragment", display_name="초기 등록 분할 제안", value=False, advanced=True, info="도메인 최초 등록에서 원문 종류별 작은 폐쇄형 조각만 제안해 모델 응답 크기를 제한합니다."),
         DropdownInput(name="authoring_kind", display_name="등록 유형", options=["domain", "dataset", "main_filter", "domain_policy"], value="domain", info="도메인, 데이터셋, 주요 필터, 관리자 정책 중 이번에 등록할 항목을 선택합니다."),
-        DropdownInput(name="mode", display_name="실행 모드", options=["prepare", "execute"], value="prepare", info="prepare는 후보를 생성하고 execute는 승인된 후보를 저장합니다. LLM 해석은 prepare에서만 수행합니다."),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", info="save는 검증된 결과를 세 컬렉션에 저장하고 validate_only는 저장 없이 컴파일·검증만 수행합니다."),
         DropdownInput(name="source_grounding_mode", display_name="자연어 입력 해석 방식", options=["freeform_llm", "explicit_inventory"], value="freeform_llm", advanced=True, info="일반 작업자 입력은 freeform_llm을 사용합니다. explicit_inventory는 관리자 검증 경로 전용입니다."),
         StrInput(name="domain_id", display_name="도메인 ID", value="default", info="등록 대상 업무 도메인의 고유 식별자입니다. 공유 시 대상 도메인 ID로 바꿉니다."),
         StrInput(name="environment", display_name="운영 환경", value="production", info="메타데이터 리비전을 구분할 운영 환경 이름입니다."),
@@ -3608,11 +3690,13 @@ class AuthoringPromptContextBuilder(Component):
 
     def build_context(self) -> Data:
         kind = str(getattr(self, "authoring_kind", "domain") or "domain").strip()
-        mode = str(getattr(self, "mode", "prepare") or "prepare").strip()
-        if kind not in {"domain", "dataset", "main_filter", "domain_policy"} or mode not in {"prepare", "execute"}:
+        mode = str(getattr(self, "mode", "save") or "save").strip()
+        # Read-only compatibility for older test/API callers.  The canvas no
+        # longer exposes prepare and this alias never creates pending state.
+        if mode == "prepare":
+            mode = "validate_only"
+        if kind not in {"domain", "dataset", "main_filter", "domain_policy"} or mode not in {"save", "validate_only"}:
             raise ContractError("metadata_schema_error", "metadata_prompt_context", "등록 유형 또는 실행 모드가 유효하지 않습니다.")
-        if mode == "execute":
-            return Data(data={"contract_version": "prompt.runtime-context.v1", "purpose": "metadata_execute", "invoke": False, "variables": {}})
         source_text = str(getattr(getattr(self, "input_message", None), "text", getattr(self, "input_message", "")) or "").strip()
         if not source_text or len(source_text.encode("utf-8")) > 65536:
             raise ContractError("metadata_schema_error", "metadata_prompt_context", "메타데이터 TXT는 1~65536 UTF-8 바이트여야 합니다.")
@@ -3626,7 +3710,7 @@ class AuthoringPromptContextBuilder(Component):
         annotation_only = kind == "domain" and bool(blueprint_text) and bool(blueprint_pin)
         bootstrap_fragment = bool(getattr(self, "bootstrap_fragment", False))
         if bootstrap_fragment and (annotation_only or kind == "domain_policy"):
-            raise ContractError("metadata_policy_error", "metadata_prompt_context", "초기 등록 분할 제안은 자유형 domain/dataset/main_filter prepare에서만 사용할 수 있습니다.")
+            raise ContractError("metadata_policy_error", "metadata_prompt_context", "초기 등록 분할 제안은 자유형 domain/dataset/main_filter 등록에서만 사용할 수 있습니다.")
         strict_inventory = grounding_mode == "explicit_inventory" or annotation_only
         source_manifest = (
             extract_authoring_source_manifest(source_text)
@@ -3815,11 +3899,9 @@ CATALOG_COLLECTIONS = {
     "alias": "aliases",
 }
 V6_AUTHORING_COLLECTIONS = {
-    "pending_collection": "agent_v6_pending_writes",
-    "revision_collection": "agent_v6_metadata_revisions",
-    "bundle_collection": "agent_v6_metadata_bundles",
-    "active_collection": "agent_v6_metadata_active",
-    "audit_collection": "agent_v6_authoring_audit",
+    "domain_collection": "agent_v6_domain_metadata",
+    "table_collection": "agent_v6_table_catalog",
+    "main_filter_collection": "agent_v6_main_filter",
 }
 AUTHORING_SUPPORTED_OPERATIONS = (
     "aggregate", "compare_fields", "derive", "filter", "join", "project", "rank", "sort",
@@ -7334,7 +7416,7 @@ def _safe_exception_location(exc):
 
 class MetadataAuthoringEngine(Component):
     display_name = "메타데이터 등록·컴파일 엔진"
-    description = "외부 Prompt/LLM 결과 또는 결정론적 정책 입력을 검증해 메타데이터 패키지를 컴파일하고 승인 기반 prepare/execute를 수행합니다."
+    description = "자연어와 외부 LLM 구조화 결과를 결정론적으로 검증한 뒤 도메인·테이블·메인필터 3컬렉션에 하나의 release로 저장합니다."
     icon = "book-lock"
 
     inputs = [
@@ -7351,7 +7433,7 @@ class MetadataAuthoringEngine(Component):
         DropdownInput(name="source_grounding_mode", display_name="자연어 입력 해석 방식", options=["freeform_llm", "explicit_inventory"], value="freeform_llm", advanced=True, info="일반 작업자 입력은 freeform_llm을 사용하며, explicit_inventory는 관리자 검증 경로 전용입니다."),
         DropdownInput(name="metadata_contract_mode", display_name="메타데이터 계약", options=["domain_package_v2"], value="domain_package_v2", info="컴파일과 저장에 적용할 메타데이터 패키지 계약 버전입니다."),
         StrInput(name="domain_id", display_name="도메인 ID", value="default", info="등록·패치할 업무 도메인의 고유 식별자입니다. 공유 시 대상 도메인 ID로 바꿉니다."),
-        StrInput(name="environment", display_name="운영 환경", value="production", info="메타데이터 리비전과 활성 포인터를 구분할 환경 이름입니다."),
+        StrInput(name="environment", display_name="운영 환경", value="production", info="세 current 메타데이터 문서와 리비전을 구분할 환경 이름입니다."),
         DropdownInput(name="revision_policy", display_name="리비전 정책", options=["auto_next", "explicit"], value="auto_next", info="다음 리비전을 자동 계산하거나 명시적 리비전 번호를 사용할지 선택합니다."),
         IntInput(name="revision", display_name="명시적 도메인 리비전", value=1, info="리비전 정책이 explicit일 때 사용할 양의 정수 리비전입니다."),
         DataInput(name="inline_base_domain_bundle", display_name="인라인 기준 도메인 번들(패치 Dry Run)", required=False, info="데이터셋·필터 패치를 저장 없이 검증할 때 사용할 기준 도메인 번들입니다."),
@@ -7375,18 +7457,14 @@ class MetadataAuthoringEngine(Component):
         MultilineInput(name="answer_prompt_extension", display_name="결과 생성 특화 프롬프트", value="", required=False, info="공통 결과 생성 프롬프트 뒤에 연결할 도메인별 표현·주의 규칙입니다."),
         MultilineInput(name="specialized_functions_json", display_name="등록 특화 함수 JSON", value="", required=False, info="Typed IR 기본 연산으로 표현하기 어려운 검토 완료 격리 함수 등록 정보입니다."),
         MultilineInput(name="output_profile_json", display_name="출력 프로필 JSON", value="", required=False, info="표시 컬럼, 표 미리보기, 다운로드 등 도메인별 기본 출력 설정입니다."),
-        DropdownInput(name="mode", display_name="실행 모드", options=["prepare", "execute"], value="prepare", info="prepare는 후보를 만들고 execute는 외부 승인 이벤트를 검증한 뒤 저장합니다."),
-        MultilineInput(name="approval_event_json", display_name="외부 승인 이벤트 JSON", value="", required=False, info="execute에서 후보 해시와 승인 주체를 확인할 외부 승인 이벤트입니다."),
-        SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="승인 후보, 리비전, 번들, 감사 이력을 저장할 MongoDB 연결 문자열입니다."),
-        StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, info="v6 메타데이터 컬렉션이 위치한 데이터베이스 이름입니다."),
-        StrInput(name="pending_collection", display_name="승인 대기 컬렉션", value="agent_v6_pending_writes", info="prepare 후보와 만료 시각을 저장하는 컬렉션입니다."),
-        StrInput(name="revision_collection", display_name="리비전 컬렉션", value="agent_v6_metadata_revisions", info="도메인별 메타데이터 리비전 기록을 저장하는 컬렉션입니다."),
-        StrInput(name="bundle_collection", display_name="불변 도메인 번들 컬렉션", value="agent_v6_metadata_bundles", info="컴파일과 검증을 마친 불변 도메인 번들을 저장하는 컬렉션입니다."),
-        StrInput(name="active_collection", display_name="활성 포인터 컬렉션", value="agent_v6_metadata_active", info="환경·도메인별 현재 활성 리비전을 가리키는 컬렉션입니다."),
-        StrInput(name="audit_collection", display_name="등록 감사 컬렉션", value="agent_v6_authoring_audit", info="등록 준비·승인 실행·거부 이력을 추적하는 감사 컬렉션입니다."),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", info="save는 검증 성공 후 세 컬렉션을 원자적으로 갱신하고 validate_only는 저장하지 않습니다."),
+        SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="도메인·테이블·메인필터 컬렉션을 저장할 MongoDB 연결 문자열입니다."),
+        StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, info="운영 메타데이터가 저장되는 데이터베이스 이름입니다."),
+        StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", info="자연어 도메인 원문과 검증된 도메인 규칙을 저장합니다."),
+        StrInput(name="table_collection", display_name="테이블 카탈로그 컬렉션", value="agent_v6_table_catalog", info="자연어 테이블 원문과 검증된 dataset/field binding을 저장합니다."),
+        StrInput(name="main_filter_collection", display_name="메인필터 컬렉션", value="agent_v6_main_filter", info="자연어 메인필터 원문과 검증된 predicate/alias를 저장합니다."),
         IntInput(name="mongo_timeout_ms", display_name="MongoDB 제한 시간(ms)", value=5000, info="MongoDB 연결과 등록 트랜잭션에 적용할 제한 시간(밀리초)입니다."),
-        IntInput(name="candidate_ttl_seconds", display_name="후보 유효 시간(초)", value=86400, info="prepare 후보가 외부 승인을 기다릴 수 있는 최대 시간입니다."),
-        BoolInput(name="dry_run", display_name="저장 없는 준비 검증", value=False, info="활성화하면 prepare 결과를 MongoDB에 저장하지 않고 컴파일·계약 검증만 수행합니다."),
+        BoolInput(name="dry_run", display_name="저장 없는 검증", value=False, info="활성화하면 MongoDB에 저장하지 않고 자연어 변환·컴파일·계약 검증만 수행합니다."),
     ]
     outputs = [Output(name="response", display_name="메타데이터 등록 응답", method="run_authoring", types=["Data"])]
 
@@ -8041,8 +8119,9 @@ class MetadataAuthoringEngine(Component):
                     domain_id=domain_id,
                 )
         draft_llm_calls = 0
-        dry_run = bool(getattr(self, "dry_run", False))
+        dry_run = bool(getattr(self, "dry_run", False)) or str(getattr(self, "mode", "save")) in {"validate_only", "prepare"}
         active_package = None
+        current_source_texts = {"domain": "", "table_catalog": "", "main_filter": ""}
         client = db = None
 
         inline_value = getattr(getattr(self, "inline_base_domain_bundle", None), "data", getattr(self, "inline_base_domain_bundle", None))
@@ -8052,23 +8131,48 @@ class MetadataAuthoringEngine(Component):
             if active_package["domain_id"] != domain_id or active_package["environment"] != environment:
                 raise ContractError("metadata_dependency_error", "metadata_prepare", "Inline base package identity does not match node inputs.")
 
-        # Section patches need the exact active base before their owned patch
-        # can be checked.  Keep this read short-lived: no LLM/schema/compiler
-        # work runs while a Mongo client remains open.
-        if not dry_run and kind != "domain":
+        # Read the three current documents as one release. Section patches use
+        # that exact package as their base; a full-domain save uses it only for
+        # monotonic revisioning and source preservation.
+        if not dry_run:
             client, db = self._mongo()
             try:
-                active_name = collections["active_collection"]
-                bundle_name = collections["bundle_collection"]
-                pointer = db[active_name].find_one({"_id": f"active:{environment}:{domain_id}"})
-                if pointer:
-                    active_package = load_active_domain_bundle(
+                current_id = f"{environment}:{domain_id}"
+                current_documents = {
+                    "domain": db[collections["domain_collection"]].find_one({"_id": current_id}),
+                    "table_catalog": db[collections["table_collection"]].find_one({"_id": current_id}),
+                    "main_filter": db[collections["main_filter_collection"]].find_one({"_id": current_id}),
+                }
+                present = [name for name, value in current_documents.items() if isinstance(value, dict)]
+                if present and len(present) != 3:
+                    raise ContractError(
+                        "metadata_dependency_error",
+                        "metadata_three_collection",
+                        "기존 메타데이터 release가 세 컬렉션에 완전하게 존재하지 않습니다.",
+                        {"present_sections": present},
+                    )
+                if len(present) == 3:
+                    active_package = assemble_domain_package_from_sections(
+                        current_documents,
+                        domain_id,
+                        environment,
+                    )
+                    current_source_texts = {
+                        name: str(value.get("source_text") or "")
+                        for name, value in current_documents.items()
+                    }
+                    # Keep the public loader path and authoring base path on the
+                    # same contract; either must reject the same drift.
+                    loaded_package = load_domain_package_from_three_collections(
                         db,
                         domain_id,
                         environment,
-                        active_collection=active_name,
-                        bundle_collection=bundle_name,
+                        domain_collection=collections["domain_collection"],
+                        table_collection=collections["table_collection"],
+                        main_filter_collection=collections["main_filter_collection"],
                     )
+                    if sha256_json(loaded_package) != sha256_json(active_package):
+                        raise ContractError("metadata_hash_conflict", "metadata_three_collection", "메타데이터 loader와 authoring base 검증 결과가 다릅니다.")
             finally:
                 client.close()
                 client = db = None
@@ -8336,23 +8440,14 @@ class MetadataAuthoringEngine(Component):
                 "compiled_catalog_sha256": str(package["runtime_catalog"].get("catalog_sha256") or ""),
             }
         coverage = {**coverage, "coverage_sha256": sha256_json(coverage)}
-        bundle_document = make_bundle_document(package)
-        active_pointer = make_active_pointer_document(package)
-        expected_active = {
-            "revision": active_revision,
-            "bundle_sha256": str((active_package or {}).get("bundle_sha256") or ""),
-            "package_sha256": str((active_package or {}).get("package_sha256") or ""),
-        }
-        # BSON persists datetimes at millisecond precision. Seal the payload
-        # and TTL wrapper from the same exact instant before hashing.
         now = _bson_millisecond_utc(datetime.now(timezone.utc))
-        expires = now + timedelta(seconds=max(300, min(int(getattr(self, "candidate_ttl_seconds", 86400)), 604800)))
         validation = {
             "schema": "passed",
             "semantic_lint": "passed",
             "dependency_closure": "passed",
             "hash_seal": "passed",
             "section_ownership": "passed",
+            "three_collection_release": "passed",
             "source_coverage": coverage,
             "source_bindings": source_binding_validation,
         }
@@ -8388,79 +8483,73 @@ class MetadataAuthoringEngine(Component):
             ] = filter_operator_normalization
         if blueprint_validation is not None:
             validation["trusted_blueprint"] = blueprint_validation
-        hash_material = {
-            "contract_version": "pending.domain-package.hash-material.v1",
-            "authoring_kind": kind,
-            "domain_package": package,
-            "bundle_document": bundle_document,
-            "active_pointer": active_pointer,
-            "expected_active": expected_active,
-            "validation": validation,
-            "prepared_at": now.isoformat(),
-            "expires_at": expires.isoformat(),
-        }
-        candidate_hash = sha256_json(hash_material)
-        candidate_id = f"candidate:{candidate_hash}"
-        pending_payload = self._pending_payload(
-            kind=kind,
-            domain_id=domain_id,
-            environment=environment,
-            revision=package["revision"],
-            expected_active=expected_active,
-            candidate_id=candidate_id,
-            candidate_hash=candidate_hash,
-            hash_material=hash_material,
-            now=now,
-            expires=expires,
+        source_texts = deepcopy(current_source_texts)
+        if split_bootstrap:
+            source_texts = {
+                "domain": str(bootstrap_branches["domain"]["source_text"]),
+                "table_catalog": str(bootstrap_branches["dataset"]["source_text"]),
+                "main_filter": str(bootstrap_branches["main_filter"]["source_text"]),
+            }
+        elif kind == "domain":
+            source_texts["domain"] = source_text
+        elif kind == "dataset":
+            source_texts["table_catalog"] = source_text
+        elif kind == "main_filter":
+            source_texts["main_filter"] = source_text
+        elif kind == "domain_policy":
+            marker = "\n\n--- 도메인 정책 변경 원문 ---\n"
+            source_texts["domain"] = (source_texts["domain"] + marker + source_text).strip()
+
+        section_documents = make_metadata_section_documents(
+            package,
+            source_texts,
+            updated_at=now.isoformat(),
         )
-        storage_document = {
-            "_id": candidate_id,
-            "pending_payload": deepcopy(pending_payload),
-            "pending_payload_sha256": sha256_json(pending_payload),
-            "workflow_status": "prepared",
-            "expires_at": expires,
-            "authoring_kind": kind,
-            "domain_id": domain_id,
-            "environment": environment,
-        }
+        release_id = str(section_documents["domain"]["release_id"])
+        release_hash = str(section_documents["domain"]["release_manifest_sha256"])
+        candidate_hash = sha256_json(
+            {
+                "contract_version": "metadata.save-candidate.v1",
+                "release_id": release_id,
+                "release_manifest_sha256": release_hash,
+                "validation": validation,
+            }
+        )
+        candidate_id = f"candidate:{candidate_hash}"
         if not dry_run:
             client, db = self._mongo()
             try:
-                pending = db[collections["pending_collection"]]
-                audit = db[collections["audit_collection"]]
-                pending.create_index("expires_at", expireAfterSeconds=0)
-                existing = pending.find_one({"_id": candidate_id})
-                if existing:
-                    existing_payload = self._pending_from_storage(
-                        existing,
-                        candidate_id=candidate_id,
-                        candidate_hash=candidate_hash,
-                    )
-                    if sha256_json(existing_payload) != sha256_json(pending_payload):
-                        raise ContractError("metadata_hash_conflict", "metadata_prepare", "Candidate ID already stores different pending bytes.")
-                if not existing:
-                    pending.insert_one(storage_document)
-                    audit.insert_one(
-                        {
-                            "event_type": "prepared",
-                            "candidate_id": candidate_id,
-                            "candidate_sha256": candidate_hash,
-                            "pending_payload_sha256": sha256_json(pending_payload),
-                            "authoring_kind": kind,
-                            "metadata_contract_mode": "domain_package_v2",
-                            "domain_id": domain_id,
-                            "environment": environment,
-                            "package_sha256": package["package_sha256"],
-                            "bundle_sha256": package["bundle_sha256"],
-                            "occurred_at": now,
-                        }
-                    )
+                with client.start_session() as session:
+                    with session.start_transaction():
+                        replace_metadata_release(
+                            db,
+                            section_documents,
+                            session=session,
+                            domain_collection=collections["domain_collection"],
+                            table_collection=collections["table_collection"],
+                            main_filter_collection=collections["main_filter_collection"],
+                        )
+                        persisted = load_domain_package_from_three_collections(
+                            db,
+                            domain_id,
+                            environment,
+                            domain_collection=collections["domain_collection"],
+                            table_collection=collections["table_collection"],
+                            main_filter_collection=collections["main_filter_collection"],
+                            session=session,
+                        )
+                        if sha256_json(persisted) != sha256_json(package):
+                            raise ContractError(
+                                "metadata_hash_conflict",
+                                "metadata_three_collection",
+                                "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
+                            )
             finally:
                 client.close()
         catalog = package["runtime_catalog"]
         return self._response(
             "ok",
-            stage="prepared",
+            stage="validated" if dry_run else "committed",
             candidate_id=candidate_id,
             candidate_sha256=candidate_hash,
             package_sha256=package["package_sha256"],
@@ -8468,8 +8557,10 @@ class MetadataAuthoringEngine(Component):
             catalog_sha256=catalog["catalog_sha256"],
             revision=package["revision"],
             persisted=not dry_run,
+            idempotent_replay=False,
             diff={
                 "authoring_kind": kind,
+                "release_id": release_id,
                 "datasets": len(catalog.get("datasets") or {}),
                 "fields": len(catalog.get("fields") or {}),
                 "metrics": len(catalog.get("metrics") or {}),
@@ -8478,7 +8569,6 @@ class MetadataAuthoringEngine(Component):
             },
             unchanged_section_checks=unchanged_sections,
             validation=validation,
-            expires_at=expires.isoformat(),
             llm_usage={
                 "draft_llm_calls": draft_llm_calls,
                 "annotation_llm_calls": 1 if annotation_only else 0,
@@ -8869,8 +8959,13 @@ class MetadataAuthoringEngine(Component):
                 )
             self._collection_names()
             validate_runtime_catalog(EMBEDDED_RUNTIME_CATALOG)
-            if str(getattr(self, "mode", "prepare")) == "execute":
-                return self._execute()
+            mode = str(getattr(self, "mode", "save") or "save")
+            # Legacy callers may still send prepare; it now means the
+            # write-free validation lane and never creates pending records.
+            if mode == "prepare":
+                mode = "validate_only"
+            if mode not in {"save", "validate_only"}:
+                raise ContractError("metadata_policy_error", "metadata_store_mode", "저장 모드는 save 또는 validate_only여야 합니다.")
             return self._prepare()
         except ContractError as exc:
             usage = deepcopy(getattr(self, "_observed_authoring_llm_usage", None) or {})
@@ -8924,19 +9019,19 @@ from lfx.schema.message import Message
 
 class AuthoringMessagePresentation(Component):
     display_name = "메타데이터 등록 메시지 구성"
-    description = "준비·승인 실행·추가 확인 결과를 짧은 한글 메시지로 표시하고 canonical response를 data에 보존합니다."
+    description = "저장·검증·추가 확인 결과를 짧은 한글 메시지로 표시하고 canonical response를 data에 보존합니다."
     icon = "file-check-2"
 
-    inputs = [DataInput(name="response", display_name="메타데이터 등록 응답", required=True, info="준비 완료, 승인 실행 완료, 추가 확인 필요, 오류 중 하나의 표준 등록 응답입니다.")]
+    inputs = [DataInput(name="response", display_name="메타데이터 등록 응답", required=True, info="저장 완료, 검증 완료, 추가 확인 필요, 오류 중 하나의 표준 등록 응답입니다.")]
     outputs = [Output(name="message", display_name="등록 결과 채팅 메시지", method="build_message", types=["Message"])]
 
     def build_message(self) -> Message:
         raw = getattr(getattr(self, "response", None), "data", getattr(self, "response", None))
         response = deepcopy(validate_authoring_response_hash(raw)) if isinstance(raw, dict) else {}
-        if response.get("status") == "ok" and response.get("stage") == "prepared":
-            text = "### Metadata prepare 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Hash: `{response.get('candidate_sha256', '')}`\n- Expires: {response.get('expires_at', '')}"
+        if response.get("status") == "ok" and response.get("stage") == "validated":
+            text = "### 메타데이터 검증 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Revision: {response.get('revision', '')}\n- MongoDB 저장: 안 함"
         elif response.get("status") == "ok":
-            text = "### Metadata execute 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Revision: {response.get('revision', '')}"
+            text = "### 메타데이터 저장 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Revision: {response.get('revision', '')}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터"
         elif response.get("status") == "needs_clarification":
             clarification = response.get("clarification") if isinstance(response.get("clarification"), dict) else {}
             questions = [str(item) for item in (clarification.get("questions") or [])[:3]]
@@ -8945,7 +9040,7 @@ class AuthoringMessagePresentation(Component):
             )
         else:
             error = response.get("error") if isinstance(response.get("error"), dict) else {}
-            text = "### Metadata authoring 실패\n\n" + f"- Code: `{error.get('code', 'metadata_authoring_failed')}`\n- Message: {error.get('message', '')}"
+            text = "### 메타데이터 등록 실패\n\n" + f"- Code: `{error.get('code', 'metadata_authoring_failed')}`\n- Message: {error.get('message', '')}"
         message = Message(
             text=text,
             sender="Machine",
@@ -9172,6 +9267,7 @@ def _authoring_source(
             drop_functions={"load_domain_package_file"},
         )
     )
+    blocks.append(_clean_module(REFERENCE_ROOT / "metadata_collections.py"))
     blocks.append(
         _namespace_flattened_module(
             _clean_module(REFERENCE_ROOT / "authoring_source_manifest.py"),
@@ -9267,6 +9363,11 @@ def _authoring_source(
         "def _invoke_authoring_json(",
         "def _strict_json_value(",
     )
+    component_body = _drop_between(
+        component_body,
+        "    def _pending_payload(",
+        "    def _response(",
+    )
     for obsolete_method, next_method in (
         ("_prepare_v2_full_compat", "_prepare_v2"),
         ("_prepare_legacy", "_prepare"),
@@ -9277,6 +9378,11 @@ def _authoring_source(
             f"    def {obsolete_method}(",
             f"    def {next_method}(",
         )
+    component_body = _drop_between(
+        component_body,
+        "    def _execute_v2(",
+        "    def run_authoring(",
+    )
     blocks.extend([_catalog_literal(catalog), _schemas_literal(schemas), component_body])
     return "\n\n".join(blocks).strip() + "\n"
 
@@ -9346,6 +9452,7 @@ def build_components(*, check: bool = False) -> list[Path]:
         for name in (
             *CORE_MODULES,
             "domain_packages.py",
+            "metadata_collections.py",
             "domain_authoring_patches.py",
             "authoring_source_manifest.py",
             "authoring_blueprint.py",
@@ -9370,12 +9477,12 @@ def build_components(*, check: bool = False) -> list[Path]:
         ),
         OUTPUT_ROOT / "data_analysis" / "domain_bundle_loader.py": _analysis_phase_source(
             "DomainBundleLoader",
-            ("canonical.py", "contracts.py", "domain_packages.py"),
+            ("canonical.py", "contracts.py", "domain_packages.py", "metadata_collections.py"),
             DOMAIN_BUNDLE_COMPONENT,
             catalog=catalog,
             schemas=schemas,
             manifest=manifest,
-            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json", "active-domain-pointer.schema.json"),
+            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
         ),
         OUTPUT_ROOT / "data_analysis" / "candidate_route_gate.py": _analysis_phase_source(
             "CandidateRouteGate",
@@ -9436,24 +9543,88 @@ def build_components(*, check: bool = False) -> list[Path]:
             schemas=schemas,
             manifest=manifest,
         ),
-        OUTPUT_ROOT / "data_analysis" / "inline_source_retriever.py": _analysis_phase_source(
-            "InlineSourceRetriever",
+        OUTPUT_ROOT / "data_analysis" / "12_oracle_source_retriever.py": _analysis_phase_source(
+            "OracleSourceRetriever",
             ("canonical.py", "contracts.py", "metadata_compiler.py", "domain_packages.py", "source_contracts.py"),
-            INLINE_RETRIEVER_COMPONENT,
+            _source_specific_retriever_component(
+                class_name="OracleSourceRetriever",
+                display_name="12 Oracle 데이터 조회",
+                description="Oracle 전용 작업과 검토된 조회 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                stage="oracle_retrieval",
+                source_type="oracle",
+                source_label="Oracle",
+                job_label="Oracle 조회 작업",
+                payload_label="Oracle 조회 결과 행",
+                output_name="oracle_results",
+                output_label="Oracle 원천 조회 결과",
+            ),
             catalog=catalog,
             schemas=schemas,
             manifest=manifest,
-            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json", "active-domain-pointer.schema.json"),
+            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
             extra_blocks=(CATALOG_VALIDATOR_DISPATCH, BOUNDED_RETRIEVER_HELPER),
         ),
-        OUTPUT_ROOT / "data_analysis" / "live_source_retriever.py": _analysis_phase_source(
-            "LiveSourceRetriever",
+        OUTPUT_ROOT / "data_analysis" / "13_h_api_source_retriever.py": _analysis_phase_source(
+            "HApiSourceRetriever",
             ("canonical.py", "contracts.py", "metadata_compiler.py", "domain_packages.py", "source_contracts.py"),
-            LIVE_RETRIEVER_COMPONENT,
+            _source_specific_retriever_component(
+                class_name="HApiSourceRetriever",
+                display_name="13 H-API 데이터 조회",
+                description="H-API 전용 작업과 검토된 API 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                stage="h_api_retrieval",
+                source_type="h_api",
+                source_label="H-API",
+                job_label="H-API 조회 작업",
+                payload_label="H-API 조회 결과 행",
+                output_name="h_api_results",
+                output_label="H-API 원천 조회 결과",
+            ),
             catalog=catalog,
             schemas=schemas,
             manifest=manifest,
-            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json", "active-domain-pointer.schema.json"),
+            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
+            extra_blocks=(CATALOG_VALIDATOR_DISPATCH, BOUNDED_RETRIEVER_HELPER),
+        ),
+        OUTPUT_ROOT / "data_analysis" / "14_datalake_source_retriever.py": _analysis_phase_source(
+            "DatalakeSourceRetriever",
+            ("canonical.py", "contracts.py", "metadata_compiler.py", "domain_packages.py", "source_contracts.py"),
+            _source_specific_retriever_component(
+                class_name="DatalakeSourceRetriever",
+                display_name="14 Datalake 데이터 조회",
+                description="Datalake 전용 작업과 검토된 조회 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                stage="datalake_retrieval",
+                source_type="datalake",
+                source_label="Datalake",
+                job_label="Datalake 조회 작업",
+                payload_label="Datalake 조회 결과 행",
+                output_name="datalake_results",
+                output_label="Datalake 원천 조회 결과",
+            ),
+            catalog=catalog,
+            schemas=schemas,
+            manifest=manifest,
+            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
+            extra_blocks=(CATALOG_VALIDATOR_DISPATCH, BOUNDED_RETRIEVER_HELPER),
+        ),
+        OUTPUT_ROOT / "data_analysis" / "15_goodocs_source_retriever.py": _analysis_phase_source(
+            "GoodocsSourceRetriever",
+            ("canonical.py", "contracts.py", "metadata_compiler.py", "domain_packages.py", "source_contracts.py"),
+            _source_specific_retriever_component(
+                class_name="GoodocsSourceRetriever",
+                display_name="15 Goodocs 데이터 조회",
+                description="Goodocs 전용 작업과 검토된 문서 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                stage="goodocs_retrieval",
+                source_type="goodocs",
+                source_label="Goodocs",
+                job_label="Goodocs 조회 작업",
+                payload_label="Goodocs 조회 결과 행",
+                output_name="goodocs_results",
+                output_label="Goodocs 원천 조회 결과",
+            ),
+            catalog=catalog,
+            schemas=schemas,
+            manifest=manifest,
+            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
             extra_blocks=(CATALOG_VALIDATOR_DISPATCH, BOUNDED_RETRIEVER_HELPER),
         ),
         OUTPUT_ROOT / "data_analysis" / "source_contract_merger.py": _analysis_phase_source(

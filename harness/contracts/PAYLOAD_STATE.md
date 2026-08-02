@@ -192,7 +192,7 @@ v5에서 사용자가 조절하던 Message 표시 옵션은 `display.options.v1`
 }
 ```
 
-v5 component input `show_pandas_code`는 Flow import/migration용 alias다. Message Presentation Adapter가 envelope 검증 전에 `show_execution_plan`으로 정규화하며, canonical `display.options.v1`에는 중복 field를 남기지 않는다. 사용자에게 pandas code를 생성하거나 노출하지 않고 검증된 typed Execution IR과 operator trace만 표시한다. 두 input이 함께 있고 다르면 canonical `show_execution_plan`이 우선하며 migration warning을 남긴다.
+v5 component input `show_pandas_code`는 Flow import/migration용 alias다. `24 채팅 메시지 표시 설정`이 표시 옵션 검증 전에 `show_execution_plan`으로 정규화하며, canonical `display.options.v1`에는 중복 field를 남기지 않는다. 사용자에게 pandas code를 생성하거나 노출하지 않고 검증된 typed Execution IR과 operator trace만 표시한다. 두 input이 함께 있고 다르면 canonical `show_execution_plan`이 우선하며 migration warning을 남긴다.
 
 `table_preview_limit`는 정수 1~20, 기본 10이다. 기존 Flow 값이 상한을 넘으면 import migration에서 20으로 clamp하고 warning을 남기며, Message adapter가 full result ref를 다시 읽어 payload를 키우지 않는다.
 
@@ -249,7 +249,7 @@ GaiA terminal은 검증된 `response.v1`을 다음과 같이 변환한다.
 
 Response assembler는 final `executed.result.v1`, next `turn.state.v1` hash와 opaque refs를 미리 계산해 response candidate에 pin한다. State gate는 immutable executed contract를 idempotent하게 publish하고 `(owner, session, expected version, parent hash)` CAS로 그 exact state/ref만 활성화한다. CAS가 실패한 content-addressed contract는 활성 state에서 참조되지 않으며 TTL로 정리하고, candidate response는 terminal로 보내지 않는다.
 
-Presentation adapter가 Message 문자열을 다시 파싱해 API/GaiA payload를 만들거나, terminal마다 결과를 재계산하는 것은 금지한다.
+`23 → 24·25·26`은 전송용 `response_sha256`이 없는 일반 JSON 응답을 전달한다. `24 채팅 메시지 표시 설정`, `25 API 표준 응답 출력`, `26 GaiA 형식 출력`은 수신 payload의 hash나 전체 응답 schema를 다시 검증하지 않는다. MongoDB result store에 저장되는 결과와 source snapshot의 `content_sha256`만 저장 무결성 용도로 유지한다. Presentation adapter가 Message 문자열을 다시 파싱해 API/GaiA payload를 만들거나, terminal마다 분석 결과를 재계산하는 것은 금지한다.
 
 ## 9. Final response
 

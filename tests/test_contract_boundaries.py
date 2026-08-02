@@ -13,7 +13,7 @@ from reference_runtime.contracts import validate_contract
 from reference_runtime.dummy_data import source_result_for_dataset
 from reference_runtime.engine import AnalysisEngine
 from reference_runtime.plan_compiler import build_candidate_bundle, compile_plan, resolve_intent, validate_plan
-from reference_runtime.presenter import api_output, gaia_output, normalize_display_options, validate_response_hash
+from reference_runtime.presenter import api_output, gaia_output, normalize_display_options
 from reference_runtime.request_literals import build_request_capsule
 from reference_runtime.state_contracts import InMemoryStateStore
 
@@ -63,11 +63,11 @@ def test_success_validates_every_trusted_runtime_boundary(monkeypatch: pytest.Mo
         "executed-result.schema.json",
         "turn-state.schema.json",
     } <= set(observed)
-    validate_response_hash(response)
+    validate_contract(response, "response.schema.json", stage="test")
     assert api_output(response) == response
     gaia = gaia_output(response)
     validate_contract(gaia["metadata"], "gaia-metadata.schema.json", stage="test")
-    assert gaia["metadata"]["response_sha256"] == response["response_sha256"]
+    assert "response_sha256" not in gaia["metadata"]
 
     state = state_store.load_state("owner", "boundary-success")
     validate_contract(state, "turn-state.schema.json", stage="test")
@@ -96,7 +96,7 @@ class FailingAdapter:
         }
 
 
-def test_empty_error_unsupported_and_clarification_responses_are_hash_valid():
+def test_empty_error_unsupported_and_clarification_responses_are_contract_valid():
     selected = case("BR-D01")
     empty = AnalysisEngine(source_adapter=EmptyAdapter()).analyze(
         selected["question"],
@@ -106,7 +106,7 @@ def test_empty_error_unsupported_and_clarification_responses_are_hash_valid():
     )
     assert empty["status"] == "empty"
     assert empty["stage_status"]["analysis"] == "empty"
-    validate_response_hash(empty)
+    validate_contract(empty, "response.schema.json", stage="test")
 
     failure = AnalysisEngine(source_adapter=FailingAdapter()).analyze(
         selected["question"],
@@ -117,7 +117,7 @@ def test_empty_error_unsupported_and_clarification_responses_are_hash_valid():
     assert failure["status"] == "error"
     assert failure["analysis"]["error"]["code"] == "source_timeout"
     assert failure["stage_status"]["retrieval"] == "error"
-    validate_response_hash(failure)
+    validate_contract(failure, "response.schema.json", stage="test")
 
     unsupported_case = case("BR-U01")
     unsupported = AnalysisEngine().analyze(
@@ -129,7 +129,7 @@ def test_empty_error_unsupported_and_clarification_responses_are_hash_valid():
     assert unsupported["status"] == "error"
     assert unsupported["analysis"]["error"]["code"] == "unsupported_operation"
     assert unsupported["stage_status"]["retrieval"] == "not_called"
-    validate_response_hash(unsupported)
+    validate_contract(unsupported, "response.schema.json", stage="test")
 
     clarification_case = case("BR-A01")
     clarification = AnalysisEngine().analyze(
@@ -142,7 +142,7 @@ def test_empty_error_unsupported_and_clarification_responses_are_hash_valid():
     assert clarification["status"] == "needs_clarification"
     assert clarification["analysis"]["error"] is None
     assert clarification["clarification"]["options"]
-    validate_response_hash(clarification)
+    validate_contract(clarification, "response.schema.json", stage="test")
 
 
 def test_request_route_intent_plan_and_format_checker_are_authoritative():
@@ -182,7 +182,7 @@ def test_display_contract_is_closed_and_preview_is_bounded():
         validate_contract({**options, "unknown_toggle": True}, "display-options.schema.json", stage="test")
 
 
-def test_response_hash_covers_trace_fanout():
+def test_output_adapters_do_not_reject_post_execution_json_changes():
     selected = case("BR-D01")
     response = AnalysisEngine().analyze(
         selected["question"],
@@ -190,9 +190,6 @@ def test_response_hash_covers_trace_fanout():
         subject_id="owner",
         reference_instant=selected["reference_instant"],
     )
-    material = {key: value for key, value in response.items() if key != "response_sha256"}
-    assert response["response_sha256"] == sha256_json(material)
+    assert "response_sha256" not in response
     response["trace"]["commit_order"].append("post_hash_mutation")
-    with pytest.raises(ContractError) as invalid:
-        validate_response_hash(response)
-    assert invalid.value.code == "answer_claim_violation"
+    assert api_output(response)["trace"]["commit_order"][-1] == "post_hash_mutation"

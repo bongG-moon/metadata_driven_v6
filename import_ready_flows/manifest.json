@@ -25,14 +25,14 @@
   },
   "inventory": {
     "path": "contracts/flow_inventory.json",
-    "sha256": "654b29327afba6f0cd7ca9e7704e832c80d0d792b62aca8d765bb629c11c6bb1"
+    "sha256": "a2053ddd59e266fb5ed7246e5cc690737e90bcf6d641f02dd63860559c51841c"
   },
   "source_build_manifest": {
     "path": "flow_exports/manifest.json",
-    "sha256": "5e4b400e6aa7d0f4e3eab08ab368239860fe6ba6892bbfc12fbebfbb8da0d2f8"
+    "sha256": "c60df98ff9da768480120f1e3eadf19e865a8ab1c65d702224f1f9d61a73bcf9"
   },
   "single_file_ui_import": "00_metadata_driven_v6_complete_ALL_FLOWS.json",
-  "single_file_ui_import_sha256": "25574ef2ae692a325dd595f810ea364118a647b3a94c73a7868717b9031e6548",
+  "single_file_ui_import_sha256": "bb55bf80d3afddbe3514e39e942a97529a8ad8b7d34464bf4fbdc3aaf7ec88b9",
   "flows": [
     {
       "order": 1,
@@ -41,10 +41,10 @@
       "display_name": "메타데이터 v6 - 신뢰형 데이터 분석",
       "id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
       "file": "01_metadata_v6_data_analysis_flow_v6_standalone.json",
-      "nodes": 33,
-      "edges": 42,
-      "source_sha256": "0b8f8a078685448506557345928f413905ab259c003758fb834416fca7d794bd",
-      "sha256": "0b8f8a078685448506557345928f413905ab259c003758fb834416fca7d794bd"
+      "nodes": 35,
+      "edges": 46,
+      "source_sha256": "ce94ce09c1583141fb3f843e1f7edbcb8fb82be99bdc9bca0961a74368ca0f9b",
+      "sha256": "ce94ce09c1583141fb3f843e1f7edbcb8fb82be99bdc9bca0961a74368ca0f9b"
     },
     {
       "order": 2,
@@ -53,10 +53,10 @@
       "display_name": "메타데이터 v6 - 도메인 등록",
       "id": "18ba3690-6b5e-522a-9ed7-3795161d1f11",
       "file": "02_metadata_v6_domain_authoring_flow_v6_standalone.json",
-      "nodes": 23,
-      "edges": 32,
-      "source_sha256": "ede31bdbd13d4df8014abf647fad69816f77b7b9ec8370b5308d94f501ce64b0",
-      "sha256": "ede31bdbd13d4df8014abf647fad69816f77b7b9ec8370b5308d94f501ce64b0"
+      "nodes": 26,
+      "edges": 35,
+      "source_sha256": "fc8d262f5310081c49504afe8b883334f8484ab355dc752f511c6bbfb548cb93",
+      "sha256": "fc8d262f5310081c49504afe8b883334f8484ab355dc752f511c6bbfb548cb93"
     },
     {
       "order": 3,
@@ -65,10 +65,10 @@
       "display_name": "메타데이터 v6 - 데이터셋 카탈로그 등록",
       "id": "c207326f-3edf-5900-ae1f-40fb1062f1e1",
       "file": "03_metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
-      "nodes": 12,
-      "edges": 12,
-      "source_sha256": "4d1ded6087ece8f98354abd22e039acd1e5e7b83d193a22ef98ee3f6fb8a0106",
-      "sha256": "4d1ded6087ece8f98354abd22e039acd1e5e7b83d193a22ef98ee3f6fb8a0106"
+      "nodes": 13,
+      "edges": 13,
+      "source_sha256": "abc0122a5aca4f5098ad44c63b59ec529c783a37f712ee28d8a0d5e6b8e16c8c",
+      "sha256": "abc0122a5aca4f5098ad44c63b59ec529c783a37f712ee28d8a0d5e6b8e16c8c"
     },
     {
       "order": 4,
@@ -77,10 +77,10 @@
       "display_name": "메타데이터 v6 - 기본 필터 등록",
       "id": "3c2dea0c-d508-5fed-95ad-b74aa3e8dca6",
       "file": "04_metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-      "nodes": 12,
-      "edges": 12,
-      "source_sha256": "7ede44849a08448f92109e92d8a1b6c2ff89aa136056a2c3b851d0568b070091",
-      "sha256": "7ede44849a08448f92109e92d8a1b6c2ff89aa136056a2c3b851d0568b070091"
+      "nodes": 13,
+      "edges": 13,
+      "source_sha256": "8f188c871b672fa427e474f433171aa512d5a383dd33051dd321e1f679761a94",
+      "sha256": "8f188c871b672fa427e474f433171aa512d5a383dd33051dd321e1f679761a94"
     },
     {
       "order": 5,
@@ -91,8 +91,8 @@
       "file": "05_metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
       "nodes": 7,
       "edges": 5,
-      "source_sha256": "f9834ffcc7c04cc1622045e788e28ced8ec8d42f6afe839f995c94091784aafc",
-      "sha256": "f9834ffcc7c04cc1622045e788e28ced8ec8d42f6afe839f995c94091784aafc"
+      "source_sha256": "49d9bac2ff056706fe1570e61a62da662dc60cad0351355fa06d94dacf7b1795",
+      "sha256": "49d9bac2ff056706fe1570e61a62da662dc60cad0351355fa06d94dacf7b1795"
     }
   ]
 }

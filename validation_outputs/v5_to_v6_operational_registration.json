@@ -1,0 +1,56 @@
+{
+  "contract_version": "metadata.compiled-release.registration.v1",
+  "status": "ok",
+  "mode": "deterministic_compiled_fallback",
+  "database": "datagov",
+  "database_mode": "operational",
+  "domain_id": "manufacturing",
+  "environment": "production",
+  "revision": 1,
+  "current_id": "production:manufacturing",
+  "collections": {
+    "domain": "agent_v6_domain_metadata",
+    "table_catalog": "agent_v6_table_catalog",
+    "main_filter": "agent_v6_main_filter"
+  },
+  "package_sha256": "1873ef8a1fb1befd894dfa5e97cc236e5859b221e41ac66d34412ebd427c19a2",
+  "bundle_sha256": "7ea386a3525cf13a1725ac0de0cd7a1685f2e8863b327c6b6c145295a26aa819",
+  "catalog_sha256": "303c33eed3efd6cbe25f4f43e5eda9dd1dabf4312e364d626f8af7682be5a142",
+  "source_sha256": {
+    "domain": "1d548923e0c6fbf55e1f1d39e6427c821e9bda95a63beccbd3cc7a5dfeaefe37",
+    "table_catalog": "e987ae7a3f843df2c26768cc80345695c026da14becb6f1c22b8173b6e7e2157",
+    "main_filter": "4a9301c27728b30830bdbb883d03ad52eec908bf86c8eca030bc8245eecb3ea3"
+  },
+  "counts": {
+    "datasets": 10,
+    "fields": 47,
+    "metrics": 17,
+    "entity_groups": 25,
+    "grains": 1,
+    "relations": 0,
+    "orderings": 1,
+    "recipes": 10,
+    "predicates": 7,
+    "aliases": 141,
+    "prompt_extensions": 2,
+    "specialized_functions": 0
+  },
+  "storage": {
+    "document_count": 3,
+    "release_ids": [
+      "release:e22d326f3d82b543a91b210b0fd8137dcbd0d3b14784e65dfc5ef4ccff381e81"
+    ],
+    "natural_source_present": {
+      "domain": true,
+      "table_catalog": true,
+      "main_filter": true
+    }
+  },
+  "checks": {
+    "package_validated": true,
+    "transactional_round_trip": true,
+    "latest_available_loader": true,
+    "three_documents_present": true,
+    "single_release": true
+  }
+}

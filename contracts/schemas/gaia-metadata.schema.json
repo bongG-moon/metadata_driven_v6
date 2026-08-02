@@ -85,10 +85,6 @@
       "maxItems": 0,
       "type": "array"
     },
-    "response_sha256": {
-      "pattern": "^[0-9a-f]{64}$",
-      "type": "string"
-    },
     "trace_id": {
       "pattern": "^[a-z][a-z0-9_-]{1,31}:[A-Za-z0-9._:-]{4,256}$",
       "type": "string"
@@ -154,7 +150,6 @@
     "followup_questions",
     "trace_id",
     "usage",
-    "response_sha256",
     "docs",
     "images",
     "knowhows"

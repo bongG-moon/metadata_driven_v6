@@ -24,6 +24,8 @@ LLM 호출 전에 deterministic Request Capsule Builder가 질문의 literal 후
 }
 ```
 
+`reference_instant`와 `timezone`은 내부 request contract 필드이지 Langflow UI 입력이 아니다. `02 요청 및 세션 상태 고정`은 실행 시 현재 시각을 만들고 시간대를 항상 `Asia/Seoul`로 고정한다. 위 고정 시각은 재현 가능한 검증 fixture에서만 사용한다.
+
 Candidate Selector는 request capsule과 exact metadata/operator registry revision을 결합해 다음 immutable compiler용 bundle을 만든다.
 
 ```json
@@ -99,7 +101,7 @@ Candidate Selector는 request capsule과 exact metadata/operator registry revisi
 
 LLM에는 full `resolved_semantics`가 아니라 `candidate_id`, matched span, 짧은 display label, applicable metric ID만 가진 bounded prompt-card projection을 보낸다. Full bundle은 LLM edge를 통과하지 않고 compiler에 직접 전달하며, inline budget을 넘으면 content-addressed immutable ref와 `bundle_sha256`로 전달한다.
 
-Date resolver v1은 `reference_instant`를 먼저 `timezone`의 local date로 바꾼다. `오늘/어제`는 그 local date의 0/-1일, 연도 없는 `6/27`·`7월 1일`은 reference local year, offset이 있는 timestamp는 해당 Instant를 Asia/Seoul로 변환한 local date다. “가장 가까운 날짜” 같은 실행 시점 heuristic을 쓰지 않으며 연도 해석 정책이 맞지 않는 도메인은 clarification을 요구한다.
+Date resolver v1은 내부 `reference_instant`를 고정 시간대 `Asia/Seoul`의 local date로 바꾼다. `오늘/어제`는 그 local date의 0/-1일, 연도 없는 `6/27`·`7월 1일`은 reference local year, offset이 있는 timestamp는 해당 Instant를 Asia/Seoul로 변환한 local date다. “가장 가까운 날짜” 같은 실행 시점 heuristic을 쓰지 않으며 연도 해석 정책이 맞지 않는 도메인은 clarification을 요구한다.
 
 `L-267`, `D/S1~D/A4`, `오늘`, `어제`, `6/27`, `2026-07-01T00:00:00+09:00`은 이 경계를 통과하는 필수 contract fixture다. 원문에 없는 literal, 허용 pattern을 통과하지 못한 literal, metadata ID로 연결되지 않은 alias는 intent에 들어갈 수 없다.
 

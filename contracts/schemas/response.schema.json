@@ -309,10 +309,6 @@
       ],
       "type": "object"
     },
-    "response_sha256": {
-      "pattern": "^[0-9a-f]{64}$",
-      "type": "string"
-    },
     "response_type": {
       "const": "data_analysis",
       "type": "string"
@@ -492,8 +488,7 @@
     "data_refs",
     "answer_sections",
     "state",
-    "trace",
-    "response_sha256"
+    "trace"
   ],
   "title": "response.v1",
   "type": "object"

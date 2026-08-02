@@ -17,42 +17,36 @@ Free-form natural-language TXT → immutable source block
   └─ domain_policy: explicit admin node inputs → LLM 0회
 → branch별 closed schema 검증 → v3 template/descriptor 결정론적 확장·병합
 → full draft JSON Schema validation → semantic lint → dependency/security closure
-→ operator diff review → immutable pending candidate
-→ external approval → atomic execute
-→ active compiled record → runtime metadata bundle
+→ operator diff review → candidate/release hash 계산
+→ MongoDB transaction으로 세 current section 동시 교체
+→ 세 section release 검증·결합 → runtime metadata bundle
 ```
 
 기본 Full-domain lane의 세 LLM 출력은 역할이 서로 다르다. Domain branch는 실행 metadata를 작성하지 않고 `metadata-annotation-proposal.schema.json`의 `display_name`과 `description`만 반환한다. Dataset branch는 내부용 compact Dataset IR을, Main Filter branch는 각 항목에 `target_type`, `target_id`, `expressions`를 요구하는 typed IR을 반환한다. 작업자는 이 IR, JSON, canonical ID inventory, relation endpoint/field-role 선언 문법을 알거나 맞출 필요가 없다.
 
-세 branch가 받는 실행 후보는 `metadata.authoring.source-registry.v3`에서 투영한 `metadata.authoring.semantic-vocabulary.v1`뿐이다. 이 축약 어휘에는 semantic ID, dataset family와 업무용 labels만 있고 physical column, type, adapter/config/query ref와 실제 데이터는 없다. 같은 v3 registry의 `metadata.authoring.semantic-templates.v1`은 LLM에 전달하지 않는다. Compiler가 그 hash-pinned template의 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 `planner_policy`를 Domain annotation에 결정론적으로 결합하고, Dataset descriptor와 Source binding 및 Main Filter alias card를 확장한다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret·registry 정책을 검증하고 valid candidate만 prepare한다. LLM은 실행 의미를 새로 만들거나 validator와 writer를 우회할 수 없다.
+세 branch가 받는 실행 후보는 `metadata.authoring.source-registry.v3`에서 투영한 `metadata.authoring.semantic-vocabulary.v1`뿐이다. 이 축약 어휘에는 semantic ID, dataset family와 업무용 labels만 있고 physical column, type, adapter/config/query ref와 실제 데이터는 없다. 같은 v3 registry의 `metadata.authoring.semantic-templates.v1`은 LLM에 전달하지 않는다. Compiler가 그 hash-pinned template의 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 `planner_policy`를 Domain annotation에 결정론적으로 결합하고, Dataset descriptor와 Source binding 및 Main Filter alias card를 확장한다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret·registry 정책을 검증하고 valid release만 저장한다. LLM은 실행 의미를 새로 만들거나 validator와 writer를 우회할 수 없다.
 
 LLM 경계는 `metadata.authoring.proposal.v1`로 닫는다. `complete` variant만 exact source hash와 `metadata.authoring.draft.v1`을 가지고 compile 단계로 이동한다. `needs_clarification` variant는 exact source hash, 1~3개 질문과 bounded `missing_fields`만 가지며 candidate/writer 단계로 이동하지 않는다.
 
-세 LLM authoring 작업은 각각 공통 Prompt Template 한 개가 기본이다. 특화 Prompt는 `PROMPTS.md`의 반복 failure case·source 다양성·root-cause·관리자 approval pin을 모두 만족한 optional overlay일 때만 허용한다. Domain Policy는 overlay 존재 여부와 무관하게 Prompt/LLM 0회다. Main Filter의 zero-LLM path는 `source_grounding_mode=explicit_inventory`가 명시되고 alias와 canonical target이 모두 유일하게 pin된 경우에만 열린다.
+세 LLM authoring 작업은 각각 별도 공통·특화 Prompt Template pair를 사용한다. 특화 업무 규칙은 각 특화 Template 본문에 직접 작성하고 변수 없이 렌더링한다. 자연어 source와 축약 의미 어휘는 Context Builder에서 Composer의 `runtime_context`로 한 번만 전달하며 Prompt 본문에 복제하지 않는다. Domain Policy는 Prompt/LLM 0회다. Main Filter의 zero-LLM path는 `source_grounding_mode=explicit_inventory`가 명시되고 alias와 canonical target이 모두 유일하게 pin된 경우에만 열린다.
 
 최초 bootstrap은 세 입력 파일을 기계적으로 정형화하라는 뜻이 아니다. 기존 Domain/Dataset/Main Filter TXT를 그대로 합친 bundle이나, 동일 정보를 충분히 담은 자연어 문서를 받는다. 비전문 작업자는 평소 업무 표현, 불규칙한 문장 순서와 줄바꿈으로 입력할 수 있다. 필수 업무 정보가 없으면 `status=needs_clarification`의 `clarification.missing_fields`와 짧은 질문으로 빠진 내용을 설명하며 특정 구문, JSON, ID, 타입, 컬럼 또는 DSL로 다시 쓰라고 요구하지 않는다. 이 상태에는 draft/candidate/persist 산출물이 없어야 한다.
 
 현재 live authoring profile은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` bundle과 exact `gemini-3.5-flash-lite`, temperature 0, fallback 0, repair 0을 사용한다. Provider 응답이 closed schema를 통과하지 못하면 자동 보정이나 재호출을 하지 않는다.
 
-## 2. Collection 분리
+## 2. 운영 Metadata 3컬렉션 계약
 
-v5 데이터를 보호하기 위해 v6 기본 collection을 별도로 둔다.
+v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 아래 세 개로 제한한다. 각 문서는 비전문 작업자가 입력한 `source_text`, LLM/컴파일러가 만든 `normalized_metadata`, source/section/document hash, 세 문서가 함께 갱신됐음을 증명하는 동일 `release_id`와 manifest를 가진다.
 
 | 용도 | 기본 collection |
 | --- | --- |
-| raw authoring source | `agent_v6_authoring_sources` |
-| compiled domain/entity/grain/recipe | `agent_v6_semantic_catalog` |
-| compiled dataset contract | `agent_v6_dataset_catalog` |
-| compiled filter contract | `agent_v6_filter_catalog` |
-| non-secret connection descriptor | `agent_v6_config_registry` |
-| reviewed query/endpoint template | `agent_v6_query_registry` |
-| approval 대기 candidate | `agent_v6_pending_writes` |
-| append-only authoring audit | `agent_v6_authoring_audit` |
+| 도메인 원문·metric/relation/grain/recipe/공통 정책 | `agent_v6_domain_metadata` |
+| 테이블 원문·dataset/field binding | `agent_v6_table_catalog` |
+| 메인필터 원문·predicate/alias | `agent_v6_main_filter` |
 | session state | `agent_v6_session_state` |
 | result/source ref | `agent_v6_result_store` |
-| validation evidence manifest | `agent_v6_validation_runs` |
 
-database 기본값은 `datagov`이며 모든 collection 이름과 연결 설정은 node input에서 확인하고 변경할 수 있어야 한다. 단, node input이 아래 contract의 ACL, read-only, timeout, row-limit 상한을 완화할 수는 없다.
+운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·timeout만 보이며, 세 metadata collection 이름·domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 위 고정 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합하고 hash 불일치 시 fail-closed한다. Source config/query의 secret·실제 query는 이 세 collection에 저장하지 않고 기존 승인 adapter/registry 경계에서만 해석한다.
 
 ## 3. 공통 envelope
 
@@ -638,41 +632,18 @@ Dynamic import, `eval`/`exec`, metadata code 실행, arbitrary network/file/subp
 
 현재 HOLD LOT 중 하나라도 valid `HOLD_EVENT_AT` history가 없거나 요청한 LOT_ID set 전체 coverage를 증명하지 못하면 `source_coverage_incomplete`로 종료한다. 이 방식은 현재 catalog에 없는 hold-start physical column을 만들지 않으면서 실제 `HOLD_TM`을 근거로 선택한다.
 
-## 13. Prepare, external approve, atomic execute
+## 13. 검증 후 3컬렉션 저장
 
-Langflow 1.9.2에서는 authoring run을 durable pause/resume으로 표현하지 않는다. 저장은 두 번의 독립 실행과 외부 승인 상태로 구성한다.
+Langflow 등록 Flow는 자연어 해석과 결정론적 검증이 성공한 한 번의 실행에서 current metadata를 저장한다. 별도 active pointer, bundle archive, pending write collection은 runtime 필수 계약이 아니다.
 
-### 13.1 Prepare run
+1. Full-domain 등록은 자유형 Domain·Dataset·Main Filter 원문을 작업별 공통·특화 Prompt pair로 각각 해석해 LLM 정확히 3개의 branch 결과를 만든다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR이다. 후속 Dataset/Main Filter는 최대 1회, Domain Policy는 0회다.
+2. Compiler가 `source-registry.v3`의 hash-pinned template/descriptor를 결합하고 전체 package schema, semantic lint, dependency/security closure, section ownership을 검증한다. 실패 또는 clarification이면 MongoDB write는 0건이다.
+3. 검증된 runtime catalog를 domain, table catalog, main filter section으로 분할한다. 각 문서에 해당 자연어 `source_text`, `source_sha256`, `normalized_metadata`, `section_sha256`, 공통 package metadata를 기록한다.
+4. 세 section hash와 package/catalog/bundle hash를 한 `metadata.release.v1` manifest로 묶고 `release_id=release:<manifest_sha256>`를 만든다.
+5. MongoDB transaction에서 `environment:domain_id`의 세 current 문서를 `replace_one(upsert=true)`로 교체한다. transaction 안에서 다시 읽고 세 release/manifest/identity/revision/hash를 검증해 동일 Domain Package로 결합되지 않으면 전체 transaction을 중단한다.
+6. `mode=validate_only` 또는 `dry_run=true`이면 같은 컴파일·release 검증을 수행하지만 MongoDB write는 하지 않는다.
 
-1. 첫 번째 webhook/run은 위 authoring-kind별 입력으로 candidate를 만든다. 기본 Full-domain은 자유형 Domain·Dataset·Main Filter 원문을 작업별 공통 Prompt로 각각 해석해 LLM 정확히 3개의 branch 결과를 만든다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR이다. Compiler가 `source-registry.v3`의 hash-pinned `semantic_templates`, dataset descriptor/Source binding과 승인 vocabulary를 사용해 세 결과를 결정론적으로 확장·병합한 뒤 full draft를 검증한다. 후속 Dataset/Main Filter도 같은 IR/expander 경계를 사용해 active package의 담당 section만 patch한다. 승인된 반복 실패 overlay가 있으면 exact approval pin을 함께 검증한다. Optional `explicit_inventory`는 완전한 proof일 때만 zero-LLM compile을 사용하며 Blueprint lane은 기본 Domain annotation에 외부 executable pin 검증을 추가한다. Domain Policy는 explicit admin input만 적용하고 LLM은 0회이며, function card는 build-time registry의 identity/hash/schema가 일치할 때만 포함한다. `semantic_templates.planner_policy`는 어느 authoring 입력도 변경할 수 없다. 이후 schema, semantic lint, dependency/security closure, diff, 영향 validation을 끝낸다.
-2. compiled record, `expected_active_revision/hash`, dependency 및 config/query pin, validation block, `prepared_at`, `expires_at`을 하나의 immutable payload로 묶는다.
-3. 이 immutable hash material만 canonicalize해 `candidate_sha256`을 계산하고 `candidate_id=candidate:<candidate_sha256>`로 만든다. 두 필드는 hash material에서 제외한다.
-4. hash material과 workflow envelope을 `agent_v6_pending_writes`에 저장한다. 상태는 `prepared`이며 응답에는 `candidate_id`, `candidate_sha256`, diff와 validation summary만 반환한다.
-
-Pending record의 candidate payload는 생성 후 수정할 수 없다. `status`, approval, claim, commit 결과는 hash 대상 payload 밖의 workflow field로만 추가된다. 승인자가 candidate 내용을 바꾸려면 새 prepare run과 새 hash가 필요하다.
-
-### 13.2 External approval
-
-Langflow 밖의 승인 UI/service가 ACL을 확인하고 `approver_id`, `decision`, `approved_at`, `expires_at`, candidate hash를 immutable approval event로 기록한다. Pending status는 candidate hash를 조건으로 `prepared → approved|rejected` compare-and-set한다. 이미 결정되었거나 hash가 다른 candidate의 두 번째 결정은 거부한다. 승인 권한과 metadata 작성 권한은 구분할 수 있어야 한다. 거절·만료 candidate는 execute할 수 없다. 이 단계는 첫 Langflow run의 일시정지나 재개가 아니다.
-
-### 13.3 Execute run
-
-두 번째 webhook/run은 `candidate_id`, `candidate_sha256`, approval reference, idempotency key만 받는다. Explicit Writer는 다음 조건을 하나의 transaction 또는 동등한 compare-and-set으로 확인하고 claim한다.
-
-- pending status가 `approved`이고 아직 claim되지 않음
-- 전달 hash, 저장 candidate hash, canonical bytes 재계산 hash가 모두 일치
-- 승인자 ACL이 유효하고 현재 시각이 `expires_at` 이전
-- active base revision/hash가 `expected_active_revision/hash`와 일치
-- 모든 dependency revision/hash와 config/query registry pin이 prepare 시점과 일치
-- exact candidate bytes에 대한 schema/lint/dependency validation 재검사가 valid
-
-조건을 통과하면 `approved → executing` claim, 새 immutable revision insert, active pointer 교체, 이전 revision deprecated, append-only audit 기록을 원자적으로 commit한다. 같은 idempotency key의 재호출은 같은 commit 결과를 반환한다.
-
-기본 구현은 MongoDB transaction으로 pending claim, catalog revision, active pointer, audit event를 함께 commit한다. 동등한 compare-and-set을 쓰려면 활성 여부와 commit marker가 같은 atomic document에 있어야 하고 loader가 `committed` marker 없는 revision을 절대 읽지 않아야 한다. 여러 document를 순서대로 쓰는 best-effort 저장은 atomic execute로 인정하지 않는다.
-
-Base/dependency/registry가 바뀌었거나 hash가 다르면 `stale_candidate`로 종료하고 저장하지 않는다. candidate를 최신 metadata에 맞춰 execute 단계에서 재작성하지 않는다. 새 prepare와 재승인이 필요하다. 이 hash pin, expiry, conditional claim이 승인과 저장 사이 TOCTOU를 차단한다.
-
-Pending 상태는 `prepared|approved|rejected|expired|executing|committed|stale|failed`만 허용한다. TTL index는 만료 record 정리에만 사용하며, 승인 가능 여부는 writer가 현재 시각으로 다시 판단한다. 모든 prepare/approve/claim/commit/reject/stale 사건은 `agent_v6_authoring_audit`에 append-only로 남긴다.
+Runtime loader는 domain metadata collection에서 `updated_at`, revision, `_id` 순으로 가장 최근 문서를 찾고 그 identity와 같은 table catalog/main filter 문서를 자동으로 읽는다. 세 문서의 `_id`, domain/environment/revision, release ID, manifest, section/document/source hash가 모두 일치할 때만 package를 제공한다. 한 문서가 누락됐거나 이전 release이거나 운영자가 `normalized_metadata`를 직접 수정하면 fail-closed한다. 단순 current 구조이므로 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 세 current 문서의 변경 스트림·백업 또는 별도 운영 감사 시스템을 사용한다.
 
 ## 14. v5 migration 원칙
 

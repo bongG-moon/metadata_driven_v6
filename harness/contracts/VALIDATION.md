@@ -60,7 +60,7 @@ v5 evidence는 Phase 1 migration manifest에 path와 SHA-256을 먼저 고정한
 - `오늘`: `2026-07-30`
 - `어제`: `2026-07-29`
 
-runner, case oracle, report manifest가 다른 기준시각 또는 시스템 로컬 timezone을 암묵적으로 사용하면 실패다.
+runner, case oracle, report manifest가 다른 기준시각 또는 시스템 로컬 timezone을 암묵적으로 사용하면 실패다. 이 고정 instant는 검증 harness의 주입 fixture다. 운영 `02 요청 및 세션 상태 고정` node에는 기준시각·시간대 UI input이 없으며 내부 현재 시각을 항상 `Asia/Seoul`로 해석한다.
 
 ## 4. Exact oracle
 
@@ -188,7 +188,7 @@ Validator는 Candidate Selector matcher를 다시 실행해 잘못된 payload를
 ### 6.2 External prompt gate
 
 - Intent와 Answer마다 공통·특화 Prompt Template node가 정확히 한 개씩 있고 두 node의 ID/purpose/revision/template SHA-256/source/edge가 독립적인지 검사
-- Domain/Dataset/Main Filter LLM 경로는 작업별 공통 Prompt Template 한 개가 기본이고 default export에 특화 overlay가 없는지 검사
+- Domain/Dataset/Main Filter LLM 경로에도 작업별 공통·특화 Prompt Template node가 정확히 한 개씩 있고 ID/purpose/revision/template SHA-256/source/edge가 독립적인지 검사
 - Domain 기본 lane은 문장 순서·말투·제목·표기가 다른 자유형 TXT bundle에서 full closed draft를 만들며 JSON·ID inventory·relation/field-role 문법·Blueprint/pin을 사용자에게 요구하지 않는지 검사
 - 기본 예시와 별도로 Markdown 제목·bullet이 0개이고 문단 순서와 말투를 수동으로 바꾼 작업자 TXT corpus를 같은 imported Flow와 새 격리 environment에서 실행한다. 두 corpus 모두 exact model, source hash, closed proposal, compiler completeness, revision chain, loader round-trip을 통과해야 하며 원문·prompt·provider 응답은 evidence에 저장하지 않는다.
 - 승인 Source Registry는 내부 self-hash 외에 독립 file SHA-256 sidecar pin과 exact match해야 하며, 임시 deterministic rebuild도 같은 byte hash를 재현해야 한다.
@@ -196,11 +196,11 @@ Validator는 Candidate Selector matcher를 다시 실행해 잘못된 payload를
 - 최초 bootstrap source가 Domain·Dataset·Main Filter 원문 bundle 또는 동등하게 완전한 도메인 설명인지 확인하고, 정보 부족은 format error가 아니라 `status=needs_clarification`의 `missing_fields`/질문으로 반환하며 draft/candidate/persist가 없는지 검사
 - `metadata.authoring.proposal.v1`의 `complete(source_sha256,draft)`와 `needs_clarification(source_sha256,clarification)` recursive closed variant를 검사하고 mixed/extra-key/wrong-source-hash proposal은 provider 재호출 없이 거부
 - 제조 live bootstrap은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` bundle, exact `gemini-3.5-flash-lite`, temperature 0, fallback 0, repair 0을 검사
-- optional authoring overlay는 같은 normalized failure shape의 승인 case 3개 이상·서로 다른 source 2개 이상·root-cause·purpose/domain/revision/hash/admin approval이 pin된 profile에서만 별도 node/edge로 허용
 - runtime/authoring custom component source와 standalone generator에서 prompt builder와 LLM instruction literal이 0건인지 static scan
-- Runtime prompt pair 또는 Authoring common이 missing/empty, optional overlay가 unapproved, purpose/revision/hash/placeholder/budget이 틀리면 provider 호출 0과 canonical error
-- 공통 prompt만 변경하면 다른 prompt와 component source hash가, Runtime 특화/Authoring approved overlay만 변경하면 공통 prompt와 component source hash가 동일하고 해당 prompt/Flow/manifest/composition hash만 변경
-- Runtime common=`system`, specialized=`domain_policy`, Authoring overlay=`approved_authoring_overlay`, runtime context=`untrusted_data` named authority가 유지되고 port swap이 provider 호출 전에 실패
+- Runtime/Authoring prompt pair 중 하나가 missing/empty이거나 purpose/revision/hash/placeholder/budget이 틀리면 provider 호출 0과 canonical error
+- 모든 공통·특화 Prompt Template의 예상 변수는 빈 집합이고 특화 본문을 사용자 입력·metadata로 바꾸는 동적 port/edge가 없음을 검사
+- 공통 prompt만 변경하면 특화 prompt와 component source hash가, 특화 prompt만 변경하면 공통 prompt와 component source hash가 동일하고 해당 prompt/Flow/manifest/composition hash만 변경
+- Runtime/Authoring common=`system`, specialized=`domain_policy`, runtime context=`untrusted_data` named authority가 유지되고 port swap이 provider 호출 전에 실패
 - question/candidate/facts/schema/source runtime context가 Prompt Template에 복제되지 않고 Composer의 별도 입력으로 한 번만 전달
 - JSON syntax/schema 오류, candidate 밖 ID와 provider 오류 뒤 Intent/Answer/authoring 자동 retry 및 다른 모델 fallback 0
 - prompt/LLM raw output이 state, result, trace, telemetry, error details에 없고 manifest에는 hash/revision/byte length만 존재
@@ -208,7 +208,7 @@ Validator는 Candidate Selector matcher를 다시 실행해 잘못된 payload를
 - deterministic, unsupported, narrative-off, optional explicit-inventory main-filter authoring과 Domain Policy는 provider 호출 0이며 zero-LLM path에서는 prompt envelope도 만들지 않음
 - Intent/Answer/domain-authoring/dataset/main-filter의 허용 경로는 각각 provider 최대 1회
 - optional `source_grounding_mode=explicit_inventory` profile에서만 exact inventory zero-LLM 또는 Blueprint/pin annotation-only gate를 적용하며, 기본 free-form run은 빈 Blueprint/pin으로 provider 전에 실패하지 않음
-- public HTTP tweak로 Prompt Template, runtime domain prompt text, authoring overlay approval/pin과 model policy를 변경하려는 요청은 실행 전에 거부
+- public HTTP tweak로 공통·특화 Prompt Template 본문/pin과 model policy를 변경하려는 요청은 실행 전에 거부
 
 ## 7. Multi-turn gate
 
@@ -243,6 +243,9 @@ v5 사용자 기능이 계산 경로 변경으로 사라지지 않는지 별도 
 - diagnostics, result table, preview limit, evidence, download, notice, criteria, next questions, intent, retrieval, execution plan 토글을 각각 on/off
 - `include_diagnostics=true`이면 intent/retrieval/execution plan 모두 true, false이면 세 child toggle 개별값; 다른 section에는 영향 0
 - v5 `show_pandas_code` import 값이 code 생성 없이 `show_execution_plan`으로 정규화
+- 채팅 표시는 `response.v1` schema만 검사하며 응답 hash mismatch를 presentation 오류로 만들지 않음
+- 24·25·26 출력 경계는 `response_sha256`을 요구하거나 비교하지 않고 일반 JSON을 전달
+- MongoDB result store의 결과·source snapshot `content_sha256` 검증은 계속 유지
 - Message 표시 토글 전후 canonical `response.v1`, result/state ref와 GaiA answer/metadata hash 동일
 - API의 bounded request/intent_plan/analysis/data/data_refs/state/trace key와 schema compatibility
 - `answer.sections.v1`의 summary/result table descriptor/criteria/evidence/notices/downloads/next questions schema
@@ -310,6 +313,8 @@ live 배포 여부와 관계없이 Oracle, H-API, Datalake, Goodocs, Dummy 5개 
 - success/empty/failure 구분과 canonical error mapping
 - timeout, row/byte limit, provenance, coverage metadata
 - Dummy와 동일한 canonical result contract
+- Flow에는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각각 하나씩 존재하고 job lane이 교차 연결되지 않음
+- source payload는 연결 Data 계약으로만 받고, 운영자가 조절하는 source scalar input은 각 실제 source node의 `조회 행 수 제한` 하나뿐임
 
 공통 security gate:
 

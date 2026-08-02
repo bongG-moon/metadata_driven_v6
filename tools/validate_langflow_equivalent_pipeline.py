@@ -12,6 +12,7 @@ import argparse
 import asyncio
 import inspect
 import json
+import os
 import sys
 from collections import Counter, deque
 from copy import deepcopy
@@ -71,8 +72,10 @@ _STAGE_ALIASES = {
     "plan_compilation": "plan_compiler_validator",
     "job_routing": "job_router",
     "dummy_retrieval": "source_retriever",
-    "inline_retrieval": "source_retriever",
-    "live_retrieval": "source_retriever",
+    "oracle_retrieval": "source_retriever",
+    "h_api_retrieval": "source_retriever",
+    "datalake_retrieval": "source_retriever",
+    "goodocs_retrieval": "source_retriever",
     "source_merge": "source_merger",
     "typed_execution": "typed_executor",
     "answer_facts_context": "answer_facts",
@@ -405,6 +408,10 @@ def execute_component_pipeline(
     model_calls_before = int(getattr(model, "calls", 0) or 0)
     invocations: list[dict[str, Any]] = []
     failures: list[str] = []
+    previous_validation_mode = os.environ.get("V6_VALIDATION_MODE")
+    previous_validation_instant = os.environ.get("V6_VALIDATION_REFERENCE_INSTANT")
+    os.environ["V6_VALIDATION_MODE"] = "1"
+    os.environ["V6_VALIDATION_REFERENCE_INSTANT"] = reference_instant
     for node_id in order:
         node = node_by_id[node_id]
         config = _node_config(node)
@@ -425,6 +432,50 @@ def execute_component_pipeline(
                 outputs[(node_id, "model_output")] = model
                 outputs[(node_id, "text_output")] = ""
                 invocations.append({"node_id": node_id, "stage": stage, "methods": ["native_model"]})
+                continue
+            if stage == "domain_bundle":
+                package = deepcopy(inline_domain_bundle) if isinstance(inline_domain_bundle, dict) else None
+                if package is None:
+                    package_path = ROOT / "metadata" / "domain_packs" / domain_id / "compiled" / "domain_package.json"
+                    if not package_path.exists():
+                        raise RuntimeError("validation_available_metadata_missing")
+                    package = json.loads(package_path.read_text(encoding="utf-8"))
+                catalog = deepcopy(
+                    package.get("runtime_catalog")
+                    if isinstance(package.get("runtime_catalog"), dict)
+                    else package
+                )
+                if inline_source_payload:
+                    # The order-sales corpus supplies reviewed physical rows but
+                    # its portable package intentionally declares dummy sources.
+                    # Exercise the new per-source live path through Datalake in
+                    # this validation-only catalog copy; production metadata is
+                    # never changed or persisted.
+                    for dataset in (catalog.get("datasets") or {}).values():
+                        if isinstance(dataset, dict):
+                            dataset["source_type"] = "datalake"
+                            dataset["source_adapter"] = "validation.datalake"
+                    catalog["catalog_sha256"] = sha256_json(
+                        {key: value for key, value in catalog.items() if key != "catalog_sha256"}
+                    )
+                identity = {
+                    "contract_version": "pipeline.context.v1",
+                    "ok": True,
+                    "stage": "domain_bundle",
+                    "domain_bundle": {
+                        "contract_version": "domain.bundle.runtime.v1",
+                        "domain_id": str(package.get("domain_id") or catalog.get("domain_id") or domain_id),
+                        "environment": str(package.get("environment") or catalog.get("environment") or runtime_environment),
+                        "revision": str(package.get("revision") or catalog.get("revision") or "validation"),
+                        "source_mode": "validation_available_metadata",
+                        "catalog_sha256": str(catalog.get("catalog_sha256") or ""),
+                        "package_sha256": str(package.get("package_sha256") or ""),
+                        "bundle_sha256": str(package.get("bundle_sha256") or ""),
+                        "runtime_catalog": deepcopy(catalog),
+                    },
+                }
+                outputs[(node_id, "domain_bundle")] = Data(data=identity)
+                invocations.append({"node_id": node_id, "stage": stage, "methods": ["validation_available_metadata"]})
                 continue
             native_module = str((config.get("metadata") or {}).get("module") or "").lower()
             if stage == "prompt" and "promptcomponent" in native_module:
@@ -492,16 +543,8 @@ def execute_component_pipeline(
                 component.narrative_enabled = bool(narrative_enabled)
             if hasattr(component, "session_id"):
                 component.session_id = session_id
-            if hasattr(component, "metadata_source_mode"):
-                # Offline component validation intentionally bypasses external
-                # MongoDB. Live active-pointer validation is a separate gate.
-                component.metadata_source_mode = "inline" if inline_domain_bundle else "embedded_baseline"
-                if inline_domain_bundle:
-                    component.inline_domain_bundle = Data(data=deepcopy(inline_domain_bundle))
-            if hasattr(component, "reference_instant"):
-                component.reference_instant = reference_instant
             if hasattr(component, "data_mode"):
-                component.data_mode = "inline" if inline_source_payload else "dummy"
+                component.data_mode = "live" if inline_source_payload else "dummy"
             if hasattr(component, "source_payload") and inline_source_payload:
                 component.source_payload = Data(data=deepcopy(inline_source_payload))
             for field_name, field_value in (component_overrides or {}).get(node_id, {}).items():
@@ -599,7 +642,7 @@ def execute_component_pipeline(
         "intent_resolver": 1,
         "plan_compiler_validator": 1,
         "job_router": 1,
-        "source_retriever": 3,
+        "source_retriever": 5,
         "source_merger": 1,
         "typed_executor": 1,
         "answer_facts": 1,
@@ -611,9 +654,7 @@ def execute_component_pipeline(
         for row in invocations
         if any(version.startswith(("source.result", "source.bundle", "source.execution")) for version in row.get("contract_versions", []))
     }
-    response_hash_ok = isinstance(response, dict) and response.get("response_sha256") == sha256_json(
-        {key: value for key, value in response.items() if key != "response_sha256"}
-    )
+    response_json_ok = isinstance(response, dict) and "response_sha256" not in response
     response_errors = []
     if isinstance(response, dict):
         raw_errors = response.get("errors") if isinstance(response.get("errors"), list) else []
@@ -693,11 +734,11 @@ def execute_component_pipeline(
         "provider_call_count_exact": int(getattr(model, "calls", 0) or 0) - model_calls_before
         == int(expected_model_calls),
         "response_status_expected": isinstance(response, dict) and response.get("status") == expected_status,
-        "response_hash_valid": response_hash_ok,
+        "response_is_plain_json": response_json_ok,
         "message_uses_canonical_response": message_response == response,
         "api_uses_canonical_response": api_response == response,
-        "gaia_uses_canonical_response_hash": isinstance(gaia_metadata, dict)
-        and gaia_metadata.get("response_sha256") == (response or {}).get("response_sha256"),
+        "gaia_uses_plain_metadata": isinstance(gaia_metadata, dict)
+        and "response_sha256" not in gaia_metadata,
         "source_contracts_bounded_to_retrieval_merge_execute": source_contract_stages
         <= {"source_retriever", "source_merger", "typed_executor"},
     }
@@ -748,7 +789,7 @@ def execute_component_pipeline(
         if isinstance(response, dict) and isinstance(response.get("answer_sections"), dict)
         else {}
     )
-    return {
+    report = {
         "contract_version": "langflow.component.pipeline.validation.v1",
         "question_sha256": sha256_json(question),
         "domain_id": domain_id,
@@ -766,7 +807,7 @@ def execute_component_pipeline(
         "checks": checks,
         "failures": failures + sorted(name for name, passed in checks.items() if not passed),
         "passed": not failures and all(checks.values()),
-        "response_sha256": (response or {}).get("response_sha256") if isinstance(response, dict) else None,
+        "response_has_transport_hash": isinstance(response, dict) and "response_sha256" in response,
         "response_status": (response or {}).get("status") if isinstance(response, dict) else None,
         "response_keys": sorted(response.keys()) if isinstance(response, dict) else [],
         "response_errors": response_errors,
@@ -805,6 +846,15 @@ def execute_component_pipeline(
             ),
         },
     }
+    if previous_validation_mode is None:
+        os.environ.pop("V6_VALIDATION_MODE", None)
+    else:
+        os.environ["V6_VALIDATION_MODE"] = previous_validation_mode
+    if previous_validation_instant is None:
+        os.environ.pop("V6_VALIDATION_REFERENCE_INSTANT", None)
+    else:
+        os.environ["V6_VALIDATION_REFERENCE_INSTANT"] = previous_validation_instant
+    return report
 
 
 def run(

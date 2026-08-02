@@ -1,0 +1,877 @@
+{
+  "contract_version": "langflow.equivalent.pipeline.validation.v1",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "graph": {
+    "contract_version": "langflow.pipeline.graph.validation.v1",
+    "flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+    "endpoint_name": "metadata_v6_data_analysis",
+    "node_count": 35,
+    "edge_count": 46,
+    "stage_counts": {
+      "annotation": 4,
+      "answer_facts": 1,
+      "candidate_route": 1,
+      "domain_bundle": 1,
+      "input": 1,
+      "intent_prompt_context": 1,
+      "intent_resolver": 1,
+      "job_router": 1,
+      "llm_invoker": 2,
+      "model": 1,
+      "narrative_claim": 1,
+      "plan_compiler_validator": 1,
+      "prompt": 6,
+      "request_state": 1,
+      "response_state_commit": 1,
+      "source_merger": 1,
+      "source_retriever": 5,
+      "terminals": 4,
+      "typed_executor": 1
+    },
+    "stage_by_node": {
+      "answer_claim_validator": "narrative_claim",
+      "answer_common_prompt": "prompt",
+      "answer_conditional_llm_invoker": "llm_invoker",
+      "answer_facts_context_builder": "answer_facts",
+      "answer_prompt_bundle_composer": "prompt",
+      "answer_specialized_prompt": "prompt",
+      "api_response": "terminals",
+      "candidate_route_gate": "candidate_route",
+      "chat_input": "input",
+      "chat_output": "terminals",
+      "common_intent_resolver": "intent_resolver",
+      "datalake_source_retriever": "source_retriever",
+      "domain_bundle_loader": "domain_bundle",
+      "dummy_source_retriever": "source_retriever",
+      "gaia_output": "terminals",
+      "goodocs_source_retriever": "source_retriever",
+      "h_api_source_retriever": "source_retriever",
+      "intent_common_prompt": "prompt",
+      "intent_conditional_llm_invoker": "llm_invoker",
+      "intent_language_model": "model",
+      "intent_prompt_bundle_composer": "prompt",
+      "intent_prompt_context_builder": "intent_prompt_context",
+      "intent_specialized_prompt": "prompt",
+      "message_presentation": "terminals",
+      "note_analysis_overview": "annotation",
+      "note_answer_outputs": "annotation",
+      "note_data_tools": "annotation",
+      "note_prompt_authority": "annotation",
+      "oracle_source_retriever": "source_retriever",
+      "plan_compiler_validator": "plan_compiler_validator",
+      "request_state_capsule": "request_state",
+      "response_state_commit": "response_state_commit",
+      "retrieval_job_router": "job_router",
+      "source_merger": "source_merger",
+      "typed_executor_publisher": "typed_executor"
+    },
+    "checks": {
+      "all_nodes_classified": true,
+      "acyclic": true,
+      "request_to_route": true,
+      "domain_to_route": true,
+      "route_to_intent": true,
+      "model_to_intent": true,
+      "intent_to_plan": true,
+      "plan_to_router": true,
+      "router_to_each_retriever": true,
+      "each_retriever_to_merger": true,
+      "merger_to_executor": true,
+      "executor_to_answer_facts": true,
+      "answer_to_commit": true,
+      "commit_to_terminals": true,
+      "three_retrieval_modes": true,
+      "single_commit_boundary": true,
+      "anonymous_multiturn_defaults_off": true,
+      "raw_source_rows_retriever_to_merger_only": true,
+      "merged_source_rows_to_executor_only": true,
+      "model_edges_are_semantic_or_narrative_only": true,
+      "narrative_claim_boundary_declared": true
+    },
+    "passed": true,
+    "failures": []
+  },
+  "runtime_cases": null,
+  "component_pipeline": {
+    "contract_version": "langflow.component.pipeline.validation.v1",
+    "question_sha256": "aeea109d850e3ed9e26a21b6f9290ff5736c1b6988c4afb2ba47e8711cbbf708",
+    "domain_id": "manufacturing",
+    "environment": "production",
+    "anonymous_multiturn_test_opt_in": false,
+    "session_id_sha256": "5244a83c958f6ff0649acf06138917dffbae8e38242e4bde5333304ae9c5ecbd",
+    "reference_instant": "2026-07-30T09:00:00+09:00",
+    "stage_counts": {
+      "annotation": 4,
+      "answer_facts": 1,
+      "candidate_route": 1,
+      "domain_bundle": 1,
+      "input": 1,
+      "intent_prompt_context": 1,
+      "intent_resolver": 1,
+      "job_router": 1,
+      "llm_invoker": 2,
+      "model": 1,
+      "narrative_claim": 1,
+      "plan_compiler_validator": 1,
+      "prompt": 6,
+      "request_state": 1,
+      "response_state_commit": 1,
+      "source_merger": 1,
+      "source_retriever": 5,
+      "terminals": 4,
+      "typed_executor": 1
+    },
+    "model_calls": {
+      "before": 0,
+      "after": 0,
+      "delta": 0
+    },
+    "invocations": [
+      {
+        "node_id": "answer_common_prompt",
+        "stage": "prompt",
+        "methods": [
+          "native_prompt"
+        ]
+      },
+      {
+        "node_id": "answer_specialized_prompt",
+        "stage": "prompt",
+        "methods": [
+          "native_prompt"
+        ]
+      },
+      {
+        "node_id": "chat_input",
+        "stage": "input",
+        "methods": [
+          "native_input"
+        ]
+      },
+      {
+        "node_id": "domain_bundle_loader",
+        "stage": "domain_bundle",
+        "methods": [
+          "validation_available_metadata"
+        ]
+      },
+      {
+        "node_id": "intent_common_prompt",
+        "stage": "prompt",
+        "methods": [
+          "native_prompt"
+        ]
+      },
+      {
+        "node_id": "intent_language_model",
+        "stage": "model",
+        "methods": [
+          "native_model"
+        ]
+      },
+      {
+        "node_id": "intent_specialized_prompt",
+        "stage": "prompt",
+        "methods": [
+          "native_prompt"
+        ]
+      },
+      {
+        "node_id": "note_analysis_overview",
+        "stage": "annotation",
+        "methods": []
+      },
+      {
+        "node_id": "note_answer_outputs",
+        "stage": "annotation",
+        "methods": []
+      },
+      {
+        "node_id": "note_data_tools",
+        "stage": "annotation",
+        "methods": []
+      },
+      {
+        "node_id": "note_prompt_authority",
+        "stage": "annotation",
+        "methods": []
+      },
+      {
+        "node_id": "request_state_capsule",
+        "stage": "request_state",
+        "methods": [
+          "build_context"
+        ],
+        "output_names": [
+          "request_context"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "request_state",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "candidate_route_gate",
+        "stage": "candidate_route",
+        "methods": [
+          "select_route"
+        ],
+        "output_names": [
+          "selection_context"
+        ],
+        "contract_versions": [
+          "analysis.route.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "resolved.candidate.bundle.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "candidate_route",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "intent_prompt_context_builder",
+        "stage": "intent_prompt_context",
+        "methods": [
+          "build_context"
+        ],
+        "output_names": [
+          "intent_prompt_context"
+        ],
+        "contract_versions": [
+          "prompt.runtime-context.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "intent_prompt_bundle_composer",
+        "stage": "prompt",
+        "methods": [
+          "build_prompt_bundle"
+        ],
+        "output_names": [
+          "prompt_bundle"
+        ],
+        "contract_versions": [
+          "prompt.bundle.v1",
+          "prompt.manifest.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "intent_conditional_llm_invoker",
+        "stage": "llm_invoker",
+        "methods": [
+          "invoke_once"
+        ],
+        "output_names": [
+          "invocation_result"
+        ],
+        "contract_versions": [
+          "llm.invocation.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": "skipped",
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "common_intent_resolver",
+        "stage": "intent_resolver",
+        "methods": [
+          "resolve"
+        ],
+        "output_names": [
+          "intent_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.route.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "resolved.candidate.bundle.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "intent_resolution",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "plan_compiler_validator",
+        "stage": "plan_compiler_validator",
+        "methods": [
+          "compile"
+        ],
+        "output_names": [
+          "plan_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.plan.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "plan_compilation",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "retrieval_job_router",
+        "stage": "job_router",
+        "methods": [
+          "dummy_jobs_out",
+          "oracle_jobs_out",
+          "h_api_jobs_out",
+          "datalake_jobs_out",
+          "goodocs_jobs_out"
+        ],
+        "output_names": [
+          "datalake_jobs",
+          "dummy_jobs",
+          "goodocs_jobs",
+          "h_api_jobs",
+          "oracle_jobs"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "job_routing",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "datalake_source_retriever",
+        "stage": "source_retriever",
+        "methods": [
+          "retrieve"
+        ],
+        "output_names": [
+          "datalake_results"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": "skipped",
+          "stage": "datalake_retrieval",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "dummy_source_retriever",
+        "stage": "source_retriever",
+        "methods": [
+          "retrieve"
+        ],
+        "output_names": [
+          "dummy_results"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1",
+          "source.result.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": "selected",
+          "stage": "dummy_retrieval",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "goodocs_source_retriever",
+        "stage": "source_retriever",
+        "methods": [
+          "retrieve"
+        ],
+        "output_names": [
+          "goodocs_results"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": "skipped",
+          "stage": "goodocs_retrieval",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "h_api_source_retriever",
+        "stage": "source_retriever",
+        "methods": [
+          "retrieve"
+        ],
+        "output_names": [
+          "h_api_results"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": "skipped",
+          "stage": "h_api_retrieval",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "oracle_source_retriever",
+        "stage": "source_retriever",
+        "methods": [
+          "retrieve"
+        ],
+        "output_names": [
+          "oracle_results"
+        ],
+        "contract_versions": [
+          "pipeline.context.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": "skipped",
+          "stage": "oracle_retrieval",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "source_merger",
+        "stage": "source_merger",
+        "methods": [
+          "merge"
+        ],
+        "output_names": [
+          "execution_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.plan.v1",
+          "canonical.frame.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "source_merge",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "typed_executor_publisher",
+        "stage": "typed_executor",
+        "methods": [
+          "execute"
+        ],
+        "output_names": [
+          "result_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.plan.v1",
+          "analysis.result.v1",
+          "canonical.frame.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "typed_execution",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "answer_facts_context_builder",
+        "stage": "answer_facts",
+        "methods": [
+          "build_facts_context",
+          "build_prompt_context"
+        ],
+        "output_names": [
+          "answer_facts_context",
+          "answer_prompt_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.plan.v1",
+          "analysis.result.v1",
+          "answer.facts.v1",
+          "canonical.frame.v1",
+          "pipeline.context.v1",
+          "prompt.runtime-context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "answer_prompt_bundle_composer",
+        "stage": "prompt",
+        "methods": [
+          "build_prompt_bundle"
+        ],
+        "output_names": [
+          "prompt_bundle"
+        ],
+        "contract_versions": [
+          "prompt.bundle.v1",
+          "prompt.manifest.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "answer_conditional_llm_invoker",
+        "stage": "llm_invoker",
+        "methods": [
+          "invoke_once"
+        ],
+        "output_names": [
+          "invocation_result"
+        ],
+        "contract_versions": [
+          "llm.invocation.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": "skipped",
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "answer_claim_validator",
+        "stage": "narrative_claim",
+        "methods": [
+          "validate_answer"
+        ],
+        "output_names": [
+          "answer_context"
+        ],
+        "contract_versions": [
+          "analysis.intent.v1",
+          "analysis.plan.v1",
+          "analysis.result.v1",
+          "answer.facts.v1",
+          "canonical.frame.v1",
+          "pipeline.context.v1",
+          "request.capsule.v1",
+          "state.policy.v1"
+        ],
+        "bounded_status": {
+          "ok": true,
+          "status": null,
+          "stage": "answer_claim_validation",
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "response_state_commit",
+        "stage": "response_state_commit",
+        "methods": [
+          "commit"
+        ],
+        "output_names": [
+          "response"
+        ],
+        "contract_versions": [
+          "answer.sections.v1",
+          "response.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": "ok",
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "api_response",
+        "stage": "terminals",
+        "methods": [
+          "build_response"
+        ],
+        "output_names": [
+          "api_response"
+        ],
+        "contract_versions": [
+          "answer.sections.v1",
+          "response.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": "ok",
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "gaia_output",
+        "stage": "terminals",
+        "methods": [
+          "build_message",
+          "build_gaia"
+        ],
+        "output_names": [
+          "gaia_response",
+          "message"
+        ],
+        "contract_versions": [
+          "answer.sections.v1",
+          "gaia.metadata.v1",
+          "response.message-link.v1",
+          "response.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "message_presentation",
+        "stage": "terminals",
+        "methods": [
+          "build_message"
+        ],
+        "output_names": [
+          "message"
+        ],
+        "contract_versions": [
+          "answer.sections.v1",
+          "display.options.v1",
+          "response.message-link.v1",
+          "response.v1"
+        ],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
+      },
+      {
+        "node_id": "chat_output",
+        "stage": "terminals",
+        "methods": [
+          "native_output"
+        ]
+      }
+    ],
+    "checks": {
+      "all_core_nodes_invoked_once": true,
+      "each_core_node_has_required_method": true,
+      "provider_call_count_exact": true,
+      "response_status_expected": true,
+      "response_is_plain_json": true,
+      "message_uses_canonical_response": true,
+      "api_uses_canonical_response": true,
+      "gaia_uses_plain_metadata": true,
+      "source_contracts_bounded_to_retrieval_merge_execute": true
+    },
+    "failures": [],
+    "passed": true,
+    "response_has_transport_hash": false,
+    "response_status": "ok",
+    "response_keys": [
+      "analysis",
+      "analysis_mode",
+      "answer_sections",
+      "clarification",
+      "contract_version",
+      "data",
+      "data_mode",
+      "data_refs",
+      "intent_plan",
+      "message",
+      "request",
+      "response_type",
+      "stage_status",
+      "state",
+      "status",
+      "trace"
+    ],
+    "response_errors": [],
+    "route": {
+      "route": "deterministic",
+      "reason_code": "unique_complete_selection",
+      "intent_llm_calls": 0,
+      "fallback_used": false,
+      "eligibility_proof_sha256": "54673f9ef10720ddaff4f4ab5da6a8c05bd6097b9882ead7b888949adc64b4a8",
+      "planner_profile": "legacy_v1_compat"
+    },
+    "usage": {
+      "intent_llm_calls": 0,
+      "pandas_code_llm_calls": 0,
+      "pandas_repair_llm_calls": 0,
+      "answer_llm_calls": 0
+    },
+    "state_version": null,
+    "source_contract_stages": [
+      "source_retriever"
+    ],
+    "result_contract": {
+      "columns": [
+        "TECH",
+        "DEN",
+        "MODE",
+        "PKG_TYPE1",
+        "PKG_TYPE2",
+        "LEAD",
+        "MCP_NO",
+        "INPUT_QTY"
+      ],
+      "row_count": 1,
+      "result_sha256": "9639113712fcf86e43d0704f0be60cee9c74f3115dc50ee5cac84601318bc422"
+    },
+    "plan_contract": {
+      "dataset_keys": [
+        "production_today"
+      ],
+      "operators": [
+        "filter",
+        "aggregate",
+        "sort",
+        "project"
+      ],
+      "plan_fingerprint": "8b9519f690c3d6fd9aacac1577d562652282569f7d17a8a5b45fa0411fe853b3"
+    },
+    "narrative_contract": {
+      "attempted": false,
+      "claim_status": "deterministic",
+      "llm_calls": 0,
+      "message_sha256": "12ae32cb1ec02d01eda3581b127c1fee3b0dc53572ed6baf239721a03d82e126"
+    },
+    "state_contract": {
+      "state_version": null,
+      "has_executed_result_ref": false,
+      "response_state_is_null": true,
+      "data_ref_count": 0,
+      "download_count": 0,
+      "answer_download_count": 0,
+      "result_table_has_data_ref": false,
+      "notice_codes": [
+        "anonymous_ephemeral"
+      ]
+    }
+  },
+  "order_sales_component_pipeline": null,
+  "multiturn_component_pipeline": null,
+  "passed": true
+}

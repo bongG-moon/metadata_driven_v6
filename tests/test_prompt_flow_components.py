@@ -102,8 +102,11 @@ def test_prompt_assets_are_external_utf8_and_have_no_manufacturing_literals() ->
         "data_analysis/answer_common_ko.md",
         "data_analysis/answer_specialized_ko.md",
         "metadata_authoring/domain_common_ko.md",
+        "metadata_authoring/domain_specialized_ko.md",
         "metadata_authoring/dataset_common_ko.md",
+        "metadata_authoring/dataset_specialized_ko.md",
         "metadata_authoring/main_filter_common_ko.md",
+        "metadata_authoring/main_filter_specialized_ko.md",
     }
     actual = {path.relative_to(PROMPTS).as_posix() for path in PROMPTS.rglob("*_ko.md")}
     assert actual == expected

@@ -4,7 +4,8 @@
 
 ```mermaid
 flowchart LR
-    A[Chat Input] --> B[Request and State Capsule]
+    A["00 분석 질문 입력"] --> B["02 요청 및 세션 상태 고정"]
+    L0["01 사용 가능 메타데이터 불러오기"] --> B
     B --> C[Metadata and Resolved Candidate Selector]
     C --> D[Deterministic Route Eligibility Gate]
     D -->|deterministic and proof-pinned| E0[Deterministic Intent Builder]
@@ -21,12 +22,11 @@ flowchart LR
     F -->|same normalized intent with bundle and route proof hash| G
     G --> H[Plan Validator]
     H --> I[Parameter Binder and Thin Job Router]
-    I --> X[Trusted Config and Query Resolver]
-    X --> J1[Oracle Retriever]
-    X --> J2[H-API Retriever]
-    X --> J3[Datalake Retriever]
-    X --> J4[Goodocs Retriever]
-    X --> J5[Dummy Retriever]
+    I --> J1["12 Oracle 데이터 조회"]
+    I --> J2["13 H-API 데이터 조회"]
+    I --> J3["14 Datalake 데이터 조회"]
+    I --> J4["15 Goodocs 데이터 조회"]
+    I --> J5["11 검증용 더미 데이터 조회"]
     J1 --> K[Source Contract Merger]
     J2 --> K
     J3 --> K
@@ -42,16 +42,18 @@ flowchart LR
     P -->|optional LLM| Q[Answer LLM and Claim Validator]
     Q --> R
     R --> Y[State CAS and Runtime Release Gate]
-    Y --> T[Message Presentation Adapter]
-    Y --> U[API Response Terminal]
-    Y --> V[GaiA Output Adapter]
-    T --> W[Chat Output]
+    Y --> T["24 채팅 메시지 표시 설정"]
+    Y --> U["25 API 표준 응답 출력"]
+    Y --> V["26 GaiA 형식 출력"]
+    T --> W["27 분석 답변 출력"]
     Z --> T
     Z --> U
     Z --> V
 ```
 
 `deterministic`과 `intent_llm`은 intent 생성 주체만 다르다. 두 경로는 동일한 closed `analysis.intent.v1` schema, bundle pin, Plan Compiler, Validator, Retriever, Executor, state와 terminal을 사용한다. 별도 fast executor나 축약 output contract를 만들지 않는다.
+
+`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 설정받는다. 고정된 `agent_v6_domain_metadata`, `agent_v6_table_catalog`, `agent_v6_main_filter`에서 가장 최근의 완전한 동일 release를 찾아 자동 결합하며 domain/environment/source mode/collection 선택 input을 노출하지 않는다. `02 요청 및 세션 상태 고정`도 기준시각·시간대 input을 노출하지 않고 내부 현재 시각을 `Asia/Seoul` 기준으로 고정한다.
 
 ### 1.1 외부 Prompt topology
 
@@ -72,7 +74,7 @@ flowchart LR
 
 Prompt Bundle Composer와 Conditional LLM Invoker는 standalone custom component일 수 있지만 prompt instruction을 소유하지 않는다. Composer는 공통/특화 Message와 runtime context를 named input으로 검증하고, Invoker는 검증된 bundle을 수정 없이 조건부 호출한다. 일반 Language Model node에 Prompt Template 출력을 직접 연결해 route와 무관하게 호출하지 않는다.
 
-Metadata authoring은 별도 topology다. Domain/Dataset/Main Filter마다 작업별 공통 Prompt Template 한 개가 기본이고, 작업자는 세 입력 모두 비정형 자유 자연어 TXT로 작성한다. 최초 bootstrap의 세 분기는 같은 모델 node를 재사용할 수 있지만 출력 계약은 서로 다르다.
+Metadata authoring은 별도 topology다. Domain/Dataset/Main Filter마다 작업별 공통·특화 Prompt Template을 물리적으로 하나씩 두며, 특화 업무 규칙은 각 특화 Template 본문에 직접 작성한다. 작업자는 세 입력 모두 비정형 자유 자연어 TXT로 작성한다. 최초 bootstrap의 세 분기는 같은 모델 node를 재사용할 수 있지만 출력 계약은 서로 다르다.
 
 ```text
 Domain TXT      → LLM 최대 1회 → display_name/description annotation only
@@ -84,7 +86,7 @@ Source Registry v3 semantic_templates + dataset descriptors
 validated metadata.authoring.draft.v1
 ```
 
-세 분기는 동일 hash의 `semantic_vocabulary`만 공유하고 물리 binding, descriptor 또는 `semantic_templates`는 받지 않는다. `metadata.authoring.source-registry.v3`의 `semantic_templates`는 compiler 전용 실행 의미 구조다. Compiler가 Domain annotation에 metric/relation/grain/ordering/predicate/recipe/entity-group/alias를 결합하고, Dataset IR에 승인 field/source descriptor를, Main Filter IR에 typed alias card를 확장한다. `semantic_templates.planner_policy`는 봉인돼 Domain Policy의 output profile도 바꿀 수 없다. 후속 Dataset/Main Filter Flow도 같은 compact/typed IR과 section-owned expander를 사용한다. 승인된 반복 실패 gate를 통과한 경우에만 해당 분기에 별도 특화 overlay node를 추가한다. Domain Policy는 Prompt Bundle Composer와 provider를 호출하지 않으며, Main Filter의 zero-LLM 경로는 optional `source_grounding_mode=explicit_inventory` proof가 완전할 때만 사용한다. Blueprint/pin 고신뢰 lane은 Domain annotation 계약을 넓히지 않고 executable external pin 검증만 추가한다.
+세 분기는 동일 hash의 `semantic_vocabulary`만 공유하고 물리 binding, descriptor 또는 `semantic_templates`는 받지 않는다. `metadata.authoring.source-registry.v3`의 `semantic_templates`는 compiler 전용 실행 의미 구조다. Compiler가 Domain annotation에 metric/relation/grain/ordering/predicate/recipe/entity-group/alias를 결합하고, Dataset IR에 승인 field/source descriptor를, Main Filter IR에 typed alias card를 확장한다. `semantic_templates.planner_policy`는 봉인돼 Domain Policy의 output profile도 바꿀 수 없다. 후속 Dataset/Main Filter Flow도 같은 compact/typed IR과 section-owned expander를 사용한다. 모든 공통·특화 Template은 변수 없이 렌더링되고 source context는 Context Builder에서 Composer의 `runtime_context`로 정확히 한 번 전달된다. Domain Policy는 Prompt Bundle Composer와 provider를 호출하지 않으며, Main Filter의 zero-LLM 경로는 optional `source_grounding_mode=explicit_inventory` proof가 완전할 때만 사용한다. Blueprint/pin 고신뢰 lane은 Domain annotation 계약을 넓히지 않고 executable external pin 검증만 추가한다.
 
 ### 1.2 Registered function topology
 
@@ -153,13 +155,14 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 
 | 단계 | 입력 | 출력 | 핵심 책임 |
 | --- | --- | --- | --- |
-| Request/State | question, authenticated subject/session ID | `request.capsule.v1` | typed literal/date 후보·owner-bound 이전 ref·실행 모드 |
+| `01 사용 가능 메타데이터 불러오기` | MongoDB URI·database·timeout | 검증된 domain runtime bundle | 고정 3컬렉션의 최신 완전 release 자동 탐색·hash 검증·결합 |
+| `02 요청 및 세션 상태 고정` | question, authenticated subject/session ID, domain bundle | `request.capsule.v1` | 내부 현재 시각·`Asia/Seoul` 기준 typed literal/date 후보·owner-bound 이전 ref·실행 모드 |
 | Candidate Selector | request capsule, metadata index, operator registry | `metadata.bundle.v1` + exact `resolved.candidate.bundle.v1` 또는 content-addressed immutable ref/hash | 관련 record/dependency closure와 immutable resolved semantics; LLM에는 bounded card projection만 제공 |
 | Route Eligibility Gate | request/state evidence, exact resolved candidate bundle, route policy | `analysis.route.v1` | selection uniqueness/completeness/registry support 증명, route reason/proof hash 고정; source/LLM 호출 없음 |
 | Runtime Common Prompt Source | versioned 공통 Prompt Template node | common prompt Message | Intent/Answer 공통 schema·안전·출력 계약의 유일한 소유자; Flow manifest pin |
-| Runtime Specialized Prompt Source | versioned 특화 Prompt Template node | domain prompt Message | runtime domain terminology·해석·표현 정책만 소유; active Domain Package pin |
-| Authoring Common Prompt Source | Domain/Dataset/Main Filter별 Prompt Template node | authoring common Message | 작업별 section ownership과 closed output 계약; 기본 한 개 |
-| Optional Authoring Overlay Source | 승인된 별도 Prompt Template node | optional overlay Message | 반복 failure/root-cause/admin approval pin이 유효할 때만 언어 해석 보조 |
+| Runtime Specialized Prompt Source | versioned 특화 Prompt Template node | domain prompt Message | Template 본문에 직접 작성한 runtime domain terminology·해석·표현 정책만 소유; 동적 변수 없음 |
+| Authoring Common Prompt Source | Domain/Dataset/Main Filter별 Prompt Template node | authoring common Message | 작업별 section ownership과 closed output 계약 |
+| Authoring Specialized Prompt Source | Domain/Dataset/Main Filter별 별도 Prompt Template node | authoring specialized Message | Template 본문에 직접 작성한 작업별 용어 해석 규칙; 동적 변수 없음 |
 | Runtime Context Builder | request/candidate/facts/authoring source의 bounded projection | allowlisted runtime context Data | Prompt Template에 payload 복제 없음; raw row/full catalog/secret/query 차단 |
 | Prompt Bundle Composer | common Message, specialized Message, runtime context, independent pins | direct structured prompt bundle + hash-only `prompt.envelope.v1` manifest | named authority/purpose/revision/hash/byte budget 검증; prompt 지속화 금지 |
 | Conditional LLM Invoker | route 또는 mode, validated prompt envelope, model object | provider raw response와 call telemetry | prompt 수정 없이 허용 경로에서만 호출; 내부 default/retry 문구 금지 |
@@ -169,8 +172,7 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 | Plan Compiler | intent, exact resolved candidate bundle, metadata bundle, executed-result contract projection | `analysis.plan.v1` | candidate semantics를 dataset/date/declarative binding spec/mapping/operator/output으로 결정론적 확장 |
 | Plan Validator | plan | validated plan | 완전성·lineage·cardinality |
 | Parameter Binder/Router | validated plan, authenticated state/result refs | `retrieval.job_bundle.v1` | owner-bound entity value resolve·required parameter·thin job 확정 |
-| Config/Query Resolver | canonical thin jobs, trusted node inputs | branch-local resolved job | ACL·secret·read-only + canonical filter/projection→reviewed physical query-slot binding |
-| Retrievers | resolved thin jobs | `source.result.v1` | timeout/row limit 안에서 trusted source 실행 |
+| `11~15` Source Retrievers | source별 thin jobs, domain bundle, 연결된 source payload | `source.result.v1` | Dummy/Oracle/H-API/Datalake/Goodocs를 분리 처리; 운영자 조절 scalar는 실제 source별 조회 행 수 제한만 허용 |
 | Source Merger | source results | `source.bundle.v1` | canonicalization·중복/스키마 검사 |
 | Executor | plan, source bundle | `analysis.result.v1` | typed operators 실행 |
 | Registered Function Registry Attestor | active function cards, build manifest/registry | exact hash-pinned registry projection | function identity/source/schema/resource pin 검증; code·callable 직렬화 금지 |
@@ -180,9 +182,9 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 | Answer Facts | result | `answer.facts.v1` | 값·조건·notice의 단일 근거 |
 | Response Assembler | facts, optional prose, refs, plan/trace projection | immutable `response.v1` + `executed.result.v1` + next `turn.state.v1` | 표·메시지, durable explain evidence, compact next state 조립 |
 | State/Release Gate | response, executed contract, next state, frame handles | immutable `response.v1` | executed contract publish와 owner/session state CAS 성공 후 frame 해제 |
-| Message Presentation | response, `display.options.v1` | `Message` | v5 표시 옵션 적용; structured payload는 변경하지 않음 |
-| API Terminal | response | `Data`, `is_output=True` | `response.v1`을 Message 역파싱 없이 반환 |
-| GaiA Adapter | response | `Message` + `gaia.metadata.v1` Data | answer·download URL·follow-up·trace/usage 변환 |
+| `24 채팅 메시지 표시 설정` | response, `display.options.v1` | `Message` | `response.v1` schema만 검사하고 v5 표시 옵션 적용; 전송 hash를 재검사하거나 structured payload를 변경하지 않음 |
+| `25 API 표준 응답 출력` | response | `Data`, `is_output=True` | 일반 JSON 응답을 Message 역파싱이나 수신 hash 비교 없이 반환 |
+| `26 GaiA 형식 출력` | response | `Message` + `gaia.metadata.v1` Data | 일반 JSON 응답에서 answer·download URL·follow-up·trace/usage 변환; 수신 hash 비교 없음 |
 | Unsupported Telemetry | unsupported route/error의 bounded shape | counter/trend evidence | missing role/operator/formula/recipe와 metadata pin 집계; row/secret/prompt 저장 금지 |
 
 ## 4. Target complexity budget
@@ -195,13 +197,13 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 - source rows가 LLM edge를 통과: 금지
 - custom component source 또는 standalone generator가 LLM instruction, retry suffix, provider별 fallback prompt를 포함: 금지
 - Runtime 공통·특화 instruction을 한 Prompt Template node에 합치거나 같은 runtime context를 두 template에 중복 전달: 금지
-- Authoring 기본 Flow에 상시 특화 Prompt를 두거나 승인 pin 없이 optional overlay를 호출: 금지
+- 특화 Prompt 본문을 사용자 입력·metadata 변수로 동적 교체하거나 공통 Prompt와 한 Template에 합치기: 금지
 - prompt text가 state/result/trace/telemetry에 저장되거나 downstream 공용 payload에 복제: 금지
 - executor peak memory: visible `max_executor_memory_mb` node input과 operator estimate/runtime measurement로 제한
 
 Node 수 자체보다 책임의 중복 여부가 우선이다. 두 node가 같은 mapping, result schema 또는 state를 각자 재해석하면 합치거나 계약 소유자를 하나로 정한다.
 
-Message/API/GaiA는 서로 다른 소비자 계약이므로 Message 문자열 하나로 합치지 않는다. 세 terminal은 같은 immutable `response.v1`을 소비하며, 표시 옵션이나 adapter가 plan/result를 다시 해석하지 않는다.
+Message/API/GaiA는 서로 다른 소비자 계약이므로 Message 문자열 하나로 합치지 않는다. 세 terminal은 같은 immutable `response.v1`을 소비하며, 표시 옵션이나 adapter가 plan/result를 다시 해석하지 않는다. 채팅 표시는 schema만 검사하고, 외부 전송 경계인 API와 GaiA가 응답 hash를 검증한다.
 
 Pandas-backed executor가 한 operation을 계산하는 동안 input/output frame을 일시적으로 함께 메모리에 두는 것은 허용한다. 다만 peak memory를 측정하고, chunk/stream 가능 operator는 budget을 적용하며, result validation/store가 끝나면 source frame reference를 해제한다. source와 result의 full copy를 payload/state/trace에 동시에 남기는 것은 허용하지 않는다.
 
@@ -218,8 +220,8 @@ Pandas-backed executor가 한 operation을 계산하는 동안 input/output fram
 
 Sticky Note는 Langflow 1.9.2의 `noteNode`/`data.type=note`로 builder가 생성한다. Note는 edge가 없고 실행 node 수·LLM call count에 포함하지 않으며 deterministic note ID와 layout group을 가진다.
 
-- Data Analysis: 시작/필수 설정, Runtime 공통·특화 Prompt와 LLM 0/1회 route, active Domain Package, source mode/adapters, Typed IR·`registered_call`, Message/API/GaiA·multi-turn 출력 Note
-- Domain/Dataset/Main Filter authoring: 자연어 입력 범위, 작업별 공통 Prompt와 optional overlay gate, section ownership, prepare→external approve→execute, 결과/collection Note
+- Data Analysis: 시작/필수 설정, 최신 3컬렉션 자동 결합, Runtime 공통·특화 Prompt와 LLM 0/1회 route, 분리된 5개 source adapter, Typed IR·`registered_call`, Message/API/GaiA·multi-turn 출력 Note
+- Domain/Dataset/Main Filter authoring: 자연어 입력 범위, 작업별 공통·특화 Prompt pair, section ownership, 검증→3컬렉션 transaction 저장, 결과/collection Note
 - Domain Policy authoring: explicit 관리자 입력, LLM 0회, registered function card는 pre-registered hash만 참조한다는 Note
 
 Note에는 secret, URI, query, raw row, prompt 원문 전체와 특정 배포 환경의 실제 값이 들어가면 안 된다. Builder가 Flow wiring이나 contract를 바꾸면 관련 Note text/revision도 함께 갱신하고 stale-note validation을 통과해야 한다.

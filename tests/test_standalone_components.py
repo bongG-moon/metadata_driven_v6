@@ -52,8 +52,10 @@ EXPECTED_COMPONENTS = {
     "data_analysis/plan_compiler_validator.py": "PlanCompilerValidator",
     "data_analysis/retrieval_job_router.py": "RetrievalJobRouter",
     "data_analysis/dummy_source_retriever.py": "DummySourceRetriever",
-    "data_analysis/inline_source_retriever.py": "InlineSourceRetriever",
-    "data_analysis/live_source_retriever.py": "LiveSourceRetriever",
+    "data_analysis/12_oracle_source_retriever.py": "OracleSourceRetriever",
+    "data_analysis/13_h_api_source_retriever.py": "HApiSourceRetriever",
+    "data_analysis/14_datalake_source_retriever.py": "DatalakeSourceRetriever",
+    "data_analysis/15_goodocs_source_retriever.py": "GoodocsSourceRetriever",
     "data_analysis/source_contract_merger.py": "SourceContractMerger",
     "data_analysis/typed_executor_publisher.py": "TypedExecutorPublisher",
     "data_analysis/answer_facts_context_builder.py": "AnswerFactsContextBuilder",
@@ -589,18 +591,40 @@ def _embedded_json(relative: str, assignment_name: str) -> dict:
 
 
 def test_generated_sources_are_current_and_monolith_is_gone() -> None:
-    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 23
+    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 25
     assert not (COMPONENT_ROOT / "data_analysis" / "00_trusted_analysis_engine.py").exists()
 
 
 def test_runtime_source_payloads_are_tweakable_scalar_json_inputs() -> None:
     for relative in (
-        "data_analysis/inline_source_retriever.py",
-        "data_analysis/live_source_retriever.py",
+        "data_analysis/12_oracle_source_retriever.py",
+        "data_analysis/13_h_api_source_retriever.py",
+        "data_analysis/14_datalake_source_retriever.py",
+        "data_analysis/15_goodocs_source_retriever.py",
     ):
         source = _source(relative)
         assert 'NestedDictInput(name="source_payload"' in source.replace("\n", "").replace(" ", "")
         assert 'DataInput(name="source_payload"' not in source
+        assert 'name="source_row_limit"' in source
+        assert "source_memory_limit" not in source
+
+
+def test_metadata_and_request_nodes_hide_deployment_internal_selectors() -> None:
+    domain_cls = _component_class("data_analysis/domain_bundle_loader.py")
+    request_cls = _component_class("data_analysis/request_state_capsule.py")
+
+    assert {item.name for item in domain_cls.inputs} == {
+        "mongo_uri",
+        "mongo_database",
+        "mongo_timeout_ms",
+    }
+    assert {"domain_id", "environment", "metadata_source_mode", "inline_domain_bundle"}.isdisjoint(
+        {item.name for item in domain_cls.inputs}
+    )
+    assert {"reference_instant", "reference_timezone"}.isdisjoint(
+        {item.name for item in request_cls.inputs}
+    )
+    assert 'timezone_name = "Asia/Seoul"' in _source("data_analysis/request_state_capsule.py")
 
 
 @pytest.mark.parametrize(("relative", "expected_class"), sorted(EXPECTED_COMPONENTS.items()))
@@ -821,8 +845,48 @@ def test_job_router_preserves_only_a_closed_candidate_lane_with_jobs() -> None:
         "stage": "job_routing",
         "data_mode": "dummy",
         "candidate_lane": "legacy_v1_compat",
+        "source_type": "dummy",
         "jobs": [{"job_id": "job:test"}],
     }
+
+
+def test_job_router_splits_live_jobs_by_source_without_payload_duplication() -> None:
+    from lfx.schema.data import Data
+
+    component_cls = _component_class("data_analysis/retrieval_job_router.py")
+    component = component_cls()
+    component.plan_context = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "candidate_lane": "generic_v2",
+            "plan": {
+                "retrieval_jobs": [
+                    {"job_id": "o", "source_type": "oracle"},
+                    {"job_id": "h", "source_type": "http"},
+                    {"job_id": "d", "source_type": "datalake"},
+                    {"job_id": "g", "source_type": "goodocs"},
+                ]
+            },
+            "unrelated_large_payload": {"rows": [{"secret": "must-not-propagate"}]},
+        }
+    )
+    component.data_mode = "live"
+
+    routes = {
+        "oracle": component.oracle_jobs_out().data,
+        "h_api": component.h_api_jobs_out().data,
+        "datalake": component.datalake_jobs_out().data,
+        "goodocs": component.goodocs_jobs_out().data,
+    }
+
+    assert {name: [item["job_id"] for item in value["jobs"]] for name, value in routes.items()} == {
+        "oracle": ["o"],
+        "h_api": ["h"],
+        "datalake": ["d"],
+        "goodocs": ["g"],
+    }
+    assert all("unrelated_large_payload" not in value for value in routes.values())
 
 
 @pytest.mark.parametrize("candidate_lane", ["", "unknown", "legacy_v2"])
@@ -1000,17 +1064,17 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
         assert flow["expected_uuid"] == str(uuid.uuid5(namespace, key))
         node_count = len(flow["native_nodes"]) + len(flow["custom_nodes"])
         if key == "metadata_v6_data_analysis":
-            assert node_count == 29
-            assert len(flow["edges"]) == 42
+            assert node_count == 31
+            assert len(flow["edges"]) == 46
         elif key == "metadata_v6_domain_policy_authoring":
             assert node_count == 6
             assert len(flow["edges"]) == 5
         elif key == "metadata_v6_domain_authoring":
-            assert node_count == 22
-            assert len(flow["edges"]) == 32
+            assert node_count == 25
+            assert len(flow["edges"]) == 35
         else:
-            assert node_count == 11
-            assert len(flow["edges"]) == 12
+            assert node_count == 12
+            assert len(flow["edges"]) == 13
         native_types = {node["type"] for node in flow["native_nodes"]}
         if key == "metadata_v6_domain_policy_authoring":
             assert native_types == {"ChatInput", "ChatOutput"}
@@ -1060,7 +1124,7 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
             }[key]
             assert authoring["settings"]["authoring_kind"] == expected_kind
             assert authoring["settings"]["metadata_contract_mode"] == "domain_package_v2"
-            assert authoring["settings"]["mode"] == "prepare"
+            assert authoring["settings"]["mode"] == "save"
             if expected_kind == "domain_policy":
                 assert set(authoring["settings"]) >= {
                     "intent_prompt_extension",
@@ -1072,10 +1136,12 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
             else:
                 assert authoring["settings"]["source_grounding_mode"] == "freeform_llm"
                 prompt_nodes = [node for node in flow["native_nodes"] if node["type"] == "PromptTemplate"]
-                expected_prompt_count = 3 if expected_kind == "domain" else 1
+                expected_prompt_count = 6 if expected_kind == "domain" else 2
                 assert len(prompt_nodes) == expected_prompt_count
                 assert all(node["expected_prompt_variables"] == [] for node in prompt_nodes)
-                assert not [node for node in flow["native_nodes"] if "specialized" in node["id"]]
+                specialized_nodes = [node for node in prompt_nodes if "specialized" in node["id"]]
+                assert len(specialized_nodes) == (3 if expected_kind == "domain" else 1)
+                assert all("specialized_ko.md" in node["settings"]["prompt_source"] for node in specialized_nodes)
                 composer_nodes = [
                     node
                     for node in flow["custom_nodes"]
@@ -1249,6 +1315,13 @@ def test_flow_json_component_sources_match_canonical_files() -> None:
         assert flow["last_tested_version"] == "1.9.2"
 
 
+def test_answer_context_outputs_render_as_independent_handles() -> None:
+    component_cls = _component_class("data_analysis/answer_facts_context_builder.py")
+    outputs = {item.name: item for item in component_cls.outputs}
+    assert set(outputs) == {"answer_facts_context", "answer_prompt_context"}
+    assert all(getattr(item, "group_outputs", False) is True for item in outputs.values())
+
+
 def test_state_scope_payload_and_prompt_boundaries_are_explicit() -> None:
     request_source = _source("data_analysis/request_state_capsule.py")
     message_source = _source("data_analysis/01_message_presentation.py")
@@ -1260,9 +1333,11 @@ def test_state_scope_payload_and_prompt_boundaries_are_explicit() -> None:
     assert 'name="allow_anonymous_multiturn"' in request_source
     assert 'len(session_id.strip()) < 20' in request_source
     assert '"contract_version": "response.message-link.v1"' in message_source
-    assert '"response_sha256": str(response.get("response_sha256") or "")' in message_source
+    assert 'validate_response_hash(' not in message_source
+    assert '"response_sha256": str(response.get("response_sha256") or "")' not in message_source
     assert '"contract_version": "response.message-link.v1"' in gaia_source
-    assert 'IntInput(name="peak_payload_limit_mb"' in merger_source
+    assert 'IntInput(name="peak_payload_limit_mb"' not in merger_source
+    assert '"source_row_count":' in merger_source
     assert '"row_copy_count": 1' in merger_source
     assert '"raw_rows_in_llm_prompt": False' in merger_source
     assert "snapshots" not in intent_source[intent_source.index("class CommonIntentResolver") :]
@@ -1284,8 +1359,13 @@ def test_authoring_component_exposes_v2_full_and_patch_controls() -> None:
     values = {item.name: getattr(item, "value", None) for item in component_cls.inputs}
     assert values["metadata_contract_mode"] == "domain_package_v2"
     assert values["revision_policy"] == "auto_next"
-    assert values["bundle_collection"] == "agent_v6_metadata_bundles"
-    assert values["active_collection"] == "agent_v6_metadata_active"
+    assert values["domain_collection"] == "agent_v6_domain_metadata"
+    assert values["table_collection"] == "agent_v6_table_catalog"
+    assert values["main_filter_collection"] == "agent_v6_main_filter"
+    assert values["mode"] == "save"
+    assert "bundle_collection" not in values
+    assert "active_collection" not in values
+    assert "pending_collection" not in values
     assert "inline_base_domain_bundle" in values
     assert values["trusted_blueprint_json"] == ""
     assert values["trusted_blueprint_sha256"] == ""
@@ -3963,81 +4043,15 @@ def test_full_domain_prepare_uses_only_annotation_llm_and_preserves_blueprint() 
     assert message.data["response"]["response_sha256"] == response["response_sha256"]
 
 
-def test_authoring_pending_timestamps_survive_exact_bson_roundtrip() -> None:
+def test_authoring_generated_source_has_no_pending_or_active_writer() -> None:
     component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
-    namespace = component_cls.run_authoring.__globals__
-    normalize = namespace["_bson_millisecond_utc"]
-    raw_now = datetime(2026, 8, 1, 1, 2, 3, 123456, tzinfo=timezone.utc)
-    now = normalize(raw_now)
-    expires = now + timedelta(minutes=30)
-    assert now.microsecond == 123000
-
-    hash_material = {
-        "contract_version": "pending.domain-package.hash-material.v1",
-        "expected_active": {"revision": 0, "bundle_sha256": "", "package_sha256": ""},
-    }
-    candidate_hash = namespace["sha256_json"](hash_material)
-    candidate_id = f"candidate:{candidate_hash}"
-    component = component_cls()
-    payload = component._pending_payload(
-        kind="domain",
-        domain_id="order_sales",
-        environment="test",
-        revision=1,
-        expected_active=hash_material["expected_active"],
-        candidate_id=candidate_id,
-        candidate_hash=candidate_hash,
-        hash_material=hash_material,
-        now=now,
-        expires=expires,
-    )
-    document = {
-        "_id": candidate_id,
-        "pending_payload": payload,
-        "pending_payload_sha256": namespace["sha256_json"](payload),
-        "workflow_status": "prepared",
-        "expires_at": expires,
-        "authoring_kind": "domain",
-        "domain_id": "order_sales",
-        "environment": "test",
-    }
-    assert component._pending_from_storage(
-        document,
-        candidate_id=candidate_id,
-        candidate_hash=candidate_hash,
-    ) == payload
-
-    naive_bson_document = dict(document)
-    naive_bson_document["expires_at"] = expires.replace(tzinfo=None)
-    assert normalize(naive_bson_document["expires_at"]) == expires
-    assert component._pending_from_storage(
-        naive_bson_document,
-        candidate_id=candidate_id,
-        candidate_hash=candidate_hash,
-    ) == payload
-
-    payload_seal = namespace["sha256_json"](payload)
-    tampered_document = dict(naive_bson_document)
-    tampered_document["expires_at"] = naive_bson_document["expires_at"] + timedelta(milliseconds=1)
-    contract_error = component_cls._pending_from_storage.__globals__["ContractError"]
-    with pytest.raises(contract_error) as raised:
-        component._pending_from_storage(
-            tampered_document,
-            candidate_id=candidate_id,
-            candidate_hash=candidate_hash,
-        )
-    assert raised.value.code == "approval_hash_mismatch"
-    assert namespace["sha256_json"](payload) == payload_seal
-    assert tampered_document["pending_payload_sha256"] == payload_seal
-
-    active_prepare = _source("metadata_authoring/00_metadata_authoring_engine.py").split(
-        "    def _prepare_v2(self):", 1
-    )[1].split("    def _execute_v2(self):", 1)[0]
-    assert "now = _bson_millisecond_utc(datetime.now(timezone.utc))" in active_prepare
-    active_execute = _source("metadata_authoring/00_metadata_authoring_engine.py").split(
-        "    def _execute_v2(self):", 1
-    )[1].split("    def _execute(self):", 1)[0]
-    assert "expiry_utc = _bson_millisecond_utc(expiry)" in active_execute
+    values = {item.name: getattr(item, "value", None) for item in component_cls.inputs}
+    source = _source("metadata_authoring/00_metadata_authoring_engine.py")
+    assert set(values).isdisjoint({"pending_collection", "active_collection", "bundle_collection"})
+    assert "def _pending_payload(" not in source
+    assert "def _execute_v2(" not in source
+    assert "replace_metadata_release(" in source
+    assert "load_domain_package_from_three_collections(" in source
 
 
 def test_domain_policy_prepare_is_explicit_operator_input_only() -> None:
@@ -4074,15 +4088,14 @@ def test_domain_policy_prepare_is_explicit_operator_input_only() -> None:
     }
 
 
-def test_api_terminal_fails_closed_before_returning_unverified_data() -> None:
+def test_api_terminal_returns_ordinary_json_without_hash_validation() -> None:
     from lfx.schema.data import Data
 
     component_cls = _component_class("shared/00_api_response_terminal.py")
     component = component_cls()
-    component.response = Data(data={"contract_version": "response.v1", "response_sha256": "0" * 64})
-    contract_error = component_cls.build_response.__globals__["ContractError"]
-    with pytest.raises(contract_error):
-        component.build_response()
+    payload = {"contract_version": "response.v1", "message": "ordinary json"}
+    component.response = Data(data=payload)
+    assert component.build_response().data == payload
 
 
 def test_generator_fails_clearly_when_compiled_catalog_is_missing(monkeypatch: pytest.MonkeyPatch) -> None:

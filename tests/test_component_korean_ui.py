@@ -20,8 +20,6 @@ ACTIVE_COMPONENT_CONSTANTS = (
     "PLAN_COMPILER_COMPONENT",
     "JOB_ROUTER_COMPONENT",
     "DUMMY_RETRIEVER_COMPONENT",
-    "INLINE_RETRIEVER_COMPONENT",
-    "LIVE_RETRIEVER_COMPONENT",
     "SOURCE_MERGER_COMPONENT",
     "TYPED_EXECUTOR_COMPONENT",
     "ANSWER_FACTS_CONTEXT_COMPONENT",
@@ -106,3 +104,18 @@ def test_manual_api_terminal_matches_korean_user_facing_ui() -> None:
     class_source = ast.get_source_segment(source, component)
     assert class_source is not None
     _assert_korean_component_ui(class_source)
+
+
+def test_generated_source_specific_retrievers_have_korean_user_facing_ui() -> None:
+    for relative in (
+        "12_oracle_source_retriever.py",
+        "13_h_api_source_retriever.py",
+        "14_datalake_source_retriever.py",
+        "15_goodocs_source_retriever.py",
+    ):
+        source = (ROOT / "langflow_components" / "data_analysis" / relative).read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        component = next(node for node in tree.body if isinstance(node, ast.ClassDef) and node.name.endswith("SourceRetriever"))
+        class_source = ast.get_source_segment(source, component)
+        assert class_source is not None
+        _assert_korean_component_ui(class_source)

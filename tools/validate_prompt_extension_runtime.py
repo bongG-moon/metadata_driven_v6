@@ -1,4 +1,4 @@
-"""Validate catalog prompt extensions and node overlays in the exported Flow.
+"""Validate direct specialized Prompt Template bodies in the exported Flow.
 
 Only hashes, byte counts and boolean assertions are persisted.  Model prompts
 and responses are deliberately excluded from the report.
@@ -65,9 +65,7 @@ def _set_template(flow: dict[str, Any], node_id: str, field_name: str, value: An
     raise RuntimeError(f"flow_node_missing:{node_id}")
 
 
-def _serialized_intent_prompt_probe(
-    flow: dict[str, Any], *, catalog_extension: str, node_extension: str
-) -> tuple[CaptureSelectionModel, dict[str, Any]]:
+def _serialized_intent_prompt_probe(flow: dict[str, Any]) -> tuple[CaptureSelectionModel, dict[str, Any]]:
     """Run the exported context -> Prompt nodes -> composer -> invoker -> resolver chain."""
 
     from lfx.custom.eval import eval_custom_component_code
@@ -118,18 +116,14 @@ def _serialized_intent_prompt_probe(
             "request": request,
             "candidate_bundle": bundle,
             "candidate_lane": "generic_v2",
-            "domain_prompt_extensions": {"intent": catalog_extension},
+            "domain_prompt_extensions": {},
         }
     )
     context_builder = custom_component("intent_prompt_context_builder")
     context_builder.selection_context = selection
     runtime_context = context_builder.build_context()
-    specialized_text = context_builder.build_specialized_text()
     common_message = prompt_message("intent_common_prompt")
-    specialized_message = prompt_message(
-        "intent_specialized_prompt",
-        domain_prompt_text=str(getattr(specialized_text, "text", "") or ""),
-    )
+    specialized_message = prompt_message("intent_specialized_prompt")
     composer = custom_component("intent_prompt_bundle_composer")
     composer.common_prompt_message = common_message
     composer.specialized_prompt_message = specialized_message
@@ -149,14 +143,13 @@ def _serialized_intent_prompt_probe(
     return model, context if isinstance(context, dict) else {}
 
 
-def _prompt_evidence(prompt: str, *, catalog_extension: str, node_sentinel: str, max_bytes: int) -> dict[str, Any]:
+def _prompt_evidence(prompt: str, *, node_sentinel: str, max_bytes: int) -> dict[str, Any]:
     byte_count = len(prompt.encode("utf-8"))
     return {
         "prompt_sha256": sha256_json(prompt),
         "prompt_utf8_bytes": byte_count,
-        "catalog_extension_sha256": sha256_json(catalog_extension),
-        "catalog_extension_present": bool(catalog_extension) and catalog_extension in prompt,
-        "node_overlay_present": node_sentinel in prompt,
+        "specialized_template_present": node_sentinel in prompt,
+        "dynamic_domain_prompt_port_absent": "domain_prompt_text" not in prompt,
         "prompt_within_budget": byte_count <= max_bytes,
     }
 
@@ -165,29 +158,17 @@ def run(flow_path: Path, package_path: Path, sample_path: Path) -> dict[str, Any
     base_flow = json.loads(flow_path.read_text(encoding="utf-8"))
     package = json.loads(package_path.read_text(encoding="utf-8"))
     sample = json.loads(sample_path.read_text(encoding="utf-8"))
-    catalog = package.get("runtime_catalog") if isinstance(package.get("runtime_catalog"), dict) else {}
-    extensions = catalog.get("prompt_extensions") if isinstance(catalog.get("prompt_extensions"), dict) else {}
-    intent_extension = str(extensions.get("intent") or "")
-    answer_extension = str(extensions.get("answer") or "")
-    if not intent_extension or not answer_extension:
-        raise RuntimeError("order_sales_prompt_extensions_missing")
-
     intent_flow = deepcopy(base_flow)
     _set_template(
         intent_flow,
         "intent_specialized_prompt",
         "template",
-        "{{domain_prompt_text}}\n" + INTENT_NODE_SENTINEL,
+        "도메인 특화 의도 규칙: " + INTENT_NODE_SENTINEL,
     )
-    intent_model, intent_context = _serialized_intent_prompt_probe(
-        intent_flow,
-        catalog_extension=intent_extension,
-        node_extension=INTENT_NODE_SENTINEL,
-    )
+    intent_model, intent_context = _serialized_intent_prompt_probe(intent_flow)
     intent_prompt = intent_model.prompts[0] if len(intent_model.prompts) == 1 else ""
     intent_evidence = _prompt_evidence(
         intent_prompt,
-        catalog_extension=intent_extension,
         node_sentinel=INTENT_NODE_SENTINEL,
         max_bytes=48 * 1024,
     )
@@ -208,7 +189,7 @@ def run(flow_path: Path, package_path: Path, sample_path: Path) -> dict[str, Any
         answer_flow,
         "answer_specialized_prompt",
         "template",
-        "{{domain_prompt_text}}\n" + ANSWER_NODE_SENTINEL,
+        "도메인 특화 응답 규칙: " + ANSWER_NODE_SENTINEL,
     )
     _set_template(
         answer_flow,
@@ -232,7 +213,6 @@ def run(flow_path: Path, package_path: Path, sample_path: Path) -> dict[str, Any
     answer_prompt = answer_model.prompts[0] if len(answer_model.prompts) == 1 else ""
     answer_evidence = _prompt_evidence(
         answer_prompt,
-        catalog_extension=answer_extension,
         node_sentinel=ANSWER_NODE_SENTINEL,
         max_bytes=12 * 1024,
     )
@@ -246,14 +226,14 @@ def run(flow_path: Path, package_path: Path, sample_path: Path) -> dict[str, Any
     )
 
     checks = {
-        "intent_catalog_and_overlay_merged": all(
+        "intent_direct_specialized_template_merged": all(
             bool(value) for key, value in intent_evidence.items() if key != "pipeline_failures"
         ),
-        "answer_catalog_and_overlay_merged": all(
+        "answer_direct_specialized_template_merged": all(
             bool(value) for key, value in answer_evidence.items() if key != "pipeline_failures"
         ),
         "prompts_not_persisted": True,
-        "raw_extensions_not_persisted": True,
+        "dynamic_prompt_extensions_not_required": True,
     }
     return {
         "contract_version": "prompt-extension.runtime.validation.v1",

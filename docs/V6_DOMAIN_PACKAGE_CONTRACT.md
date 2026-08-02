@@ -2,7 +2,7 @@
 
 ## 1. 목적
 
-분석 Core는 특정 공정 이름을 소유하지 않는다. 사용자는 기존처럼 정형화되지 않은 Domain·Dataset·Main Filter 자연어 TXT를 입력한다. 외부 작업별 Authoring Prompt는 각 원문에 LLM을 최대 한 번씩 호출하지만 실행 metadata를 자유 생성하지 않는다. Domain은 표시명·설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR을 반환한다. 결정론적 engine이 `metadata.authoring.source-registry.v3`의 compiler-owned `semantic_templates`, dataset descriptor와 Source binding으로 세 결과를 확장·병합해 full draft를 컴파일한다. 정확성과 저장 권한은 LLM이 아니라 registry hash, schema·semantic·dependency·security compiler와 prepare/approve/execute writer가 책임진다.
+분석 Core는 특정 공정 이름을 소유하지 않는다. 사용자는 기존처럼 정형화되지 않은 Domain·Dataset·Main Filter 자연어 TXT를 입력한다. 외부 작업별 Authoring Prompt는 각 원문에 LLM을 최대 한 번씩 호출하지만 실행 metadata를 자유 생성하지 않는다. Domain은 표시명·설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR을 반환한다. 결정론적 engine이 `metadata.authoring.source-registry.v3`의 compiler-owned `semantic_templates`, dataset descriptor와 Source binding으로 세 결과를 확장·병합해 full draft를 컴파일한다. 정확성과 저장 권한은 LLM이 아니라 registry hash, schema·semantic·dependency·security compiler와 3컬렉션 transaction writer가 책임진다.
 
 ```text
 자유형 자연어 TXT bundle
@@ -14,9 +14,9 @@
   → compile_domain_package(...)
   → schema + semantic lint + dependency/security closure
   → immutable domain.package.v1
-  → prepare / external approve / atomic commit
-  → active:{environment}:{domain_id}
-  → load_active_domain_bundle(...)
+  → domain/table_catalog/main_filter section + release manifest
+  → 3컬렉션 transaction save
+  → load_domain_package_from_three_collections(...)
 ```
 
 작업자는 JSON Schema, canonical ID inventory, relation endpoint, field-role 또는 hash 문법을 직접 맞추지 않는다. 최초 bootstrap에는 기존 Domain·Dataset·Main Filter TXT를 합친 bundle 또는 같은 정보를 충분히 담은 완전한 도메인 설명이 필요하다. 정보가 부족하면 `status=needs_clarification`의 `missing_fields`/질문으로 누락 항목을 설명하고 draft/candidate/persist와 repair/fallback LLM 없이 끝낸다.
@@ -150,13 +150,13 @@ Specialized function card는 코드를 담지 않고 `function_id`, version, imp
 네 Authoring Flow는 서로 다른 runtime 저장소를 만들지 않는다.
 
 - Domain Authoring: 자유형 source bundle에서 LLM 최대 1회로 표시명·설명 annotation만 만들고, Source Registry v3 `semantic_templates`를 결정론적으로 결합한 뒤 전체 compiler를 실행한다. Optional Blueprint lane도 같은 두 annotation 필드만 허용한다.
-- Dataset Catalog Authoring: 현재 `active:{environment}:{domain_id}` package를 exact hash로 읽고 `datasets` section만 upsert한다.
-- Main Filter Authoring: 같은 active package를 읽고 `aliases`, `entity_groups`, `grains`, `orderings`, `predicates`, `recipes` section만 upsert한다.
+- Dataset Catalog Authoring: 현재 세 collection package를 exact hash로 읽고 `datasets` section만 upsert한다.
+- Main Filter Authoring: 같은 current package를 읽고 `aliases`, `entity_groups`, `grains`, `orderings`, `predicates`, `recipes` section만 upsert한다.
 - Domain Policy Authoring: 별도 Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 적용한다. Prompt Template/Composer/envelope/LLM은 0회이며 Domain annotation이나 Dataset/Main Filter IR은 이 section을 바꿀 수 없다. `output_profile_json`도 sealed planner policy key를 포함하면 거부한다.
 
-부분 등록은 `runtime_catalog_v2_to_authoring_draft()`로 active catalog를 완전한 authoring draft로 복원한 뒤 `apply_authoring_section_patch()`를 적용한다. 삭제 지시, 다른 Flow가 소유한 section, 빈 patch는 거부한다. 결과는 항상 전체 `compile_domain_package()`와 schema·semantic lint·dependency closure를 다시 통과하고 새 immutable bundle과 CAS-bound active pointer candidate가 된다. 따라서 Dataset/Main Filter Flow의 성공 결과가 분석 runtime과 무관한 `active:{kind}`에 남는 구조를 사용하지 않는다. `legacy_projection_v1`은 별도 migration tool에서만 처리하며 Langflow authoring runtime은 `domain_package_v2`만 허용한다.
+부분 등록은 `runtime_catalog_v2_to_authoring_draft()`로 세 current 문서에서 결합한 catalog를 완전한 authoring draft로 복원한 뒤 `apply_authoring_section_patch()`를 적용한다. 삭제 지시, 다른 Flow가 소유한 section, 빈 patch는 거부한다. 결과는 항상 전체 `compile_domain_package()`와 schema·semantic lint·dependency closure를 다시 통과하고 새 revision의 세 section과 단일 release manifest가 된다. `legacy_projection_v1`은 별도 migration tool에서만 처리하며 Langflow authoring runtime은 `domain_package_v2`만 허용한다.
 
-Domain/Dataset/Main Filter LLM 경로는 작업별 공통 Prompt Template 한 개가 기본이다. optional authoring overlay는 같은 normalized failure shape 승인 case 3개 이상, 서로 다른 자연어 source 2개 이상, language-interpretation root cause와 관리자 approval pin을 모두 만족할 때만 별도 node/source/hash/edge로 연결한다. Domain Policy는 prompt node/Composer/envelope/provider를 실행하지 않는다. Main Filter는 `source_grounding_mode=explicit_inventory`의 완전한 binding proof가 있을 때만 선택적으로 zero-LLM compile한다.
+Domain/Dataset/Main Filter LLM 경로는 작업별 공통·특화 Prompt Template을 별도 node/source/hash/edge로 유지한다. 특화 업무 규칙은 각 특화 Template 본문에 직접 작성하고 모든 Prompt Template은 변수 없이 렌더링한다. 자연어 source context는 Context Builder에서 Composer의 `runtime_context`로 정확히 한 번 전달한다. Domain Policy는 prompt node/Composer/envelope/provider를 실행하지 않는다. Main Filter는 `source_grounding_mode=explicit_inventory`의 완전한 binding proof가 있을 때만 선택적으로 zero-LLM compile한다.
 
 `specialized_functions`의 실행 계약은 card 저장에서 끝나지 않는다. Registry attestation을 통과한 card만 bounded candidate가 되고 Intent는 candidate ID만 선택한다. Plan Compiler는 exact function/registry/I/O-schema/resource pin의 `registered_call` Typed IR을 만들며 Registered Function Gateway가 build-time allowlisted standalone 구현, typed argument, field/role, timeout/row limit, output schema와 lineage를 검증해 실행한다. dynamic import, metadata code, `eval`/`exec`, arbitrary network/file/subprocess와 미등록 fallback은 금지한다. 이 전체 consumer chain과 positive/negative E2E가 없으면 card를 실행 가능 기능으로 노출·활성화하지 않는다.
 
@@ -170,36 +170,29 @@ Domain/Dataset/Main Filter LLM 경로는 작업별 공통 Prompt Template 한 �
 
 Public API request는 자유형 자연어 `input_message`와 공개 authoring context만 받는다. `source_grounding_mode`, `trusted_blueprint_json`, `trusted_blueprint_sha256`, Mongo URI, approval payload, policy 관리자 입력은 public request schema와 일반 tweak allowlist에서 제외한다. Gateway는 해당 node input을 덮어쓰려는 요청을 거부해야 한다. Optional Blueprint lane의 pin을 API body에서 읽어 검증기에 전달하면 공격자가 executable과 hash를 함께 교체할 수 있으므로 외부 trust anchor가 아니다.
 
-관리자 설정을 변경할 권한은 Flow/registry 운영 ACL로 제한하고 audit에 남긴다. Optional Blueprint lane의 설정을 바꾸면 새 Blueprint pin과 회귀 검증을 거쳐야 하며, 기본/optional 어느 lane에서도 기존 pending candidate를 새 source나 설정에 맞춰 자동 수정하지 않는다.
+관리자 설정을 변경할 권한은 Flow/registry 운영 ACL로 제한하고 audit에 남긴다. Optional Blueprint lane의 설정을 바꾸면 새 Blueprint pin과 회귀 검증을 거쳐야 하며, 이전 `validate_only` 결과를 새 source나 설정에 맞춰 자동 수정하거나 그대로 `save` 입력으로 재사용하지 않는다.
 
-## 5. MongoDB 계약
+## 5. MongoDB 3컬렉션 계약
 
 | 역할 | collection | key |
 | --- | --- | --- |
-| immutable package/bundle | `agent_v6_metadata_bundles` | `bundle:{bundle_sha256}` |
-| active selector | `agent_v6_metadata_active` | `active:{environment}:{domain_id}` |
-| migration review | 기존 semantic/dataset/filter v6 candidate collection | `migration:v5:{source_sha256}` |
-| unsafe migration | `agent_v6_migration_quarantine` | 운영 writer가 부여 |
+| 도메인 metadata current | `agent_v6_domain_metadata` | `{environment}:{domain_id}` |
+| 테이블 카탈로그 current | `agent_v6_table_catalog` | `{environment}:{domain_id}` |
+| 메인필터 current | `agent_v6_main_filter` | `{environment}:{domain_id}` |
 
-Runtime loader는 active pointer의 domain, environment, revision, package hash, bundle hash를 immutable document와 다시 비교하고 catalog/package/bundle hash를 모두 재계산한다. 어느 하나라도 다르면 실행하지 않는다.
+세 current 문서는 동일 `release_id`, revision, manifest와 package hash를 가져야 한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받고 domain collection에서 가장 최근 문서의 identity를 자동 선택한다. 이어 고정된 table catalog/main filter collection에서 같은 identity의 문서를 읽어 source/section/document hash와 공통 release manifest를 재계산하고 결합한 Domain Package의 catalog/package/bundle hash를 검증한다. domain/environment/source mode/collection 이름은 UI에 노출하지 않으며 어느 하나라도 다르면 실행하지 않는다. active pointer와 immutable bundle/pending collection은 runtime 필수 계약이 아니다.
 
-기존 `active:{kind}`와 `agent_v6_metadata_revisions`는 Domain Package v2 runtime selector로 사용하지 않는다.
+## 6. 검증 / 저장 연결
 
-## 6. Prepare / approve / commit 연결
-
-1. 기본 Full-domain prepare는 세 자유형 원문을 각각 bounded context로 만들고 작업별 외부 공통 Prompt를 통해 LLM을 각각 최대 한 번, 총 3회 호출한다.
+1. 기본 Full-domain 등록은 세 자유형 원문을 각각 bounded context로 만들고 작업별 외부 공통·특화 Prompt pair를 통해 LLM을 각각 최대 한 번, 총 3회 호출한다.
 2. Domain annotation, compact Dataset IR, `target_type` 필수 Main Filter IR을 각각 closed decode한다. Invalid/missing output은 repair 없이 실패한다.
-3. Source Registry v3의 template/blueprint/executable/projection hash를 검증하고 `semantic_templates`, dataset descriptor/Source binding과 alias target을 결정론적으로 확장·병합한 뒤 전체 schema·semantic·dependency·security compiler를 실행한다. Sealed planner policy drift는 candidate 전에 실패한다.
-4. Optional Blueprint lane이면 provider 호출 전에 external pin, self-hash, executable hash와 source identity를 추가 검증하고 annotation merge 후 executable byte 불변을 확인한다.
-5. `make_bundle_document`의 exact canonical bytes, branch IR 및 template expansion evidence, optional Blueprint 검증 evidence와 expected active revision을 pending candidate hash material에 넣는다.
-6. 첫 Langflow run은 이 immutable material의 `candidate_sha256`을 계산하고 `agent_v6_pending_writes`에 `prepared`만 기록한다.
-7. 외부 승인 event는 exact `candidate_sha256`만 승인하며 source, Blueprint나 draft를 수정하는 payload를 받지 않는다.
-8. 두 번째 Langflow run은 candidate ID/hash와 approval reference만으로 candidate를 atomic claim한다. 새 자연어, LLM 출력, Blueprint나 annotation을 입력받지 않는다.
-9. Execute는 저장된 candidate material, package/catalog/bundle hash와 active-base pin을 다시 계산한다. 하나라도 다르면 stale/failed로 끝낸다.
-10. immutable bundle insert와 `active:{environment}:{domain_id}` CAS를 한 transaction에서 수행한다.
-11. 동일 idempotency key 재호출은 동일 commit result를 반환한다.
+3. Source Registry v3를 결정론적으로 확장·병합한 뒤 전체 schema·semantic·dependency·security compiler를 실행한다.
+4. 성공한 package를 domain/table catalog/main filter section으로 나누고 각 자연어 원문과 hash를 보존한다.
+5. 세 section hash와 catalog/package/bundle hash를 공통 `metadata.release.v1` manifest로 봉인한다.
+6. 한 MongoDB transaction에서 세 current 문서를 교체하고 같은 transaction 안에서 다시 읽어 package 동치를 검증한다.
+7. `validate_only` 또는 dry-run이면 동일 검증을 수행하되 write하지 않는다. clarification/error이면 항상 write 0건이다.
 
-따라서 prepare에서 승인된 executable이 approve/execute 사이에 바뀔 수 없다. 자연어 source나 optional Blueprint가 이후 바뀌어도 이미 준비된 candidate를 새 의미로 재해석하지 않으며, 변경 내용을 반영하려면 새 prepare와 새 승인이 필요하다.
+세부 문서 필드와 운영 절차는 [V6_THREE_COLLECTION_METADATA.md](V6_THREE_COLLECTION_METADATA.md)를 따른다.
 
 ## 7. v5 migration
 
@@ -208,19 +201,9 @@ Runtime loader는 active pointer의 domain, environment, revision, package hash,
 python tools/migrate_v5_metadata.py --read-v5-mongo `
   --output-dir validation_outputs/live_v5_migration
 
-# 승인된 경우 v6 candidate collection에만 insert
-python tools/migrate_v5_metadata.py --read-v5-mongo --apply-v6-candidates
-
-# 저장된 exact bundle을 최초 활성화하고 audit event 기록
-python tools/migrate_v5_metadata.py `
-  --activate-v6-bundle `
-  --domain-id manufacturing `
-  --environment production `
-  --activation-idempotency-key manufacturing-production-r1
 ```
 
-기존 active pointer를 새 revision으로 교체하는 경우에는
-`--expected-active-revision`과 `--expected-active-bundle-sha256`를 모두 제공해야 한다. 최초 pointer가 없는 경우에는 두 옵션을 제공하지 않는다. 동일 bundle과 idempotency key로 재실행하면 pointer/audit write가 모두 0이어야 한다.
+기존 migration tool의 candidate/active-pointer write 옵션은 새 runtime 저장 계약이 아니므로 사용하지 않는다. 승인된 migration 결과는 자연어 Authoring Flow 또는 별도 검토된 3컬렉션 importer로 전체 Domain Package를 다시 compile한 뒤 같은 release로 저장해야 한다.
 
 고정 v5 source collection은 세 개뿐이며 모든 실행에서 `v5_write_operations=0`이어야 한다.
 

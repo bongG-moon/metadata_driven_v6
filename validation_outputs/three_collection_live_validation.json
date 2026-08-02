@@ -1,0 +1,108 @@
+{
+  "status": "ok",
+  "contract_version": "three-collection-live-validation.v1",
+  "model": "gemini-3.5-flash-lite",
+  "database": "datagov_v6_validation",
+  "environment": "validation",
+  "domain_id": "manufacturing",
+  "collections": {
+    "domain": "agent_v6_domain_metadata",
+    "table_catalog": "agent_v6_table_catalog",
+    "main_filter": "agent_v6_main_filter"
+  },
+  "source_sha256": {
+    "domain": "fc579913bf2fc045aedaf8918522b2e13b50daab513342657a7d95b1fc10d8f2",
+    "dataset": "2546efeb09ce803fd4681f031333e1b94b158cacdf688f2fce108d327578b4ab",
+    "main_filter": "df1b0d75d6b0f331941cd595c4b6b960e55b025e20e5c0a83ace98d749f919b0"
+  },
+  "prompt_bundle_sha256": {
+    "domain": "1eb1dafd1d6c0bcf1f5b38055b761e2df4022af57818c57a5b0f554ed3a39c1d",
+    "dataset": "1e19437d767929cb6be57954ba73e06dd9c8a6cb96f3e0aac69ab7b62e86945b",
+    "main_filter": "fc17e8731e813bd6ddce5b309233d0a45a3d581b2cf232834eb07b63ed8c048d"
+  },
+  "llm": {
+    "model": "gemini-3.5-flash-lite",
+    "model_contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "fallback_used": false,
+    "provider_model_versions_exact": true,
+    "calls": 3,
+    "prompt_sha256": [
+      "1941da89cbdc8f1e5226a3127a994d2a5ed0ba0be3313b022fbd5d11385c2cc8",
+      "50cf53d021467e314a388021d1f6969cb032a327fcbc4827549ecdce227a9203",
+      "fafcbdce3af20c20ebcc2d27a1982d593ef855c7b2d491944658b5cd6fe52c42"
+    ],
+    "provider_response_sha256": [
+      "1313b8a8c2c6be3677c19e447dca5b1950559226758ed542bc43b0bd07b1036e",
+      "cabfbb6290af729a4a773431edf21909e3265aa314118c6ba338c4407362f142",
+      "3fd36f7d413febf36478c9c308213cbd2d392fd597c34b58c7dbfdbf9b457f08"
+    ],
+    "provider_model_versions": [
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite"
+    ],
+    "finish_reasons": [
+      "STOP",
+      "STOP",
+      "STOP"
+    ],
+    "candidate_text_bytes": [
+      388,
+      8299,
+      3993
+    ],
+    "usage": {
+      "prompt_tokens": 24438,
+      "candidate_tokens": 4468,
+      "total_tokens": 28906
+    }
+  },
+  "authoring": {
+    "stage": "committed",
+    "revision": 2,
+    "candidate_sha256": "bc17b187c361643501ca4dfc2240e8b6ad07de1e30fa39c6a3ae5479982798e6",
+    "catalog_sha256": "6a40c83f1a988ae859efdfbc6db0815a54f8bd78aa83ff32d120f7a33fd28b9b",
+    "llm_usage": {
+      "draft_llm_calls": 3,
+      "annotation_llm_calls": 0,
+      "repair_llm_calls": 0
+    }
+  },
+  "storage": {
+    "document_count": 3,
+    "release_id_count": 1,
+    "release_id_sha256": "38e16d6cfee003f76dcdf73bd46e0c8b502af270b3c48ca24570fa90a1b68fb8",
+    "natural_source_present": {
+      "domain": true,
+      "table_catalog": true,
+      "main_filter": true
+    }
+  },
+  "loader": {
+    "ok": true,
+    "selection": "latest_available_release",
+    "input_names": [
+      "mongo_database",
+      "mongo_timeout_ms",
+      "mongo_uri"
+    ],
+    "source_mode": "three_collections",
+    "revision": "2",
+    "catalog_sha256": "6a40c83f1a988ae859efdfbc6db0815a54f8bd78aa83ff32d120f7a33fd28b9b",
+    "checks": {
+      "source_mode_exact": true,
+      "identity_exact": true,
+      "revision_exact": true,
+      "package_sha256_exact": true,
+      "bundle_sha256_exact": true,
+      "catalog_sha256_exact": true,
+      "loader_inputs_exact": true
+    }
+  }
+}

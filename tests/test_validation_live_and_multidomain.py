@@ -29,7 +29,7 @@ from tools.validate_live_v6_authoring_inputs import run as validate_v6_authoring
 from tools.validate_prompt_extension_runtime import _prompt_evidence
 from tools.validate_langflow_http_order_sales_e2e import (
     CASES as ORDER_SALES_HTTP_CASES,
-    _inline_fixture,
+    _datalake_fixture,
     _json_input_tweak,
     _matches_rows,
 )
@@ -351,8 +351,10 @@ def test_langflow_graph_validator_accepts_split_stage_aliases_and_fanout() -> No
         _node("plan", "plan_compilation"),
         _node("router", "job_routing"),
         _node("dummy", "dummy_retrieval"),
-        _node("inline", "inline_retrieval"),
-        _node("live", "live_retrieval"),
+        _node("oracle", "oracle_retrieval"),
+        _node("h_api", "h_api_retrieval"),
+        _node("datalake", "datalake_retrieval"),
+        _node("goodocs", "goodocs_retrieval"),
         _node("merge", "source_merge"),
         _node("execute", "typed_execution"),
         _node("answer", "answer_facts", ["answer_facts", "narrative_claim"]),
@@ -378,11 +380,15 @@ def test_langflow_graph_validator_accepts_split_stage_aliases_and_fanout() -> No
         _edge("intent", "plan"),
         _edge("plan", "router"),
         _edge("router", "dummy"),
-        _edge("router", "inline"),
-        _edge("router", "live"),
+        _edge("router", "oracle"),
+        _edge("router", "h_api"),
+        _edge("router", "datalake"),
+        _edge("router", "goodocs"),
         _edge("dummy", "merge"),
-        _edge("inline", "merge"),
-        _edge("live", "merge"),
+        _edge("oracle", "merge"),
+        _edge("h_api", "merge"),
+        _edge("datalake", "merge"),
+        _edge("goodocs", "merge"),
         _edge("merge", "execute"),
         _edge("execute", "answer"),
         _edge("answer", "answer_composer"),
@@ -396,7 +402,7 @@ def test_langflow_graph_validator_accepts_split_stage_aliases_and_fanout() -> No
     ]
     report = validate_flow_graph({"id": "flow:test", "endpoint_name": "test", "data": {"nodes": nodes, "edges": edges}})
     assert report["passed"] is True, report["failures"]
-    assert report["stage_counts"]["source_retriever"] == 3
+    assert report["stage_counts"]["source_retriever"] == 5
     assert report["stage_counts"]["response_state_commit"] == 1
 
 
@@ -449,18 +455,17 @@ def test_prompt_extension_evidence_is_hash_only_and_utf8_bounded() -> None:
     prompt = "catalog-policy\nnode-overlay\n질문"
     evidence = _prompt_evidence(
         prompt,
-        catalog_extension="catalog-policy",
         node_sentinel="node-overlay",
         max_bytes=128,
     )
-    assert evidence["catalog_extension_present"] is True
-    assert evidence["node_overlay_present"] is True
+    assert evidence["specialized_template_present"] is True
+    assert evidence["dynamic_domain_prompt_port_absent"] is True
     assert evidence["prompt_within_budget"] is True
     assert prompt not in json.dumps(evidence, ensure_ascii=False)
 
 
 def test_order_sales_http_fixture_enriches_refund_join_key_in_memory() -> None:
-    fixture = _inline_fixture(ROOT / "metadata" / "domain_packs" / "order_sales" / "sample_rows.json")
+    fixture = _datalake_fixture(ROOT / "metadata" / "domain_packs" / "order_sales" / "sample_rows.json")
     refunds = fixture["datasets"]["refunds"]
     assert {row["order_id"]: row["product_id"] for row in refunds} == {
         "O-002": "P-100",
@@ -493,7 +498,7 @@ def test_order_sales_http_uses_utf8_questions_and_langflow_json_input_wrapper() 
         "NET_SALES_AMOUNT": 700.0,
     }
 
-    payload = {"contract_version": "source.inline.payload.v1", "datasets": {"orders": []}}
+    payload = {"contract_version": "source.datalake.payload.v1", "datasets": {"orders": []}}
     wrapped = _json_input_tweak(payload)
     assert wrapped == payload
     assert wrapped is not payload

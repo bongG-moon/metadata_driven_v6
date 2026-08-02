@@ -99,6 +99,8 @@ Trusted core 정상 경로:
 
 ## 4. 기능 요구사항
 
+Data Analysis Flow는 `00`~`27` 실행 순서의 한국어 표시명을 사용한다. Domain/Dataset/Main Filter/Domain Policy 등록 Flow도 각자의 `00` 입력부터 최종 출력까지 번호를 붙이고, 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C`로 구분한다. 도메인 초기 등록의 세 context/composer/invoker에는 도메인·초기 데이터셋·초기 주요 필터 분기명을 명시한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받아 고정 3컬렉션의 최신 완전 release를 자동 결합한다. domain/environment/source mode/collection 선택은 UI에 없다. `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI 없이 내부 현재 시각을 `Asia/Seoul`로 고정한다.
+
 ### FR-01. 자연어 질문 이해
 
 - 상대/절대/ISO/slash/Korean/timestamp 날짜를 원문 evidence가 있는 `LocalDate` 또는 `Instant` 후보로 정규화
@@ -195,6 +197,7 @@ Derived metric은 자유 수식 문자열이 아니라 typed formula AST를 사�
 - summary/result table/applied criteria/evidence/notices/downloads/next questions를 `answer.sections.v1`으로 생성
 - API는 v5의 request/intent_plan/analysis/data/data_refs/state/trace와 `data.rows`/`data_refs[]` wire surface를 bounded projection으로 유지
 - Langflow Message, structured API `Data(is_output=True)`, GaiA answer/metadata를 같은 immutable `response.v1`에서 fan-out
+- `23 → 24·25·26`은 전송용 hash가 없는 일반 JSON을 전달하고, 24·25·26은 수신 hash나 전체 응답 schema를 재검증하지 않음. 결과 무결성 hash는 MongoDB result store 내부에서만 유지
 - Message 표시 옵션은 canonical message, API data/result/state, GaiA answer/metadata를 바꾸지 않음
 - result/source store → state CAS → runtime frame release → Message/API/GaiA fan-out 순서를 보장
 
@@ -202,18 +205,18 @@ v5 호환 surface는 다음과 같이 이전한다.
 
 | v5 기능 | v6 소유자 | 호환 규칙 |
 | --- | --- | --- |
-| Answer Message Adapter 표시 토글 | Message Presentation Adapter | 같은 항목과 배포 기본값 유지 |
+| Answer Message Adapter 표시 토글 | `24 채팅 메시지 표시 설정` | schema만 검사하고 같은 항목과 배포 기본값 유지 |
 | `show_pandas_code` | `show_execution_plan` | import alias만 유지하고 code 대신 typed IR 표시 |
 | Answer Response Builder | Response Assembler | canonical `answer.sections.v1` 생성 |
-| API Response Builder | API Response Terminal | structured `response.v1`을 별도 output으로 반환 |
+| API Response Builder | `25 API 표준 응답 출력` | response hash 검증 후 structured `response.v1`을 별도 output으로 반환 |
 | MongoDB result/download store | Result/Source Ref Store | TTL, owner/session binding, CSV ref/URL 유지 |
-| GaiA Output | GaiA Output Adapter | answer, URLs, follow-up questions, trace/usage 유지 |
+| GaiA Output | `26 GaiA 형식 출력` | response hash 검증 후 answer, URLs, follow-up questions, trace/usage 유지 |
 | multi-turn compact state | State Store/Loader | transform/requery/enrich/reset/explain과 CAS 유지 |
 
 ### FR-08. Metadata authoring
 
 - 사용자는 정형 문법 없이 TXT에 비정형 자연어로 입력한다. JSON/DSL, canonical/등록 ID, relation endpoint/field-role 선언, 타입, 물리 컬럼과 source binding 문법은 일반 작업자에게 요구하지 않는다.
-- Full-domain bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter 원문을 물리적으로 분리된 외부 공통 Prompt Template node 세 개로 전달한다. 각 branch는 동일 hash의 `semantic_vocabulary`를 사용하지만 출력은 Domain annotation only, compact Dataset IR, `target_type` 필수 Main Filter typed IR로 분리된다. 각 LLM은 최대 1회, 총 3회이며 작업자가 이 내부 계약을 작성하지 않는다.
+- Full-domain bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter 원문을 작업별로 물리적으로 분리된 외부 공통·특화 Prompt Template pair에 전달한다. 특화 업무 규칙은 각 특화 Template 본문에 직접 작성하고 자연어 context는 Composer에 한 번만 연결한다. 각 branch는 동일 hash의 `semantic_vocabulary`를 사용하지만 출력은 Domain annotation only, compact Dataset IR, `target_type` 필수 Main Filter typed IR로 분리된다. 각 LLM은 최대 1회, 총 3회이며 작업자가 이 내부 계약을 작성하지 않는다.
 - 승인 semantic vocabulary는 `metadata.authoring.source-registry.v3`가 투영한 dataset의 `id/family/business labels`와 field·metric·relation·grain·ordering·predicate·recipe·entity-group의 `id/business labels`만 제공한다. 물리 컬럼, 타입, 역할, coercion, source/config/query ref, metric binding, 실행 payload와 `semantic_templates`는 LLM에 전달하지 않는다.
 - Domain 조각은 `metadata-annotation-proposal.schema.json`의 `display_name`과 `description`만 가진다. Compiler가 v3 registry의 hash-pinned `metadata.authoring.semantic-templates.v1`을 결합해 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 locale/timezone을 확장한다. Domain LLM이 실행 section을 반환하면 실패한다.
 - Dataset 조각은 LLM 내부 출력용 `metadata.bootstrap.dataset-ir.v1`을 사용한다. 일반 작업자에게 compact IR 형식을 입력시키지 않는다. 결정론적 expander가 같은 dataset의 승인 Source Registry v3 descriptor와 1:1 대조한 뒤 승인된 family·physical column·semantic type·roles로 full dataset section을 확장한다.
@@ -221,12 +224,12 @@ v5 호환 surface는 다음과 같이 이전한다.
 - Dataset은 exact active package의 dataset section만 자연어 기반 bounded LLM 1회로 patch
 - Main Filter는 기본적으로 `metadata.bootstrap.main-filter-ir.v1`의 `target_type`·`target_id`·`expressions`만 LLM 최대 1회로 만들고 compiler가 alias card로 확장한다. `source_grounding_mode=explicit_inventory`가 완전한 alias→canonical binding을 증명한 경우에만 선택적으로 LLM 0회 결정론적 patch를 사용한다.
 - optional 고신뢰 lane은 reviewed `metadata.executable-blueprint.v1`과 별도 SHA-256 pin으로 기본 Domain annotation 계약에 executable 불변성 증명을 추가할 수 있으나 일반 작업자 입력의 전제 조건이 아니다.
-- Domain/Dataset/Main Filter의 LLM 경로는 작업별 공통 Prompt Template node가 각각 하나씩이며 서로 다른 node/source/hash/edge를 유지한다. 같은 normalized failure shape의 승인 case 3개 이상·서로 다른 자연어 source 2개 이상·language interpretation root cause·관리자 pin을 모두 만족할 때만 공통 Prompt와 합치지 않은 별도 optional 특화 Overlay Prompt node를 사용한다. 현재 기본 Flow는 공통 Prompt 세 개만 포함한다.
+- Domain/Dataset/Main Filter의 LLM 경로는 작업별 공통·특화 Prompt Template node가 각각 하나씩이며 서로 다른 node/source/hash/edge를 유지한다. 모든 Template은 변수 없이 렌더링하고 사용자 입력이나 metadata가 특화 본문을 동적으로 바꾸지 못한다.
 - Domain Policy는 별도 Domain Policy Authoring Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 사용하고 Prompt Template/Composer/envelope/LLM은 0회다. `semantic_templates.planner_policy`의 `planner_profile`/legacy hash는 이 Flow도 변경할 수 없다.
 - optional explicit-inventory Main Filter도 Prompt Template/Composer/envelope/LLM은 0회
 - JSON Schema와 semantic·dependency·security lint가 실행 가능성을 검증한다. 누락·모호한 정보는 포맷 재작성 요구가 아니라 draft/candidate 없는 `status=needs_clarification`으로 반환하며, 질문은 내부 ID나 타입 대신 작업자가 고를 수 있는 쉬운 업무 label을 사용한다.
-- dependency closure 후 immutable candidate/diff hash를 pending store에 prepare
-- 외부 승인 후 두 번째 run이 같은 hash를 atomic claim한 경우에만 writer 저장
+- dependency closure 후 동일 release의 세 section과 catalog/package/bundle hash를 봉인
+- `validate_only`는 write 0건, `save`는 고정 3컬렉션을 하나의 transaction으로 교체
 - raw source/hash와 compiled runtime record 분리
 
 ### FR-09. Observability
@@ -323,7 +326,7 @@ Turn 2:
 3. Main filter authoring
 4. Domain Policy authoring
 
-네 Flow는 같은 immutable prepare/approve/execute 경계를 공유하지만 candidate 생성 권한은 다음처럼 분리한다.
+네 Flow는 같은 typed 검증과 `save|validate_only` 저장 경계를 공유하지만 변경 가능한 metadata 구간은 다음처럼 분리한다.
 
 ```text
 Free-form Raw Text Input
@@ -331,8 +334,8 @@ Free-form Raw Text Input
    ├─ Domain bootstrap
    │  → 작업자가 작성한 Domain·Dataset·Main Filter 자유형 자연어 TXT
    │  → 세 branch 공통의 hash-pinned approved semantic vocabulary
-   │  → 서로 분리된 Domain/Dataset/Main Filter 공통 Prompt node 3개
-   │     (+ 승인된 경우에만 해당 분기의 별도 특화 Overlay Prompt node)
+   │  → 서로 분리된 Domain/Dataset/Main Filter 공통·특화 Prompt pair 3개
+   │  → 각 Context Builder의 runtime_context를 해당 Composer에 정확히 1회 연결
    │  → Domain annotation only / compact Dataset IR / target_type 필수 Main Filter IR
    │  → 각 LLM 최대 1회 → branch별 closed decoder
    │  → Source Registry v3 semantic_templates + dataset descriptor deterministic expansion
@@ -342,14 +345,12 @@ Free-form Raw Text Input
    │  → full-draft schema/semantic/dependency/security compiler
    │  → optional explicit_inventory: zero-LLM / Blueprint: annotation + external pin
    ├─ Dataset
-   │  → exact active package load → Dataset Authoring 공통 Prompt 한 개
-   │  → 승인된 반복 실패에서만 optional overlay
+   │  → 최신 완전 3컬렉션 package load → Dataset Authoring 공통·특화 Prompt pair
    │  → LLM 1회 → compact Dataset IR decoder + v3 descriptor expander
    ├─ Main Filter
    │  → exact active package load
    │  → explicit_inventory complete proof: deterministic patch, LLM 0회
-   │  → 기본 free-form filter-owned input: Main Filter Authoring 공통 Prompt 한 개
-   │     + 승인된 반복 실패에서만 optional overlay, LLM 최대 1회
+   │  → 기본 free-form filter-owned input: Main Filter Authoring 공통·특화 Prompt pair, LLM 최대 1회
    │  → target_type 필수 Main Filter IR decoder + alias expander
    └─ Domain Policy 전용 Flow
       → explicit admin node inputs
@@ -393,33 +394,18 @@ Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/ha
 - `config_ref` → 서버 측 운영 adapter registry: adapter, endpoint ref, secret node-input 이름, ACL, read-only action
 - `query_ref` → 서버 측 운영 adapter registry: reviewed query/operation, typed parameter schema, ACL, timeout/max-row 상한
 
-저장소의 승인 Source 레지스트리에는 credential·SQL·endpoint 값을 넣지 않는다. 현재 범용 Flow는 외부 데이터 도구가 수행한 결과를 **실데이터 조회 결과 수신** 노드에서 검증하며, 물리 ref resolver는 서버 측 배포 adapter의 책임이다. 그 adapter는 ACL과 reference hash를 검증하고 secret을 호출 동안만 주입해야 하며 metadata/state/trace/result/LLM에는 남기지 않는다. Node input으로 상한을 완화하거나 write action, 임의 SQL/endpoint/dynamic collection을 넣을 수 없다.
+저장소의 승인 Source 레지스트리에는 credential·SQL·endpoint 값을 넣지 않는다. 범용 Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리하고 각 node가 연결된 자기 source payload만 검증한다. 물리 ref resolver는 서버 측 배포 adapter의 책임이다. 그 adapter는 ACL과 reference hash를 검증하고 secret을 호출 동안만 주입해야 하며 metadata/state/trace/result/LLM에는 남기지 않는다. 운영자에게 노출하는 source scalar는 실제 source별 `조회 행 수 제한`뿐이며 이를 완화하거나 write action, 임의 SQL/endpoint/dynamic collection을 넣을 수 없다.
 
 ### 6.3 Langflow 1.9.2 저장 프로토콜
 
-Langflow 1.9.2 저장은 durable pause/resume이 아니라 `prepare → external approve → atomic execute` 두-run 프로토콜이다.
+현재 기본 등록 Flow는 `save`와 `validate_only` 두 모드만 제공한다. 두 모드 모두 자연어 TXT를 LLM으로 typed 등록 IR로 바꾼 뒤 동일한 schema, 참조, hash 검증을 수행한다.
 
-#### Prepare run
+- `validate_only`: 변환·컴파일·검증 결과만 반환하고 MongoDB를 변경하지 않는다.
+- `save`: 검증된 동일 release의 도메인, 테이블 카탈로그, 메인필터 문서를 고정 3개 컬렉션에 transaction으로 교체한다.
 
-첫 webhook/run은 compiled record, expected active revision/hash, dependency와 config/query revision/hash, validation block, prepare/expiry 시각을 immutable hash material로 만든다. 그 projection의 canonical JSON bytes로 `candidate_sha256`을 계산하고 `candidate_id=candidate:<hash>`로 만든다. candidate ID/hash, status, approval, claim, commit 결과는 hash material 밖의 workflow envelope field다. 둘을 `agent_v6_pending_writes`에 `prepared`로 저장하고 응답에는 candidate ID/hash, diff, validation summary만 돌려준다.
+별도의 pending collection이나 active pointer는 사용하지 않는다. 각 문서는 같은 `release_id`, revision, section hash, package hash를 가지며, 분석 Flow의 selector-free loader는 가장 최근 도메인 문서의 identity를 기준으로 나머지 두 문서를 결합한 뒤 세 문서의 seal을 다시 검증한다. 세 문서 중 하나라도 누락되거나 release/hash가 다르면 저장 결과를 사용하지 않는다.
 
-#### External approve
-
-외부 UI/service가 승인자 ACL을 확인하고 candidate hash에 대해 approver, decision, approval time, expiry를 immutable event로 기록한다. Pending status는 candidate hash를 조건으로 `prepared → approved|rejected` compare-and-set한다. Candidate payload 수정은 금지하며 변경이 필요하면 새 prepare가 필요하다.
-
-#### Atomic execute run
-
-승인 후 두 번째 webhook/run이 candidate ID/hash, approval reference, idempotency key를 전달한다. Explicit Writer는 transaction 또는 동등한 compare-and-set으로 다음을 한 번에 확인하고 claim한다.
-
-- approved, unclaimed, unexpired 상태와 승인자 ACL
-- 전달 hash, 저장 hash, candidate bytes 재계산 hash 일치
-- expected active revision/hash 일치
-- dependency와 config/query registry revision/hash가 prepare 시점과 일치
-- exact candidate에 대한 schema/lint/dependency 재검사 valid
-
-검사를 통과하면 `approved → executing` claim, immutable revision insert, active pointer 교체, 이전 revision deprecated, audit append를 MongoDB transaction으로 원자적으로 commit한다. 동등한 compare-and-set 구현은 active selector와 commit marker가 같은 atomic document에 있고 loader가 uncommitted revision을 읽지 않을 때만 허용한다. 여러 document의 best-effort 순차 쓰기는 금지한다. 같은 idempotency key는 같은 결과를 반환한다. 어떤 pin이라도 바뀌면 `stale_candidate`로 종료하고 candidate를 최신 상태에 맞춰 자동 수정하지 않는다. 새 prepare와 재승인을 요구해 TOCTOU를 차단한다.
-
-Pending 상태는 `prepared|approved|rejected|expired|executing|committed|stale|failed`로 제한한다. 모든 prepare/approve/claim/commit/reject/stale 사건은 `agent_v6_authoring_audit`에 append-only로 기록한다.
+조직 정책상 사전 승인이 필요하면 등록 Flow 바깥의 배포·승인 서비스가 `validate_only` 결과를 검토한 다음 별도의 인증된 `save` 실행을 호출할 수 있다. 이는 선택 가능한 운영 래퍼이며, 기본 Flow나 MongoDB 스키마에 pending/active 컬렉션을 추가하지 않는다.
 
 ## 7. Payload와 memory
 
@@ -469,7 +455,7 @@ Exploration Flow/endpoint/worker가 초기 bundle에 없고 Data Analysis에서 
 - source failure를 empty/zero로 숨긴 case 0
 - output semantic duplicate 0
 - prompt/state/trace byte budget 통과
-- Runtime Intent/Answer는 물리적으로 분리된 공통·특화 Prompt pair를 사용하고, Domain/Dataset/Main Filter는 작업별 공통 Prompt 한 개와 승인된 경우에만 optional overlay를 사용
+- Runtime Intent/Answer와 Domain/Dataset/Main Filter는 물리적으로 분리된 공통·특화 Prompt pair를 사용하고 특화 규칙을 Template 본문에 직접 작성하며 runtime context를 Composer에 한 번만 연결
 - Domain Policy와 optional explicit-inventory Main Filter의 prompt/envelope/provider 호출 0
 - registered function descriptor→registry attestation→candidate→Intent→`registered_call`→Gateway→output schema/lineage positive/negative E2E 통과
 - 5개 MVP Flow의 사용자 가시 Flow/node/input/output 이름·설명 한글화와 역할별 Sticky Note 정적·import 검증 통과

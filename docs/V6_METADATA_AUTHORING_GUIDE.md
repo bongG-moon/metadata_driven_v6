@@ -4,7 +4,7 @@
 
 사용자는 JSON Schema, `dataset_key`, physical column mapping 구조나 relation/field-role inventory 문법을 직접 작성할 필요가 없다. canonical/등록 ID, 타입과 물리 컬럼을 몰라도 된다. 기존처럼 Domain, Table Catalog, Main Filter 정보를 자신이 아는 업무 표현으로 자유롭게 적는다. 문장 순서, 제목, 표기 방식, 조사, 오탈자와 줄바꿈이 달라도 괜찮다.
 
-기본 full-domain bootstrap에서 작업자는 기존처럼 Domain·Dataset·Main Filter TXT에 자유로운 자연어만 입력한다. Flow 내부의 세 공통 Prompt Template이 각 원문을 최대 한 번씩 해석한다. 그러나 세 LLM 출력은 full draft가 아니다. Domain은 `display_name`과 `description` annotation만, Dataset은 compact `metadata.bootstrap.dataset-ir.v1`, Main Filter는 모든 항목에 `target_type`이 필수인 `metadata.bootstrap.main-filter-ir.v1`만 반환한다. 작업자가 보는 입력 계약에는 JSON/DSL, compact IR, canonical ID inventory, 컬럼 타입 표, `config_ref`/`query_ref` 문법이 없다.
+기본 full-domain bootstrap에서 작업자는 기존처럼 Domain·Dataset·Main Filter TXT에 자유로운 자연어만 입력한다. Flow 내부의 작업별 공통·특화 Prompt Template pair가 각 원문을 최대 한 번씩 해석한다. 공통·특화 Template은 별도 node/source/hash/edge이고 특화 업무 규칙은 특화 Template 본문에 직접 작성한다. 그러나 세 LLM 출력은 full draft가 아니다. Domain은 `display_name`과 `description` annotation만, Dataset은 compact `metadata.bootstrap.dataset-ir.v1`, Main Filter는 모든 항목에 `target_type`이 필수인 `metadata.bootstrap.main-filter-ir.v1`만 반환한다. 작업자가 보는 입력 계약에는 JSON/DSL, compact IR, canonical ID inventory, 컬럼 타입 표, `config_ref`/`query_ref` 문법이 없다.
 
 결정론적 engine은 `metadata.authoring.source-registry.v3`의 compiler-owned `semantic_templates`, dataset descriptor/Source binding과 alias target으로 세 결과를 확장·병합해 완전한 `metadata.authoring.draft.v1` 후보를 만든다. Domain 실행 metric/relation/grain/ordering/predicate/recipe/entity-group/alias는 LLM이 생성하지 않는다. Dataset용 compact IR과 Main Filter typed IR도 Gemini 내부 중간 계약일 뿐이며 registry membership을 통과해야 full section이 된다. 이 후보는 저장되거나 실행되기 전에 JSON Schema, canonical identity, field binding, type, dependency closure, join/cardinality, read-only·secret·registry 정책과 hash를 모두 검증한다. LLM은 자연어 해석과 승인 후보 선택만 담당하며 정확성 authority나 writer가 아니다.
 
@@ -14,7 +14,7 @@
 
 실제 LLM 출력 envelope는 `metadata.authoring.proposal.v1`이다. `status=complete`이면 입력 원문의 `source_sha256`과 closed `draft`가 있고, `status=needs_clarification`이면 같은 source hash와 최대 3개의 확인 질문 및 `missing_fields`만 있다. 두 형태를 섞거나 clarification 응답에 draft/candidate/persist 결과를 넣으면 schema 단계에서 거부한다.
 
-Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자의 업무 의도를 대신 확정하지 않는다. Prepare 응답은 원문 근거, assumptions, missing information과 typed diff를 보여주며 사람이 승인한 exact candidate hash만 execute할 수 있다. 서로 다른 해석이 가능한 문장은 임의 선택하지 않고 clarification/missing-information으로 돌려보낸다. 확인 질문은 “당일 생산과 생산 이력 중 어느 자료인가요?”처럼 쉬운 업무 선택지를 사용하며 등록 ID, canonical ID, JSON/DSL, 타입, 물리 컬럼 또는 schema 경로를 묻지 않는다.
+Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자의 업무 의도를 대신 확정하지 않는다. 서로 다른 해석이 가능한 문장은 임의 선택하지 않고 clarification/missing-information으로 돌려보내며 이 경우 저장하지 않는다. 확인 질문은 “당일 생산과 생산 이력 중 어느 자료인가요?”처럼 쉬운 업무 선택지를 사용하며 등록 ID, canonical ID, JSON/DSL, 타입, 물리 컬럼 또는 schema 경로를 묻지 않는다. 검증에 성공한 결과는 도메인·테이블 카탈로그·메인필터 current 문서를 동일 release로 transaction 저장한다.
 
 현재 live 검증 model policy는 정확히 `gemini-3.5-flash-lite`, temperature `0`, provider/model fallback `0`, repair LLM `0`이다. 모델 응답이 schema를 통과하지 못하면 같은 질문을 고쳐 재호출하지 않고 canonical validation error로 끝낸다.
 
@@ -32,7 +32,7 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 
 `source_grounding_mode=explicit_inventory`는 선택적 고신뢰 lane이다. 이 mode를 명시한 운영자는 exact identity/binding inventory로 zero-LLM compile을 시도할 수 있다. 검토된 `metadata.executable-blueprint.v1`과 별도 SHA-256 pin을 제공하는 lane은 기본 Domain annotation-only 계약에 executable 불변성 검증을 추가한다. 이는 감사·마이그레이션·규제 환경을 위한 선택 사항이며 일반 작업자의 자연어 입력 조건이 아니다. Blueprint/pin이 없다는 이유만으로 기본 자유형 lane이 `metadata_blueprint_required`로 실패해서는 안 된다.
 
-어느 authoring lane을 사용해도 분석 runtime은 active compiled metadata에서 Typed Execution IR을 결정론적으로 만들고 실행한다. pandas 코드 생성 LLM과 repair LLM 호출 수는 항상 0이며, authoring LLM 출력이 runtime code로 직접 전달되지 않는다.
+어느 authoring lane을 사용해도 분석 runtime은 세 current metadata 문서를 검증·결합한 package에서 Typed Execution IR을 결정론적으로 만들고 실행한다. pandas 코드 생성 LLM과 repair LLM 호출 수는 항상 0이며, authoring LLM 출력이 runtime code로 직접 전달되지 않는다.
 
 ## 2. Authoring source 종류
 
@@ -47,9 +47,9 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 
 네 authoring 입력 화면은 분리되어 있지만 저장 결과는 하나의 versioned Domain Package다. Domain/Dataset/Main Filter는 자연어 TXT UX를 유지하고, Domain Policy만 별도 explicit 관리자 입력을 사용한다. Dataset Catalog와 Main Filter 입력은 active package의 해당 section만 삭제 없이 upsert하고, 다른 dataset·metric·relation·prompt·output 설정을 보존한 상태에서 전체 package를 다시 컴파일한다. 운영자가 일부 입력을 등록했는데 Data Analysis Flow가 읽지 못하는 별도 legacy pointer만 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
 
-최초 Domain bootstrap의 Flow canvas에는 Domain·Dataset·Main Filter용 **공통 Prompt Template node 세 개**가 물리적으로 따로 있다. 세 Prompt는 한 템플릿의 section으로 합치지 않으며 각각 별도 Runtime Context Builder, Prompt Bundle Composer, Conditional LLM Invoker와 연결된다. 세 Invoker는 같은 승인 Language Model node를 재사용할 수 있지만 proposal과 source hash는 분기별로 봉인한다.
+최초 Domain bootstrap의 Flow canvas에는 Domain·Dataset·Main Filter용 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 각 pair는 한 템플릿의 section으로 합치지 않으며 각각 별도 Runtime Context Builder, Prompt Bundle Composer, Conditional LLM Invoker와 연결된다. 모든 Template은 변수 없이 렌더링되고 자연어 source context는 Composer의 `runtime_context`에 정확히 한 번 연결된다. 세 Invoker는 같은 승인 Language Model node를 재사용할 수 있지만 proposal과 source hash는 분기별로 봉인한다.
 
-Runtime Intent/Answer에서는 공통 Prompt와 도메인 특화 Prompt가 각각 별도 Prompt Template node인 필수 pair다. Authoring은 이를 기계적으로 복제하지 않는다. 현재 기본 authoring Flow는 세 작업별 공통 Prompt만 포함한다. 특화 authoring 지시가 필요하면 공통 Prompt나 custom component 안에 넣지 않고, 같은 normalized failure shape의 승인 case 3개 이상, 서로 다른 자연어 source 2개 이상, language-interpretation root cause와 관리자 approval pin이 모두 있을 때만 해당 분기의 **별도 optional Overlay Prompt node/source/hash/edge**로 연결한다. Domain Policy와 `source_grounding_mode=explicit_inventory`의 완전한 inventory compile은 Prompt Template, Composer, `prompt.envelope.v1`, provider 호출이 모두 0회다.
+Runtime Intent/Answer와 Authoring은 모두 공통·특화 Prompt Template을 별도 필수 pair로 유지한다. 특화 authoring 지시는 공통 Prompt나 custom component가 아니라 각 특화 Prompt Template 본문에 직접 작성하며 사용자 TXT나 metadata로 동적 교체하지 않는다. Domain Policy와 `source_grounding_mode=explicit_inventory`의 완전한 inventory compile은 Prompt Template, Composer, `prompt.envelope.v1`, provider 호출이 모두 0회다.
 
 ## 3. Domain 입력 예시
 
@@ -296,14 +296,14 @@ Blueprint lane에서는 Blueprint JSON과 external pin을 같은 public API payl
 
 Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 
-## 8. Prepare와 dry-run
+## 8. Save와 validate-only
 
-기본은 `dry_run=true`다.
+기본은 `mode=save`다. `mode=validate_only` 또는 `dry_run=true`는 같은 compile/release 검증을 수행하지만 MongoDB에는 쓰지 않는다.
 
-기본 full-domain prepare 순서는 다음과 같다.
+기본 full-domain save 순서는 다음과 같다.
 
 1. Domain·Dataset·Main Filter 자유형 원문과 세 원문의 결정론적 합성 hash를 immutable source evidence로 고정한다.
-2. 원문별 공통 Prompt Template, bounded source context와 동일 SHA-256의 승인 semantic vocabulary로 Gemini를 각각 최대 한 번, 총 3회 호출한다. 승인된 반복 실패 overlay가 있으면 해당 branch의 별도 approval pin을 검증해 optional segment로만 추가한다.
+2. 원문별 공통·특화 Prompt Template pair와 Composer의 단일 bounded source context, 동일 SHA-256의 승인 semantic vocabulary로 Gemini를 각각 최대 한 번, 총 3회 호출한다.
 3. 세 LLM 응답을 목적별 closed proposal schema로 decode하고 source hash를 검증한다. Domain은 `display_name`/`description` 외 key를 거부하고, Dataset은 compact Dataset IR, Main Filter는 `target_type`·`target_id`·`expressions` typed IR만 허용한다. 누락/모호한 입력은 repair 호출 없이 `status=needs_clarification`, 충돌·schema 오류는 canonical validation error로 반환한다.
 4. Source Registry v3 root와 `semantic_templates_sha256`, blueprint/executable/projection hash를 검증한다. `semantic_templates` 본문은 LLM payload에 포함하지 않는다.
 5. Domain annotation에 registry의 locale/timezone과 metric/relation/grain/ordering/predicate/recipe/entity-group/alias template를 결정론적으로 붙인다. `semantic_templates.planner_policy`도 그대로 봉인하며 LLM 또는 Domain Policy 입력의 변경을 거부한다.
@@ -314,14 +314,14 @@ Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 10. 최초 bootstrap에서는 확장된 dataset ID 집합과 운영자 승인 Source 레지스트리 집합이 정확히 같은지 검사한다. 누락·미승인 dataset이 하나라도 있으면 candidate를 만들지 않는다.
 11. Exact coverage를 통과한 dataset에만 registry의 `source_type`, `source_adapter`, `config_ref`, `query_ref`를 결정론적으로 overlay하고 registry hash를 봉인한다. LLM이 같은 필드를 출력해도 실행 authority로 사용하지 않는다.
 12. 완성 draft에 full-draft JSON Schema, semantic lint, dependency closure, field/source binding, join/cardinality, read-only·secret·registered-function security compiler를 실행한다.
-13. valid draft만 typed diff와 immutable candidate hash로 prepare한다. LLM이 직접 active record를 쓰지 않는다.
+13. valid draft만 typed diff와 immutable candidate/release hash를 만든다. LLM이 직접 current metadata를 쓰지 않는다.
 
 `source_grounding_mode=explicit_inventory`의 optional zero-LLM lane은 완전한 binding proof를 먼저 검증한다. Blueprint lane은 기본과 같은 Domain annotation output을 사용하되 provider 호출 전에 external pin, Blueprint self-hash, executable hash와 source identity를 추가 검증한다. Pin이 없거나 틀리면 provider 호출 0으로 fail-closed한다. 주문·매출 fixture와 `build_executable_blueprint.py --check`는 이 고신뢰 lane의 재현성 검사다.
 
 Dry-run 결과:
 
 - 생성/변경 후보
-- 기존 active record와 typed diff
+- 기존 current package와 typed diff
 - missing information
 - assumptions
 - schema errors
@@ -329,37 +329,18 @@ Dry-run 결과:
 - dependency changes
 - 영향받는 validation cases
 
-첫 Langflow webhook/run은 여기까지 수행한 뒤 canonical candidate hash material을 만든다. Hash material에는 다음 값이 포함된다.
+Compiler는 세 section hash와 catalog/package/bundle hash를 `metadata.release.v1` manifest로 봉인한다. 응답의 `candidate_id`와 hash는 결과 추적용이며 별도 pending collection을 만들지 않는다. `needs_clarification`, schema/dependency/security 오류는 MongoDB write 0건으로 끝난다.
 
-- immutable compiled candidate
-- `expected_active_revision`, `expected_active_contract_sha256`
-- 모든 dependency와 config/query registry의 revision/hash
-- validation block
-- Domain annotation/Dataset IR/Main Filter IR hash, Source Registry v3 template/descriptor expansion evidence와 semantic-template provenance hash
-- optional Blueprint lane이면 Blueprint/executable external-pin 검증 evidence
-- `prepared_at`, `expires_at`
+## 9. 3컬렉션 atomic save
 
-위 immutable hash material만 canonicalize한 JSON bytes로 `candidate_sha256`을 계산하고 `candidate_id=candidate:<candidate_sha256>`로 만든다. `candidate_id`, `candidate_sha256`, status, approval, claim, commit 결과는 hash material 밖의 envelope field다. Candidate는 hash material과 함께 `agent_v6_pending_writes`에 `prepared` 상태로 저장한다. Candidate 내용을 수정하면 hash가 바뀌므로 같은 candidate로 승인할 수 없고 새 prepare가 필요하다. `active` writer는 아직 실행하지 않는다.
+1. Domain Package를 domain, table catalog, main filter section으로 나눈다.
+2. 각 문서에 해당 작업자의 자연어 `source_text`와 hash, 정규화 section과 hash를 함께 기록한다.
+3. 세 문서는 같은 `_id=environment:domain_id`, revision, `release_id`, release manifest와 package metadata를 가진다.
+4. MongoDB transaction에서 세 current 문서를 `replace_one(upsert=true)`로 교체한다.
+5. 같은 transaction 안에서 다시 읽고 세 문서의 identity/release/manifest/source/section/document hash를 검증해 원래 Domain Package와 동치인지 확인한다.
+6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·timeout만 입력받고 domain collection의 최신 identity를 자동 선택한 뒤 같은 검사를 수행한다. domain/environment/source mode/collection 이름은 UI에 없다.
 
-## 9. 외부 승인과 atomic execute
-
-Langflow 1.9.2에서 이 절차를 Flow pause/resume으로 구현하지 않는다.
-
-Production approval service는 Langflow Flow가 아니라 platform/metadata-governance 영역이 운영한다. Project는 `approval_contract/openapi.yaml`, authenticated client, approval-event schema를 소유하고 production service 구현/배포는 외부 의존성으로 명시한다. 계약은 `candidate_id`, `candidate_sha256`, decision, authenticated approver subject/roles, approval/event ID, decision/expiry time, idempotency key만 허용하며 candidate payload 수정 API는 제공하지 않는다. Test에서는 project의 fake approval service가 같은 contract로 approve/reject/expire/hash mismatch를 재현한다.
-
-1. 외부 승인 UI/service가 승인자 ACL을 확인한다.
-2. 승인 서비스는 exact `approval.event.v1`(`candidate_id`, `candidate_sha256`, `decision`, 인증된 `subject_id`, `decided_at`, `expires_at`, `idempotency_key`)을 canonical hash하고, Mongo wrapper의 `workflow_status`와 `approval_event_id`/`approval_event_sha256`을 atomic하게 기록한다. immutable `pending_payload`는 바꾸지 않는다.
-3. 승인이 끝나면 **두 번째** Langflow webhook/run을 호출한다.
-4. 두 번째 run에는 `candidate_id`, `candidate_sha256`, approval reference, idempotency key만 전달한다.
-5. Explicit Writer가 pending record를 atomic claim하고 새 revision과 active pointer를 transaction 또는 동등한 compare-and-set으로 commit한다.
-
-Writer는 execute 직전에 exact candidate bytes의 hash와 schema/lint/dependency validation을 다시 검사한다. 또한 active base revision/hash, 모든 dependency revision/hash, config/query registry pin, 승인자 ACL, 만료 시각이 prepare 당시 조건과 같은지 확인한다. 하나라도 바뀌면 `stale_candidate`로 끝내며 candidate를 자동 수정하거나 저장하지 않는다. 새 prepare와 재승인이 필요하다.
-
-Approve와 execute run은 새 Blueprint, 새 annotation, 자연어 TXT를 입력받지 않는다. Approve는 exact candidate hash만 승인하고, execute는 저장된 immutable material을 재검증한다. 관리자가 Blueprint를 교체해도 이미 prepared된 candidate의 의미를 바꾸지 않는다.
-
-기본 commit은 MongoDB transaction을 사용한다. Compare-and-set 대안은 active selector와 commit marker가 같은 atomic document에 있고 loader가 uncommitted revision을 읽지 않을 때만 동등한 것으로 본다. 여러 document를 순서대로 쓰는 best-effort 저장은 허용하지 않는다.
-
-허용 상태는 `prepared|approved|rejected|expired|executing|committed|stale|failed`다. 같은 idempotency key의 재호출은 같은 commit 결과를 반환한다. Prepare, approve, claim, commit, reject, stale 사건은 `agent_v6_authoring_audit`에 append-only로 남긴다. 이 구조가 승인 후 payload나 active dependency가 바뀌는 TOCTOU를 막는다.
+이 단순 current 구조에는 자동 승인 대기열, active pointer, revision archive나 자동 rollback이 없다. 이력이 필요한 조직은 MongoDB change stream/backup 또는 별도 감사 서비스를 사용한다. 세부 계약은 [V6_THREE_COLLECTION_METADATA.md](V6_THREE_COLLECTION_METADATA.md)를 따른다.
 
 ## 10. 수정 방식
 
@@ -377,7 +358,7 @@ Approve와 execute run은 새 Blueprint, 새 annotation, 자연어 TXT를 입력
 
 - token/password/API key는 raw TXT에도 입력하지 않는 것을 원칙으로 한다.
 - authoring Flow는 운영자가 검토한 `metadata/domain_packs/<domain>/approved_source_registry.json`의 versioned `config_ref`/`query_ref` ID만 dataset contract에 주입한다. 이 파일에는 secret, endpoint, SQL/query 본문을 저장하지 않는다.
-- 현재 범용 Data Analysis Flow의 **실데이터 조회 결과 수신** 노드는 별도 Oracle/API/데이터레이크 도구가 조회한 payload를 검증해 받는다. exported Flow 자체가 ref를 SQL이나 credential로 해석하지 않는다.
+- Data Analysis Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 각 node는 연결된 자기 source payload만 검증하며 exported Flow 자체가 ref를 SQL이나 credential로 해석하지 않는다. 운영자가 source node에서 조절하는 scalar는 실제 source별 `조회 행 수 제한`뿐이다.
 - 실제 운영 adapter가 참조하는 config/query registry, ACL, template hash와 secret 주입은 서버 측 배포 책임이다. 해당 resolver가 없는 환경에서는 dummy 검증만 가능하며 물리 Oracle 조회가 완성됐다고 간주하지 않는다.
 - Dataset contract는 승인 ID와 authoring registry hash를 pin하며, 서버 측 adapter는 같은 ID의 revision/hash·parameter schema·ACL을 다시 확인해야 한다.
 - Dataset policy와 registry 중 더 엄격한 read-only, timeout, max-row 한계를 적용한다. Node input은 이 한계를 더 줄일 수 있지만 늘리거나 write로 바꿀 수 없다.
