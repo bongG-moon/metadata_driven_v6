@@ -135,7 +135,7 @@ read-only로 source schema와 parameter를 검증한다. 실데이터 값 전체
 
 live smoke와 별개로 Oracle, H-API, Datalake, Goodocs, Dummy 5개 adapter type 모두 fixture contract와 security test를 가진다. 9개 live dataset이 배포된 일부 adapter만 사용해도 나머지 adapter fixture를 생략하지 않는다.
 
-Flow graph에는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각각 하나씩 있어야 한다. 각 source node는 자기 lane의 연결 payload만 처리하고, 운영자가 조절하는 source scalar는 실제 source별 `조회 행 수 제한` 하나뿐이어야 한다.
+Flow graph에는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각각 하나씩 있어야 한다. 네 실제 source node는 자기 lane의 job과 메타데이터만 처리하고 v5 호환 운영 입력으로 read-only 조회를 실행해야 한다. `source_payload`/`EDIT SOURCE PAYLOAD` 입력은 없어야 하며 export된 credential 기본값은 비어 있어야 한다.
 
 필수 adapter 판정:
 

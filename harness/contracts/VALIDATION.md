@@ -314,7 +314,7 @@ live 배포 여부와 관계없이 Oracle, H-API, Datalake, Goodocs, Dummy 5개 
 - timeout, row/byte limit, provenance, coverage metadata
 - Dummy와 동일한 canonical result contract
 - Flow에는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각각 하나씩 존재하고 job lane이 교차 연결되지 않음
-- source payload는 연결 Data 계약으로만 받고, 운영자가 조절하는 source scalar input은 각 실제 source node의 `조회 행 수 제한` 하나뿐임
+- 실제 source node에는 `source_payload` 수동 행 입력이 없고 v5 호환 운영 연결 입력이 존재하며, credential 기본값은 export JSON에서 비어 있음
 
 공통 security gate:
 

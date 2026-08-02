@@ -94,7 +94,7 @@
 8. 두 route의 closed intent schema/hash 동등성 검증. `unsupported`이면 retrieval 없이 canonical error와 telemetry를 만들고 종료
 9. metadata resolver와 공통 plan compiler로 `analysis.plan.v1` 생성. 선택된 registered function은 exact registry pin을 가진 `registered_call`로만 확장
 10. plan의 declarative binding spec validation
-11. owner-bound entity value resolve와 immutable job bundle validation 후 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각자 배정된 source만 처리한다. source payload는 연결된 Data 계약이며 운영자가 조절하는 유일한 source scalar는 각 실제 source node의 `조회 행 수 제한`이다.
+11. owner-bound entity value resolve와 immutable job bundle validation 후 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`가 각자 배정된 source만 실제 read-only 방식으로 조회한다. 실제 source node는 v5와 같은 운영 입력을 노출하며 빈 값은 환경변수 fallback을 사용할 수 있다. 비밀값은 export JSON 기본값으로 저장하지 않고, 조회 결과 행을 운영자가 `EDIT SOURCE PAYLOAD`로 직접 입력하는 경로는 사용하지 않는다.
 12. Source Contract Merger의 exact-once canonicalization 및 source contract validation
 13. 공통 typed operation DAG 실행. `registered_call`은 Registered Function Gateway가 implementation hash·I/O schema·resource policy를 재검증한 뒤 standalone allowlist 구현만 호출
 14. result lineage/schema/ordering validation

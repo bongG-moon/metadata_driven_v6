@@ -172,7 +172,7 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 | Plan Compiler | intent, exact resolved candidate bundle, metadata bundle, executed-result contract projection | `analysis.plan.v1` | candidate semantics를 dataset/date/declarative binding spec/mapping/operator/output으로 결정론적 확장 |
 | Plan Validator | plan | validated plan | 완전성·lineage·cardinality |
 | Parameter Binder/Router | validated plan, authenticated state/result refs | `retrieval.job_bundle.v1` | owner-bound entity value resolve·required parameter·thin job 확정 |
-| `11~15` Source Retrievers | source별 thin jobs, domain bundle, 연결된 source payload | `source.result.v1` | Dummy/Oracle/H-API/Datalake/Goodocs를 분리 처리; 운영자 조절 scalar는 실제 source별 조회 행 수 제한만 허용 |
+| `11~15` Source Retrievers | source별 thin jobs, domain bundle, source별 운영 연결 입력 | `source.result.v1` | Dummy/Oracle/H-API/Datalake/Goodocs를 분리하고 실제 read-only 조회 실행; v5 호환 운영 입력과 환경변수 fallback을 지원하며 수동 결과 행 payload는 받지 않음 |
 | Source Merger | source results | `source.bundle.v1` | canonicalization·중복/스키마 검사 |
 | Executor | plan, source bundle | `analysis.result.v1` | typed operators 실행 |
 | Registered Function Registry Attestor | active function cards, build manifest/registry | exact hash-pinned registry projection | function identity/source/schema/resource pin 검증; code·callable 직렬화 금지 |

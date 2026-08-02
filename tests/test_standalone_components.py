@@ -595,18 +595,106 @@ def test_generated_sources_are_current_and_monolith_is_gone() -> None:
     assert not (COMPONENT_ROOT / "data_analysis" / "00_trusted_analysis_engine.py").exists()
 
 
-def test_runtime_source_payloads_are_tweakable_scalar_json_inputs() -> None:
-    for relative in (
-        "data_analysis/12_oracle_source_retriever.py",
-        "data_analysis/13_h_api_source_retriever.py",
-        "data_analysis/14_datalake_source_retriever.py",
-        "data_analysis/15_goodocs_source_retriever.py",
-    ):
+def test_runtime_source_retrievers_restore_v5_operator_inputs() -> None:
+    expected_inputs = {
+        "data_analysis/12_oracle_source_retriever.py": {"oracle_config", "fetch_limit"},
+        "data_analysis/13_h_api_source_retriever.py": {"api_token", "timeout_seconds", "fetch_limit"},
+        "data_analysis/14_datalake_source_retriever.py": {
+            "module_name", "class_name", "user_id", "token", "s3_access_key", "s3_secret_key", "fetch_limit",
+        },
+        "data_analysis/15_goodocs_source_retriever.py": {"user_id", "token_source", "token_key", "fetch_limit"},
+    }
+    for relative, expected in expected_inputs.items():
         source = _source(relative)
-        assert 'NestedDictInput(name="source_payload"' in source.replace("\n", "").replace(" ", "")
-        assert 'DataInput(name="source_payload"' not in source
-        assert 'name="source_row_limit"' in source
+        assert 'name="source_payload"' not in source
+        assert 'name="source_row_limit"' not in source
         assert "source_memory_limit" not in source
+        for name in expected:
+            assert f'name="{name}"' in source
+        assert "_connector_payload(selected_jobs, catalog)" in source
+        assert "_checked_connector_results" in source
+
+
+def test_oracle_source_retriever_executes_v5_compatible_connector_without_source_payload() -> None:
+    from lfx.schema.data import Data
+
+    class FakeCursor:
+        description = [("PHYSICAL_VALUE",)]
+
+        def execute(self, sql: str) -> None:
+            assert sql == "SELECT PHYSICAL_VALUE FROM TEST_TABLE"
+
+        def fetchmany(self, limit: int):
+            assert limit == 5000
+            return [(7,)]
+
+        def close(self) -> None:
+            return None
+
+    class FakeConnection:
+        def cursor(self):
+            return FakeCursor()
+
+        def close(self) -> None:
+            return None
+
+    class FakeOracle:
+        @staticmethod
+        def connect(**kwargs):
+            assert kwargs == {"dsn": "TEST_DSN"}
+            return FakeConnection()
+
+    component_cls = _component_class("data_analysis/12_oracle_source_retriever.py")
+    component_cls.oracledb = FakeOracle
+    component = component_cls()
+    component.job_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "stage": "job_routing",
+            "data_mode": "live",
+            "source_type": "oracle",
+            "jobs": [
+                {
+                    "job_id": "job_test",
+                    "dataset_key": "test_dataset",
+                    "source_type": "oracle",
+                    "parameters": {},
+                    "required_fields": ["VALUE"],
+                    "filters": None,
+                }
+            ],
+        }
+    )
+    component.domain_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "domain_bundle": {
+                "runtime_catalog": {
+                    "datasets": {
+                        "test_dataset": {
+                            "source_type": "oracle",
+                            "source_config": {
+                                "db_key": "TEST_DB",
+                                "query_template": "SELECT PHYSICAL_VALUE FROM TEST_TABLE",
+                            },
+                            "parameters": {},
+                        }
+                    }
+                }
+            },
+        }
+    )
+    component.oracle_config = '{"TEST_DB":{"dsn":"TEST_DSN"}}'
+    component.fetch_limit = "5000"
+
+    result = component.retrieve().data
+
+    assert result["ok"] is True
+    assert result["status"] == "selected"
+    assert result["source_results"][0]["rows"] == [{"PHYSICAL_VALUE": 7}]
+    assert result["source_results"][0]["source_type"] == "oracle"
 
 
 def test_metadata_and_request_nodes_hide_deployment_internal_selectors() -> None:

@@ -22,6 +22,7 @@ REFERENCE_ROOT = PROJECT_ROOT / "reference_runtime"
 CATALOG_PATH = PROJECT_ROOT / "metadata" / "fixtures" / "compiled" / "runtime_catalog.json"
 SCHEMA_ROOT = PROJECT_ROOT / "contracts" / "schemas"
 OUTPUT_ROOT = PROJECT_ROOT / "langflow_components"
+SOURCE_ADAPTER_ASSET_ROOT = PROJECT_ROOT / "tools" / "assets" / "v5_source_adapters"
 
 CORE_MODULES = (
     "canonical.py",
@@ -1539,8 +1540,66 @@ class LiveSourceRetriever(Component):
 
 SOURCE_SPECIFIC_RETRIEVER_TEMPLATE = r'''
 from lfx.custom.custom_component.component import Component
-from lfx.io import DataInput, IntInput, NestedDictInput, Output
+from lfx.io import DataInput, MessageTextInput, Output
 from lfx.schema.data import Data
+
+
+def _connector_payload(jobs, catalog):
+    datasets = catalog.get("datasets") if isinstance(catalog, dict) else {}
+    prepared = []
+    for raw_job in jobs:
+        job = deepcopy(raw_job)
+        dataset = datasets.get(str(job.get("dataset_key") or "")) if isinstance(datasets, dict) else {}
+        dataset = dataset if isinstance(dataset, dict) else {}
+        source_config = deepcopy(job.get("source_config")) if isinstance(job.get("source_config"), dict) else {}
+        if not source_config:
+            for key in ("source_config", "adapter_config", "connection_config"):
+                if isinstance(dataset.get(key), dict):
+                    source_config = deepcopy(dataset[key])
+                    break
+        for key in (
+            "db_key", "query_template", "sql_template", "oracle_sql", "datalake_sql", "sql", "query",
+            "api_url", "url", "endpoint", "method", "headers", "query_params", "request_body", "response_path",
+            "doc_id", "sheet_name", "sheet", "range", "inline_rows", "required_params",
+        ):
+            if key not in source_config and dataset.get(key) not in (None, "", [], {}):
+                source_config[key] = deepcopy(dataset[key])
+        job["source_config"] = source_config
+        job["params"] = deepcopy(job.get("parameters") or {})
+        parameter_specs = dataset.get("parameters") if isinstance(dataset.get("parameters"), dict) else {}
+        job["required_param_names"] = [
+            str(name)
+            for name, spec in parameter_specs.items()
+            if isinstance(spec, dict) and bool(spec.get("required"))
+        ]
+        prepared.append(job)
+    return {"retrieval_mode": "live", "retrieval_job_bundle": {"jobs": prepared}}
+
+
+def _checked_connector_results(raw_result, jobs, source_type, stage):
+    raw_results = raw_result.get("source_results") if isinstance(raw_result, dict) else None
+    if not isinstance(raw_results, list) or len(raw_results) != len(jobs):
+        raise ContractError("source_retrieval_failed", stage, "조회기가 작업별 결과를 완전하게 반환하지 않았습니다.")
+    failures = [
+        result for result in raw_results
+        if not isinstance(result, dict) or str(result.get("status") or "") not in {"ok", "empty"}
+    ]
+    if failures:
+        error_types = sorted({
+            str(error.get("type") or "source_retrieval_failed")
+            for result in failures if isinstance(result, dict)
+            for error in (result.get("errors") or []) if isinstance(error, dict)
+        })
+        raise ContractError(
+            "source_retrieval_failed",
+            stage,
+            "데이터 원천 조회에 실패했습니다.",
+            {"source_type": source_type, "error_types": error_types[:8]},
+        )
+    return [
+        _physical_result(job, deepcopy(result.get("rows") or []), source_type)
+        for job, result in zip(jobs, raw_results, strict=True)
+    ]
 
 
 class __CLASS_NAME__(Component):
@@ -1551,14 +1610,7 @@ class __CLASS_NAME__(Component):
     inputs = [
         DataInput(name="job_bundle", display_name="__JOB_LABEL__", required=True, info="라우터가 __SOURCE_LABEL__에만 배정한 최소 조회 작업입니다."),
         DataInput(name="domain_bundle", display_name="사용 가능 메타데이터", required=True, info="조회 행의 데이터셋·필드 계약을 검증할 현재 메타데이터입니다."),
-        NestedDictInput(
-            name="source_payload",
-            display_name="__PAYLOAD_LABEL__",
-            value={},
-            required=False,
-            info="검토된 __SOURCE_LABEL__ 연동 코드가 query_ref/config_ref에 따라 반환한 데이터셋별 행입니다. 비밀값이나 연결 문자열을 넣지 않습니다.",
-        ),
-        IntInput(name="source_row_limit", display_name="조회 행 수 제한", value=50000, info="이 원천 노드가 한 번에 수신할 수 있는 최대 행 수입니다."),
+__ADAPTER_INPUTS__
     ]
     outputs = [Output(name="__OUTPUT_NAME__", display_name="__OUTPUT_LABEL__", method="retrieve", types=["Data"])]
 
@@ -1585,12 +1637,9 @@ class __CLASS_NAME__(Component):
             if not domain.get("ok"):
                 raise ContractError("metadata_dependency_error", "__STAGE__", "사용 가능 메타데이터를 불러오지 못했습니다.")
             catalog = (domain.get("domain_bundle") or {}).get("runtime_catalog")
-            payload = _payload(getattr(self, "source_payload", None))
-            max_rows = max(1, min(int(getattr(self, "source_row_limit", 50000)), 100000))
-            results = [
-                _physical_result(job, _source_rows(payload, job, catalog, max_rows), "__SOURCE_TYPE__")
-                for job in selected_jobs
-            ]
+            connector_payload = _connector_payload(selected_jobs, catalog)
+            raw_result = __ADAPTER_CALL__
+            results = _checked_connector_results(raw_result, selected_jobs, "__SOURCE_TYPE__", "__STAGE__")
             lane.update({"status": "selected", "source_results": results, "data_mode": "live"})
         except Exception as exc:
             lane = _pipeline_error(lane, exc, "__STAGE__")
@@ -1607,9 +1656,12 @@ def _source_specific_retriever_component(
     source_type: str,
     source_label: str,
     job_label: str,
-    payload_label: str,
     output_name: str,
     output_label: str,
+    adapter_asset: str,
+    adapter_class_name: str,
+    adapter_inputs: str,
+    adapter_call: str,
 ) -> str:
     values = {
         "__CLASS_NAME__": class_name,
@@ -1619,11 +1671,22 @@ def _source_specific_retriever_component(
         "__SOURCE_TYPE__": source_type,
         "__SOURCE_LABEL__": source_label,
         "__JOB_LABEL__": job_label,
-        "__PAYLOAD_LABEL__": payload_label,
         "__OUTPUT_NAME__": output_name,
         "__OUTPUT_LABEL__": output_label,
+        "__ADAPTER_INPUTS__": adapter_inputs,
+        "__ADAPTER_CALL__": adapter_call,
     }
-    source = SOURCE_SPECIFIC_RETRIEVER_TEMPLATE
+    asset_path = SOURCE_ADAPTER_ASSET_ROOT / adapter_asset
+    if not asset_path.is_file():
+        raise GenerationError(f"source adapter asset is missing: {asset_path}")
+    asset_source = asset_path.read_text(encoding="utf-8")
+    marker = f"class {adapter_class_name}(Component):"
+    if marker not in asset_source:
+        raise GenerationError(f"source adapter class marker is missing: {asset_path}: {marker}")
+    support_source = asset_source.split(marker, 1)[0]
+    support_source = support_source.replace("from __future__ import annotations\n", "")
+    support_source = support_source.replace(adapter_class_name, class_name)
+    source = support_source.rstrip() + "\n\n" + SOURCE_SPECIFIC_RETRIEVER_TEMPLATE
     for marker, value in values.items():
         source = source.replace(marker, value)
     return source
@@ -9549,14 +9612,18 @@ def build_components(*, check: bool = False) -> list[Path]:
             _source_specific_retriever_component(
                 class_name="OracleSourceRetriever",
                 display_name="12 Oracle 데이터 조회",
-                description="Oracle 전용 작업과 검토된 조회 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                description="v5 호환 Oracle 설정/TNS로 실제 read-only 조회를 실행하고 메타데이터 물리 컬럼 계약으로 검증합니다.",
                 stage="oracle_retrieval",
                 source_type="oracle",
                 source_label="Oracle",
                 job_label="Oracle 조회 작업",
-                payload_label="Oracle 조회 결과 행",
                 output_name="oracle_results",
                 output_label="Oracle 원천 조회 결과",
+                adapter_asset="oracle_retriever.py",
+                adapter_class_name="OracleQueryRetriever",
+                adapter_inputs='''        MessageTextInput(name="oracle_config", display_name="Oracle 설정/TNS", required=False, value="", info="v5와 같은 JSON 또는 TNS 연결 설정입니다. 빈 값이면 ORACLE_CONFIG_JSON 환경변수를 사용합니다."),
+        MessageTextInput(name="fetch_limit", display_name="조회 제한 건수", required=False, value="5000", advanced=True, info="한 작업에서 반환할 최대 행 수입니다."),''',
+                adapter_call='retrieve_oracle_data(connector_payload, getattr(self, "oracle_config", ""), getattr(self, "fetch_limit", "5000"))',
             ),
             catalog=catalog,
             schemas=schemas,
@@ -9570,14 +9637,19 @@ def build_components(*, check: bool = False) -> list[Path]:
             _source_specific_retriever_component(
                 class_name="HApiSourceRetriever",
                 display_name="13 H-API 데이터 조회",
-                description="H-API 전용 작업과 검토된 API 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                description="v5 호환 H-API 설정으로 실제 read-only API 조회를 실행하고 메타데이터 물리 컬럼 계약으로 검증합니다.",
                 stage="h_api_retrieval",
                 source_type="h_api",
                 source_label="H-API",
                 job_label="H-API 조회 작업",
-                payload_label="H-API 조회 결과 행",
                 output_name="h_api_results",
                 output_label="H-API 원천 조회 결과",
+                adapter_asset="h_api_retriever.py",
+                adapter_class_name="HApiRetriever",
+                adapter_inputs='''        MessageTextInput(name="api_token", display_name="H-API 토큰", required=False, value="", advanced=True, info="H-API 인증 토큰입니다. 빈 값이면 H_API_TOKEN 환경변수를 사용합니다."),
+        MessageTextInput(name="timeout_seconds", display_name="요청 제한 시간(초)", required=False, value="30", advanced=True, info="H-API 요청의 최대 대기 시간입니다."),
+        MessageTextInput(name="fetch_limit", display_name="조회 제한 건수", required=False, value="5000", advanced=True, info="한 작업에서 반환할 최대 행 수입니다."),''',
+                adapter_call='h_api_retrieve(connector_payload, getattr(self, "api_token", ""), getattr(self, "timeout_seconds", "30"), getattr(self, "fetch_limit", "5000"), getattr(self, "opener", None))',
             ),
             catalog=catalog,
             schemas=schemas,
@@ -9591,14 +9663,23 @@ def build_components(*, check: bool = False) -> list[Path]:
             _source_specific_retriever_component(
                 class_name="DatalakeSourceRetriever",
                 display_name="14 Datalake 데이터 조회",
-                description="Datalake 전용 작업과 검토된 조회 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                description="v5 호환 LakeHouse 설정으로 실제 read-only 조회를 실행하고 메타데이터 물리 컬럼 계약으로 검증합니다.",
                 stage="datalake_retrieval",
                 source_type="datalake",
                 source_label="Datalake",
                 job_label="Datalake 조회 작업",
-                payload_label="Datalake 조회 결과 행",
                 output_name="datalake_results",
                 output_label="Datalake 원천 조회 결과",
+                adapter_asset="datalake_retriever.py",
+                adapter_class_name="DatalakeRetriever",
+                adapter_inputs='''        MessageTextInput(name="module_name", display_name="Datalake 모듈명", required=False, value="lakes", advanced=True, info="LakeHouse 클라이언트가 들어 있는 Python 모듈명입니다."),
+        MessageTextInput(name="class_name", display_name="Datalake 클래스명", required=False, value="LakeHouse", advanced=True, info="Datalake 조회를 실행할 클라이언트 클래스명입니다."),
+        MessageTextInput(name="user_id", display_name="LakeHouse 사용자 ID", required=False, value="", advanced=True, info="LakeHouse 사용자 ID입니다. 빈 값이면 LAKEHOUSE_USER_ID 환경변수를 사용합니다."),
+        MessageTextInput(name="token", display_name="LakeHouse 토큰", required=False, value="", advanced=True, info="LakeHouse 인증 토큰입니다. 빈 값이면 LAKEHOUSE_TOKEN 환경변수를 사용합니다."),
+        MessageTextInput(name="s3_access_key", display_name="S3 접근 키", required=False, value="", advanced=True, info="필요한 경우 사용하는 S3 접근 키입니다."),
+        MessageTextInput(name="s3_secret_key", display_name="S3 보안 키", required=False, value="", advanced=True, info="필요한 경우 사용하는 S3 보안 키입니다."),
+        MessageTextInput(name="fetch_limit", display_name="조회 제한 건수", required=False, value="5000", advanced=True, info="한 작업에서 반환할 최대 행 수입니다."),''',
+                adapter_call='datalake_retrieve(connector_payload, getattr(self, "module_name", "lakes"), getattr(self, "class_name", "LakeHouse"), getattr(self, "user_id", ""), getattr(self, "token", ""), getattr(self, "s3_access_key", ""), getattr(self, "s3_secret_key", ""), getattr(self, "fetch_limit", "5000"), getattr(self, "client_cls", None))',
             ),
             catalog=catalog,
             schemas=schemas,
@@ -9612,14 +9693,20 @@ def build_components(*, check: bool = False) -> list[Path]:
             _source_specific_retriever_component(
                 class_name="GoodocsSourceRetriever",
                 display_name="15 Goodocs 데이터 조회",
-                description="Goodocs 전용 작업과 검토된 문서 결과를 받아 메타데이터 물리 컬럼 계약으로 검증합니다.",
+                description="v5 호환 Goodocs 설정으로 실제 read-only 문서 조회를 실행하고 메타데이터 물리 컬럼 계약으로 검증합니다.",
                 stage="goodocs_retrieval",
                 source_type="goodocs",
                 source_label="Goodocs",
                 job_label="Goodocs 조회 작업",
-                payload_label="Goodocs 조회 결과 행",
                 output_name="goodocs_results",
                 output_label="Goodocs 원천 조회 결과",
+                adapter_asset="goodocs_retriever.py",
+                adapter_class_name="GoodocsRetriever",
+                adapter_inputs='''        MessageTextInput(name="user_id", display_name="Goodocs 사용자 ID", required=False, value="", advanced=True, info="Goodocs 조회 사용자 ID입니다. 빈 값이면 GOODOCS_USER_ID 환경변수를 사용합니다."),
+        MessageTextInput(name="token_source", display_name="Goodocs 토큰 소스", required=False, value="", advanced=True, info="Goodocs 인증 토큰을 가져올 소스 식별자입니다."),
+        MessageTextInput(name="token_key", display_name="Goodocs 토큰 키", required=False, value="", advanced=True, info="Goodocs 인증에 사용할 토큰 키입니다."),
+        MessageTextInput(name="fetch_limit", display_name="조회 제한 건수", required=False, value="5000", advanced=True, info="한 작업에서 반환할 최대 행 수입니다."),''',
+                adapter_call='goodocs_retrieve(connector_payload, getattr(self, "user_id", ""), getattr(self, "token_source", ""), getattr(self, "token_key", ""), getattr(self, "fetch_limit", "5000"))',
             ),
             catalog=catalog,
             schemas=schemas,

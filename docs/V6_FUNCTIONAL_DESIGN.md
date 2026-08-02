@@ -394,7 +394,7 @@ Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/ha
 - `config_ref` → 서버 측 운영 adapter registry: adapter, endpoint ref, secret node-input 이름, ACL, read-only action
 - `query_ref` → 서버 측 운영 adapter registry: reviewed query/operation, typed parameter schema, ACL, timeout/max-row 상한
 
-저장소의 승인 Source 레지스트리에는 credential·SQL·endpoint 값을 넣지 않는다. 범용 Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리하고 각 node가 연결된 자기 source payload만 검증한다. 물리 ref resolver는 서버 측 배포 adapter의 책임이다. 그 adapter는 ACL과 reference hash를 검증하고 secret을 호출 동안만 주입해야 하며 metadata/state/trace/result/LLM에는 남기지 않는다. 운영자에게 노출하는 source scalar는 실제 source별 `조회 행 수 제한`뿐이며 이를 완화하거나 write action, 임의 SQL/endpoint/dynamic collection을 넣을 수 없다.
+저장소의 승인 Source 레지스트리에는 credential 값을 넣지 않는다. 범용 Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 네 실제 source node는 v5 호환 운영 입력 또는 환경변수 fallback으로 직접 read-only 조회를 실행하고 결과를 `source.result.v1`로 변환한다. 운영자가 이미 조회된 행을 `EDIT SOURCE PAYLOAD`에 수동 입력하는 구조는 사용하지 않는다. credential/token 기본값은 export JSON에서 비워 두고 metadata/state/trace/result/LLM에 복사하지 않으며, 승인 metadata 밖의 write action은 허용하지 않는다.
 
 ### 6.3 Langflow 1.9.2 저장 프로토콜
 

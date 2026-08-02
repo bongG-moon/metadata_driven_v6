@@ -320,7 +320,7 @@ Phase 4에서는 아직 adapter가 없으므로 30+6 전체 E2E나 multi-turn �
 ### 작업
 
 - `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`의 분리된 adapter
-- canonical filter/projection→reviewed physical query-slot binding과 branch-local secret injection은 배포 adapter가 소유하고, Flow node는 연결된 source payload 계약만 수신
+- canonical filter/projection→reviewed physical query-slot binding은 metadata가 소유하고, 네 Flow source node는 v5 호환 운영 입력 또는 환경변수로 branch-local credential을 받아 실제 read-only 조회를 실행한 뒤 `source.result.v1`만 반환
 - physical schema capture
 - Source Contract Merger의 exact-once field binding canonicalization
 - inline/ref threshold
