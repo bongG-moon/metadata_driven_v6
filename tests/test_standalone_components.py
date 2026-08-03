@@ -380,28 +380,30 @@ def _bootstrap_prompt_context(
     return component.build_context()
 
 
-def test_manufacturing_dataset_input_is_worker_friendly_freeform() -> None:
-    """The worker fixture must not require registry grammar or physical mappings."""
+def test_manufacturing_dataset_input_is_worker_friendly_and_query_aware() -> None:
+    """The baseline may carry reviewed SQL while variants remain plain prose."""
 
     context = _approved_reference_context("manufacturing").data
 
     forbidden_registration_syntax = (
         "dataset_id",
         "field_id",
-        "filter_mappings",
         "source_binding",
         "config_ref",
         "query_ref",
-        "query_template",
-        "semantic_type",
         "physical_column",
         "pandas_function_cases",
     )
     assert len(context["dataset_descriptors"]) == 10
-    for source_dir in AUTHORING_WORKER_SOURCE_SETS.values():
+    for source_set, source_dir in AUTHORING_WORKER_SOURCE_SETS.items():
         source = (source_dir / "dataset_v6.txt").read_text(encoding="utf-8")
         assert all(label in source for label in MANUFACTURING_DATASET_BUSINESS_LABELS)
         assert not any(token in source for token in forbidden_registration_syntax)
+        if source_set == "baseline":
+            assert source.count("query_template:") == 8
+            assert "{DATE}" in source and "{LOT_ID}" in source
+        else:
+            assert "query_template:" not in source
 
 
 def test_worker_v6_inputs_remain_free_prose_not_compiler_grammar() -> None:
@@ -430,7 +432,10 @@ def test_worker_v6_inputs_remain_free_prose_not_compiler_grammar() -> None:
             assert 1 <= len(text.encode("utf-8")) <= 65536
             assert not text.startswith("{")
             assert not text.startswith("[")
-            assert not (forbidden_compiler_terms & set(re.findall(r"[A-Za-z_]+", text)))
+            observed_terms = forbidden_compiler_terms & set(re.findall(r"[A-Za-z_]+", text))
+            if source_set == "baseline" and filename == "dataset_v6.txt":
+                observed_terms -= {"semantic_type"}
+            assert not observed_terms
             with pytest.raises(json.JSONDecodeError):
                 json.loads(text)
 
@@ -622,7 +627,7 @@ def test_oracle_source_retriever_executes_v5_compatible_connector_without_source
         description = [("PHYSICAL_VALUE",)]
 
         def execute(self, sql: str) -> None:
-            assert sql == "SELECT PHYSICAL_VALUE FROM TEST_TABLE"
+            assert sql == "SELECT PHYSICAL_VALUE\nFROM TEST_TABLE\nWHERE WORK_DATE = '20260803'"
 
         def fetchmany(self, limit: int):
             assert limit == 5000
@@ -659,7 +664,7 @@ def test_oracle_source_retriever_executes_v5_compatible_connector_without_source
                     "job_id": "job_test",
                     "dataset_key": "test_dataset",
                     "source_type": "oracle",
-                    "parameters": {},
+                    "parameters": {"DATE": "20260803"},
                     "required_fields": ["VALUE"],
                     "filters": None,
                 }
@@ -677,9 +682,10 @@ def test_oracle_source_retriever_executes_v5_compatible_connector_without_source
                             "source_type": "oracle",
                             "source_config": {
                                 "db_key": "TEST_DB",
-                                "query_template": "SELECT PHYSICAL_VALUE FROM TEST_TABLE",
+                                "query_template": "SELECT PHYSICAL_VALUE\nFROM TEST_TABLE\nWHERE WORK_DATE = {DATE}",
+                                "required_params": ["DATE"],
                             },
-                            "parameters": {},
+                            "parameters": {"DATE": {"type": "LocalDate", "required": True}},
                         }
                     }
                 }
@@ -695,6 +701,72 @@ def test_oracle_source_retriever_executes_v5_compatible_connector_without_source
     assert result["status"] == "selected"
     assert result["source_results"][0]["rows"] == [{"PHYSICAL_VALUE": 7}]
     assert result["source_results"][0]["source_type"] == "oracle"
+
+
+def test_datalake_retriever_executes_catalog_query_with_required_parameter() -> None:
+    from lfx.schema.data import Data
+
+    class FakeLake:
+        def run_sql(self, sql: str):
+            assert sql == "SELECT LOT_ID, VALUE\nFROM LAKE_TABLE\nWHERE LOT_ID = 'LOT-001'"
+            return [{"LOT_ID": "LOT-001", "VALUE": 9}]
+
+    component_cls = _component_class("data_analysis/14_datalake_source_retriever.py")
+    component = component_cls()
+    component.client_cls = FakeLake
+    component.job_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "stage": "job_routing",
+            "data_mode": "live",
+            "source_type": "datalake",
+            "jobs": [
+                {
+                    "job_id": "job_lake",
+                    "dataset_key": "lake_dataset",
+                    "source_type": "datalake",
+                    "parameters": {"LOT_ID": "LOT-001"},
+                    "required_fields": ["LOT_ID", "VALUE"],
+                    "filters": None,
+                }
+            ],
+        }
+    )
+    component.domain_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "domain_bundle": {
+                "runtime_catalog": {
+                    "datasets": {
+                        "lake_dataset": {
+                            "source_type": "datalake",
+                            "source_config": {
+                                "source_type": "datalake",
+                                "db_key": "LAKE_MAIN",
+                                "query_template": "SELECT LOT_ID, VALUE\nFROM LAKE_TABLE\nWHERE LOT_ID = {LOT_ID}",
+                                "required_params": ["LOT_ID"],
+                            },
+                            "parameters": {"LOT_ID": {"type": "string", "required": True}},
+                        }
+                    }
+                }
+            },
+        }
+    )
+    component.module_name = "lakes"
+    component.class_name = "LakeHouse"
+    component.token = ""
+    component.s3_access_key = ""
+    component.s3_secret_key = ""
+    component.fetch_limit = "5000"
+
+    result = component.retrieve().data
+
+    assert result["ok"] is True
+    assert result["status"] == "selected"
+    assert result["source_results"][0]["rows"] == [{"LOT_ID": "LOT-001", "VALUE": 9}]
 
 
 def test_metadata_node_exposes_collection_names_but_hides_domain_selectors() -> None:
@@ -4163,7 +4235,8 @@ def test_authoring_generated_source_has_no_pending_or_active_writer() -> None:
     assert set(values).isdisjoint({"pending_collection", "active_collection", "bundle_collection"})
     assert "def _pending_payload(" not in source
     assert "def _execute_v2(" not in source
-    assert "replace_metadata_release(" in source
+    assert "replace_metadata_items(" in source
+    assert "release_manifest_sha256" not in source
     assert "load_domain_package_from_three_collections(" in source
 
 

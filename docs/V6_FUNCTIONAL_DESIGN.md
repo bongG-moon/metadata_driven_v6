@@ -99,7 +99,7 @@ Trusted core 정상 경로:
 
 ## 4. 기능 요구사항
 
-Data Analysis Flow는 `00`~`27` 실행 순서의 한국어 표시명을 사용한다. Domain/Dataset/Main Filter/Domain Policy 등록 Flow도 각자의 `00` 입력부터 최종 출력까지 번호를 붙이고, 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C`로 구분한다. 도메인 초기 등록의 세 context/composer/invoker에는 도메인·초기 데이터셋·초기 주요 필터 분기명을 명시한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인/데이터 카탈로그/메인필터 컬렉션명·timeout을 입력받아 해당 3컬렉션의 최신 완전 release를 자동 결합한다. domain/environment/source mode 선택은 UI에 없다. `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI 없이 내부 현재 시각을 `Asia/Seoul`로 고정한다.
+Data Analysis Flow는 `00`~`27` 실행 순서의 한국어 표시명을 사용한다. Domain/Dataset/Main Filter/Domain Policy 등록 Flow도 각자의 `00` 입력부터 최종 출력까지 번호를 붙이고, 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C`로 구분한다. 도메인 초기 등록의 세 context/composer/invoker에는 도메인·초기 데이터셋·초기 주요 필터 분기명을 명시한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인/데이터 카탈로그/메인필터 컬렉션명·timeout을 입력받아 해당 3컬렉션의 항목을 typed runtime catalog로 컴파일한다. domain/environment/source mode 선택은 UI에 없다. `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI 없이 내부 현재 시각을 `Asia/Seoul`로 고정한다.
 
 ### FR-01. 자연어 질문 이해
 
@@ -205,7 +205,7 @@ v5 호환 surface는 다음과 같이 이전한다.
 
 | v5 기능 | v6 소유자 | 호환 규칙 |
 | --- | --- | --- |
-| Answer Message Adapter 표시 토글 | `24 채팅 메시지 표시 설정` | schema만 검사하고 같은 항목과 배포 기본값 유지 |
+| Answer Message Adapter 표시 토글 | `24 채팅 메시지 표시 설정` | 결과표·근거·적용 기준·Pandas 등가 코드·Typed Execution IR을 각각 선택하며 출력 payload hash 비교는 하지 않음 |
 | `show_pandas_code` | `show_execution_plan` | import alias만 유지하고 code 대신 typed IR 표시 |
 | Answer Response Builder | Response Assembler | canonical `answer.sections.v1` 생성 |
 | API Response Builder | `25 API 표준 응답 출력` | response hash 검증 후 structured `response.v1`을 별도 output으로 반환 |
@@ -228,7 +228,7 @@ v5 호환 surface는 다음과 같이 이전한다.
 - Domain Policy는 별도 Domain Policy Authoring Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 사용하고 Prompt Template/Composer/envelope/LLM은 0회다. `semantic_templates.planner_policy`의 `planner_profile`/legacy hash는 이 Flow도 변경할 수 없다.
 - optional explicit-inventory Main Filter도 Prompt Template/Composer/envelope/LLM은 0회
 - JSON Schema와 semantic·dependency·security lint가 실행 가능성을 검증한다. 누락·모호한 정보는 포맷 재작성 요구가 아니라 draft/candidate 없는 `status=needs_clarification`으로 반환하며, 질문은 내부 ID나 타입 대신 작업자가 고를 수 있는 쉬운 업무 label을 사용한다.
-- dependency closure 후 동일 release의 세 section과 catalog/package/bundle hash를 봉인
+- dependency closure 후 전체 runtime catalog를 검증하고 MongoDB 저장용 항목 문서로 분할
 - `validate_only`는 write 0건, `save`는 노드에 지정된 3컬렉션을 하나의 transaction으로 교체
 - raw source/hash와 compiled runtime record 분리
 
@@ -392,7 +392,7 @@ Canonicalization 책임자는 typed executor가 아니라 **Source Contract Merg
 Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/hash와 함께 pin한다. 이 ID는 작업자나 LLM이 작성하지 않고 별도 운영자 승인 Source 레지스트리가 dataset ID로 결정론적으로 주입한다.
 
 - `config_ref` → 서버 측 운영 adapter registry: adapter, endpoint ref, secret node-input 이름, ACL, read-only action
-- `query_ref` → 서버 측 운영 adapter registry: reviewed query/operation, typed parameter schema, ACL, timeout/max-row 상한
+- Oracle·SQL·Datalake → 테이블 카탈로그 `payload.source_config`: reviewed read-only `query_template`, `db_key`, `required_params`. credential/connection string은 노드 입력 또는 환경변수 경계에 남긴다. 다른 adapter는 필요하면 기존 `query_ref`를 사용할 수 있다.
 
 저장소의 승인 Source 레지스트리에는 credential 값을 넣지 않는다. 범용 Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 네 실제 source node는 v5 호환 운영 입력 또는 환경변수 fallback으로 직접 read-only 조회를 실행하고 결과를 `source.result.v1`로 변환한다. 운영자가 이미 조회된 행을 `EDIT SOURCE PAYLOAD`에 수동 입력하는 구조는 사용하지 않는다. credential/token 기본값은 export JSON에서 비워 두고 metadata/state/trace/result/LLM에 복사하지 않으며, 승인 metadata 밖의 write action은 허용하지 않는다.
 
@@ -401,9 +401,9 @@ Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/ha
 현재 기본 등록 Flow는 `save`와 `validate_only` 두 모드만 제공한다. 두 모드 모두 자연어 TXT를 LLM으로 typed 등록 IR로 바꾼 뒤 동일한 schema, 참조, hash 검증을 수행한다.
 
 - `validate_only`: 변환·컴파일·검증 결과만 반환하고 MongoDB를 변경하지 않는다.
-- `save`: 검증된 동일 release의 도메인, 테이블 카탈로그, 메인필터 문서를 노드에 지정된 서로 다른 3개 컬렉션에 transaction으로 교체한다.
+- `save`: 검증된 도메인, 테이블 카탈로그, 메인필터 항목 문서를 노드에 지정된 서로 다른 3개 컬렉션에 transaction으로 교체한다.
 
-별도의 pending collection이나 active pointer는 사용하지 않는다. 각 문서는 같은 `release_id`, revision, section hash, package hash를 가지며, 분석 Flow의 selector-free loader는 가장 최근 도메인 문서의 identity를 기준으로 나머지 두 문서를 결합한 뒤 세 문서의 seal을 다시 검증한다. 세 문서 중 하나라도 누락되거나 release/hash가 다르면 저장 결과를 사용하지 않는다.
+별도의 pending collection이나 active pointer는 사용하지 않는다. 각 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. 분석 Flow의 selector-free loader는 세 컬렉션의 항목 전체를 결합한 뒤 Domain Package를 메모리에서 다시 컴파일한다. 필수 항목 누락, 중복 key, 지원하지 않는 section, typed payload 오류가 있으면 저장 결과를 사용하지 않는다.
 
 조직 정책상 사전 승인이 필요하면 등록 Flow 바깥의 배포·승인 서비스가 `validate_only` 결과를 검토한 다음 별도의 인증된 `save` 실행을 호출할 수 있다. 이는 선택 가능한 운영 래퍼이며, 기본 Flow나 MongoDB 스키마에 pending/active 컬렉션을 추가하지 않는다.
 

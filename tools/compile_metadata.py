@@ -17,11 +17,15 @@ from reference_runtime.metadata_compiler import (
     COMPILER_VERSION,
     build_runtime_catalog,
     compiled_records,
+    compute_catalog_sha256,
     load_runtime_catalog,
+    MANUFACTURING_PACK_CATALOG,
     source_provenance,
+    validate_runtime_catalog,
     write_runtime_catalog,
 )
 from reference_runtime.domain_packages import (
+    apply_dataset_source_configs_from_text,
     adapt_legacy_catalog_v1,
     compile_domain_package,
     make_active_pointer_document,
@@ -45,6 +49,16 @@ def compile_baseline(
 ) -> dict[str, Any]:
     provenance = source_provenance(authoring_root)
     catalog = build_runtime_catalog(authoring_root)
+    table_catalog_source = (authoring_root / "table_catalog" / "data_catalog.txt").read_text(encoding="utf-8")
+    catalog, query_extraction = apply_dataset_source_configs_from_text(
+        catalog,
+        table_catalog_source,
+        require_complete=True,
+    )
+    catalog["catalog_sha256"] = compute_catalog_sha256(catalog)
+    catalog = validate_runtime_catalog(catalog)
+    if authoring_root.resolve() == (ROOT / "metadata" / "authoring").resolve():
+        write_runtime_catalog(MANUFACTURING_PACK_CATALOG, catalog)
     output_dir.mkdir(parents=True, exist_ok=True)
     catalog_path = write_runtime_catalog(output_dir / "runtime_catalog.json", catalog)
     records = compiled_records(catalog, provenance, lifecycle_status="active")
@@ -61,7 +75,12 @@ def compile_baseline(
             "legacy_catalog_sha256": catalog["catalog_sha256"],
         },
     )
-    manufacturing_dir = ROOT / "metadata" / "domain_packs" / "manufacturing" / "compiled"
+    default_output_dir = (ROOT / "metadata" / "fixtures" / "compiled").resolve()
+    manufacturing_dir = (
+        ROOT / "metadata" / "domain_packs" / "manufacturing" / "compiled"
+        if output_dir.resolve() == default_output_dir
+        else output_dir / "manufacturing_domain_package"
+    )
     manufacturing_dir.mkdir(parents=True, exist_ok=True)
     manufacturing_package_path = manufacturing_dir / "domain_package.json"
     manufacturing_package_path.write_bytes(canonical_bytes(manufacturing_package) + b"\n")
@@ -94,6 +113,7 @@ def compile_baseline(
             "aliases": len(catalog["aliases"]),
         },
         "round_trip_ok": round_trip["catalog_sha256"] == catalog["catalog_sha256"],
+        "source_query_extraction": query_extraction,
         "domain_package": {
             "domain_id": manufacturing_package["domain_id"],
             "environment": manufacturing_package["environment"],

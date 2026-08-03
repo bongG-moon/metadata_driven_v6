@@ -1,5 +1,5 @@
 {
-  "blueprint_sha256": "58533edfe3489336d9829b1ff1ac1ece328d7a50233ba9ba19abf5b07bd877af",
+  "blueprint_sha256": "eb35800f2ca4893669a0dc92e0318fa0515365150edbb0725eabaf2a904d4033",
   "contract_version": "metadata.executable-blueprint.v1",
   "default_annotations": {
     "description": "Legacy manufacturing catalog isolated as a versioned domain pack.",
@@ -4526,6 +4526,12 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "GMS_DB",
+          "query_template": "SELECT \n\n  EQUIP_MODEL\n  ,OPER\n  ,OPER_NAME\n  ,PRESS_CNT\n  ,PROD_TYP AS \"MODE\"\n  ,TECH\n  ,ORG\n  ,DENSITY\n  ,PKG_TYP AS PKG1\n  ,PKG_TYP_2 AS PKG2\n  ,LEAD_CNT AS LEAD\n  ,MCP_NO\n  ,RECIPE_ID \n  ,round(AVG_UPH_VAL,2) AS UPH\n  ,WORK_DT AS LOAD_DT\n  ,BASE_DT\nFROM UPH\nWHERE 1=1",
+          "required_params": [],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "current"
       },
@@ -4929,6 +4935,12 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "SELECT \n  BAY_ID, \n  EQUIP_ID, \n  EQUIP_MODEL, \n  PRESS_CNT,\n  OPER,\n  OPER_NM,\n  MODE, \n  DENSITY, \n  TECH, \n  PKG1, \n  PKG2, \n  LEAD, \n  ORG,\n  PKGSIZE,  \n  MCP_NO,\n  DEVICE,\n  DEVICE_DESC,\n  LOT_ID,\n  RECIPE_ID\nFROM  EQP_TABLE\nWHERE 1=1",
+          "required_params": [],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "current"
       },
@@ -5233,6 +5245,14 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "/*HOLD_LOT_HISTORY*/\n\n        SELECT\n\n            LOT_ID,\n            PROD_QTY,\n            OPER,\n            OPER_NAME,\n            HOLD_TM,\n            HOLD_CD,\n            HOLD_USER,\n            HOLD_DESC,\n            FAB,\n            FAMILY,\n            MODE,\n            DENSITY,\n            TECH,\n            ORG,\n            PKG1,\n            PKG2,\n            LEAD,\n            MCP_NO,\n            GRADE,\n            OWNER,\n            \n            DEVICE,\n            DEVICE_DESC,\n            PKG_SIZE,\n            THK_CD,\n            flow_id   \n        FROM HOLD_HIS\n        WHERE LOT_ID IN ({LOT_ID})",
+          "required_params": [
+            "LOT_ID"
+          ],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "history",
         "upstream_bindings": [
@@ -5684,6 +5704,12 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "/*Current Wip Status*/\nSELECT\nERM_ID,OPER,OPER_NAME,FAB,OWNER,GRADE,DEVICE,LOT_ID,SUB_LOT_ID,PROD_QTY,WF_QTY,IN_TAT,CUM_TAT,EQP_ID,FLOW_ID,OPER_IN_TM,FAC_IN_TIME,HOLD_STAT,HOLD_REASON,FAMILY,MODE,DENSITY,TECH,ORG,PKG1,PKG2,PKG3,LEAD,MCP_NO,THK_CD,LOT_STAT,LOT_GRP,PKG_SIZE,HOT_LOT,HOT_LEVEL,PKG_COMPOSIT,DURABLE_ID,DURABLE_TYP,SUB_QTY,TSV_DIE_TYPE,EVENT_DESC,MOVE_IN_TM,PAD_ABNORMAL,SWR_REQ_NO,INSP_TARGET\nFROM WIP_STATE\nWHERE 1=1",
+          "required_params": [],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "current"
       },
@@ -5703,10 +5729,8 @@
             "aliases": [],
             "coercion": "string",
             "nullable": true,
-            "physical_aliases": [
-              "DEN"
-            ],
-            "physical_column": "DENSITY",
+            "physical_aliases": [],
+            "physical_column": "DEN",
             "required_in_source": false,
             "roles": [
               "filter",
@@ -6217,6 +6241,14 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "SELECT WORK_DATE, SHIFT, FACTORY, FAB, FAMILY, MODE, DENSITY, TECH, ORG, PKG1\n        , PKG2, LEAD, MCP_NO, TSV_DIE_TYP, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, NETDIE_300_CNT, OPER\n        , OPER_NAME, OPER_SEQ, PRODUCTION \nFROM PROD_TABLE2\nWHERE 1=1\nAND WORK_DATE = {DATE}",
+          "required_params": [
+            "DATE"
+          ],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "history"
       },
@@ -6589,6 +6621,14 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "--쿼리 작성\nSELECT WORK_DATE, SHIFT, FACTORY, FAB, FAMILY, MODE, DENSITY, TECH, ORG, PKG1\n        , PKG2, LEAD, MCP_NO, TSV_DIE_TYP, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, NETDIE_300_CNT, OPER\n        , OPER_NAME, OPER_SEQ, PRODUCTION \nFROM PROD_TABLE\nWHERE 1=1\nAND WORK_DATE = {DATE}",
+          "required_params": [
+            "DATE"
+          ],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "current"
       },
@@ -7175,6 +7215,14 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "--쿼리 작성\nSELECT WORK_DATE, SHIFT, FACTORY, FAB, FAMILY, MODE, DENSITY, TECH, ORG, PKG1\n        , PKG2, LEAD, MCP_NO, TSV_DIE_TYP, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, NETDIE_300_CNT, OPER\n        , OPER_NAME, OPER_SEQ\n        , WIP\nFROM WIP_TABLE2\nWHERE 1=1\nAND WORK_DATE = {DATE}",
+          "required_params": [
+            "DATE"
+          ],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "history"
       },
@@ -7546,6 +7594,14 @@
           "timeout_seconds": 30
         },
         "source_adapter": "oracle",
+        "source_config": {
+          "db_key": "PNT_RPT",
+          "query_template": "SELECT WORK_DATE, SHIFT, FACTORY, FAB, FAMILY, MODE, DENSITY, TECH, ORG, PKG1\n        , PKG2, LEAD, MCP_NO, TSV_DIE_TYP, DEVICE, DEVICE_DESC, DIE_ATTACH_QTY, NETDIE_300_CNT, OPER\n        , OPER_NAME, OPER_SEQ\n        , WIP\nFROM WIP_TABLE\nWHERE 1=1\nAND WORK_DATE = {DATE}",
+          "required_params": [
+            "DATE"
+          ],
+          "source_type": "oracle"
+        },
         "source_type": "oracle",
         "time_scope": "current"
       }
@@ -8674,7 +8730,7 @@
       }
     },
     "output_profile": {
-      "legacy_catalog_sha256": "6d2c9eaf3a10be1023a5c7aa52c796d5f0caf7287237a488ce38e68840b0e16f",
+      "legacy_catalog_sha256": "1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e",
       "planner_profile": "legacy_v1_compat"
     },
     "predicates": {
@@ -9275,12 +9331,12 @@
     },
     "relations": {},
     "source_provenance": {
-      "base_catalog_sha256": "d3b8fd3149689bd39cd43291a82b4114aea63c9980ca4f3f076632fb40696db5",
+      "base_catalog_sha256": "ddb3ae9ea854940da02fd182b9bb497f6a474ae4617d265798bd7e2763333717",
       "source_type": "compiled_runtime_catalog_v2"
     },
     "specialized_functions": [],
     "timezone": "Asia/Seoul"
   },
-  "executable_sha256": "f5d01711cde703260e4932e4b62dd2435529a567cf730335a1054a787aadeeb4",
+  "executable_sha256": "fe580e4ec13c22a124538f22f3eec415aeae188279c99da386ae5755aab9922f",
   "source_manifest_sha256": "96cba65beedd3246c158f858e4e356a0fa4e27eb15be31593ec86b9c739d5576"
 }

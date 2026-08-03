@@ -14,7 +14,7 @@
 
 실제 LLM 출력 envelope는 `metadata.authoring.proposal.v1`이다. `status=complete`이면 입력 원문의 `source_sha256`과 closed `draft`가 있고, `status=needs_clarification`이면 같은 source hash와 최대 3개의 확인 질문 및 `missing_fields`만 있다. 두 형태를 섞거나 clarification 응답에 draft/candidate/persist 결과를 넣으면 schema 단계에서 거부한다.
 
-Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자의 업무 의도를 대신 확정하지 않는다. 서로 다른 해석이 가능한 문장은 임의 선택하지 않고 clarification/missing-information으로 돌려보내며 이 경우 저장하지 않는다. 확인 질문은 “당일 생산과 생산 이력 중 어느 자료인가요?”처럼 쉬운 업무 선택지를 사용하며 등록 ID, canonical ID, JSON/DSL, 타입, 물리 컬럼 또는 schema 경로를 묻지 않는다. 검증에 성공한 결과는 도메인·테이블 카탈로그·메인필터 current 문서를 동일 release로 transaction 저장한다.
+Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자의 업무 의도를 대신 확정하지 않는다. 서로 다른 해석이 가능한 문장은 임의 선택하지 않고 clarification/missing-information으로 돌려보내며 이 경우 저장하지 않는다. 확인 질문은 “당일 생산과 생산 이력 중 어느 자료인가요?”처럼 쉬운 업무 선택지를 사용하며 등록 ID, canonical ID, JSON/DSL, 타입, 물리 컬럼 또는 schema 경로를 묻지 않는다. 검증에 성공한 결과는 도메인·테이블 카탈로그·메인필터 collection에 자연어 기반 항목 문서로 transaction 저장한다.
 
 현재 live 검증 model policy는 정확히 `gemini-3.5-flash-lite`, temperature `0`, provider/model fallback `0`, repair LLM `0`이다. 모델 응답이 schema를 통과하지 못하면 같은 질문을 고쳐 재호출하지 않고 canonical validation error로 끝낸다.
 
@@ -43,7 +43,7 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 | Main Filter | 날짜·제품·공정 등 조회 기준의 업무 의미와 사용자가 실제로 쓰는 표현 | 내부 `target_type` 필수 typed IR + 승인 vocabulary membership + alias-card expansion |
 | Domain Policy | intent/answer prompt extension, registered function descriptor, output profile | 별도 Domain Policy Authoring Flow의 explicit 관리자 node input; Prompt/LLM 0회, sealed planner policy 변경 금지 |
 
-연결 비밀번호나 token은 어떤 TXT에도 쓰지 않는다. 일반 작업자는 `config_ref`/`query_ref` 문법을 알거나 입력할 필요가 없다. `db_key는 PNT_RPT야`처럼 자신이 아는 원천 시스템 정보를 자유롭게 적으면, 별도 운영자 노드가 Source Registry v3의 dataset ID와 정확히 결합하고 LLM이 만든 실행 참조는 폐기한다.
+연결 비밀번호나 token은 어떤 TXT에도 쓰지 않는다. 일반 작업자는 `config_ref`/`query_ref` 문법을 알 필요가 없다. Oracle/Datalake 운영 조회가 필요한 항목에는 `db_key는 PNT_RPT야` 같은 설명과 `query_template:` 아래의 여러 줄 SQL, `{DATE}`·`{LOT_ID}` 같은 변수를 함께 적을 수 있다. Flow는 SQL 본문을 LLM에 보내지 않고 원본 TXT에서 직접 추출해 read-only 여부와 필수 변수를 검증한다.
 
 네 authoring 입력 화면은 분리되어 있지만 저장 결과는 하나의 versioned Domain Package다. Domain/Dataset/Main Filter는 자연어 TXT UX를 유지하고, Domain Policy만 별도 explicit 관리자 입력을 사용한다. Dataset Catalog와 Main Filter 입력은 active package의 해당 section만 삭제 없이 upsert하고, 다른 dataset·metric·relation·prompt·output 설정을 보존한 상태에서 전체 package를 다시 컴파일한다. 운영자가 일부 입력을 등록했는데 Data Analysis Flow가 읽지 못하는 별도 legacy pointer만 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
 
@@ -298,7 +298,7 @@ Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 
 ## 8. Save와 validate-only
 
-기본은 `mode=save`다. `mode=validate_only` 또는 `dry_run=true`는 같은 compile/release 검증을 수행하지만 MongoDB에는 쓰지 않는다.
+기본은 `mode=save`다. `mode=validate_only` 또는 `dry_run=true`는 같은 item→catalog compile 검증을 수행하지만 MongoDB에는 쓰지 않는다.
 
 기본 full-domain save 순서는 다음과 같다.
 
@@ -314,7 +314,7 @@ Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 10. 최초 bootstrap에서는 확장된 dataset ID 집합과 운영자 승인 Source 레지스트리 집합이 정확히 같은지 검사한다. 누락·미승인 dataset이 하나라도 있으면 candidate를 만들지 않는다.
 11. Exact coverage를 통과한 dataset에만 registry의 `source_type`, `source_adapter`, `config_ref`, `query_ref`를 결정론적으로 overlay하고 registry hash를 봉인한다. LLM이 같은 필드를 출력해도 실행 authority로 사용하지 않는다.
 12. 완성 draft에 full-draft JSON Schema, semantic lint, dependency closure, field/source binding, join/cardinality, read-only·secret·registered-function security compiler를 실행한다.
-13. valid draft만 typed diff와 immutable candidate/release hash를 만든다. LLM이 직접 current metadata를 쓰지 않는다.
+13. valid draft만 typed diff와 저장용 item set을 만든다. LLM이 직접 MongoDB metadata를 쓰지 않는다.
 
 `source_grounding_mode=explicit_inventory`의 optional zero-LLM lane은 완전한 binding proof를 먼저 검증한다. Blueprint lane은 기본과 같은 Domain annotation output을 사용하되 provider 호출 전에 external pin, Blueprint self-hash, executable hash와 source identity를 추가 검증한다. Pin이 없거나 틀리면 provider 호출 0으로 fail-closed한다. 주문·매출 fixture와 `build_executable_blueprint.py --check`는 이 고신뢰 lane의 재현성 검사다.
 
@@ -329,16 +329,16 @@ Dry-run 결과:
 - dependency changes
 - 영향받는 validation cases
 
-Compiler는 세 section hash와 catalog/package/bundle hash를 `metadata.release.v1` manifest로 봉인한다. 응답의 `candidate_id`와 hash는 결과 추적용이며 별도 pending collection을 만들지 않는다. `needs_clarification`, schema/dependency/security 오류는 MongoDB write 0건으로 끝난다.
+Compiler는 저장 전에 전체 runtime catalog를 검증한다. 응답의 `candidate_id`와 hash는 실행 중 결과 추적용이며 MongoDB metadata 문서에 기록하지 않고 별도 pending collection도 만들지 않는다. `needs_clarification`, schema/dependency/security 오류는 MongoDB write 0건으로 끝난다.
 
 ## 9. 3컬렉션 atomic save
 
-1. Domain Package를 domain, table catalog, main filter section으로 나눈다.
-2. 각 문서에 해당 작업자의 자연어 `source_text`와 hash, 정규화 section과 hash를 함께 기록한다.
-3. 세 문서는 같은 `_id=environment:domain_id`, revision, `release_id`, release manifest와 package metadata를 가진다.
-4. MongoDB transaction에서 세 current 문서를 `replace_one(upsert=true)`로 교체한다.
-5. 같은 transaction 안에서 다시 읽고 세 문서의 identity/release/manifest/source/section/document hash를 검증해 원래 Domain Package와 동치인지 확인한다.
-6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 지정한 domain collection의 최신 identity를 자동 선택한 뒤 같은 검사를 수행한다. domain/environment/source mode는 UI에 없다.
+1. Domain Package를 도메인 규칙, 데이터셋, alias 등 실제 등록 항목 단위로 나눈다.
+2. 각 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다.
+3. `domain_id`, environment, revision, contract, release, manifest, hash는 MongoDB에 저장하지 않는다.
+4. MongoDB transaction에서 세 collection의 current item set을 `replace_one(upsert=true)`로 교체한다.
+5. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 원래 runtime catalog와 동치인지 확인한다.
+6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 같은 item compile을 수행한다. domain/environment/source mode는 UI에 없다.
 
 이 단순 current 구조에는 자동 승인 대기열, active pointer, revision archive나 자동 rollback이 없다. 이력이 필요한 조직은 MongoDB change stream/backup 또는 별도 감사 서비스를 사용한다. 세부 계약은 [V6_THREE_COLLECTION_METADATA.md](V6_THREE_COLLECTION_METADATA.md)를 따른다.
 
@@ -346,20 +346,20 @@ Compiler는 세 section hash와 catalog/package/bundle hash를 `metadata.release
 
 | 요청 | 동작 |
 | --- | --- |
-| 신규 등록 | 새 identity revision 1 |
-| 내용 보강 | 기존 identity에 새 revision, diff 보존 |
-| 전체 교체 | 새 revision, 이전 active revision deprecated |
-| 저장하지 않음 | draft 폐기 |
-| 모호한 identity | 저장 차단, 후보 표시 |
+| 신규 항목 등록 | `collection-role:section:key` ID로 항목 하나를 upsert |
+| 같은 항목 수정 | 해당 항목의 `natural_text`와 검증된 `payload`를 새 입력으로 교체 |
+| 전체 도메인 재등록 | 컴파일된 전체 항목 집합으로 세 current collection을 transaction 교체 |
+| 저장하지 않음 | `validate_only` 결과만 반환하고 MongoDB write 0건 |
+| 모호하거나 잘못된 입력 | 저장 차단 후 확인 질문 또는 오류 반환 |
 
-기존 document를 in-place 변경하지 않는다. Runtime bundle은 active revision을 pin한다.
+별도 revision 문서, active pointer, release archive는 만들지 않는다. 변경 이력이 필요하면 MongoDB change stream·backup 또는 별도 감사 시스템에서 관리한다.
 
 ## 11. Secret, registry, 실행 경계
 
 - token/password/API key는 raw TXT에도 입력하지 않는 것을 원칙으로 한다.
-- authoring Flow는 운영자가 검토한 `metadata/domain_packs/<domain>/approved_source_registry.json`의 versioned `config_ref`/`query_ref` ID만 dataset contract에 주입한다. 이 파일에는 secret, endpoint, SQL/query 본문을 저장하지 않는다.
+- authoring Flow의 LLM용 `approved_source_registry.json`에는 secret, endpoint, SQL/query 본문을 저장하지 않는다. Oracle·SQL·Datalake query는 작업자 원본에서 결정론적으로 추출해 테이블 카탈로그 dataset 항목의 `payload.source_config`에만 저장한다.
 - Data Analysis Flow는 `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 각 node는 연결된 자기 source payload만 검증하며 exported Flow 자체가 ref를 SQL이나 credential로 해석하지 않는다. 운영자가 source node에서 조절하는 scalar는 실제 source별 `조회 행 수 제한`뿐이다.
-- 실제 운영 adapter가 참조하는 config/query registry, ACL, template hash와 secret 주입은 서버 측 배포 책임이다. 해당 resolver가 없는 환경에서는 dummy 검증만 가능하며 물리 Oracle 조회가 완성됐다고 간주하지 않는다.
+- 실제 운영 adapter의 credential과 ACL은 서버 측 배포 책임이다. Oracle·Datalake 노드는 저장된 `db_key`와 `query_template`을 읽고 node input/환경변수에서 연결 정보를 주입한 뒤 필수 변수를 치환해 실행한다.
 - Dataset contract는 승인 ID와 authoring registry hash를 pin하며, 서버 측 adapter는 같은 ID의 revision/hash·parameter schema·ACL을 다시 확인해야 한다.
 - Dataset policy와 registry 중 더 엄격한 read-only, timeout, max-row 한계를 적용한다. Node input은 이 한계를 더 줄일 수 있지만 늘리거나 write로 바꿀 수 없다.
 - 임의 SQL, 임의 endpoint, dynamic collection 이름, mutation query는 받지 않는다.
@@ -369,7 +369,7 @@ Compiler는 세 section hash와 catalog/package/bundle hash를 `metadata.release
 - Public webhook/API와 일반 tweak allowlist는 `trusted_blueprint_json`, `trusted_blueprint_sha256`, Mongo URI, approval payload, Domain Policy 관리자 입력을 받을 수 없다.
 - Blueprint와 pin은 Flow 관리자 ACL 또는 approved registry resolver만 설정한다. 일반 사용자가 Message나 API body에서 두 값을 함께 덮어쓸 수 있으면 external trust anchor가 아니므로 요청을 거부한다.
 
-Config/query registry는 Dataset Catalog LLM이 자동 생성하지 않는다. Metadata source admin이 `provision_source_registry.py`의 dry-run diff, ACL, reviewed read-only template 검사를 거쳐 revision을 등록한다. Repository에는 production secret/URI/query body가 아니라 schema-valid dummy bootstrap example만 둔다. 첫 Dataset Catalog prepare 전에 필요한 ref revision/hash가 bootstrap 또는 운영 registry에 있어야 하며, 없으면 dependency error로 저장을 막는다.
+Dataset Catalog LLM은 SQL을 생성하거나 수정하지 않는다. 작업자가 제공한 query 원문은 deterministic compiler가 단일 read-only `SELECT/WITH`, placeholder 문법, typed required parameter의 일치를 검사한다. production secret/URI는 repository와 MongoDB에 두지 않으며, query가 필요한 Oracle·Datalake dataset에 query가 없으면 조회 단계에서 dependency error로 종료한다.
 
 ## 12. Migration
 

@@ -23,6 +23,7 @@ DEFAULT_DISPLAY_OPTIONS = {
     "show_next_questions": False,
     "show_intent_analysis": False,
     "show_data_retrieval": False,
+    "show_pandas_code": False,
     "show_execution_plan": False,
 }
 
@@ -39,12 +40,10 @@ def normalize_display_options(value: Any) -> dict[str, Any]:
             continue
         if key in raw:
             result[key] = bool(raw[key])
-    if "show_pandas_code" in raw and "show_execution_plan" not in raw:
-        # Backward-compatible UI label only; no pandas code is generated.
-        result["show_execution_plan"] = bool(raw.get("show_pandas_code"))
     if result["include_diagnostics"]:
         result["show_intent_analysis"] = True
         result["show_data_retrieval"] = True
+        result["show_pandas_code"] = True
         result["show_execution_plan"] = True
     try:
         result["table_preview_limit"] = max(1, min(20, int(raw.get("table_preview_limit", 10))))
@@ -93,6 +92,124 @@ def _usage(route: dict[str, Any]) -> dict[str, int]:
         "pandas_repair_llm_calls": 0,
         "answer_llm_calls": 0,
     }
+
+
+def _frame_expression(reference: Any) -> str:
+    value = str(reference or "")
+    if value.startswith("source:"):
+        return f"source_frames[{value.split(':', 1)[1]!r}]"
+    return f"steps[{value!r}]"
+
+
+def _filter_expression(node: Any, frame_name: str = "df") -> str:
+    if not isinstance(node, dict):
+        return "pd.Series(False, index=df.index)"
+    combinator = str(node.get("op") or "").lower()
+    if combinator in {"all", "any"}:
+        clauses = [_filter_expression(item, frame_name) for item in node.get("clauses", [])]
+        if not clauses:
+            return "pd.Series(True, index=df.index)"
+        joiner = " & " if combinator == "all" else " | "
+        return "(" + joiner.join(f"({item})" for item in clauses) + ")"
+    field = str(node.get("field") or "")
+    operator = str(node.get("operator") or "eq").lower()
+    value = repr(node.get("value"))
+    series = f"{frame_name}[{field!r}]"
+    comparisons = {"eq": "==", "ne": "!=", "gt": ">", "gte": ">=", "lt": "<", "lte": "<="}
+    if operator in comparisons:
+        return f"{series} {comparisons[operator]} {value}"
+    if operator in {"in", "not_in"}:
+        expression = f"{series}.isin({value})"
+        return f"~({expression})" if operator == "not_in" else expression
+    if operator in {"contains", "starts_with", "ends_with"}:
+        method = {"contains": "contains", "starts_with": "startswith", "ends_with": "endswith"}[operator]
+        return f"{series}.astype('string').str.{method}({value}, na=False)"
+    if operator == "is_null":
+        return f"{series}.isna()"
+    if operator == "not_null":
+        return f"{series}.notna()"
+    if operator == "is_not_blank":
+        return f"{series}.notna() & {series}.astype('string').str.strip().ne('')"
+    return f"typed_filter_mask({frame_name}, {repr(node)})"
+
+
+def pandas_equivalent_code(operations: Any) -> str:
+    """Render inspectable pandas-equivalent code from the executed Typed IR.
+
+    This is intentionally a presentation artifact. The TypedExecutor remains
+    the only execution authority, so displaying code cannot change results.
+    """
+
+    values = operations if isinstance(operations, list) else []
+    lines = [
+        "# 표시용 Pandas 등가 코드입니다.",
+        "# 실제 계산은 검증된 Typed Execution IR 실행기가 수행합니다.",
+        "import pandas as pd",
+        "steps = {}",
+    ]
+    for index, raw in enumerate(values, start=1):
+        if not isinstance(raw, dict):
+            continue
+        operation = deepcopy(raw)
+        operation_id = str(operation.get("id") or f"step_{index}")
+        operator = str(operation.get("op") or "")
+        source = _frame_expression(operation.get("input"))
+        target = f"steps[{operation_id!r}]"
+        lines.append("")
+        lines.append(f"# {index}. {operator} ({operation_id})")
+        if operator == "filter":
+            lines.append(f"df = {source}")
+            lines.append(f"{target} = df.loc[{_filter_expression(operation.get('where') or {})}].reset_index(drop=True)")
+        elif operator in {"project", "detail"}:
+            lines.append(f"{target} = {source}[{list(operation.get('fields') or [])!r}].copy()")
+        elif operator == "ordered_range":
+            field = str(operation.get("field") or "OPER_SEQ")
+            lines.append(f"df = {source}")
+            lines.append(f"numeric = pd.to_numeric(df[{field!r}], errors='coerce')")
+            lines.append(f"{target} = df.loc[numeric.between({operation.get('start')!r}, {operation.get('end')!r}, inclusive='both')].reset_index(drop=True)")
+        elif operator == "aggregate":
+            groups = list(operation.get("group_by") or [])
+            metrics = operation.get("metrics") if isinstance(operation.get("metrics"), list) else []
+            named = {
+                str(item.get("as") or item.get("field") or item.get("function")): (str(item.get("field") or ""), str(item.get("function") or "count"))
+                for item in metrics
+                if isinstance(item, dict)
+            }
+            if groups:
+                lines.append(f"{target} = {source}.groupby({groups!r}, dropna=False, sort=False).agg(**{named!r}).reset_index()")
+            else:
+                lines.append(f"{target} = pd.DataFrame([typed_aggregate({source}, {metrics!r})])")
+        elif operator == "sort":
+            keys = operation.get("keys") if isinstance(operation.get("keys"), list) else []
+            fields = [str(item.get("field") or "") for item in keys if isinstance(item, dict)]
+            ascending = [str(item.get("direction") or "asc").lower() != "desc" for item in keys if isinstance(item, dict)]
+            lines.append(f"{target} = {source}.sort_values({fields!r}, ascending={ascending!r}, kind='mergesort').reset_index(drop=True)")
+        elif operator == "rank":
+            keys = list(operation.get("rank_by") or []) + list(operation.get("tie_break_by") or [])
+            fields = [str(item.get("field") or "") for item in keys if isinstance(item, dict)]
+            ascending = [str(item.get("direction") or "asc").lower() != "desc" for item in keys if isinstance(item, dict)]
+            limit = int(operation.get("limit") or 1)
+            partitions = list(operation.get("partition_by") or [])
+            lines.append(f"ranked = {source}.sort_values({fields!r}, ascending={ascending!r}, kind='mergesort')")
+            if partitions:
+                lines.append(f"{target} = ranked.groupby({partitions!r}, dropna=False, sort=False).head({limit}).reset_index(drop=True)")
+            else:
+                lines.append(f"{target} = ranked.head({limit}).reset_index(drop=True)")
+        elif operator == "join":
+            left = _frame_expression(operation.get("left") or operation.get("input"))
+            right = _frame_expression(operation.get("right"))
+            mappings = operation.get("key_mappings") if isinstance(operation.get("key_mappings"), list) else []
+            left_on = [str(item.get("left") or "") for item in mappings if isinstance(item, dict)]
+            right_on = [str(item.get("right") or "") for item in mappings if isinstance(item, dict)]
+            lines.append(f"{target} = {left}.merge({right}, how={str(operation.get('how') or 'inner')!r}, left_on={left_on!r}, right_on={right_on!r})")
+        elif operator == "dedupe":
+            lines.append(f"{target} = {source}.drop_duplicates(subset={list(operation.get('fields') or [])!r}, keep={str(operation.get('keep') or 'first')!r}).reset_index(drop=True)")
+        else:
+            lines.append(f"{target} = typed_ir_step({source}, {operation!r})")
+    if values:
+        last_id = str(values[-1].get("id") or f"step_{len(values)}") if isinstance(values[-1], dict) else f"step_{len(values)}"
+        lines.extend(["", f"result_df = steps[{last_id!r}]"])
+    return "\n".join(lines)
 
 
 def validate_authoring_response_hash(response: dict[str, Any]) -> dict[str, Any]:
@@ -243,6 +360,7 @@ def assemble_response(
             "result_sha256": result.get("result_sha256"),
             "operation_trace": result.get("operation_trace", []),
             "execution_ir": plan.get("operations", []),
+            "pandas_code": pandas_equivalent_code(plan.get("operations", [])),
             "lineage": result.get("lineage", {}),
         },
         "clarification": None,
@@ -373,6 +491,10 @@ def render_message(response: dict[str, Any], options: Any = None) -> str:
         sections.append("### 의도 분석\n```json\n" + json.dumps(response.get("intent_plan", {}).get("semantic_intent", {}), ensure_ascii=False, indent=2) + "\n```")
     if display["show_data_retrieval"]:
         sections.append("### 조회 진단\n```json\n" + json.dumps(response.get("trace", {}).get("retrieval", []), ensure_ascii=False, indent=2) + "\n```")
+    if display["show_pandas_code"]:
+        pandas_code = str(response.get("analysis", {}).get("pandas_code") or "").strip()
+        if pandas_code:
+            sections.append("### Pandas 등가 코드 (표시용)\n```python\n" + pandas_code + "\n```")
     if display["show_execution_plan"]:
         sections.append("### 실행 계획 진단\n```json\n" + json.dumps(response.get("analysis", {}).get("execution_ir", []), ensure_ascii=False, indent=2) + "\n```")
     return "\n\n".join(section for section in sections if section)

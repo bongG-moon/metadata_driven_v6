@@ -53,7 +53,7 @@ flowchart LR
 
 `deterministic`과 `intent_llm`은 intent 생성 주체만 다르다. 두 경로는 동일한 closed `analysis.intent.v1` schema, bundle pin, Plan Compiler, Validator, Retriever, Executor, state와 terminal을 사용한다. 별도 fast executor나 축약 output contract를 만들지 않는다.
 
-`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인 컬렉션·데이터 카탈로그 컬렉션·메인필터 컬렉션·timeout을 설정받는다. 컬렉션 기본값은 `agent_v6_domain_metadata`, `agent_v6_table_catalog`, `agent_v6_main_filter`이며, 입력받은 안전하고 서로 다른 3컬렉션에서 가장 최근의 완전한 동일 release를 찾아 자동 결합한다. domain/environment/source mode 선택 input은 노출하지 않는다. `02 요청 및 세션 상태 고정`도 기준시각·시간대 input을 노출하지 않고 내부 현재 시각을 `Asia/Seoul` 기준으로 고정한다.
+`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인 컬렉션·데이터 카탈로그 컬렉션·메인필터 컬렉션·timeout을 설정받는다. 컬렉션 기본값은 `agent_v6_domain_metadata`, `agent_v6_table_catalog`, `agent_v6_main_filter`이며, 입력받은 안전하고 서로 다른 3컬렉션의 자연어 기반 항목을 결합해 typed Domain Package를 메모리에서 컴파일한다. domain/environment/source mode 선택 input은 노출하지 않는다. `02 요청 및 세션 상태 고정`도 기준시각·시간대 input을 노출하지 않고 내부 현재 시각을 `Asia/Seoul` 기준으로 고정한다.
 
 ### 1.1 외부 Prompt topology
 
@@ -155,7 +155,7 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 
 | 단계 | 입력 | 출력 | 핵심 책임 |
 | --- | --- | --- | --- |
-| `01 사용 가능 메타데이터 불러오기` | MongoDB URI·database·3개 컬렉션명·timeout | 검증된 domain runtime bundle | 입력 3컬렉션의 최신 완전 release 자동 탐색·hash 검증·결합 |
+| `01 사용 가능 메타데이터 불러오기` | MongoDB URI·database·3개 컬렉션명·timeout | 검증된 domain runtime bundle | 입력 3컬렉션의 항목을 결합하고 typed runtime catalog를 메모리에서 컴파일 |
 | `02 요청 및 세션 상태 고정` | question, authenticated subject/session ID, domain bundle | `request.capsule.v1` | 내부 현재 시각·`Asia/Seoul` 기준 typed literal/date 후보·owner-bound 이전 ref·실행 모드 |
 | Candidate Selector | request capsule, metadata index, operator registry | `metadata.bundle.v1` + exact `resolved.candidate.bundle.v1` 또는 content-addressed immutable ref/hash | 관련 record/dependency closure와 immutable resolved semantics; LLM에는 bounded card projection만 제공 |
 | Route Eligibility Gate | request/state evidence, exact resolved candidate bundle, route policy | `analysis.route.v1` | selection uniqueness/completeness/registry support 증명, route reason/proof hash 고정; source/LLM 호출 없음 |

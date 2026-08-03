@@ -14,7 +14,7 @@
 - pandas code 생성 LLM과 repair LLM은 기본 경로에서 0회다.
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter authoring의 공통·특화 Prompt는 외부 Prompt Template node로 분리되어 있다. 특화 규칙은 각 특화 Template 본문에 직접 작성하고 runtime context는 Composer에 한 번만 연결한다. Domain Policy의 prompt extension·등록 함수·출력 정책은 별도 관리자 입력으로 관리한다.
 - Message 표시 항목 선택, structured API, GaiA, CSV ref와 멀티턴 상태 계약을 유지한다.
-- Data Analysis node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C`로 구분하며 도메인 초기 등록의 반복 노드는 담당 분기명까지 표시한다. Metadata loader는 MongoDB URI·database·세 컬렉션명·timeout을 받아 입력 3컬렉션의 최신 완전 release를 자동 결합하고, Request는 기준시각·시간대 UI 없이 `Asia/Seoul`로 고정한다.
+- Data Analysis node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C`로 구분하며 도메인 초기 등록의 반복 노드는 담당 분기명까지 표시한다. Metadata loader는 MongoDB URI·database·세 컬렉션명·timeout을 받아 항목 문서를 결합하고 실행용 metadata를 메모리에서 컴파일하며, Request는 기준시각·시간대 UI 없이 `Asia/Seoul`로 고정한다.
 - Dummy/Oracle/H-API/Datalake/Goodocs 조회 node는 분리돼 있고 실제 source node의 운영 조절값은 조회 행 수 제한뿐이다. 23→24·25·26은 전송용 hash가 없는 일반 JSON을 전달하며 출력 adapter는 수신 hash나 전체 응답 schema를 재검증하지 않는다.
 
 ## 2. Flow 구성
@@ -83,9 +83,9 @@ canonical 70개 질문은 65 deterministic, 3 Intent LLM, 2 unsupported로 분�
 - provider/model fallback: 0
 - validation DB: `datagov_v6_validation`
 - 저장 대상: `agent_v6_domain_metadata`, `agent_v6_table_catalog`, `agent_v6_main_filter`
-- 저장 결과: 자연어 원문 3/3 보존, 동일 release 1개, revision 2
-- selector 없는 loader 입력: `mongo_uri`, `mongo_database`, `mongo_timeout_ms`
-- loader의 source/section/document/package hash와 identity/revision 검증: 모두 통과
+- 운영 DB 저장 결과: 도메인 147개, 데이터 카탈로그 20개, 메인필터 49개 항목이며 모든 문서가 자연어 원문을 보존
+- loader 입력: `mongo_uri`, `mongo_database`, 세 컬렉션명, `mongo_timeout_ms`
+- 저장 필드는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 존재하며 항목 결합·런타임 컴파일 검증 통과
 - Data Analysis 동일 component 흐름: canonical 70/70, 주문·매출 범용 case, multi-turn·owner/session 격리 통과
 - pandas code / pandas repair LLM: 0
 - 채팅 Message는 표시 schema만 검증하고, API/GaiA 외부 경계의 response hash 검증은 유지
@@ -96,14 +96,15 @@ canonical 70개 질문은 65 deterministic, 3 Intent LLM, 2 unsupported로 분�
 
 | 검증 | 결과 | evidence |
 | --- | ---: | --- |
-| 전체 pytest | 476/476, failure/error/skip 0 | `validation_outputs/pytest_v6_current.xml` |
+| 전체 pytest | 485/485, failure/error/skip 0 | 최종 로컬 전체 실행 |
 | generated artifacts | 41/41 current | `generate_contracts_and_cases.py --check` |
 | standalone components | 25/25 current | `build_standalone_components.py --check` |
 | Flow source parity | 168 instance / 27 unique, error 0 | `validation_outputs/flow_component_sources_current.json` |
-| exact Langflow runtime | Python 3.12.13, 1.9.2 / 0.9.2 / 0.4.2, 5개 Flow·86/86 template parse | `validation_outputs/langflow_runtime_current.json` |
-| Python 동등 분석 흐름 | 70/70, order-sales, multi-turn 모두 통과 | `validation_outputs/v6_simplified_flow_validation.json` |
+| exact Langflow runtime | Python 3.12.13, 1.9.2 / 0.9.2 / 0.4.2, 5개 Flow·86/86 template parse | `validation_outputs/langflow_runtime_item_storage.json` |
+| Python 동등 분석 흐름 | 70/70, 제조·order-sales·multi-turn 모두 통과 | `validation_outputs/langflow_equivalent_pipeline_item_storage.json` |
+| 실제 Gemini Intent 분기 | exact `gemini-3.5-flash-lite`, 3/3 통과 | `validation_outputs/live_intent_item_storage.json` |
 | 비정형 실제 authoring | 4/4, exact Gemini, repair 0 | `validation_outputs/langflow_http_authoring_freeform_reordered_current.json` |
-| 3컬렉션 실제 등록 | exact Gemini 3회, fallback/repair 0, revision 2, loader 통과 | `validation_outputs/three_collection_live_validation.json` |
+| 운영 3컬렉션 항목 등록 | 147/20/49개, 자연어 216/216, 최소 6필드, loader 통과 | `validation_outputs/compiled_metadata_registration.json` |
 
 ## 8. 재현 명령
 

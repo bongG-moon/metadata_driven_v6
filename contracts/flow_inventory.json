@@ -316,6 +316,7 @@
             "show_next_questions": false,
             "show_intent_analysis": false,
             "show_data_retrieval": false,
+            "show_pandas_code": false,
             "show_execution_plan": false
           },
           "ui": {"display_name": "24 채팅 메시지 표시 설정"}

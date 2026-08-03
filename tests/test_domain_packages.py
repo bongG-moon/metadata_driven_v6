@@ -11,12 +11,14 @@ from reference_runtime.domain_packages import (
     ACTIVE_POINTER_COLLECTION,
     DOMAIN_PACKAGE_COLLECTION,
     adapt_legacy_catalog_v1,
+    apply_dataset_source_configs_from_text,
     build_runtime_catalog_v2,
     compile_domain_package,
     load_active_domain_bundle,
     make_active_pointer_document,
     make_bundle_document,
     validate_domain_package,
+    validate_read_only_query_template,
 )
 from reference_runtime.metadata_compiler import build_runtime_catalog
 from reference_runtime.registered_functions import registered_function_descriptor
@@ -58,6 +60,42 @@ def test_natural_language_draft_contract_compiles_deterministically_to_generic_p
     }
     assert catalog["datasets"]["orders"]["source_adapter"] == "dummy.orders.v1"
     assert "aggregate" in catalog["fields"]["SALES_AMOUNT"]["roles"]
+
+
+def test_query_template_is_extracted_verbatim_and_parameters_become_required() -> None:
+    draft = _draft()
+    draft["datasets"]["orders"]["source_type"] = "datalake"
+    source = """주문 자료는 orders로 등록해줘. source는 datalake이고 db_key는 SALES_LAKE야.
+
+query_template:
+-- keep this comment
+SELECT ORDER_ID,
+       SALES_AMOUNT
+FROM SALES_ORDERS
+WHERE ORDER_DATE = {DATE}
+  AND STORE_ID = {STORE_ID}
+
+filter_mappings는 DATE -> ORDER_DATE로 연결해줘.
+"""
+    updated, evidence = apply_dataset_source_configs_from_text(draft, source)
+    config = updated["datasets"]["orders"]["source_config"]
+    assert config["db_key"] == "SALES_LAKE"
+    assert config["required_params"] == ["DATE", "STORE_ID"]
+    assert config["query_template"] == """-- keep this comment
+SELECT ORDER_ID,
+       SALES_AMOUNT
+FROM SALES_ORDERS
+WHERE ORDER_DATE = {DATE}
+  AND STORE_ID = {STORE_ID}"""
+    assert updated["datasets"]["orders"]["parameters"]["DATE"]["required"] is True
+    assert updated["datasets"]["orders"]["parameters"]["STORE_ID"]["required"] is True
+    assert evidence["dataset_keys"] == ["orders"]
+
+
+@pytest.mark.parametrize("query", ["DELETE FROM T", "SELECT * FROM T; DROP TABLE T", "SELECT * FROM T FOR UPDATE"])
+def test_query_template_rejects_non_read_only_sql(query: str) -> None:
+    with pytest.raises(ContractError):
+        validate_read_only_query_template(query)
 
 
 @pytest.mark.parametrize(

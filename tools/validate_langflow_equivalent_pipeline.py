@@ -377,6 +377,25 @@ def execute_component_pipeline(
     anonymous_multiturn_overrides: dict[str, bool] | None = None,
     component_overrides: dict[str, dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
+    class _ValidationDatalakeClient:
+        """Read-only in-memory client used only by the Langflow-equivalent test."""
+
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            pass
+
+        def run_sql(self, sql: str) -> list[dict[str, Any]]:
+            datasets = (
+                inline_source_payload.get("datasets")
+                if isinstance(inline_source_payload, dict)
+                and isinstance(inline_source_payload.get("datasets"), dict)
+                else {}
+            )
+            # The cross-domain smoke question reads the orders dataset.  The
+            # adapter still receives and executes the compiled retrieval job;
+            # only the external LakeHouse boundary is replaced by reviewed
+            # fixture rows.
+            return deepcopy(datasets.get("orders") or [])
+
     """Run each serialized standalone component in Flow topological order."""
 
     from lfx.custom.eval import eval_custom_component_code
@@ -455,6 +474,7 @@ def execute_component_pipeline(
                         if isinstance(dataset, dict):
                             dataset["source_type"] = "datalake"
                             dataset["source_adapter"] = "validation.datalake"
+                            dataset["query_template"] = "SELECT * FROM validation_fixture"
                     catalog["catalog_sha256"] = sha256_json(
                         {key: value for key, value in catalog.items() if key != "catalog_sha256"}
                     )
@@ -522,7 +542,14 @@ def execute_component_pipeline(
                     if isinstance(globals_value, dict) and "_shared_memory_store" in globals_value:
                         globals_value["_shared_memory_store"] = lambda: shared_state_store
             for field_name in config.get("field_order", []):
-                setattr(component, str(field_name), _template_value(config, str(field_name)))
+                field_name = str(field_name)
+                field_value = _template_value(config, field_name)
+                if field_name == "user_id" and hasattr(type(component), "user_id"):
+                    # Component.user_id is read-only in LFX 0.4.2. Langflow
+                    # injects the corresponding graph value through _user_id.
+                    component._user_id = field_value
+                else:
+                    setattr(component, field_name, field_value)
             if hasattr(component, "domain_id"):
                 component.domain_id = domain_id
             if hasattr(component, "environment"):
@@ -547,6 +574,8 @@ def execute_component_pipeline(
                 component.data_mode = "live" if inline_source_payload else "dummy"
             if hasattr(component, "source_payload") and inline_source_payload:
                 component.source_payload = Data(data=deepcopy(inline_source_payload))
+            if node_id == "datalake_source_retriever" and inline_source_payload:
+                component.client_cls = _ValidationDatalakeClient
             for field_name, field_value in (component_overrides or {}).get(node_id, {}).items():
                 setattr(component, str(field_name), deepcopy(field_value))
 

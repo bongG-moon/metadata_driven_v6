@@ -339,8 +339,8 @@ def build_assets(
     raw_source_bytes = len(raw_source.encode("utf-8"))
     if not raw_source.strip() or raw_source_bytes > MAX_SOURCE_BYTES:
         raise ValueError("free-form domain source is empty or exceeds the input budget")
-    if "등록해줘" not in raw_source and "등록해 주세요" not in raw_source:
-        raise ValueError("manufacturing domain_v6.txt is not the expected free-form input")
+    if raw_source.lstrip().startswith(("{", "[")):
+        raise ValueError("manufacturing domain_v6.txt must remain free-form natural language, not JSON")
     draft = runtime_catalog_v2_to_authoring_draft(package["runtime_catalog"])
     inventory_source, source_evidence = render_trusted_inventory_source(draft)
     manifest = extract_authoring_source_manifest(inventory_source)

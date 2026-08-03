@@ -185,9 +185,24 @@ FORBIDDEN_EXECUTABLE_KEYS = {
     "callable",
     "lambda",
     "sql",
-    "query_template",
     "endpoint_url",
 }
+QUERY_SOURCE_TYPES = {"oracle", "sql", "datalake"}
+QUERY_TEMPLATE_KEYS = {"query_template", "sql_template", "oracle_sql", "datalake_sql"}
+_QUERY_PLACEHOLDER = re.compile(r"\{([A-Za-z][A-Za-z0-9_]*)\}")
+_QUERY_MARKER = re.compile(
+    r"(?im)^[ \t]*(?:query_template|sql_template|oracle_sql|datalake_sql)[ \t]*:[ \t]*(?:\n|$)"
+)
+_QUERY_BLOCK_END = re.compile(
+    r"(?im)^[ \t]*(?:filter_mappings|required_params|required_param_mappings|"
+    r"standard_column_aliases|default_detail_columns|metric_semantics|selection_criteria)"
+    r"[ \t]*(?:[:=]|(?:은|는)\b)"
+)
+_QUERY_FORBIDDEN_VERB = re.compile(
+    r"\b(?:INSERT|UPDATE|DELETE|MERGE|ALTER|DROP|CREATE|TRUNCATE|GRANT|REVOKE|"
+    r"EXECUTE|EXEC|CALL|BEGIN|DECLARE|COMMIT|ROLLBACK)\b",
+    re.IGNORECASE,
+)
 SECRET_KEY_PARTS = {
     "password",
     "passwd",
@@ -237,6 +252,164 @@ SECRET_SCALAR_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
         ),
     ),
 )
+
+
+def query_template_parameters(query_template: str) -> list[str]:
+    """Return unique ``{NAME}`` placeholders in first-occurrence order."""
+
+    normalized = str(query_template or "").replace("\r\n", "\n").replace("\r", "\n")
+    values: list[str] = []
+    seen: set[str] = set()
+    for match in _QUERY_PLACEHOLDER.finditer(normalized):
+        name = match.group(1)
+        if name not in seen:
+            seen.add(name)
+            values.append(name)
+    return values
+
+
+def validate_read_only_query_template(query_template: str) -> str:
+    """Validate one executable Oracle/Datalake query without rewriting it.
+
+    Only line-ending normalization and surrounding blank-line removal are
+    applied.  Indentation, comments, placeholder spelling and internal
+    newlines remain byte-for-byte stable after the CRLF-to-LF normalization.
+    """
+
+    normalized = str(query_template or "").replace("\r\n", "\n").replace("\r", "\n").strip(" \t\n")
+    if not normalized or len(normalized.encode("utf-8")) > 131072:
+        _fail("query_template must contain 1 to 131072 UTF-8 bytes.")
+    neutral = re.sub(r"/\*.*?\*/", " ", normalized, flags=re.DOTALL)
+    neutral = re.sub(r"(?m)--[^\n]*$", " ", neutral)
+    neutral = re.sub(r"'(?:''|[^'])*'", "''", neutral)
+    executable = neutral.strip()
+    if not re.match(r"(?is)^(?:SELECT|WITH)\b", executable):
+        _fail("query_template must be a read-only SELECT or WITH query.")
+    forbidden = _QUERY_FORBIDDEN_VERB.search(executable)
+    if forbidden or re.search(r"\bFOR\s+UPDATE\b", executable, re.IGNORECASE):
+        _fail(
+            "query_template contains a non-read-only SQL operation.",
+            {"keyword": forbidden.group(0).upper() if forbidden else "FOR UPDATE"},
+        )
+    statement_body = executable[:-1] if executable.endswith(";") else executable
+    if ";" in statement_body:
+        _fail("query_template must contain exactly one SQL statement.")
+    braces_removed = _QUERY_PLACEHOLDER.sub("", normalized)
+    if "{" in braces_removed or "}" in braces_removed:
+        _fail("query_template contains an invalid placeholder. Use {NAME} syntax only.")
+    return normalized
+
+
+def apply_dataset_source_configs_from_text(
+    authoring_payload: Mapping[str, Any],
+    source_text: str,
+    *,
+    require_complete: bool = False,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Overlay trusted SQL blocks from operator text onto compiled datasets.
+
+    The LLM is intentionally not trusted to copy or modify SQL.  Dataset
+    identity is resolved against the already schema-validated draft and the
+    exact query body is taken directly from the operator's natural-language
+    source text.
+    """
+
+    draft = deepcopy(dict(authoring_payload))
+    datasets = draft.get("datasets")
+    if not isinstance(datasets, dict):
+        _fail("datasets must be an object before query extraction.")
+    text = str(source_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    markers = list(_QUERY_MARKER.finditer(text))
+    applied: dict[str, dict[str, Any]] = {}
+    previous_end = 0
+    for index, marker in enumerate(markers):
+        next_marker_start = markers[index + 1].start() if index + 1 < len(markers) else len(text)
+        candidate_end = next_marker_start
+        boundary = _QUERY_BLOCK_END.search(text, marker.end(), next_marker_start)
+        if boundary:
+            candidate_end = boundary.start()
+        raw_query = text[marker.end():candidate_end].strip(" \t\n")
+        query_template = validate_read_only_query_template(raw_query)
+
+        prefix = text[previous_end:marker.start()]
+        dataset_key = ""
+        latest_position = -1
+        for key in sorted(datasets, key=len, reverse=True):
+            explicit = re.compile(
+                rf"(?<![A-Za-z0-9_]){re.escape(str(key))}(?![A-Za-z0-9_])[ \t]*(?:으로|로)[ \t]*등록",
+                re.IGNORECASE,
+            )
+            matches = list(explicit.finditer(prefix))
+            if matches and matches[-1].start() >= latest_position:
+                latest_position = matches[-1].start()
+                dataset_key = str(key)
+        if not dataset_key:
+            latest_position = -1
+            for key in sorted(datasets, key=len, reverse=True):
+                pattern = re.compile(rf"(?<![A-Za-z0-9_]){re.escape(str(key))}(?![A-Za-z0-9_])", re.IGNORECASE)
+                matches = list(pattern.finditer(prefix))
+                if matches and matches[-1].start() >= latest_position:
+                    latest_position = matches[-1].start()
+                    dataset_key = str(key)
+        if not dataset_key:
+            _fail("query_template could not be associated with a registered dataset.", {"query_index": index})
+        if dataset_key in applied:
+            _fail("A dataset may define only one query_template.", {"dataset_key": dataset_key})
+
+        dataset = datasets[dataset_key]
+        source_type = str(dataset.get("source_type") or "").casefold()
+        if source_type not in QUERY_SOURCE_TYPES:
+            _fail(
+                "query_template is only allowed for Oracle, SQL or Datalake datasets.",
+                {"dataset_key": dataset_key, "source_type": source_type},
+            )
+        db_matches = list(
+            re.finditer(
+                r"(?i)(?<![A-Za-z0-9_])db_key(?![A-Za-z0-9_])[ \t]*(?:[:=]|(?:은|는))[ \t]*([A-Za-z][A-Za-z0-9_.-]{0,127})",
+                prefix,
+            )
+        )
+        source_config = deepcopy(dict(dataset.get("source_config") or {}))
+        source_config["source_type"] = source_type
+        if db_matches:
+            source_config["db_key"] = db_matches[-1].group(1)
+        source_config["query_template"] = query_template
+        placeholders = query_template_parameters(query_template)
+        source_config["required_params"] = placeholders
+        dataset["source_config"] = source_config
+
+        parameters = deepcopy(dict(dataset.get("parameters") or {}))
+        for name in placeholders:
+            card = deepcopy(dict(parameters.get(name) or {}))
+            card.setdefault("type", "string")
+            card["required"] = True
+            parameters[name] = card
+        dataset["parameters"] = parameters
+        applied[dataset_key] = {
+            "db_key": str(source_config.get("db_key") or ""),
+            "required_params": placeholders,
+            "query_bytes": len(query_template.encode("utf-8")),
+            "line_count": query_template.count("\n") + 1,
+        }
+        previous_end = candidate_end
+
+    missing = sorted(
+        key
+        for key, raw_dataset in datasets.items()
+        if str(raw_dataset.get("source_type") or "").casefold() in QUERY_SOURCE_TYPES
+        and not str(dict(raw_dataset.get("source_config") or {}).get("query_template") or "").strip()
+    )
+    if require_complete and missing:
+        _fail("Every Oracle, SQL and Datalake dataset requires a query_template.", {"dataset_keys": missing})
+    evidence = {
+        "contract_version": "metadata.source-query-extraction.v1",
+        "status": "passed",
+        "query_count": len(applied),
+        "dataset_keys": sorted(applied),
+        "datasets": {key: applied[key] for key in sorted(applied)},
+        "missing_query_dataset_keys": missing,
+    }
+    return draft, evidence
 
 
 def compile_domain_package(
@@ -753,6 +926,37 @@ def _validate_catalog_semantics(catalog: Mapping[str, Any]) -> None:
             _fail("Unsupported dataset source type.", {"dataset_key": dataset_key})
         if dict(dataset.get("read_policy") or {}).get("read_only") is not True:
             _fail("Dataset read policy must be read-only.", {"dataset_key": dataset_key})
+        source_config = dataset.get("source_config")
+        if source_config is not None:
+            if not isinstance(source_config, dict):
+                _fail("Dataset source_config must be an object.", {"dataset_key": dataset_key})
+            configured_type = str(source_config.get("source_type") or dataset.get("source_type") or "").casefold()
+            if configured_type != str(dataset.get("source_type") or "").casefold():
+                _fail("Dataset source_config source_type does not match the dataset.", {"dataset_key": dataset_key})
+            query_template = source_config.get("query_template")
+            if query_template not in (None, ""):
+                if configured_type not in QUERY_SOURCE_TYPES:
+                    _fail("Only Oracle, SQL and Datalake datasets may store query_template.", {"dataset_key": dataset_key})
+                normalized_query = validate_read_only_query_template(str(query_template))
+                if normalized_query != query_template:
+                    _fail("query_template must already use normalized LF line endings.", {"dataset_key": dataset_key})
+                placeholders = query_template_parameters(normalized_query)
+                required_params = source_config.get("required_params", placeholders)
+                if not isinstance(required_params, list) or any(not isinstance(item, str) for item in required_params):
+                    _fail("source_config.required_params must be a string array.", {"dataset_key": dataset_key})
+                if list(required_params) != placeholders:
+                    _fail(
+                        "source_config.required_params must exactly match query placeholders in occurrence order.",
+                        {"dataset_key": dataset_key, "expected": placeholders, "actual": required_params},
+                    )
+                parameter_cards = dict(dataset.get("parameters") or {})
+                missing_cards = [name for name in placeholders if not isinstance(parameter_cards.get(name), dict)]
+                optional_cards = [name for name in placeholders if not bool(dict(parameter_cards.get(name) or {}).get("required"))]
+                if missing_cards or optional_cards:
+                    _fail(
+                        "Every query placeholder requires a required typed parameter card.",
+                        {"dataset_key": dataset_key, "missing": missing_cards, "not_required": optional_cards},
+                    )
         family = str(dataset.get("family") or "").strip()
         if not family:
             _fail("Dataset family is required.", {"dataset_key": dataset_key})
@@ -1288,6 +1492,16 @@ def _reject_executable_or_secret_payload(value: Any, path: tuple[str, ...] = ())
             if not identity_key:
                 if key in FORBIDDEN_EXECUTABLE_KEYS:
                     _fail("authoring draft에는 실행 코드/자유 query를 저장할 수 없습니다.", {"path": location})
+                if key in QUERY_TEMPLATE_KEYS:
+                    allowed_query_path = (
+                        key == "query_template"
+                        and len(path) == 3
+                        and str(path[0]).casefold() == "datasets"
+                        and str(path[2]).casefold() == "source_config"
+                    )
+                    if not allowed_query_path or not isinstance(child, str):
+                        _fail("query_template is only allowed at datasets.<id>.source_config.query_template.", {"path": location})
+                    validate_read_only_query_template(child)
                 if any(
                     part in key
                     for part in SECRET_KEY_PARTS
@@ -1353,6 +1567,7 @@ __all__ = [
     "MIGRATION_QUARANTINE_COLLECTION",
     "RUNTIME_CATALOG_V2",
     "adapt_legacy_catalog_v1",
+    "apply_dataset_source_configs_from_text",
     "build_runtime_catalog_v2",
     "compile_domain_package",
     "compute_bundle_sha256",
@@ -1363,6 +1578,8 @@ __all__ = [
     "make_active_pointer",
     "make_active_pointer_document",
     "make_bundle_document",
+    "query_template_parameters",
     "validate_domain_package",
+    "validate_read_only_query_template",
     "validate_runtime_catalog_v2",
 ]

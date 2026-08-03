@@ -2329,7 +2329,7 @@ class MessagePresentation(Component):
 
     inputs = [
         DataInput(name="response", display_name="분석 JSON 응답", required=True, info="23번에서 전달한 일반 JSON 응답입니다. 표시 단계에서는 해시나 전체 스키마를 다시 검증하지 않습니다."),
-        BoolInput(name="include_diagnostics", display_name="모든 진단 표시", value=False, info="의도 분석, 조회 진단, 실행 계획을 한 번에 표시합니다."),
+        BoolInput(name="include_diagnostics", display_name="모든 진단 표시", value=False, info="의도 분석, 조회 진단, Pandas 등가 코드, 실행 계획을 한 번에 표시합니다."),
         BoolInput(name="show_result_table", display_name="결과표 표시", value=True, info="분석 결과의 표 미리보기를 채팅 메시지에 포함합니다."),
         IntInput(name="table_preview_limit", display_name="표 미리보기 행 수", value=10, info="채팅 메시지에 표시할 결과표의 최대 행 수입니다."),
         BoolInput(name="show_analysis_evidence", display_name="분석 근거 표시", value=False, info="사용한 데이터와 연산에 대한 검증 가능한 근거를 표시합니다."),
@@ -2339,6 +2339,7 @@ class MessagePresentation(Component):
         BoolInput(name="show_next_questions", display_name="후속 질문 표시", value=False, info="현재 결과에서 이어서 물을 수 있는 후속 질문 제안을 표시합니다."),
         BoolInput(name="show_intent_analysis", display_name="의도 분석 표시", value=False, info="선택된 의도 후보와 분기 판정 정보를 진단용으로 표시합니다."),
         BoolInput(name="show_data_retrieval", display_name="조회 진단 표시", value=False, info="선택된 데이터 경로와 원천 조회 결과 요약을 표시합니다."),
+        BoolInput(name="show_pandas_code", display_name="Pandas 등가 코드 표시", value=False, info="Typed Execution IR에서 결정론적으로 만든 표시용 Pandas 등가 코드를 보여줍니다. 실제 실행 코드는 아닙니다."),
         BoolInput(name="show_execution_plan", display_name="Typed Execution IR 표시", value=False, info="컴파일된 결정론적 실행 계획을 진단용으로 표시합니다."),
     ]
     outputs = [Output(name="message", display_name="채팅 답변 메시지", method="build_message", types=["Message"])]
@@ -2357,6 +2358,7 @@ class MessagePresentation(Component):
             "show_next_questions": bool(getattr(self, "show_next_questions", False)),
             "show_intent_analysis": bool(getattr(self, "show_intent_analysis", False)),
             "show_data_retrieval": bool(getattr(self, "show_data_retrieval", False)),
+            "show_pandas_code": bool(getattr(self, "show_pandas_code", False)),
             "show_execution_plan": bool(getattr(self, "show_execution_plan", False)),
         }
         message = Message(
@@ -8213,13 +8215,12 @@ class MetadataAuthoringEngine(Component):
         if not dry_run:
             client, db = self._mongo()
             try:
-                current_id = f"{environment}:{domain_id}"
                 current_documents = {
-                    "domain": db[collections["domain_collection"]].find_one({"_id": current_id}),
-                    "table_catalog": db[collections["table_collection"]].find_one({"_id": current_id}),
-                    "main_filter": db[collections["main_filter_collection"]].find_one({"_id": current_id}),
+                    "domain": list(db[collections["domain_collection"]].find({})),
+                    "table_catalog": list(db[collections["table_collection"]].find({})),
+                    "main_filter": list(db[collections["main_filter_collection"]].find({})),
                 }
-                present = [name for name, value in current_documents.items() if isinstance(value, dict)]
+                present = [name for name, value in current_documents.items() if value]
                 if present and len(present) != 3:
                     raise ContractError(
                         "metadata_dependency_error",
@@ -8228,13 +8229,15 @@ class MetadataAuthoringEngine(Component):
                         {"present_sections": present},
                     )
                 if len(present) == 3:
-                    active_package = assemble_domain_package_from_sections(
-                        current_documents,
-                        domain_id,
-                        environment,
-                    )
+                    active_package = assemble_domain_package_from_items(current_documents)
                     current_source_texts = {
-                        name: str(value.get("source_text") or "")
+                        name: "\n\n".join(
+                            dict.fromkeys(
+                                str(item.get("natural_text") or "").strip()
+                                for item in value
+                                if str(item.get("natural_text") or "").strip()
+                            )
+                        )[:65536]
                         for name, value in current_documents.items()
                     }
                     # Keep the public loader path and authoring base path on the
@@ -8247,7 +8250,7 @@ class MetadataAuthoringEngine(Component):
                         table_collection=collections["table_collection"],
                         main_filter_collection=collections["main_filter_collection"],
                     )
-                    if sha256_json(loaded_package) != sha256_json(active_package):
+                    if loaded_package["runtime_catalog"] != active_package["runtime_catalog"]:
                         raise ContractError("metadata_hash_conflict", "metadata_three_collection", "메타데이터 loader와 authoring base 검증 결과가 다릅니다.")
             finally:
                 client.close()
@@ -8441,6 +8444,15 @@ class MetadataAuthoringEngine(Component):
             domain_id=domain_id,
         )
 
+        query_source_text = source_text
+        if split_bootstrap:
+            query_source_text = str(bootstrap_branches["dataset"]["source_text"])
+        draft, source_query_extraction = apply_dataset_source_configs_from_text(
+            draft,
+            query_source_text,
+            require_complete=False,
+        )
+
         if strict_inventory:
             try:
                 coverage = validate_draft_inventory_coverage(
@@ -8521,11 +8533,12 @@ class MetadataAuthoringEngine(Component):
             "schema": "passed",
             "semantic_lint": "passed",
             "dependency_closure": "passed",
-            "hash_seal": "passed",
+            "runtime_compile": "passed",
             "section_ownership": "passed",
-            "three_collection_release": "passed",
+            "three_collection_items": "passed",
             "source_coverage": coverage,
             "source_bindings": source_binding_validation,
+            "source_queries": source_query_extraction,
         }
         observed_schema_bindings = deepcopy(
             getattr(self, "_observed_authoring_schema_bindings", None) or {}
@@ -8576,18 +8589,18 @@ class MetadataAuthoringEngine(Component):
             marker = "\n\n--- 도메인 정책 변경 원문 ---\n"
             source_texts["domain"] = (source_texts["domain"] + marker + source_text).strip()
 
-        section_documents = make_metadata_section_documents(
+        item_documents = make_metadata_item_documents(
             package,
             source_texts,
             updated_at=now.isoformat(),
         )
-        release_id = str(section_documents["domain"]["release_id"])
-        release_hash = str(section_documents["domain"]["release_manifest_sha256"])
+        item_counts = {name: len(items) for name, items in item_documents.items()}
         candidate_hash = sha256_json(
             {
                 "contract_version": "metadata.save-candidate.v1",
-                "release_id": release_id,
-                "release_manifest_sha256": release_hash,
+                "domain_id": domain_id,
+                "item_counts": item_counts,
+                "runtime_catalog_sha256": package["runtime_catalog"]["catalog_sha256"],
                 "validation": validation,
             }
         )
@@ -8597,9 +8610,9 @@ class MetadataAuthoringEngine(Component):
             try:
                 with client.start_session() as session:
                     with session.start_transaction():
-                        replace_metadata_release(
+                        replace_metadata_items(
                             db,
-                            section_documents,
+                            item_documents,
                             session=session,
                             domain_collection=collections["domain_collection"],
                             table_collection=collections["table_collection"],
@@ -8614,7 +8627,7 @@ class MetadataAuthoringEngine(Component):
                             main_filter_collection=collections["main_filter_collection"],
                             session=session,
                         )
-                        if sha256_json(persisted) != sha256_json(package):
+                        if persisted["runtime_catalog"] != package["runtime_catalog"]:
                             raise ContractError(
                                 "metadata_hash_conflict",
                                 "metadata_three_collection",
@@ -8636,7 +8649,7 @@ class MetadataAuthoringEngine(Component):
             idempotent_replay=False,
             diff={
                 "authoring_kind": kind,
-                "release_id": release_id,
+                "item_counts": item_counts,
                 "datasets": len(catalog.get("datasets") or {}),
                 "fields": len(catalog.get("fields") or {}),
                 "metrics": len(catalog.get("metrics") or {}),

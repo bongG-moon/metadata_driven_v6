@@ -195,6 +195,9 @@
           "type": "string",
           "maxLength": 256
         },
+        "source_config": {
+          "$ref": "#/$defs/jsonObject"
+        },
         "parameters": {
           "type": "object",
           "maxProperties": 128,

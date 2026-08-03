@@ -6,6 +6,7 @@ import hashlib
 import json
 import math
 import re
+from copy import deepcopy
 from typing import Any
 
 from lfx.custom.custom_component.component import Component
@@ -54,6 +55,34 @@ _CONTEXT_LIMIT_BY_PURPOSE = {
     "metadata_execute": 4 * 1024,
 }
 _BUNDLE_LIMIT = 216 * 1024
+_QUERY_MARKER = re.compile(
+    r"(?im)^[ \t]*(?:query_template|sql_template|oracle_sql|datalake_sql)[ \t]*:[ \t]*(?:\n|$)"
+)
+_QUERY_BLOCK_END = re.compile(
+    r"(?im)^[ \t]*(?:filter_mappings|required_params|required_param_mappings|"
+    r"standard_column_aliases|default_detail_columns|metric_semantics|selection_criteria)"
+    r"[ \t]*(?:[:=]|(?:은|는)\b)"
+)
+
+
+def _redact_query_templates(value: str) -> str:
+    """Remove executable SQL from the provider projection only."""
+
+    text = str(value or "").replace("\r\n", "\n").replace("\r", "\n")
+    markers = list(_QUERY_MARKER.finditer(text))
+    if not markers:
+        return text
+    pieces: list[str] = []
+    cursor = 0
+    for index, marker in enumerate(markers):
+        next_marker_start = markers[index + 1].start() if index + 1 < len(markers) else len(text)
+        boundary = _QUERY_BLOCK_END.search(text, marker.end(), next_marker_start)
+        query_end = boundary.start() if boundary else next_marker_start
+        pieces.append(text[cursor:marker.end()])
+        pieces.append("[SQL 원문은 결정론적 등록 컴파일러에서 별도 보존 및 검증됨]\n\n")
+        cursor = query_end
+    pieces.append(text[cursor:])
+    return "".join(pieces)
 
 
 def _json_value(value: Any) -> Any:
@@ -166,9 +195,11 @@ class PromptBundleComposer(Component):
             raise ValueError(f"지원하지 않는 프롬프트 목적입니다: {purpose or '(빈 값)'}")
         if not isinstance(context.get("invoke"), bool):
             raise ValueError("런타임 컨텍스트의 invoke는 boolean이어야 합니다.")
-        variables = context.get("variables")
+        variables = deepcopy(context.get("variables"))
         if not isinstance(variables, dict):
             raise ValueError("런타임 컨텍스트의 variables는 객체여야 합니다.")
+        if purpose == "metadata_dataset_draft" and isinstance(variables.get("source_text"), str):
+            variables["source_text"] = _redact_query_templates(variables["source_text"])
         _reject_disallowed_payload(variables)
 
         common_bytes = len(common.encode("utf-8"))

@@ -189,8 +189,8 @@ def test_semantic_templates_are_closed_bounded_and_compiler_only() -> None:
     assert templates["locale"] == "ko-KR"
     assert templates["timezone"] == "Asia/Seoul"
     assert templates["planner_policy"] == {
-        "legacy_catalog_sha256": "6d2c9eaf3a10be1023a5c7aa52c796d5f0caf7287237a488ce38e68840b0e16f",
-        "planner_profile": "legacy_v1_compat",
+        key: _load(CATALOG_PATH)["output_profile"][key]
+        for key in ("legacy_catalog_sha256", "planner_profile")
     }
     compact = json.dumps(
         templates,

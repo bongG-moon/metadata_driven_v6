@@ -41,7 +41,7 @@
    - 최초 bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter 원문을 각각 받는다. 세 내부 LLM branch는 같은 hash로 봉인된 `semantic_vocabulary`의 `id/family/business labels`만 보고 원문 표현을 승인 후보에 매핑한다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR을 반환한다. 작업자는 이 내부 형식을 알 필요가 없다.
    - 결정론적 compiler가 `metadata.authoring.source-registry.v3`의 LLM 비공개 `semantic_templates`와 dataset descriptor/Source binding으로 세 결과를 확장·재결합한다. 실행 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 planner policy는 LLM이 아니라 registry가 소유한다.
    - 정보가 부족하거나 한 표현이 여러 승인 후보에 대응하면 작업자가 고를 수 있는 쉬운 업무 표현으로 `status=needs_clarification`을 반환한다. 작업자용 질문에 내부 ID, JSON/DSL, 타입, 물리 컬럼이나 schema 경로를 노출하지 않는다.
-3. runtime은 compiled metadata만 사용한다. `01 사용 가능 메타데이터 불러오기`는 UI에 MongoDB URI·database·도메인 컬렉션·데이터 카탈로그 컬렉션·메인필터 컬렉션·timeout을 노출하고, 입력받은 서로 다른 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합한다. domain/environment/source mode 선택 input은 두지 않는다.
+3. MongoDB에는 작업자가 관리하는 자연어 기반 항목 문서만 저장한다. `01 사용 가능 메타데이터 불러오기`는 UI에 MongoDB URI·database·도메인 컬렉션·데이터 카탈로그 컬렉션·메인필터 컬렉션·timeout을 노출하고, 입력받은 서로 다른 3컬렉션의 항목을 실행 시점에 typed Domain Package로 컴파일한다. domain/environment/source mode 선택 input은 두지 않는다.
    - `02 요청 및 세션 상태 고정`은 기준시각·시간대 UI input을 두지 않는다. 실행 시각은 내부에서 생성하고 날짜 해석 시간대는 항상 `Asia/Seoul`이다. 검증용 고정 시각은 harness가 주입하는 test fixture이지 운영 Flow 설정이 아니다.
 4. canonical↔physical mapping은 **Source Contract Merger**가 source boundary에서 정확히 한 번 수행한다.
 5. metric output 하나마다 source/date/filter/aggregation lineage가 하나 존재한다.
@@ -68,7 +68,11 @@
 26. 사용자에게 보이는 Flow·node·input·output의 이름과 설명은 한국어를 기본으로 하고 내부 ID/port/schema key는 유지한다. Data Analysis node는 `00`부터 `27`까지, Domain/Dataset/Main Filter/Domain Policy 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 실행 순서가 보이는 번호형 한국어 표시명을 사용한다. 같은 단계의 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분하며, 도메인 초기 등록의 반복 context/composer/invoker에는 담당 분기명을 반드시 포함한다. 각 input/output에는 기능, 필수 여부, 계약 type과 연결 대상을 알 수 있는 설명을 제공한다.
 27. Flow 목적, 입력, prompt 정책, source, typed execution/registered function, 승인·저장과 Message/API/GaiA 출력을 설명하는 Sticky Note를 builder가 생성한다. Note는 실행 edge와 node count에 포함하지 않고 secret·query·raw row를 포함하지 않는다.
 28. 기본 metadata authoring은 `자유형 TXT → 외부 공통·특화 Prompt pair → branch별 closed annotation/IR → Source Registry v3 결정론적 확장 → compile → 3컬렉션 transaction 저장`이다. 최초 Domain bootstrap은 Domain annotation, compact Dataset IR, `target_type` 필수 Main Filter IR을 각각 최대 1회씩, 총 3회 생성하고 한 번에 merge/compile한다. 후속 Dataset/Main Filter 수정은 최대 1회다. `source_grounding_mode=explicit_inventory`와 Blueprint/external pin은 선택적 고신뢰 lane이며 일반 작업자 입력의 전제 조건이 아니다.
-29. Deterministic compiler는 schema·dependency·security 일관성을 보장하지만 자연어의 모호한 업무 의도를 임의 확정하지 않는다. 모호하면 assumptions/missing information과 짧은 업무 질문을 반환하고 저장하지 않는다. 성공한 release만 도메인·테이블 카탈로그·메인필터 current 문서로 함께 저장한다.
+29. Deterministic compiler는 schema·dependency·security 일관성을 보장하지만 자연어의 모호한 업무 의도를 임의 확정하지 않는다. 모호하면 assumptions/missing information과 짧은 업무 질문을 반환하고 저장하지 않는다. 성공한 결과만 도메인·테이블 카탈로그·메인필터 collection에 항목 단위로 저장한다.
+30. MongoDB metadata 항목은 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. release/manifest/package/domain/environment/revision/hash 필드는 저장하지 않으며 runtime contract/hash는 로드 후 메모리에서만 계산한다.
+   - Oracle·SQL·Datalake dataset 항목의 `payload.source_config`에는 운영 조회에 필요한 `source_type`, `db_key`, 검증된 여러 줄 `query_template`, `required_params`를 저장할 수 있다. query의 내부 줄바꿈·주석·placeholder 철자는 보존한다.
+   - `query_template`은 단일 read-only `SELECT/WITH`만 허용하며 `{NAME}` placeholder마다 typed `parameters.NAME.required=true`가 있어야 한다. 비밀번호·token·접속 문자열은 metadata에 저장하지 않는다.
+   - Dataset LLM에는 query 본문을 전달하지 않는다. Prompt Composer가 provider projection에서 query body를 제거하고, 등록 compiler가 원본 TXT에서 별도로 추출·검증·저장한다.
 30. 최초 Domain bootstrap의 Prompt 경계는 다음과 같이 고정한다.
    - 작업자는 Domain·Dataset·Main Filter 한글 입력 노드에 자유형 자연어 TXT만 넣는다. JSON/DSL, compact IR, canonical ID 목록, 컬럼 타입 표, `config_ref`/`query_ref`는 일반 작업자 입력 계약이 아니다.
    - Domain·Dataset·Main Filter에는 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 모든 pair는 서로 다른 node/source/hash/edge로 유지하고 한 Prompt Template 안의 section으로 합치지 않는다. 각 분기는 별도의 Context Builder·Composer·Conditional Invoker를 가지며 하나의 승인된 Language Model node를 공유할 수 있다.
@@ -84,7 +88,7 @@
 
 ## Canonical 실행 순서
 
-1. `00 분석 질문 입력`과 `01 사용 가능 메타데이터 불러오기`가 사용자 질문과 최신 완전 3컬렉션 release를 준비
+1. `00 분석 질문 입력`과 `01 사용 가능 메타데이터 불러오기`가 사용자 질문과 3컬렉션 항목에서 컴파일한 runtime catalog를 준비
 2. `02 요청 및 세션 상태 고정`이 내부 현재 시각·고정 `Asia/Seoul` 기준의 request capsule과 이전 turn state/result contract를 구성
 3. metadata dependency bundle, hash-pinned registered-function registry와 immutable resolved candidate bundle 선택
 4. Route Eligibility Gate가 `analysis.route.v1`의 `deterministic|intent_llm|unsupported`, reason과 proof hash 확정

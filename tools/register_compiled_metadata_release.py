@@ -1,9 +1,7 @@
-"""Publish a reviewed v6 domain package to the fixed three MongoDB collections.
+"""Register a reviewed package as simple natural-language MongoDB items.
 
-This is the deterministic registration lane used when a natural-language LLM
-draft cannot be decoded safely. It never asks an LLM to recreate executable
-metadata; it validates the reviewed package, preserves the worker source text,
-publishes one atomic release, and reloads it through the public runtime loader.
+The historical filename is kept for existing commands. No release document,
+manifest, or persisted hash is created by this implementation.
 """
 
 from __future__ import annotations
@@ -12,7 +10,6 @@ import argparse
 import json
 import os
 import sys
-from hashlib import sha256
 from pathlib import Path
 from typing import Any
 
@@ -31,10 +28,41 @@ COLLECTIONS = {
     "table_catalog": "agent_v6_table_catalog",
     "main_filter": "agent_v6_main_filter",
 }
+V4_COLLECTIONS = (
+    "agent_v4_domain_items",
+    "agent_v4_table_catalog_items",
+    "agent_v4_main_flow_filters",
+)
+ALLOWED_ITEM_FIELDS = {"_id", "section", "key", "natural_text", "payload", "updated_at"}
 
 
 def _count(value: Any) -> int:
     return len(value) if isinstance(value, (dict, list)) else 0
+
+
+def _legacy_natural_texts(database: Any) -> dict[str, str]:
+    """Reuse worker-entered V4 text when an item key can be matched."""
+
+    result: dict[str, str] = {}
+    for collection_name in V4_COLLECTIONS:
+        for document in database[collection_name].find({}):
+            trace = document.get("registration_trace") if isinstance(document.get("registration_trace"), dict) else {}
+            text = str(trace.get("raw_text") or "").strip()
+            if not text:
+                continue
+            markers = [str(document.get("_id") or "")]
+            if collection_name == V4_COLLECTIONS[0]:
+                section = str(document.get("section") or "")
+                key = str(document.get("key") or "")
+                markers.extend([key, f"{section}:{key}"])
+            elif collection_name == V4_COLLECTIONS[1]:
+                markers.append(str(document.get("dataset_key") or ""))
+            else:
+                markers.append(str(document.get("filter_key") or ""))
+            for marker in markers:
+                if marker:
+                    result.setdefault(marker, text)
+    return result
 
 
 def run(
@@ -47,13 +75,11 @@ def run(
     allow_replace: bool,
     output: Path,
 ) -> dict[str, Any]:
-    from reference_runtime.canonical import sha256_json
     from reference_runtime.domain_packages import validate_domain_package
     from reference_runtime.metadata_collections import (
         load_available_domain_package_from_three_collections,
-        load_domain_package_from_three_collections,
-        make_metadata_section_documents,
-        replace_metadata_release,
+        make_metadata_item_documents,
+        replace_metadata_items,
     )
 
     env = load_dotenv_values(env_file)
@@ -73,37 +99,31 @@ def run(
         "table_catalog": (input_dir / "dataset_v6.txt").read_text(encoding="utf-8"),
         "main_filter": (input_dir / "main_filter_v6.txt").read_text(encoding="utf-8"),
     }
-    documents = make_metadata_section_documents(package, source_texts)
-    current_id = f"{package['environment']}:{package['domain_id']}"
 
     client = MongoClient(mongo_uri, serverSelectionTimeoutMS=10000)
     try:
         database = client[target_database]
         client.admin.command("ping")
-        existing = {
-            kind: database[name].find_one({"_id": current_id}, {"_id": 1, "release_id": 1})
-            for kind, name in COLLECTIONS.items()
-        }
-        if any(isinstance(value, dict) for value in existing.values()) and not allow_replace:
-            raise RuntimeError("metadata_release_exists_use_allow_replace")
-
+        existing_counts = {kind: database[name].count_documents({}) for kind, name in COLLECTIONS.items()}
+        if any(existing_counts.values()) and not allow_replace:
+            raise RuntimeError("metadata_items_exist_use_allow_replace")
+        documents = make_metadata_item_documents(
+            package,
+            source_texts,
+            legacy_natural_texts=_legacy_natural_texts(database),
+        )
         with client.start_session() as session:
             with session.start_transaction():
-                replace_metadata_release(database, documents, session=session)
-                loaded = load_domain_package_from_three_collections(
-                    database,
-                    package["domain_id"],
-                    package["environment"],
-                    session=session,
-                )
-                if sha256_json(loaded) != sha256_json(package):
-                    raise RuntimeError("published_package_round_trip_mismatch")
+                replace_metadata_items(database, documents, session=session)
+                loaded = load_available_domain_package_from_three_collections(database, session=session)
+                if loaded["runtime_catalog"] != package["runtime_catalog"]:
+                    raise RuntimeError("published_runtime_catalog_round_trip_mismatch")
 
         auto_loaded = load_available_domain_package_from_three_collections(database)
-        if sha256_json(auto_loaded) != sha256_json(package):
-            raise RuntimeError("latest_available_loader_mismatch")
+        if auto_loaded["runtime_catalog"] != package["runtime_catalog"]:
+            raise RuntimeError("available_loader_runtime_catalog_mismatch")
         stored = {
-            kind: database[name].find_one({"_id": current_id})
+            kind: list(database[name].find({}))
             for kind, name in COLLECTIONS.items()
         }
     finally:
@@ -124,39 +144,34 @@ def run(
         "prompt_extensions": _count(catalog.get("prompt_extensions")),
         "specialized_functions": _count(catalog.get("specialized_functions")),
     }
+    actual_fields = {
+        kind: sorted({key for document in items for key in document})
+        for kind, items in stored.items()
+    }
+    item_counts = {kind: len(items) for kind, items in stored.items()}
+    natural_text_counts = {
+        kind: sum(bool(str(document.get("natural_text") or "").strip()) for document in items)
+        for kind, items in stored.items()
+    }
     report = {
-        "contract_version": "metadata.compiled-release.registration.v1",
+        "contract_version": "metadata.item-registration.v1",
         "status": "ok",
-        "mode": "deterministic_compiled_fallback",
+        "mode": "natural_language_items",
         "database": target_database,
         "database_mode": "operational" if target_database == operational_database else "isolated_validation",
-        "domain_id": package["domain_id"],
-        "environment": package["environment"],
-        "revision": package["revision"],
-        "current_id": current_id,
         "collections": COLLECTIONS,
-        "package_sha256": package["package_sha256"],
-        "bundle_sha256": package["bundle_sha256"],
-        "catalog_sha256": catalog["catalog_sha256"],
-        "source_sha256": {
-            kind: sha256(text.encode("utf-8")).hexdigest()
-            for kind, text in source_texts.items()
-        },
-        "counts": counts,
-        "storage": {
-            "document_count": sum(isinstance(value, dict) for value in stored.values()),
-            "release_ids": sorted({str(value.get("release_id") or "") for value in stored.values()}),
-            "natural_source_present": {
-                kind: bool(str(value.get("source_text") or "").strip())
-                for kind, value in stored.items()
-            },
-        },
+        "item_counts": item_counts,
+        "natural_text_counts": natural_text_counts,
+        "runtime_counts": counts,
+        "stored_fields": actual_fields,
         "checks": {
-            "package_validated": True,
-            "transactional_round_trip": True,
-            "latest_available_loader": True,
-            "three_documents_present": all(isinstance(value, dict) for value in stored.values()),
-            "single_release": len({str(value.get("release_id") or "") for value in stored.values()}) == 1,
+            "runtime_catalog_round_trip": True,
+            "available_loader": True,
+            "item_fields_only": all(set(fields) == ALLOWED_ITEM_FIELDS for fields in actual_fields.values()),
+            "no_release_documents": all(
+                not ({"release_id", "release_manifest", "source_sha256", "document_sha256"} & set(fields))
+                for fields in actual_fields.values()
+            ),
         },
     }
     assert_secret_absent(report, mongo_uri)

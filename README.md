@@ -21,7 +21,7 @@
 - 미지원 요청은 bounded telemetry로 집계하고, 반복 수요는 검토된 metadata recipe·formula·typed operator로 승격
 - 자유 pandas 탐색은 미래의 별도 특권 계층 계약만 정의하며 초기 runtime에서는 비활성이다. trusted 5-Flow core의 자동 fallback 또는 결과/state 입력으로 연결하지 않는다.
 - 자연어 TXT 기반 Domain/Table Catalog/Main Filter 입력: 유지. 현장 작업자는 JSON·스키마·ID inventory·relation key 문법을 작성하지 않고 기존처럼 자유롭게 설명한다.
-- 실행 소스 binding: 작업자와 LLM은 `config_ref`/`query_ref`를 소유하지 않는다. **승인 업무 어휘·Source 참조 레지스트리**는 LLM에는 ID·family·업무용 표현만 제공하고, 물리 컬럼·타입·adapter/config/query binding은 결정론적 컴파일러에만 제공한다.
+- 실행 소스 binding: 작업자는 Oracle/Datalake 항목에 `db_key`, 여러 줄 `query_template`, `{DATE}`·`{LOT_ID}` 같은 필수 변수를 자연어 설명과 함께 넣을 수 있다. SQL 본문은 LLM prompt에서 제거되며 결정론적 compiler가 원문 줄바꿈을 보존해 읽기 전용 SQL로 검증하고 `payload.source_config`에 저장한다. credential은 저장하지 않고 조회 노드 입력/환경변수에서만 주입한다.
 - 기본 Full-domain 등록: 작업자는 Domain/Dataset/Main Filter TXT에 평소 사용하는 자유로운 업무 문장만 입력한다. 세 LLM 분기가 이를 작은 closed 조각으로 바꾸고, 결정론적 engine이 승인 어휘와 정확히 결합한 뒤 전체 계약을 컴파일한다. 작업자는 JSON·DSL·canonical ID·물리 컬럼 타입·엄격 문법을 작성하지 않으며, 의미가 여러 가지면 저장 대신 비기술적인 확인 질문을 받는다.
 - 정보가 부족하거나 모호하면 포맷 오류로 몰지 않고 draft/candidate 없이 `status=needs_clarification`의 누락 항목과 짧은 확인 질문을 반환한다.
 - 선택적 고신뢰 등록: `source_grounding_mode=explicit_inventory`를 명시한 운영자 lane에서만 reviewed Blueprint+별도 SHA-256 pin의 annotation-only 방식 또는 완전한 inventory의 zero-LLM compile을 사용한다. 일반 작업자에게 이 문법이나 Blueprint/pin을 요구하지 않는다.
@@ -31,13 +31,13 @@
 - 특화 함수: descriptor→build-time standalone registry attestation→candidate→Intent→`registered_call` Typed IR→Registered Function Gateway→output schema/lineage 검증의 닫힌 실행 chain을 사용하며 metadata code/dynamic import/fallback은 금지
 - v5 사용자 출력 기능: 결과표/근거/다운로드/알림/적용 기준/후속 질문/의도·조회·실행 진단 표시 선택, 구조화 API output, GaiA metadata, CSV ref, 멀티턴을 호환 계약으로 유지
 - Langflow UI: Data Analysis node는 `00`~`27`, 네 등록 Flow는 각 Flow의 `00` 입력부터 최종 출력까지 실행 순서가 드러나는 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분한다. Metadata loader에는 MongoDB URI·database·세 컬렉션명·timeout을 노출하고, 실제 source node에는 v5 호환 연결 설정과 조회 행 제한을 노출한다.
-- metadata read: `01 사용 가능 메타데이터 불러오기`가 입력받은 도메인·테이블 카탈로그·메인필터 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·검증·결합한다. 컬렉션 입력 기본값은 v6 운영명이며 domain/environment/source mode 선택은 UI에 없다.
+- metadata read: `01 사용 가능 메타데이터 불러오기`가 입력받은 도메인·테이블 카탈로그·메인필터 3컬렉션의 자연어 기반 항목을 결합해 typed runtime catalog를 메모리에서 컴파일한다. 컬렉션 입력 기본값은 v6 운영명이며 domain/environment/source mode 선택은 UI에 없다.
 - 요청 시간: `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없고, 실행 시각을 내부에서 생성해 `Asia/Seoul`로 고정한다. 검증의 고정 시각은 harness fixture다.
 - 데이터 source 경계: `11 검증용 더미 데이터 조회`, `12 Oracle 데이터 조회`, `13 H-API 데이터 조회`, `14 Datalake 데이터 조회`, `15 Goodocs 데이터 조회`를 분리한다. 연결된 payload는 각 node가 자기 source 계약으로만 검증하며, 개발 dummy 검증을 실제 원천 조회 완료로 과장하지 않는다.
 - 출력 전달 경계: `23 → 24·25·26`은 전송용 해시가 없는 일반 JSON 응답을 전달한다. 24·25·26은 수신 payload의 해시나 전체 응답 schema를 다시 검사하지 않으며, 결과 무결성 hash는 MongoDB result store 내부에서만 유지한다.
 - MVP Flow inventory: Data Analysis 1개 + Domain/Dataset/Main Filter/Domain Policy authoring 4개, 총 5개
 - metadata write: 자연어 해석 → deterministic compile/validation → 도메인·테이블 카탈로그·메인필터 3컬렉션 transaction 저장
-- v5 MongoDB 문서: 직접 덮어쓰지 않고 기본 v6 3컬렉션 current release로 컴파일·이관
+- v5 MongoDB 문서: 기존 작업자 자연어를 재사용해 기본 v6 3컬렉션의 항목 문서로 컴파일·이관
 
 실행 계층은 다음과 같다.
 
@@ -98,7 +98,7 @@ v6의 목표는 단순 node 수 축소가 아니다. LLM이 결정하던 실행 
 | 반복 안정성 | 70건 × 3회, 70개 case 모두 plan/result signature 동일 |
 | Langflow 1.9.2 artifact | standalone component 25/25, 3개 artifact layer의 Flow source parity 168 instance/27 unique, 5개 Flow의 source-export node template 86/86 parse, import-ready 5/5 생성 |
 | 주문·매출 범용 도메인 | 19/19 통과, 제조 도메인과 session/result ref 격리 확인 |
-| MongoDB metadata | 격리 DB `datagov_v6_validation`에 정확히 도메인·테이블 카탈로그·메인필터 3문서 저장, 자연어 원문 3/3 보존, 동일 release 1개, loader round-trip 통과 |
+| MongoDB metadata | 격리 DB `datagov_v6_validation`에서 도메인·테이블 카탈로그·메인필터 항목별 문서 저장, 허용 필드 6개만 사용, natural_text 보존, loader runtime-catalog round-trip 통과 |
 | 실제 Gemini API | exact `gemini-3.5-flash-lite`, temperature 0, fallback 0. 기본 corpus와 제목·bullet 0개 재작성 corpus 모두 실제 authoring 4/4 cycle 통과; 각 run draft 5, annotation 0, repair 0 |
 | 실제 Gemini + Mongo 등록 | exact `gemini-3.5-flash-lite` 3회, fallback/repair 0; 자유형 TXT→standalone Langflow component 순서→compile→3컬렉션 commit revision 2→loader 통과 (`three_collection_live_validation.json`) |
 | Langflow runtime | 정확한 1.9.2/0.9.2/0.4.2에서 5개 Flow, 실행 node template 86/86 parse, Flow/source parity 통과 |

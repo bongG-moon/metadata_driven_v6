@@ -154,6 +154,35 @@ def test_composer_rejects_raw_or_secret_bearing_payloads() -> None:
             component.build_prompt_bundle()
 
 
+def test_dataset_prompt_redacts_sql_but_preserves_business_context() -> None:
+    component = _component_class("01_prompt_bundle_composer.py")()
+    component.common_prompt_message = _message("COMMON")
+    component.runtime_context = _data(
+        {
+            **_runtime_context(purpose="metadata_dataset_draft"),
+            "variables": {
+                "source_sha256": "a" * 64,
+                "source_text": """생산 자료는 production으로 등록해줘. db_key는 PNT_RPT야.
+query_template:
+SELECT A,
+       B
+FROM PROD
+WHERE WORK_DATE = {DATE}
+filter_mappings는 DATE -> WORK_DATE로 연결해줘.
+""",
+                "output_schema": {"type": "object"},
+            },
+        }
+    )
+    payload = component.build_prompt_bundle().data
+    context_text = payload["segments"][-1]["content"]
+    assert "production으로 등록" in context_text
+    assert "filter_mappings" in context_text
+    assert "SQL 원문은 결정론적 등록 컴파일러" in context_text
+    assert "SELECT A" not in context_text
+    assert "FROM PROD" not in context_text
+
+
 class _FakeModel:
     def __init__(self, response):
         self.response = response

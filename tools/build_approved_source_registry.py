@@ -72,6 +72,7 @@ REQUIRED_DATASET_TEMPLATE_KEYS = (
 _DATASET_TEMPLATE_EXCLUDED_KEYS = {
     "fields",
     "family",
+    "source_config",
     *BINDING_KEYS,
 }
 _RUNTIME_DATASET_IDENTITY_KEYS = {"key"}
@@ -1159,11 +1160,13 @@ def _dataset_template_projection(
         raise RegistryBuildError("dataset template source must be an object")
     blueprint_allowed = _DATASET_TEMPLATE_EXCLUDED_KEYS | set(DATASET_TEMPLATE_KEYS)
     runtime_allowed = blueprint_allowed | _RUNTIME_DATASET_IDENTITY_KEYS
+    blueprint_contract_keys = set(blueprint_dataset) - {"source_config"}
+    runtime_contract_keys = set(runtime_dataset) - _RUNTIME_DATASET_IDENTITY_KEYS - {"source_config"}
     if (
         not set(REQUIRED_DATASET_TEMPLATE_KEYS).issubset(blueprint_dataset)
         or set(blueprint_dataset) - blueprint_allowed
         or set(runtime_dataset) - runtime_allowed
-        or set(runtime_dataset) - _RUNTIME_DATASET_IDENTITY_KEYS != set(blueprint_dataset)
+        or runtime_contract_keys != blueprint_contract_keys
         or runtime_dataset.get("key") != dataset_id
     ):
         raise RegistryBuildError("dataset template source contract is open or inconsistent")

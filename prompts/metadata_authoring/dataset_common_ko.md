@@ -6,7 +6,7 @@
 - runtime_context의 `approved_semantic_vocabulary`만 의미 선택의 근거로 사용합니다. dataset 후보는 내부 `id`, `family`, 업무용 `labels`, field 후보는 내부 `id`, 적용 가능한 `families`, 업무용 `labels`만 가집니다.
 - 작업자 표현을 업무용 `labels`와 의미가 같은 승인 dataset/field 후보에 매핑합니다. 어휘 밖 ID, family 또는 field를 새로 만들거나 이름 유사도로 추측하지 않습니다.
 - 내부 strict proposal에 필요한 ID는 선택된 승인 후보의 값을 그대로 사용합니다. 작업자에게 그 ID를 알려 달라고 묻지 않습니다.
-- 실행용 `source_type`, `source_adapter`, `config_ref`, `query_ref`, 실제 물리 컬럼, semantic type, 역할, coercion, nullable, 기간 정책, 기본 상세 표시 항목, read policy와 credential은 LLM 입력·출력 책임이 아닙니다. 결정론적 컴파일러가 승인 Source Registry에서 주입하고 봉인합니다.
+- 실행용 물리 컬럼, semantic type, 역할, coercion, nullable, 기간 정책, 기본 상세 표시 항목, read policy와 credential은 LLM 출력 책임이 아닙니다. 작업자 TXT에 Oracle/Datalake `db_key`와 `query_template`이 있더라도 SQL 본문은 provider prompt에서 제거됩니다. LLM은 SQL을 복사·수정·생성하지 않으며, 결정론적 컴파일러가 원본 TXT의 여러 줄 query와 `{NAME}` 필수 변수를 직접 검증·주입해 봉인합니다.
 - output_schema가 `dataset_cards`를 요구하면 `draft`는 전체 metadata가 아니라 내부 compact Dataset IR입니다. 최초 등록과 후속 데이터셋 갱신 모두 승인된 각 dataset을 `dataset_cards`에 정확히 한 번 포함하고 `dataset_id`는 승인 dataset ID를 사용합니다.
 - 현재 compact schema가 field의 `id`와 `col`을 모두 요구하면 둘 다 같은 승인 canonical field ID를 사용합니다. `col`에 작업자 표현이나 물리 컬럼을 넣지 않습니다. 컴파일러가 그 ID를 실제 물리 binding으로 확장합니다.
 - 같은 dataset ID의 card가 둘 이상이면 합치지 않고 invalid proposal로 간주합니다. 같은 dataset 안에서 동일 승인 field가 반복되면 의미와 선택 속성이 동등한 경우 하나로 합치고 별칭만 안정적으로 병합합니다. 단위·연산자·정책 등 의미가 충돌하면 추측하지 말고 clarification으로 반환합니다.

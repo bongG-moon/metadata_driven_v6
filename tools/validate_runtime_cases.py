@@ -605,7 +605,9 @@ def _base_failures(
         "code_llm_zero": int(usage.get("pandas_code_llm_calls") or 0) == 0,
         "repair_llm_zero": int(usage.get("pandas_repair_llm_calls") or 0) == 0,
         "answer_llm": int(usage.get("answer_llm_calls") or 0) == int(case.get("expected_answer_llm_calls") or 0),
-        "response_hash": response.get("response_sha256") == sha256_json({key: value for key, value in response.items() if key != "response_sha256"}),
+        # Runtime nodes exchange ordinary JSON.  Integrity hashes are a
+        # persistence concern only and must not be required at this boundary.
+        "plain_json_response": "response_sha256" not in response,
     }
     if case.get("expected_error_code"):
         checks["error_code"] = error.get("code") == case.get("expected_error_code")

@@ -154,7 +154,7 @@ metadata_driven_v6/
 2. `validation/ACCEPTANCE_MATRIX.md` §5의 모든 `OP-*` question shape를 자연스러운 exact Korean question text와 deterministic subfixture로 구체화해 review하고 case skeleton에 추가한다. 나머지 v6 invariant도 contract oracle의 우선 기준으로 적용한다.
 3. v5 expected 문서는 dummy expected row/value를 옮기는 evidence로만 사용한다. v6 fixed reference instant, canonical field, typed operator, source/date contract와 충돌하면 v6 contract가 우선하며 충돌을 migration report에 남긴다. unresolved conflict가 있는 case는 생성하지 않고 review를 요구한다.
 4. 검토가 끝난 `validation/cases.jsonl`을 처음 생성하고 이후 단일 source of truth로 승격한다.
-5. `PAYLOAD_STATE.md`의 모든 envelope, purpose별 공통·특화 prompt segment cardinality, route/unsupported telemetry, current 3컬렉션 metadata release, registered-function card/registry, validation case/profile/evidence, registry, flow inventory를 포함한 위 JSON Schema를 작성한다. legacy approval schema와 future exploration schema는 runtime 미등록 상태를 manifest로 증명해야 한다.
+5. `PAYLOAD_STATE.md`의 모든 envelope, purpose별 공통·특화 prompt segment cardinality, route/unsupported telemetry, current 3컬렉션 metadata 항목 계약, registered-function card/registry, validation case/profile/evidence, registry, flow inventory를 포함한 위 JSON Schema를 작성한다. legacy approval schema와 future exploration schema는 runtime 미등록 상태를 manifest로 증명해야 한다.
 6. schema hash와 canonical JSON serializer를 구현한다.
 7. 사람이 읽는 question/acceptance 문서를 generator로 만든다.
 8. `error_registry.json`, `operator_registry.json`, `registered_function_registry.json`을 schema 및 fault case에 연결한다.
@@ -195,7 +195,7 @@ metadata_driven_v6/
 - Domain/Dataset/Filter JSON Schema validator
 - cross-record dependency resolver
 - SQL/column/parameter/mapping semantic lint
-- immutable candidate/diff hash와 3-section release manifest builder
+- 3컬렉션 항목 문서 builder와 로드 후 결정론적 runtime compile
 - 도메인·테이블 카탈로그·메인필터 transaction writer와 read-after-write package 검증
 - v5 read-only migration candidate tool
 - runtime bundle selector
@@ -217,7 +217,7 @@ metadata_driven_v6/
 
 - natural TXT → compiled record → runtime loader round-trip
 - invalid metadata active 저장 차단
-- 세 section release/manifest/source/document hash 중 하나라도 바뀌면 loader 차단
+- 필수 항목 누락, 중복 `section/key`, 지원하지 않는 section 또는 typed payload 오류가 있으면 loader 차단
 - transaction read-after-write package hash가 compile 결과와 다르면 저장 전체 중단
 - non-secret bootstrap config/query fixture round-trip과 admin ACL; runtime/LLM이 registry를 생성·수정하지 못함
 - dependency closure byte budget 통과
@@ -425,7 +425,7 @@ Phase 4에서는 아직 adapter가 없으므로 30+6 전체 E2E나 multi-turn �
 | 26 | GaiA 형식 출력 |
 | 27 | 분석 답변 출력 |
 
-`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 컬렉션명·timeout을 받고 입력된 3컬렉션의 최신 완전 release를 자동 결합한다. 세 컬렉션명은 안전한 형식이어야 하고 서로 달라야 하며 기본값은 v6 운영 컬렉션명이다. `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없다. Runtime Intent와 Answer에는 각각 물리적으로 분리된 공통·특화 Prompt Template node가 필수이며 두 prompt는 변수 없이 서로 다른 ID/source/revision/hash/edge를 가진다. Context Builder 출력은 Composer의 `runtime_context`로 한 번만 연결한다.
+`01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 컬렉션명·timeout을 받고 입력된 3컬렉션의 항목 문서를 typed Domain Package로 메모리에서 컴파일한다. 세 컬렉션명은 안전한 형식이어야 하고 서로 달라야 하며 기본값은 v6 운영 컬렉션명이다. `02 요청 및 세션 상태 고정`에는 기준시각·시간대 UI가 없다. Runtime Intent와 Answer에는 각각 물리적으로 분리된 공통·특화 Prompt Template node가 필수이며 두 prompt는 변수 없이 서로 다른 ID/source/revision/hash/edge를 가진다. Context Builder 출력은 Composer의 `runtime_context`로 한 번만 연결한다.
 
 deterministic branch에서는 Language Model node가 실행되지 않아야 한다. `23 → 24·25·26`은 전송용 hash가 없는 일반 JSON을 전달하며, 출력 adapter는 수신 hash나 전체 응답 schema를 재검증하지 않는다. 결과 무결성 hash는 MongoDB result store 내부에서만 사용한다.
 
@@ -440,7 +440,7 @@ deterministic branch에서는 Language Model node가 실행되지 않아야 한�
 | A04 | Transactional 3컬렉션 Writer |
 | A05 | Compile/Runtime Loader Round-trip Validator |
 
-한 authoring run에서 A00~A05를 실행한다. 최초 Full-domain bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter TXT를 세 입력으로 받아 작업별 공통·특화 Prompt Template pair와 LLM을 각각 최대 1회, 총 3회 사용한다. 모든 특화 규칙은 특화 Template 본문에 직접 작성하고 runtime context는 Composer에 한 번만 연결한다. 출력은 Domain 표시명/설명 annotation, compact Dataset IR, `target_type` 필수 Main Filter IR로 고정된다. A02가 Source Registry v3의 hash-pinned `semantic_templates`, dataset descriptor/Source binding과 alias target을 결정론적으로 확장·병합해 full draft를 compile한다. `semantic_templates.planner_policy`는 봉인되며 어떤 LLM 출력이나 Domain Policy output profile도 변경할 수 없다. 후속 Dataset과 Main Filter 수정도 각각 같은 IR/expander 경계에서 LLM 최대 1회다. 사용자에게 정형 inventory, JSON, ID, 타입, 컬럼 또는 IR 문법을 요구하지 않는다. Domain Policy와 optional explicit-inventory Main Filter는 LLM 0회다. A03은 domain/table/main-filter section과 공통 release manifest를 만들고, A04는 세 current 문서를 한 MongoDB transaction으로 교체한다. A05는 같은 transaction 안에서 다시 결합해 package/hash 동치를 확인한다. `validate_only`는 A04 write를 건너뛴다.
+한 authoring run에서 A00~A05를 실행한다. 최초 Full-domain bootstrap은 작업자가 자유롭게 작성한 Domain·Dataset·Main Filter TXT를 세 입력으로 받아 작업별 공통·특화 Prompt Template pair와 LLM을 각각 최대 1회, 총 3회 사용한다. 모든 특화 규칙은 특화 Template 본문에 직접 작성하고 runtime context는 Composer에 한 번만 연결한다. 출력은 Domain 표시명/설명 annotation, compact Dataset IR, `target_type` 필수 Main Filter IR로 고정된다. A02가 Source Registry v3의 hash-pinned `semantic_templates`, dataset descriptor/Source binding과 alias target을 결정론적으로 확장·병합해 full draft를 compile한다. `semantic_templates.planner_policy`는 봉인되며 어떤 LLM 출력이나 Domain Policy output profile도 변경할 수 없다. 후속 Dataset과 Main Filter 수정도 각각 같은 IR/expander 경계에서 LLM 최대 1회다. 사용자에게 정형 inventory, JSON, ID, 타입, 컬럼 또는 IR 문법을 요구하지 않는다. Domain Policy와 optional explicit-inventory Main Filter는 LLM 0회다. A03은 검증된 catalog를 자연어 기반 item 문서로 분할하고, A04는 세 collection의 item set을 한 MongoDB transaction으로 교체한다. A05는 같은 transaction 안에서 다시 읽어 runtime catalog 동치를 확인한다. `validate_only`는 A04 write를 건너뛴다.
 
 ### Standalone build
 

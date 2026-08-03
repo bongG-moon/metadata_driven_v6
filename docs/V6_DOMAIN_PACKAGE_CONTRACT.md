@@ -14,7 +14,7 @@
   → compile_domain_package(...)
   → schema + semantic lint + dependency/security closure
   → immutable domain.package.v1
-  → domain/table_catalog/main_filter section + release manifest
+  → domain/table_catalog/main_filter 항목 문서
   → 3컬렉션 transaction save
   → load_domain_package_from_three_collections(...)
 ```
@@ -154,7 +154,7 @@ Specialized function card는 코드를 담지 않고 `function_id`, version, imp
 - Main Filter Authoring: 같은 current package를 읽고 `aliases`, `entity_groups`, `grains`, `orderings`, `predicates`, `recipes` section만 upsert한다.
 - Domain Policy Authoring: 별도 Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 적용한다. Prompt Template/Composer/envelope/LLM은 0회이며 Domain annotation이나 Dataset/Main Filter IR은 이 section을 바꿀 수 없다. `output_profile_json`도 sealed planner policy key를 포함하면 거부한다.
 
-부분 등록은 `runtime_catalog_v2_to_authoring_draft()`로 세 current 문서에서 결합한 catalog를 완전한 authoring draft로 복원한 뒤 `apply_authoring_section_patch()`를 적용한다. 삭제 지시, 다른 Flow가 소유한 section, 빈 patch는 거부한다. 결과는 항상 전체 `compile_domain_package()`와 schema·semantic lint·dependency closure를 다시 통과하고 새 revision의 세 section과 단일 release manifest가 된다. `legacy_projection_v1`은 별도 migration tool에서만 처리하며 Langflow authoring runtime은 `domain_package_v2`만 허용한다.
+부분 등록은 세 current collection의 항목에서 결합한 catalog를 `runtime_catalog_v2_to_authoring_draft()`로 완전한 authoring draft로 복원한 뒤 `apply_authoring_section_patch()`를 적용한다. 삭제 지시, 다른 Flow가 소유한 section, 빈 patch는 거부한다. 결과는 항상 전체 `compile_domain_package()`와 schema·semantic lint·dependency closure를 다시 통과하고 항목 단위로 다시 저장된다. `legacy_projection_v1`은 별도 migration tool에서만 처리하며 Langflow authoring runtime은 `domain_package_v2`만 허용한다.
 
 Domain/Dataset/Main Filter LLM 경로는 작업별 공통·특화 Prompt Template을 별도 node/source/hash/edge로 유지한다. 특화 업무 규칙은 각 특화 Template 본문에 직접 작성하고 모든 Prompt Template은 변수 없이 렌더링한다. 자연어 source context는 Context Builder에서 Composer의 `runtime_context`로 정확히 한 번 전달한다. Domain Policy는 prompt node/Composer/envelope/provider를 실행하지 않는다. Main Filter는 `source_grounding_mode=explicit_inventory`의 완전한 binding proof가 있을 때만 선택적으로 zero-LLM compile한다.
 
@@ -180,7 +180,7 @@ Public API request는 자유형 자연어 `input_message`와 공개 authoring co
 | 테이블 카탈로그 current | `agent_v6_table_catalog` | `{environment}:{domain_id}` |
 | 메인필터 current | `agent_v6_main_filter` | `{environment}:{domain_id}` |
 
-세 current 문서는 동일 `release_id`, revision, manifest와 package hash를 가져야 한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 domain collection에서 가장 최근 문서의 identity를 자동 선택한다. 이어 입력된 table catalog/main filter collection에서 같은 identity의 문서를 읽어 source/section/document hash와 공통 release manifest를 재계산하고 결합한 Domain Package의 catalog/package/bundle hash를 검증한다. collection 이름은 안전한 형식이며 서로 달라야 한다. domain/environment/source mode는 UI에 노출하지 않으며 어느 하나라도 다르면 실행하지 않는다. active pointer와 immutable bundle/pending collection은 runtime 필수 계약이 아니다.
+세 current collection은 항목 문서를 보관한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 모든 항목을 읽어 Domain Package를 메모리에서 컴파일한다. collection 이름은 안전한 형식이며 서로 달라야 한다. domain/environment/source mode는 UI에 노출하지 않으며 필수 항목 누락, 중복 key, 지원하지 않는 section, typed payload 오류가 있으면 실행하지 않는다. active pointer와 immutable bundle/pending collection은 runtime 필수 계약이 아니다.
 
 ## 6. 검증 / 저장 연결
 
@@ -188,7 +188,7 @@ Public API request는 자유형 자연어 `input_message`와 공개 authoring co
 2. Domain annotation, compact Dataset IR, `target_type` 필수 Main Filter IR을 각각 closed decode한다. Invalid/missing output은 repair 없이 실패한다.
 3. Source Registry v3를 결정론적으로 확장·병합한 뒤 전체 schema·semantic·dependency·security compiler를 실행한다.
 4. 성공한 package를 domain/table catalog/main filter section으로 나누고 각 자연어 원문과 hash를 보존한다.
-5. 세 section hash와 catalog/package/bundle hash를 공통 `metadata.release.v1` manifest로 봉인한다.
+5. 전체 runtime catalog 검증 후 MongoDB 저장용 항목 문서를 만든다. runtime hash는 메모리에서만 사용한다.
 6. 한 MongoDB transaction에서 세 current 문서를 교체하고 같은 transaction 안에서 다시 읽어 package 동치를 검증한다.
 7. `validate_only` 또는 dry-run이면 동일 검증을 수행하되 write하지 않는다. clarification/error이면 항상 write 0건이다.
 
@@ -203,7 +203,7 @@ python tools/migrate_v5_metadata.py --read-v5-mongo `
 
 ```
 
-기존 migration tool의 candidate/active-pointer write 옵션은 새 runtime 저장 계약이 아니므로 사용하지 않는다. 승인된 migration 결과는 자연어 Authoring Flow 또는 별도 검토된 3컬렉션 importer로 전체 Domain Package를 다시 compile한 뒤 같은 release로 저장해야 한다.
+기존 migration tool의 candidate/active-pointer write 옵션은 새 runtime 저장 계약이 아니므로 사용하지 않는다. 승인된 migration 결과는 자연어 Authoring Flow 또는 별도 검토된 3컬렉션 importer로 전체 Domain Package를 다시 compile한 뒤 항목 문서로 저장해야 한다.
 
 고정 v5 source collection은 세 개뿐이며 모든 실행에서 `v5_write_operations=0`이어야 한다.
 

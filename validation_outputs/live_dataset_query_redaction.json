@@ -1,0 +1,13 @@
+{
+  "contract_version": "metadata.dataset-query-live-validation.v1",
+  "model": "gemini-3.5-flash-lite",
+  "purpose": "metadata_dataset_draft",
+  "status": "ok",
+  "llm_calls": 1,
+  "sql_redacted": true,
+  "redaction_marker_present": true,
+  "bundle_sha256": "6197fb604ea3e01c0f5a5cde6f22cbbd9117f8e194930a1d888f3a415ec14b83",
+  "raw_prompt_persisted": false,
+  "raw_model_response_persisted": false,
+  "credential_persisted": false
+}

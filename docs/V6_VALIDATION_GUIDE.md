@@ -168,7 +168,7 @@ isolated exact 1.9.2 environment에 generated Flow를 import하고 Chat/API/GaiA
 - Domain Flow의 기본 free-form full-draft lane은 빈 Blueprint/pin으로도 실행하고, optional explicit-inventory profile에서만 missing/tampered Blueprint pin zero-model fail-closed와 annotation allowlist를 통과
 - Domain Policy와 optional explicit-inventory Main Filter는 prompt node/Composer/envelope/provider 호출 0을 정적 graph와 runtime counter 양쪽에서 통과
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter는 공통·특화 Prompt Template의 node ID/prompt ID/revision/source/hash/edge가 물리적으로 분리되고, 모든 Template의 변수 집합이 비어 있으며 runtime context는 Composer에 한 번만 전달
-- `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인/데이터 카탈로그/메인필터 컬렉션명·timeout을 노출하고 입력 3컬렉션의 최신 완전 release를 자동 결합하며, domain/environment/source mode 입력은 없음
+- `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·도메인/데이터 카탈로그/메인필터 컬렉션명·timeout을 노출하고 입력 3컬렉션의 항목 문서를 결합해 메모리에서 실행용 metadata를 컴파일하며, domain/environment/source mode 입력은 없음
 - Data Analysis 실행 node는 `00`~`27`, 네 등록 Flow는 각자의 `00` 입력부터 최종 출력까지 순서형 한국어 표시명을 사용하고 병렬 단계만 `A/B/C`로 구분한다. `24` 채팅은 schema만, `25` API와 `26` GaiA는 schema+response hash를 검사
 - 각 Flow/node/input/output의 사용자 가시 이름·설명은 한글이고 input `info`/output 설명이 기능·필수 여부·contract/consumer를 명시. 역할별 Sticky Note는 deterministic ID/layout/content revision이며 secret/query/raw row/prompt 원문을 포함하지 않음
 - exploration Flow/endpoint/worker는 초기 bundle에 없고 Data Analysis에서 `exploration.*` 자동 호출 edge가 0

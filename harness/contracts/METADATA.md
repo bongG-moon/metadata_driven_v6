@@ -17,14 +17,14 @@ Free-form natural-language TXT → immutable source block
   └─ domain_policy: explicit admin node inputs → LLM 0회
 → branch별 closed schema 검증 → v3 template/descriptor 결정론적 확장·병합
 → full draft JSON Schema validation → semantic lint → dependency/security closure
-→ operator diff review → candidate/release hash 계산
-→ MongoDB transaction으로 세 current section 동시 교체
-→ 세 section release 검증·결합 → runtime metadata bundle
+→ operator diff review → 전체 runtime catalog 검증
+→ MongoDB transaction으로 세 collection의 항목 문서 upsert
+→ 세 collection 항목 재컴파일 → runtime metadata bundle
 ```
 
 기본 Full-domain lane의 세 LLM 출력은 역할이 서로 다르다. Domain branch는 실행 metadata를 작성하지 않고 `metadata-annotation-proposal.schema.json`의 `display_name`과 `description`만 반환한다. Dataset branch는 내부용 compact Dataset IR을, Main Filter branch는 각 항목에 `target_type`, `target_id`, `expressions`를 요구하는 typed IR을 반환한다. 작업자는 이 IR, JSON, canonical ID inventory, relation endpoint/field-role 선언 문법을 알거나 맞출 필요가 없다.
 
-세 branch가 받는 실행 후보는 `metadata.authoring.source-registry.v3`에서 투영한 `metadata.authoring.semantic-vocabulary.v1`뿐이다. 이 축약 어휘에는 semantic ID, dataset family와 업무용 labels만 있고 physical column, type, adapter/config/query ref와 실제 데이터는 없다. 같은 v3 registry의 `metadata.authoring.semantic-templates.v1`은 LLM에 전달하지 않는다. Compiler가 그 hash-pinned template의 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 `planner_policy`를 Domain annotation에 결정론적으로 결합하고, Dataset descriptor와 Source binding 및 Main Filter alias card를 확장한다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret·registry 정책을 검증하고 valid release만 저장한다. LLM은 실행 의미를 새로 만들거나 validator와 writer를 우회할 수 없다.
+세 branch가 받는 실행 후보는 `metadata.authoring.source-registry.v3`에서 투영한 `metadata.authoring.semantic-vocabulary.v1`뿐이다. 이 축약 어휘에는 semantic ID, dataset family와 업무용 labels만 있고 physical column, type, adapter/config/query ref와 실제 데이터는 없다. 같은 v3 registry의 `metadata.authoring.semantic-templates.v1`은 LLM에 전달하지 않는다. Compiler가 그 hash-pinned template의 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 `planner_policy`를 Domain annotation에 결정론적으로 결합하고, Dataset descriptor와 Source binding 및 Main Filter alias card를 확장한다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret·registry 정책을 검증하고 valid item set만 저장한다. LLM은 실행 의미를 새로 만들거나 validator와 writer를 우회할 수 없다.
 
 LLM 경계는 `metadata.authoring.proposal.v1`로 닫는다. `complete` variant만 exact source hash와 `metadata.authoring.draft.v1`을 가지고 compile 단계로 이동한다. `needs_clarification` variant는 exact source hash, 1~3개 질문과 bounded `missing_fields`만 가지며 candidate/writer 단계로 이동하지 않는다.
 
@@ -36,7 +36,7 @@ LLM 경계는 `metadata.authoring.proposal.v1`로 닫는다. `complete` variant�
 
 ## 2. 운영 Metadata 3컬렉션 계약
 
-v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 아래 세 개로 제한한다. 각 문서는 비전문 작업자가 입력한 `source_text`, LLM/컴파일러가 만든 `normalized_metadata`, source/section/document hash, 세 문서가 함께 갱신됐음을 증명하는 동일 `release_id`와 manifest를 가진다.
+v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 아래 세 개로 제한한다. 한 collection에 전체 package를 한 문서로 저장하지 않고, 작업자가 등록하는 업무 항목마다 별도 문서로 저장한다. 문서 필드는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 허용한다.
 
 | 용도 | 기본 collection |
 | --- | --- |
@@ -46,7 +46,7 @@ v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 �
 | session state | `agent_v6_session_state` |
 | result/source ref | `agent_v6_result_store` |
 
-운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·세 metadata collection 이름·timeout이 보이며, domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 입력받은 안전하고 서로 다른 3컬렉션에서 가장 최근의 완전한 동일 release를 자동 탐색·결합하고 hash 불일치 시 fail-closed한다. Source config/query의 secret·실제 query는 이 세 collection에 저장하지 않고 기존 승인 adapter/registry 경계에서만 해석한다.
+운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·세 metadata collection 이름·timeout이 보이며, domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 입력받은 안전하고 서로 다른 3컬렉션의 모든 항목을 결합하고 전체 typed catalog를 다시 컴파일한다. 누락·중복·잘못된 payload는 fail-closed한다. Oracle·SQL·Datalake dataset의 실제 read-only query는 테이블 카탈로그 항목의 `payload.source_config.query_template`에 저장하며, `db_key`와 `required_params`도 같은 항목이 소유한다. credential·접속 문자열은 저장하지 않는다.
 
 ## 3. 공통 envelope
 
@@ -638,12 +638,12 @@ Langflow 등록 Flow는 자연어 해석과 결정론적 검증이 성공한 한
 
 1. Full-domain 등록은 자유형 Domain·Dataset·Main Filter 원문을 작업별 공통·특화 Prompt pair로 각각 해석해 LLM 정확히 3개의 branch 결과를 만든다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR이다. 후속 Dataset/Main Filter는 최대 1회, Domain Policy는 0회다.
 2. Compiler가 `source-registry.v3`의 hash-pinned template/descriptor를 결합하고 전체 package schema, semantic lint, dependency/security closure, section ownership을 검증한다. 실패 또는 clarification이면 MongoDB write는 0건이다.
-3. 검증된 runtime catalog를 domain, table catalog, main filter section으로 분할한다. 각 문서에 해당 자연어 `source_text`, `source_sha256`, `normalized_metadata`, `section_sha256`, 공통 package metadata를 기록한다.
-4. 세 section hash와 package/catalog/bundle hash를 한 `metadata.release.v1` manifest로 묶고 `release_id=release:<manifest_sha256>`를 만든다.
-5. MongoDB transaction에서 `environment:domain_id`의 세 current 문서를 `replace_one(upsert=true)`로 교체한다. transaction 안에서 다시 읽고 세 release/manifest/identity/revision/hash를 검증해 동일 Domain Package로 결합되지 않으면 전체 transaction을 중단한다.
-6. `mode=validate_only` 또는 `dry_run=true`이면 같은 컴파일·release 검증을 수행하지만 MongoDB write는 하지 않는다.
+3. 검증된 runtime catalog를 도메인 규칙, 데이터셋, alias 등 실제 등록 항목 단위로 분할한다.
+4. 각 MongoDB 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. 작업자가 새 원문을 주지 않은 기존 항목은 저장된 `natural_text`를 보존한다.
+5. MongoDB transaction에서 세 collection의 stale 항목을 제거하고 현재 item set을 `replace_one(upsert=true)`한다. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 저장 전 runtime catalog와 동치인지 확인한다.
+6. `mode=validate_only` 또는 `dry_run=true`이면 같은 item→catalog 컴파일 검증을 수행하지만 MongoDB write는 하지 않는다.
 
-Runtime loader는 domain metadata collection에서 `updated_at`, revision, `_id` 순으로 가장 최근 문서를 찾고 그 identity와 같은 table catalog/main filter 문서를 자동으로 읽는다. 세 문서의 `_id`, domain/environment/revision, release ID, manifest, section/document/source hash가 모두 일치할 때만 package를 제공한다. 한 문서가 누락됐거나 이전 release이거나 운영자가 `normalized_metadata`를 직접 수정하면 fail-closed한다. 단순 current 구조이므로 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 세 current 문서의 변경 스트림·백업 또는 별도 운영 감사 시스템을 사용한다.
+Runtime loader는 selector나 active pointer 없이 세 collection의 항목 전체를 읽는다. 도메인 프로필은 `section=profile` 문서 하나여야 하고 데이터셋 collection은 비어 있으면 안 된다. 중복 key, 지원하지 않는 section, 잘못된 typed payload, dependency 불일치가 있으면 package를 제공하지 않는다. `domain_id`, environment, revision, contract, package hash는 MongoDB 필드가 아니라 실행 시 생성되는 내부 값이다. 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 change stream·백업 또는 별도 운영 감사 시스템을 사용한다.
 
 ## 14. v5 migration 원칙
 

@@ -73,6 +73,9 @@
     "show_notices": {
       "type": "boolean"
     },
+    "show_pandas_code": {
+      "type": "boolean"
+    },
     "show_result_table": {
       "type": "boolean"
     },
@@ -95,6 +98,7 @@
     "show_next_questions",
     "show_intent_analysis",
     "show_data_retrieval",
+    "show_pandas_code",
     "show_execution_plan"
   ],
   "title": "display.options.v1",

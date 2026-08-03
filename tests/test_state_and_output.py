@@ -11,6 +11,7 @@ from reference_runtime.presenter import (
     error_response,
     gaia_output,
     normalize_display_options,
+    pandas_equivalent_code,
     render_message,
 )
 from reference_runtime.state_contracts import InMemoryStateStore
@@ -53,7 +54,10 @@ def sample_response() -> dict:
             "timezone": "Asia/Seoul",
         },
         "intent_plan": {"semantic_intent": {"analysis_kind": "rank"}},
-        "analysis": {"execution_ir": [{"id": "rank", "op": "rank"}]},
+        "analysis": {
+            "execution_ir": [{"id": "rank", "op": "rank", "input": "source:s", "rank_by": [{"field": "VALUE", "direction": "desc"}], "limit": 1}],
+            "pandas_code": pandas_equivalent_code([{"id": "rank", "op": "rank", "input": "source:s", "rank_by": [{"field": "VALUE", "direction": "desc"}], "limit": 1}]),
+        },
         "clarification": None,
         "data_refs": [],
         "state": None,
@@ -84,14 +88,16 @@ def test_display_toggles_change_only_markdown():
     assert sha256_json(response) == before
 
 
-def test_show_pandas_code_is_execution_plan_alias_only():
+def test_show_pandas_code_is_a_separate_display_section():
     options = normalize_display_options({"show_pandas_code": True, "table_preview_limit": 999})
     assert options["profile"] == "standard"
-    assert options["show_execution_plan"] is True
+    assert options["show_pandas_code"] is True
+    assert options["show_execution_plan"] is False
     assert options["table_preview_limit"] == 20
     message = render_message(sample_response(), {"show_pandas_code": True})
-    assert "실행 계획 진단" in message
-    assert "generated_code" not in message
+    assert "Pandas 등가 코드 (표시용)" in message
+    assert "sort_values" in message
+    assert "실행 계획 진단" not in message
 
 
 def test_message_api_and_gaia_consume_same_json_response():

@@ -1,0 +1,17 @@
+{
+  "status": "ok",
+  "flow_count": 5,
+  "artifact_layers": [
+    "source_exports",
+    "individual_imports",
+    "combined_bundle"
+  ],
+  "custom_node_instances_checked": 168,
+  "active_unique_component_sources": 27,
+  "all_component_sources": 27,
+  "runtime_asset_hashes": {
+    "language_model": "1d46e80acad2063ff1ca452e47c3daeef0c31697364b3b6e1e35e63c5eb88ae8",
+    "component_index": "e747b684e578c340a203a59fb26ba5d5e814ba9e1347a425d48a3defcc9af24c"
+  },
+  "errors": []
+}

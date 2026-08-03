@@ -1,0 +1,68 @@
+{
+  "contract_version": "metadata.item-registration.v1",
+  "status": "ok",
+  "mode": "natural_language_items",
+  "database": "datagov",
+  "database_mode": "operational",
+  "collections": {
+    "domain": "agent_v6_domain_metadata",
+    "table_catalog": "agent_v6_table_catalog",
+    "main_filter": "agent_v6_main_filter"
+  },
+  "item_counts": {
+    "domain": 147,
+    "table_catalog": 20,
+    "main_filter": 49
+  },
+  "natural_text_counts": {
+    "domain": 147,
+    "table_catalog": 20,
+    "main_filter": 49
+  },
+  "runtime_counts": {
+    "datasets": 10,
+    "fields": 47,
+    "metrics": 17,
+    "entity_groups": 25,
+    "grains": 1,
+    "relations": 0,
+    "orderings": 1,
+    "recipes": 10,
+    "predicates": 7,
+    "aliases": 141,
+    "prompt_extensions": 2,
+    "specialized_functions": 0
+  },
+  "stored_fields": {
+    "domain": [
+      "_id",
+      "key",
+      "natural_text",
+      "payload",
+      "section",
+      "updated_at"
+    ],
+    "table_catalog": [
+      "_id",
+      "key",
+      "natural_text",
+      "payload",
+      "section",
+      "updated_at"
+    ],
+    "main_filter": [
+      "_id",
+      "key",
+      "natural_text",
+      "payload",
+      "section",
+      "updated_at"
+    ]
+  },
+  "checks": {
+    "runtime_catalog_round_trip": true,
+    "available_loader": true,
+    "item_fields_only": true,
+    "no_release_documents": true
+  }
+}

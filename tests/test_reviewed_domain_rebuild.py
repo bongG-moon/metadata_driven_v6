@@ -66,8 +66,8 @@ def test_field_override_removals_are_audited_and_idempotent() -> None:
     assert corrected["datasets"]["lot_status"]["fields"]["OPER_SEQ"][
         "required_in_source"
     ] is True
-    assert first_evidence["applied_count"] == 10
-    assert first_evidence["already_current_count"] == 1
+    assert first_evidence["applied_count"] == 11
+    assert first_evidence["already_current_count"] == 0
     assert {
         (item["dataset_id"], item["field_id"], item["reason_code"])
         for item in first_evidence["applied_operations"]
@@ -75,7 +75,7 @@ def test_field_override_removals_are_audited_and_idempotent() -> None:
         (dataset_id, field_id, "source_projection_not_registered")
         for dataset_id, field_ids in expected_removed.items()
         for field_id in field_ids
-    }
+    } | {("product_master", "DEN", "natural_source_binding_correction")}
 
     snapshot = deepcopy(corrected)
     corrected_again, second_evidence = _apply_overrides(corrected, overrides)
@@ -96,19 +96,16 @@ def test_field_override_removal_rejects_descriptor_drift() -> None:
         _apply_overrides(draft, overrides)
 
 
-def test_dataset_worker_input_is_freeform_and_contains_no_registry_or_sql_contract() -> None:
+def test_dataset_worker_input_is_freeform_with_deterministic_query_blocks() -> None:
     registry = _load_json(DOMAIN_ROOT / "approved_source_registry.json")
     assert len(registry["datasets"]) == len(DATASET_BUSINESS_LABELS) == 10
 
     forbidden_registration_syntax = (
         "dataset_id",
         "field_id",
-        "filter_mappings",
         "source_binding",
         "config_ref",
         "query_ref",
-        "query_template",
-        "semantic_type",
         "physical_column",
         "pandas_function_cases",
     )
@@ -117,9 +114,16 @@ def test_dataset_worker_input_is_freeform_and_contains_no_registry_or_sql_contra
         assert 1 <= len(source.encode("utf-8")) <= 65536
         assert all(label in source for label in DATASET_BUSINESS_LABELS)
         assert not any(token in source for token in forbidden_registration_syntax)
-        assert not re.search(r"(?im)^\s*(SELECT|FROM|WHERE|JOIN)\b", source)
         assert not re.search(r"(?i)(password|api[_-]?key|mongodb(?:\+srv)?://|jdbc:|https?://)", source)
-        assert not DATASET_START.search(source)
+
+    baseline = DATASET_SOURCE.read_text(encoding="utf-8")
+    assert baseline.count("query_template:") == 8
+    assert re.search(r"(?im)^\s*(?:SELECT|WITH)\b", baseline)
+    assert "{DATE}" in baseline and "{LOT_ID}" in baseline
 
     variant = DATASET_VARIANT_SOURCE.read_text(encoding="utf-8")
+    assert "query_template:" not in variant
+    assert not re.search(r"(?im)^\s*(SELECT|FROM|WHERE|JOIN)\b", variant)
+    assert not DATASET_START.search(variant)
+
     assert not re.search(r"(?m)^\s{0,3}#{1,6}\s+", variant)

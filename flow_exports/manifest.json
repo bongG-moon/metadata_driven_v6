@@ -4,7 +4,7 @@
   "uuid_namespace": "9d1be18e-0f18-52aa-8d0e-b6f8e53f4f6d",
   "inventory": {
     "path": "contracts/flow_inventory.json",
-    "sha256": "a2053ddd59e266fb5ed7246e5cc690737e90bcf6d641f02dd63860559c51841c",
+    "sha256": "e5d8d7bf790ccad8c10e491c47beaef7bfb70129cf9361e5db594ef6484274c0",
     "contract_version": "flow.inventory.v1"
   },
   "runtime_assets": {
@@ -31,7 +31,7 @@
     },
     {
       "path": "contracts/flow_inventory.json",
-      "sha256": "a2053ddd59e266fb5ed7246e5cc690737e90bcf6d641f02dd63860559c51841c"
+      "sha256": "e5d8d7bf790ccad8c10e491c47beaef7bfb70129cf9361e5db594ef6484274c0"
     },
     {
       "path": "contracts/operator_registry.json",
@@ -71,7 +71,7 @@
     },
     {
       "path": "contracts/schemas/display-options.schema.json",
-      "sha256": "27bcc5558f8357d2a47d96cd3cdc48535da3643164fd6a539df878301dea08d9"
+      "sha256": "099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866"
     },
     {
       "path": "contracts/schemas/domain-package.schema.json",
@@ -115,7 +115,7 @@
     },
     {
       "path": "contracts/schemas/metadata-authoring-draft.schema.json",
-      "sha256": "93b424e2d17205074ab833bed6e0463492c50fc918162ebdaa544561679e027c"
+      "sha256": "035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2"
     },
     {
       "path": "contracts/schemas/metadata-authoring-proposal.schema.json",
@@ -232,27 +232,27 @@
         {
           "node_id": "request_state_capsule",
           "source": "langflow_components/data_analysis/request_state_capsule.py",
-          "sha256": "12a7f33499b15c51e5dca60f6e0d46a9a4f84d4433b46c11adb98b97b160a6f0"
+          "sha256": "39866d39182a4d6a982b31f134ad2283c56803d375ecd98c8f2671d856a36212"
         },
         {
           "node_id": "domain_bundle_loader",
           "source": "langflow_components/data_analysis/domain_bundle_loader.py",
-          "sha256": "ef695314e49e30c73c0371a982dd9dfd588b963728a7b16fd2cb752eeebc5eb8"
+          "sha256": "2f42d03b658a2dd660507f9e14ed1c4f55c9bc653c5282f9c8305c1e881ec977"
         },
         {
           "node_id": "candidate_route_gate",
           "source": "langflow_components/data_analysis/candidate_route_gate.py",
-          "sha256": "0c2bf691167c1154d892cf22935544bd7b8001f0eb72aeb64b077c9e8eca5a02"
+          "sha256": "81f7aefed5aea346c54c8fdb6bcd1304ecc95fd286fc1b99530e57e85ec511f1"
         },
         {
           "node_id": "intent_prompt_context_builder",
           "source": "langflow_components/data_analysis/intent_prompt_context_builder.py",
-          "sha256": "e6f918a1e1216e3a81759bf8d80343526aa1c63bfb57131977b2cfaeb10433b2"
+          "sha256": "8736da69f01b180c4bd69f2d5e34e1373ce6cf16cf17bce4016d42ca02605d70"
         },
         {
           "node_id": "intent_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "intent_conditional_llm_invoker",
@@ -262,62 +262,62 @@
         {
           "node_id": "common_intent_resolver",
           "source": "langflow_components/data_analysis/common_intent_resolver.py",
-          "sha256": "b6a2016933df57cf6e48256c3a0f1a84c826e474be00fce719721b7f1fe0cdbb"
+          "sha256": "b85537022bfb02a470a8513963f946404a10d9542531aa981fd43425107691bf"
         },
         {
           "node_id": "plan_compiler_validator",
           "source": "langflow_components/data_analysis/plan_compiler_validator.py",
-          "sha256": "6ddd346f5be2111bda7ce26bfd5351ad915ef97e82b57eea863875c9a94fdd41"
+          "sha256": "d3e973333fba78801cd9d223e0940ba20bc964e23d312e45e5ec13a13ee27cb7"
         },
         {
           "node_id": "retrieval_job_router",
           "source": "langflow_components/data_analysis/retrieval_job_router.py",
-          "sha256": "f4f514260f8c9eedcb626711c249a389ad51bd3559236998e87802e8223d3238"
+          "sha256": "70246e25243dc527a81d37b318c49ba2a12a57bce9400d7c50b99238dec4cf46"
         },
         {
           "node_id": "dummy_source_retriever",
           "source": "langflow_components/data_analysis/dummy_source_retriever.py",
-          "sha256": "1b8ed88e20dcf209d2c0c067c4ffa878c754b385664b85996c2a14be06652777"
+          "sha256": "2cfbba29b33fe58f715dc91d8ce6a0e3b04574f23bbc19a916ce3715afb1ae5e"
         },
         {
           "node_id": "oracle_source_retriever",
           "source": "langflow_components/data_analysis/12_oracle_source_retriever.py",
-          "sha256": "2d545662ff00f4f19909a1233f86a926c7d889bf5fdc5f92f110c76857799551"
+          "sha256": "423b103a0d4a129a1f3dc3f2275d512bf5a4dfd05be037d28a6eb4bfedf3f8d0"
         },
         {
           "node_id": "h_api_source_retriever",
           "source": "langflow_components/data_analysis/13_h_api_source_retriever.py",
-          "sha256": "33a09ef3bb86924992bdc882c7a8d1b556d66580a94d670909eaf9807d664487"
+          "sha256": "50a9f4342e7360be9c56b5784a66f1c45f18d05a0860472bef3f0fb2ae241821"
         },
         {
           "node_id": "datalake_source_retriever",
           "source": "langflow_components/data_analysis/14_datalake_source_retriever.py",
-          "sha256": "babaab12555fee1cc287f212a247c082cee75348df890eb99c5f458a6586bb84"
+          "sha256": "dd7e5748bceff8925681f0262821307305ac731e2b98e147f642f3b1598eb80f"
         },
         {
           "node_id": "goodocs_source_retriever",
           "source": "langflow_components/data_analysis/15_goodocs_source_retriever.py",
-          "sha256": "06a378c50c5e5da369af65feef603843935ca39d2918bcac4a12418399e2e5d9"
+          "sha256": "88e4df0688a870442fb7ce0ee488006151e0ae7b259e30f6ec6ed1bade047d76"
         },
         {
           "node_id": "source_merger",
           "source": "langflow_components/data_analysis/source_contract_merger.py",
-          "sha256": "11d212c8cc0859372a4504a4f4c5f4c2e4009722d30d75e6581e7a8a6d6cf119"
+          "sha256": "c5eedf25f8fd1b3a97ba2106e15580a318c5b4a2a0bb665a0cd35885844be25d"
         },
         {
           "node_id": "typed_executor_publisher",
           "source": "langflow_components/data_analysis/typed_executor_publisher.py",
-          "sha256": "88263c97479f8d8e21d0545a904fab5ea3f296e92c2814b90752733012e5c9f8"
+          "sha256": "0bbe4719e5fcb17b3eccd1f23a7f49253b8035b0b21bd66e4ef9b6bd93aa3659"
         },
         {
           "node_id": "answer_facts_context_builder",
           "source": "langflow_components/data_analysis/answer_facts_context_builder.py",
-          "sha256": "05b79fd822082810f7caa2c193d9a6fadfd6623f1d5ab923c83a2692286b9d41"
+          "sha256": "7d5f0a96311559dc78a9090af7ed84bdf7128043d109d2337c9b5f51fc9daf6c"
         },
         {
           "node_id": "answer_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "answer_conditional_llm_invoker",
@@ -327,27 +327,27 @@
         {
           "node_id": "answer_claim_validator",
           "source": "langflow_components/data_analysis/answer_claim_validator.py",
-          "sha256": "ac94af9d7754815c94d8adbfc71f2bdfb258245bc8d0e194722db9fadd82f197"
+          "sha256": "84209fedeb291abe58b11f427a7442183d1559bc77e32362fd48437e778dd440"
         },
         {
           "node_id": "response_state_commit",
           "source": "langflow_components/data_analysis/response_state_commit.py",
-          "sha256": "94028a6cd5ea855da7b276140c9d220b6d1c3a1d832a456f4b28b7cb159a21af"
+          "sha256": "a8578a570d5c1b92613556a696a89c7b3a76f54946f1747b075d069f7d657664"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/data_analysis/01_message_presentation.py",
-          "sha256": "11c818e84552587d9ed9fb11efb6962d7d824922eeba1609007422dfad53f41e"
+          "sha256": "8441bac5854bc43431485ba34383fd717170e6f940b1909fecfbea53fd37db80"
         },
         {
           "node_id": "gaia_output",
           "source": "langflow_components/data_analysis/02_gaia_output.py",
-          "sha256": "35254965be241681058cdc5744f84c0a8c5186bcaa40873aa72a778857574056"
+          "sha256": "8393f1db1bb4fc35e4b7d146f64ddfad17fe6d6972d93f1ec479dee5d2ea1f82"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "cc855bbea6a61bb2825a4f8ed8f03d56c373e5b191082651ae959646b8f1a522"
+          "sha256": "d2ad27aa080adc2294c751f68623526126ae6f2458648e390d618d521e61cee4"
         }
       ],
       "prompt_sources": [
@@ -373,7 +373,7 @@
         }
       ],
       "file": "metadata_v6_data_analysis_flow_v6_standalone.json",
-      "sha256": "b30ef9c3136cf017b29d333b3693bafdb2b60fe76759fff88f5b1af012ea45f3"
+      "sha256": "df0f4df749881c9a2285d3602f21ba23852b482d476c202690c9df1c8d0771b6"
     },
     {
       "logical_key": "metadata_v6_domain_authoring",
@@ -388,24 +388,24 @@
         {
           "node_id": "natural_metadata_source_bundle",
           "source": "langflow_components/metadata_authoring/natural_metadata_source_bundle.py",
-          "sha256": "e186f338e1ccdf09e35cff2de408cf3360fb983650fbb87f3f76933006d9b56e"
+          "sha256": "6ee9ba873ef45eb7e922f3e1fa2b548ba80925d923993bf4f28865f86738ac1d"
         },
         {
           "node_id": "authoring_reference_registry",
           "source": "langflow_components/metadata_authoring/authoring_reference_registry.py",
-          "sha256": "90f74e11826b251a0413597725241fb3a562f0a5341a40b8d7657db87b850210",
+          "sha256": "ee6f3c175c32b96e38eeea1fa92ae31ad598e4133a95307a435eaffccc892571",
           "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310"
+          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
         },
         {
           "node_id": "authoring_prompt_context_builder",
           "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
-          "sha256": "877964aee1d54af11f4bbd7abe3d252dd48cd0d43c9794bdbb22f0951cc5076e"
+          "sha256": "1bc73544c0dd2c4c1c0b0cb36ef153b5097cd1859a8d3094dd3aff98e455e349"
         },
         {
           "node_id": "authoring_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "authoring_conditional_llm_invoker",
@@ -415,12 +415,12 @@
         {
           "node_id": "bootstrap_dataset_prompt_context_builder",
           "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
-          "sha256": "877964aee1d54af11f4bbd7abe3d252dd48cd0d43c9794bdbb22f0951cc5076e"
+          "sha256": "1bc73544c0dd2c4c1c0b0cb36ef153b5097cd1859a8d3094dd3aff98e455e349"
         },
         {
           "node_id": "bootstrap_dataset_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "bootstrap_dataset_conditional_llm_invoker",
@@ -430,12 +430,12 @@
         {
           "node_id": "bootstrap_main_filter_prompt_context_builder",
           "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
-          "sha256": "877964aee1d54af11f4bbd7abe3d252dd48cd0d43c9794bdbb22f0951cc5076e"
+          "sha256": "1bc73544c0dd2c4c1c0b0cb36ef153b5097cd1859a8d3094dd3aff98e455e349"
         },
         {
           "node_id": "bootstrap_main_filter_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "bootstrap_main_filter_conditional_llm_invoker",
@@ -445,17 +445,17 @@
         {
           "node_id": "metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "sha256": "83bf4d3ae97d859c1c92b1be9f3c930f93518a6651de2bdf046a46b5a3298bb2"
+          "sha256": "d9cf40f3e5a9b2a553117a0defee3b053f87170b5c8584131406a49719096691"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "a860e32e92a54df8c54324dbef00d781a2e7fe48852c5d02cf5c0edf709ba4df"
+          "sha256": "931248abd4ac80c7a24c3120128f00599591a5ff61c300d221c652b8732fa343"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "cc855bbea6a61bb2825a4f8ed8f03d56c373e5b191082651ae959646b8f1a522"
+          "sha256": "d2ad27aa080adc2294c751f68623526126ae6f2458648e390d618d521e61cee4"
         }
       ],
       "prompt_sources": [
@@ -472,7 +472,7 @@
         {
           "node_id": "bootstrap_dataset_common_prompt",
           "source": "prompts/metadata_authoring/dataset_common_ko.md",
-          "sha256": "f3c5de94c946449663186155b5e316ea285fda21bf83c6f064e1e68913d6d14f"
+          "sha256": "6985d95a8dabef90fbbdcabba5532102e300c7d276cd408c521947d851a227a1"
         },
         {
           "node_id": "bootstrap_dataset_specialized_prompt",
@@ -491,7 +491,7 @@
         }
       ],
       "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
-      "sha256": "2cd8c035ea0150ec318c4829bc5093979a2e45fb3a1dbc1d52127899db4bfd63"
+      "sha256": "040733b85a5f59c693de9aeec9611d4ece0a536549eda6ed26e06308e2031fb1"
     },
     {
       "logical_key": "metadata_v6_dataset_catalog_authoring",
@@ -506,19 +506,19 @@
         {
           "node_id": "authoring_prompt_context_builder",
           "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
-          "sha256": "877964aee1d54af11f4bbd7abe3d252dd48cd0d43c9794bdbb22f0951cc5076e"
+          "sha256": "1bc73544c0dd2c4c1c0b0cb36ef153b5097cd1859a8d3094dd3aff98e455e349"
         },
         {
           "node_id": "authoring_reference_registry",
           "source": "langflow_components/metadata_authoring/authoring_reference_registry.py",
-          "sha256": "90f74e11826b251a0413597725241fb3a562f0a5341a40b8d7657db87b850210",
+          "sha256": "ee6f3c175c32b96e38eeea1fa92ae31ad598e4133a95307a435eaffccc892571",
           "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310"
+          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
         },
         {
           "node_id": "authoring_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "authoring_conditional_llm_invoker",
@@ -528,24 +528,24 @@
         {
           "node_id": "metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "sha256": "83bf4d3ae97d859c1c92b1be9f3c930f93518a6651de2bdf046a46b5a3298bb2"
+          "sha256": "d9cf40f3e5a9b2a553117a0defee3b053f87170b5c8584131406a49719096691"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "a860e32e92a54df8c54324dbef00d781a2e7fe48852c5d02cf5c0edf709ba4df"
+          "sha256": "931248abd4ac80c7a24c3120128f00599591a5ff61c300d221c652b8732fa343"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "cc855bbea6a61bb2825a4f8ed8f03d56c373e5b191082651ae959646b8f1a522"
+          "sha256": "d2ad27aa080adc2294c751f68623526126ae6f2458648e390d618d521e61cee4"
         }
       ],
       "prompt_sources": [
         {
           "node_id": "authoring_common_prompt",
           "source": "prompts/metadata_authoring/dataset_common_ko.md",
-          "sha256": "f3c5de94c946449663186155b5e316ea285fda21bf83c6f064e1e68913d6d14f"
+          "sha256": "6985d95a8dabef90fbbdcabba5532102e300c7d276cd408c521947d851a227a1"
         },
         {
           "node_id": "authoring_specialized_prompt",
@@ -554,7 +554,7 @@
         }
       ],
       "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
-      "sha256": "a6909a782fd67c5db119582b27cf0a069188242e718f537cfa4146f8412f0b21"
+      "sha256": "77dae376c32291acaee79a7ea6df7fe1c5ed5929d2a49c5211b48d060b208503"
     },
     {
       "logical_key": "metadata_v6_main_filter_authoring",
@@ -569,19 +569,19 @@
         {
           "node_id": "authoring_prompt_context_builder",
           "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
-          "sha256": "877964aee1d54af11f4bbd7abe3d252dd48cd0d43c9794bdbb22f0951cc5076e"
+          "sha256": "1bc73544c0dd2c4c1c0b0cb36ef153b5097cd1859a8d3094dd3aff98e455e349"
         },
         {
           "node_id": "authoring_reference_registry",
           "source": "langflow_components/metadata_authoring/authoring_reference_registry.py",
-          "sha256": "90f74e11826b251a0413597725241fb3a562f0a5341a40b8d7657db87b850210",
+          "sha256": "ee6f3c175c32b96e38eeea1fa92ae31ad598e4133a95307a435eaffccc892571",
           "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310"
+          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
         },
         {
           "node_id": "authoring_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "sha256": "64d806ae14f2e75b161b4bd2b12f1be8ae8aed300070578139ec79f7c5ba8934"
+          "sha256": "2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b"
         },
         {
           "node_id": "authoring_conditional_llm_invoker",
@@ -591,17 +591,17 @@
         {
           "node_id": "metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "sha256": "83bf4d3ae97d859c1c92b1be9f3c930f93518a6651de2bdf046a46b5a3298bb2"
+          "sha256": "d9cf40f3e5a9b2a553117a0defee3b053f87170b5c8584131406a49719096691"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "a860e32e92a54df8c54324dbef00d781a2e7fe48852c5d02cf5c0edf709ba4df"
+          "sha256": "931248abd4ac80c7a24c3120128f00599591a5ff61c300d221c652b8732fa343"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "cc855bbea6a61bb2825a4f8ed8f03d56c373e5b191082651ae959646b8f1a522"
+          "sha256": "d2ad27aa080adc2294c751f68623526126ae6f2458648e390d618d521e61cee4"
         }
       ],
       "prompt_sources": [
@@ -617,7 +617,7 @@
         }
       ],
       "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-      "sha256": "e8c4c0599bdd98843e8bfe803abcbd1ec476a7c323773ad8faf9fd2749f56616"
+      "sha256": "f8131b72ae586469f0b66efba2b565c2ed31d832c9b01fd1e835ce48def244bd"
     },
     {
       "logical_key": "metadata_v6_domain_policy_authoring",
@@ -632,29 +632,29 @@
         {
           "node_id": "metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "sha256": "83bf4d3ae97d859c1c92b1be9f3c930f93518a6651de2bdf046a46b5a3298bb2"
+          "sha256": "d9cf40f3e5a9b2a553117a0defee3b053f87170b5c8584131406a49719096691"
         },
         {
           "node_id": "authoring_reference_registry",
           "source": "langflow_components/metadata_authoring/authoring_reference_registry.py",
-          "sha256": "90f74e11826b251a0413597725241fb3a562f0a5341a40b8d7657db87b850210",
+          "sha256": "ee6f3c175c32b96e38eeea1fa92ae31ad598e4133a95307a435eaffccc892571",
           "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "2bbafd584fad0ed6e4aa312164880b4545e05a309a90dafc80d99fc2c164d310"
+          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "a860e32e92a54df8c54324dbef00d781a2e7fe48852c5d02cf5c0edf709ba4df"
+          "sha256": "931248abd4ac80c7a24c3120128f00599591a5ff61c300d221c652b8732fa343"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "cc855bbea6a61bb2825a4f8ed8f03d56c373e5b191082651ae959646b8f1a522"
+          "sha256": "d2ad27aa080adc2294c751f68623526126ae6f2458648e390d618d521e61cee4"
         }
       ],
       "prompt_sources": [],
       "file": "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
-      "sha256": "f7fd54c335988e8706688659c794975afa68241d6b7dbdaca8117a7b2845dbb4"
+      "sha256": "3983139cdfda6b1a12e50c49cc0fcb2bcdacabe9b68b368a5f405fc772c21f37"
     }
   ]
 }
