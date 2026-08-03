@@ -12,10 +12,10 @@
 
 | Flow | 실행 노드 | Edge | SHA-256 |
 | --- | ---: | ---: | --- |
-| Data Analysis | 31 + Sticky Note 4 | 46 | `efd43a9aa29fbbe8dd0db59cd5ae2639f565a36626b34a0531de5cb01f75c038` |
-| Domain 등록 | 8 + Sticky Note 1 | 7 | `aa4357482ee6bea1923bf303ef6d331ee1ac605c8d27a1d4eb9dbba7eb4bf37d` |
-| Table Catalog 등록 | 8 + Sticky Note 1 | 7 | `97b90b410e14fa0b1e724ce4e14dfd6c4cd4502f75b1b4c998dd78a74a1a8a53` |
-| Main Filter 등록 | 8 + Sticky Note 1 | 7 | `0b7cf687a13ad61702c9a468436164711a66937ceed264202f273c3a0e7b3bb1` |
+| Data Analysis | 32 + Sticky Note 4 | 47 | `4cf4242fc623342f620c81781a2dce0a15683876a1048554c4bbebe89e334a4d` |
+| Domain 등록 | 8 + Sticky Note 1 | 7 | `a1dda864eb11da3def6646bbd098bc19251995d73b289cd6c7b5a000e96269e8` |
+| Table Catalog 등록 | 8 + Sticky Note 1 | 7 | `69de372ba70e5ddb82201f48990674e04bbd2b1b9dbe903aa238b2c062b95e60` |
+| Main Filter 등록 | 8 + Sticky Note 1 | 7 | `aba410bb5e9b1845f63a92d0eeb1ec8086f68d6ba3b76ca6861a87f3e6c65b99` |
 
 별도 Domain Policy 등록 Flow는 제거했다. 업무별 해석 차이는 Domain/Table Catalog/Main Filter 각 Flow의 특화 Prompt Template에서 관리한다. 실행 함수 descriptor와 planner policy 같은 실행 권한 계약은 자연어 등록으로 변경하지 않는다.
 
@@ -34,18 +34,22 @@ Chat Input
 - 공통 Prompt와 업무별 특화 Prompt는 서로 다른 Prompt Template 노드다.
 - Gemini 호출은 등록 1회당 최대 1회이며 pandas 코드 생성 및 repair LLM은 호출하지 않는다.
 - LLM은 자연어를 제한된 등록 초안으로 바꾸고, 승인된 Source Registry와 결정론적 compiler가 실제 저장 가능 여부를 판단한다.
-- 저장 노드는 `save`와 `validate_only`를 지원한다.
+- 저장 노드는 `save`, `replace`, `validate_only`를 지원하며 등록 유형·도메인 ID·운영 환경·dry-run을 작업자 입력으로 노출하지 않는다.
 - MongoDB에는 Domain, Table Catalog, Main Filter 세 컬렉션만 사용하며 항목 단위 문서로 저장한다.
 - Table Catalog의 주석·줄바꿈을 포함한 SQL 원문은 LLM payload에서 제외하고 compiler가 승인된 registry binding으로 결합한다.
+- `04 검증 및 저장`은 별도 LLM·컬렉션 없이 exact/정규화 key, typed ID, 동일 section 표시명·별칭, dataset `query_ref`·전체 source descriptor, 세 컬렉션 전역 alias target·표현 중복을 결정론적으로 검사한다.
+- 충돌 응답은 최대 32건, 항목별 처리 결과는 최대 64건으로 제한하며 SQL·URL·접속 설정은 노출하지 않는다.
+- 실제 변경 item만 upsert하되 모든 transaction이 domain profile을 공통 serialization boundary로 써서 서로 다른 key의 동시 저장도 retryable `state_conflict`로 닫는다.
 
 ## 3. 검증 결과
 
 ### 코드 및 Flow
 
-- 전체 pytest: 모든 테스트 통과
-- standalone 생성물: 27/27 동기화 통과
+- 전체 pytest: 520/520 통과
+- 중복·저장 정책 단위 테스트: 32/32 통과
+- standalone 생성물: 29/29 동기화 통과
 - Flow source parity: 4개 Flow, 3개 artifact layer, custom-node instance 99개, 오류 0
-- Langflow runtime parse: 4개 Flow의 실행 노드 55/55 통과
+- Langflow runtime parse: 4개 Flow의 실행 노드 56/56 통과
 - 모든 Flow와 실행 노드의 `lf_version` 및 `last_tested_version`: 1.9.2
 
 ### Data Analysis 회귀
@@ -75,8 +79,8 @@ Dataset/Main Filter의 read-only 후속 검증에서는 현재 운영 3컬렉션
 - 개별 Flow: `flow_exports/`
 - Langflow import-ready 개별/통합 JSON: `import_ready_flows/`
 - import-ready ZIP: `import_ready_flows.zip`
-- 통합 bundle SHA-256: `e764a8d789a4b639c2d8a47e24b1f3e041e3da4b82ebaecaa74a8ea415959671`
-- ZIP SHA-256: `aa8be5559b9a52db71b0a85499c1332293d92222ae43eb878deb54801c709d3f`
+- 통합 bundle SHA-256: `5ff161a7c62b6393b8f76ff4180d19d9deea2716cdfc3c6a2c4ade30c216f0c9`
+- ZIP SHA-256: `0e53ed7a1d2412c8be1ad8f36990c10634eb1a6a10e8a23c12a060d31a5ddc32`
 
 ## 5. 재현 명령
 

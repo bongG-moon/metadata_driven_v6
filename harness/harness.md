@@ -72,6 +72,8 @@
 28. 기본 metadata authoring은 `자유형 TXT → 외부 공통·특화 Prompt pair → branch별 closed annotation/IR → Source Registry v3 결정론적 확장 → compile → 3컬렉션 transaction 저장`이다. 최초 Domain bootstrap은 Domain annotation, compact Dataset IR, `target_type` 필수 Main Filter IR을 각각 최대 1회씩, 총 3회 생성하고 한 번에 merge/compile한다. 후속 Dataset/Main Filter 수정은 최대 1회다. `source_grounding_mode=explicit_inventory`와 Blueprint/external pin은 선택적 고신뢰 lane이며 일반 작업자 입력의 전제 조건이 아니다.
 29. Deterministic compiler는 schema·dependency·security 일관성을 보장하지만 자연어의 모호한 업무 의도를 임의 확정하지 않는다. 모호하면 assumptions/missing information과 짧은 업무 질문을 반환하고 저장하지 않는다. 성공한 결과만 도메인·테이블 카탈로그·메인필터 collection에 항목 단위로 저장한다.
 30. MongoDB metadata 항목은 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. release/manifest/package/domain/environment/revision/hash 필드는 저장하지 않으며 runtime contract/hash는 로드 후 메모리에서만 계산한다.
+31. 세 등록 Flow의 등록 유형은 Flow별 컴포넌트 소스에 고정한다. 작업자에게 `등록 항목`, `domain_id`, `environment`, `dry_run` 입력을 노출하지 않는다. `domain_id`는 승인 레지스트리에서 내부적으로 읽고 environment는 `production`으로 고정한다.
+32. 저장 모드는 `save|replace|validate_only`다. `save`는 신규 `section+key`와 동일 payload 재실행만 허용하고, 변경 충돌은 `replace`를 요구한다. `replace`는 같은 `section+key`만 교체하며 언급되지 않은 기존 항목을 삭제하지 않는다. `validate_only`는 replace projection까지 검증하지만 MongoDB write는 0건이다.
    - Oracle·SQL·Datalake dataset 항목의 `payload.source_config`에는 운영 조회에 필요한 `source_type`, `db_key`, 검증된 여러 줄 `query_template`, `required_params`를 저장할 수 있다. query의 내부 줄바꿈·주석·placeholder 철자는 보존한다.
    - `query_template`은 단일 read-only `SELECT/WITH`만 허용하며 `{NAME}` placeholder마다 typed `parameters.NAME.required=true`가 있어야 한다. 비밀번호·token·접속 문자열은 metadata에 저장하지 않는다.
    - Dataset LLM에는 query 본문을 전달하지 않는다. Prompt Composer가 provider projection에서 query body를 제거하고, 등록 compiler가 원본 TXT에서 별도로 추출·검증·저장한다.

@@ -258,7 +258,10 @@ def _flow_defaults(path: Path) -> dict[str, Any]:
     }
     engine = nodes.get("simple_metadata_authoring_engine", {})
     template = (((engine.get("data") or {}).get("node") or {}).get("template") or {})
-    kind = str(_field_value(template, "authoring_kind") or "")
+    generator = nodes.get("simple_metadata_draft_generator", {})
+    generator_node = ((generator.get("data") or {}).get("node") or {})
+    generator_metadata = generator_node.get("metadata") or {}
+    kind = str(generator_metadata.get("authoring_kind") or "")
     model_contract = langflow_gemini_contract_evidence(flow, require_model=True)
     model_node = nodes.get("draft_language_model", {})
     model_template = (((model_node.get("data") or {}).get("node") or {}).get("template") or {})
@@ -275,7 +278,10 @@ def _flow_defaults(path: Path) -> dict[str, Any]:
     }
     checks = {
         "mode_save": _field_value(template, "mode") == "save",
-        "dry_run_false": _field_value(template, "dry_run") is False,
+        "selector_inputs_absent": all(
+            _field_value(template, name) is None
+            for name in ("authoring_kind", "domain_id", "environment", "dry_run")
+        ),
         "fixed_three_collections": collection_defaults
         == {
             "domain_collection": METADATA_COLLECTIONS["domain"],
@@ -380,25 +386,20 @@ def _authoring_tweaks(
     registry_json: str,
     sources: dict[str, str],
 ) -> dict[str, Any]:
-    if mode not in {"save", "validate_only"}:
+    if mode not in {"save", "replace", "validate_only"}:
         raise ValueError("authoring_mode_invalid")
     tweaks: dict[str, Any] = {
         "simple_metadata_draft_generator": {
-            "authoring_kind": kind,
-            "domain_id": domain_id,
-            "environment": environment,
             "registry_json": registry_json,
         },
         "simple_metadata_authoring_engine": {
-            "authoring_kind": kind,
-            "domain_id": domain_id,
-            "environment": environment,
             "mode": mode,
             "mongo_uri": mongo_uri,
             "mongo_database": mongo_database,
             "mongo_timeout_ms": 10000,
         },
     }
+    del kind, domain_id, environment
     tweaks["draft_language_model"] = {"temperature": 0.0, "stream": False}
     return tweaks
 

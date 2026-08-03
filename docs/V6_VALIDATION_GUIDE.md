@@ -164,7 +164,7 @@ isolated exact 1.9.2 environment에 generated Flow를 import하고 Chat/API/GaiA
 - imported Data Analysis endpoint는 dummy profile 30 single + 6 date + MT-1~MT-5 + 모든 `OP-*` 전체 route corpus와, 그중 `expected_route=intent_llm` subset의 primary/secondary 각 3회 model conformance를 통과
 - 모든 imported run에서 route/reason/call-count와 no-fallback oracle 통과
 - imported Data Analysis endpoint는 typed flexibility matrix와 v5 Message 표시/API/GaiA compatibility matrix를 통과
-- 세 authoring Flow는 각각 자연어 변환, 결정론적 검증, `save|validate_only`, 항목 단위 저장 smoke를 통과
+- 세 authoring Flow는 각각 자연어 변환, 결정론적 검증, selector-free 입력, `save|replace|validate_only`, 항목 단위 저장·교체·무저장 smoke를 통과
 - Domain Flow의 기본 free-form full-draft lane은 빈 Blueprint/pin으로도 실행하고, optional explicit-inventory profile에서만 missing/tampered Blueprint pin zero-model fail-closed와 annotation allowlist를 통과
 - Domain Policy와 optional explicit-inventory Main Filter는 prompt node/Composer/envelope/provider 호출 0을 정적 graph와 runtime counter 양쪽에서 통과
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter는 공통·특화 Prompt Template의 node ID/prompt ID/revision/source/hash/edge가 물리적으로 분리되고, 모든 Template의 변수 집합이 비어 있으며 runtime context는 Composer에 한 번만 전달

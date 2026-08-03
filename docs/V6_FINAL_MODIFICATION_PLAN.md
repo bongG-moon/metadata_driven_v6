@@ -9,7 +9,7 @@
 다음 기존 기능은 유지한다.
 
 - Langflow 1.9.2 standalone custom component
-- 자연어 기반 metadata 등록, `validate_only`, 입력 가능한 3컬렉션 원자적 `save`
+- 자연어 기반 metadata 등록, selector-free 입력, `save|replace|validate_only`, 입력 가능한 3컬렉션 원자적 항목 저장
 - 결정 가능한 질문의 LLM 0회 실행
 - 선택적 Intent/Answer LLM
 - Top/Bottom N, extrema, filter, aggregate, compare, join, derive와 detail 조회

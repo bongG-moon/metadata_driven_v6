@@ -67,7 +67,9 @@ EXPECTED_COMPONENTS = {
     "metadata_authoring/natural_metadata_source_bundle.py": "NaturalMetadataSourceBundle",
     "metadata_authoring/authoring_reference_registry.py": "AuthoringReferenceRegistry",
     "metadata_authoring/authoring_prompt_context_builder.py": "AuthoringPromptContextBuilder",
-    "metadata_authoring/simple_metadata_draft_generator.py": "SimpleMetadataDraftGenerator",
+    "metadata_authoring/03_domain_metadata_draft_generator.py": "SimpleMetadataDraftGenerator",
+    "metadata_authoring/03_dataset_metadata_draft_generator.py": "SimpleMetadataDraftGenerator",
+    "metadata_authoring/03_main_filter_metadata_draft_generator.py": "SimpleMetadataDraftGenerator",
     "metadata_authoring/02_simple_metadata_authoring_engine.py": "SimpleMetadataAuthoringEngine",
     "metadata_authoring/01_authoring_message_presentation.py": "AuthoringMessagePresentation",
     "shared/00_api_response_terminal.py": "APIResponseTerminal",
@@ -598,7 +600,7 @@ def _embedded_json(relative: str, assignment_name: str) -> dict:
 
 
 def test_generated_sources_are_current_and_monolith_is_gone() -> None:
-    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 27
+    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 29
     assert not (COMPONENT_ROOT / "data_analysis" / "00_trusted_analysis_engine.py").exists()
 
 
@@ -1281,16 +1283,16 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
                 "metadata_v6_dataset_catalog_authoring": "dataset",
                 "metadata_v6_main_filter_authoring": "main_filter",
             }[key]
-            assert authoring["settings"]["authoring_kind"] == expected_kind
             assert authoring["settings"]["mode"] == "save"
-            assert generator["settings"]["authoring_kind"] == expected_kind
             assert generator["settings"]["registry_source"].endswith("approved_source_registry.json")
+            assert {"authoring_kind", "domain_id", "environment", "dry_run"}.isdisjoint(authoring["settings"])
+            assert {"authoring_kind", "domain_id", "environment"}.isdisjoint(generator["settings"])
             prompt_nodes = [node for node in flow["native_nodes"] if node["type"] == "PromptTemplate"]
             assert len(prompt_nodes) == 2
             assert all(node["expected_prompt_variables"] == [] for node in prompt_nodes)
             assert len([node for node in prompt_nodes if "specialized" in node["id"]]) == 1
             assert {
-                "langflow_components/metadata_authoring/simple_metadata_draft_generator.py",
+                f"langflow_components/metadata_authoring/03_{expected_kind}_metadata_draft_generator.py",
                 "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
                 "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
             } == sources
@@ -4079,6 +4081,40 @@ def test_authoring_generated_source_has_no_pending_or_active_writer() -> None:
     assert "replace_metadata_items(" in source
     assert "release_manifest_sha256" not in source
     assert "load_domain_package_from_three_collections(" in source
+    assert "metadata.duplicate-policy.v1" in source
+    assert "requested_write_mode == \"validate_only\"" in source
+    assert "explicit_dry_run and requested_write_mode != \"prepare\"" in source
+    assert "metadata_item_set_projection(" in source
+    assert "concurrent_metadata_update" in source
+    assert "delete_many(" not in source
+
+    simple_source = _source("metadata_authoring/02_simple_metadata_authoring_engine.py")
+    assert "metadata.duplicate-policy.v1" in simple_source
+    assert "operation_by_key" in simple_source
+    assert "delete_many(" not in simple_source
+
+
+@pytest.mark.parametrize(
+    ("relative_path", "expected_kind"),
+    [
+        ("metadata_authoring/03_domain_metadata_draft_generator.py", "domain"),
+        ("metadata_authoring/03_dataset_metadata_draft_generator.py", "dataset"),
+        ("metadata_authoring/03_main_filter_metadata_draft_generator.py", "main_filter"),
+    ],
+)
+def test_simple_authoring_flow_identity_is_internal_not_user_input(
+    relative_path: str, expected_kind: str
+) -> None:
+    generator_cls = _component_class(relative_path)
+    generator_inputs = {item.name for item in generator_cls.inputs}
+    assert {"authoring_kind", "domain_id", "environment"}.isdisjoint(generator_inputs)
+    assert generator_cls.metadata["authoring_kind"] == expected_kind
+
+    engine_cls = _component_class("metadata_authoring/02_simple_metadata_authoring_engine.py")
+    engine_inputs = {item.name for item in engine_cls.inputs}
+    assert {"authoring_kind", "domain_id", "environment", "dry_run"}.isdisjoint(engine_inputs)
+    mode_input = next(item for item in engine_cls.inputs if item.name == "mode")
+    assert mode_input.options == ["save", "replace", "validate_only"]
 
 
 def test_domain_policy_prepare_is_explicit_operator_input_only() -> None:

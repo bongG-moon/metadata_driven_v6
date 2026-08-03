@@ -12,6 +12,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import json
 import re
+import unicodedata
 from typing import Any, Mapping, Sequence
 
 from .canonical import ContractError
@@ -45,6 +46,20 @@ _ALIAS_PROVENANCE_TO_COLLECTION = {
     "table_catalog": "table_catalog",
     "main_filters": "main_filter",
 }
+_DUPLICATE_POLICY_VERSION = "metadata.duplicate-policy.v1"
+_DUPLICATE_OPERATION_LIMIT = 64
+_DUPLICATE_CANDIDATE_LIMIT = 8
+_DUPLICATE_CONFLICT_LIMIT = 32
+_DOMAIN_SECTION_ID_FIELDS = {
+    "metrics": "metric_id",
+    "entity_groups": "group_id",
+    "grains": "grain_id",
+    "relations": "relation_id",
+    "orderings": "ordering_id",
+    "predicates": "predicate_id",
+    "recipes": "recipe_id",
+}
+_GENERIC_DISPLAY_NAMES = {"default", "unknown", "기본", "기타", "미정", "항목"}
 
 
 def _fail(message: str, details: Mapping[str, Any] | None = None) -> None:
@@ -54,6 +69,43 @@ def _fail(message: str, details: Mapping[str, Any] | None = None) -> None:
         message,
         deepcopy(dict(details or {})),
     )
+
+
+def _duplicate_text(value: Any) -> str:
+    """Normalize identifiers conservatively for duplicate comparison only."""
+
+    normalized = unicodedata.normalize("NFKC", str(value or ""))
+    return " ".join(normalized.strip().split()).casefold()
+
+
+def _duplicate_string_values(value: Any) -> set[str]:
+    values: list[Any]
+    if isinstance(value, (list, tuple)):
+        values = list(value)
+    else:
+        values = [value]
+    result: set[str] = set()
+    for raw in values:
+        if isinstance(raw, Mapping):
+            raw = raw.get("text")
+        marker = _duplicate_text(raw)
+        if marker:
+            result.add(marker)
+    return result
+
+
+def _alias_payload_target(payload: Mapping[str, Any]) -> tuple[str, str]:
+    return (
+        _duplicate_text(payload.get("target_type")),
+        _duplicate_text(payload.get("target_key")),
+    )
+
+
+def _alias_payload_expressions(payload: Mapping[str, Any]) -> set[str]:
+    values = payload.get("values")
+    if not isinstance(values, list):
+        values = payload.get("aliases")
+    return _duplicate_string_values(values)
 
 
 def _metadata_collection_names(
@@ -455,6 +507,9 @@ def assemble_domain_package_from_items(
         "output_profile": {},
     }
     seen: set[tuple[str, str, str]] = set()
+    alias_owners: dict[str, tuple[str, str]] = {}
+    alias_target_owners: dict[tuple[str, str], tuple[str, str]] = {}
+    alias_expression_owners: dict[tuple[str, str], tuple[str, str, str]] = {}
     for collection_kind, items in values.items():
         for item in items:
             marker = (collection_kind, item["section"], item["key"])
@@ -464,6 +519,65 @@ def assemble_domain_package_from_items(
             section = item["section"]
             key = item["key"]
             payload = deepcopy(item["payload"])
+            if section == "aliases":
+                alias_marker = _duplicate_text(key)
+                previous_owner = alias_owners.get(alias_marker)
+                if previous_owner is not None:
+                    _fail(
+                        "정규화한 같은 alias key가 메타데이터 전역에 둘 이상 등록되어 있습니다.",
+                        {
+                            "alias_key": key,
+                            "current_collection": collection_kind,
+                            "previous_collection": previous_owner[0],
+                            "previous_key": previous_owner[1],
+                            "reason": "cross_collection_alias_duplicate",
+                        },
+                    )
+                alias_owners[alias_marker] = (collection_kind, key)
+                target_type, target_key = _alias_payload_target(payload)
+                if not target_type or not target_key:
+                    _fail(
+                        "alias card의 target_type과 target_key가 비어 있습니다.",
+                        {"collection": collection_kind, "key": key},
+                    )
+                target_marker = (target_type, target_key)
+                previous_target_owner = alias_target_owners.get(target_marker)
+                if previous_target_owner is not None:
+                    _fail(
+                        "같은 alias target이 여러 card에 등록되어 있습니다.",
+                        {
+                            "collection": collection_kind,
+                            "key": key,
+                            "previous_collection": previous_target_owner[0],
+                            "previous_key": previous_target_owner[1],
+                            "reason": "global_alias_target_duplicate",
+                        },
+                    )
+                alias_target_owners[target_marker] = (collection_kind, key)
+                for expression in _alias_payload_expressions(payload):
+                    expression_marker = (target_type, expression)
+                    previous_expression_owner = alias_expression_owners.get(
+                        expression_marker
+                    )
+                    if (
+                        previous_expression_owner is not None
+                        and previous_expression_owner[0] != target_key
+                    ):
+                        _fail(
+                            "같은 target_type의 alias 표현이 여러 target을 가리킵니다.",
+                            {
+                                "collection": collection_kind,
+                                "key": key,
+                                "previous_collection": previous_expression_owner[1],
+                                "previous_key": previous_expression_owner[2],
+                                "reason": "global_alias_expression_ambiguous",
+                            },
+                        )
+                    alias_expression_owners[expression_marker] = (
+                        target_key,
+                        collection_kind,
+                        key,
+                    )
             if collection_kind == "domain" and section in _DOMAIN_MAP_SECTIONS:
                 draft[section][key] = payload
             elif collection_kind == "table_catalog" and section == "datasets":
@@ -540,6 +654,496 @@ def load_domain_package_from_three_collections(
     return package
 
 
+def _alias_target(item: Mapping[str, Any]) -> tuple[str, str]:
+    payload = item.get("payload") if isinstance(item.get("payload"), Mapping) else {}
+    return _alias_payload_target(payload)
+
+
+def _alias_expressions(item: Mapping[str, Any]) -> set[str]:
+    payload = item.get("payload") if isinstance(item.get("payload"), Mapping) else {}
+    return _alias_payload_expressions(payload)
+
+
+def _dataset_query_ref(item: Mapping[str, Any]) -> str:
+    payload = item.get("payload") if isinstance(item.get("payload"), Mapping) else {}
+    return _duplicate_text(payload.get("query_ref"))
+
+
+def _dataset_source_descriptor(item: Mapping[str, Any]) -> str:
+    """Return an in-memory physical-source descriptor without changing SQL.
+
+    Query text, including comments and Oracle optimizer hints, is compared as
+    an exact value.  ``config_ref`` is included only as part of the complete
+    descriptor and can never identify a duplicate by itself.
+    """
+
+    payload = item.get("payload") if isinstance(item.get("payload"), Mapping) else {}
+    source_config = (
+        deepcopy(dict(payload.get("source_config")))
+        if isinstance(payload.get("source_config"), Mapping)
+        else {}
+    )
+    location_keys = (
+        "query_template",
+        "path",
+        "uri",
+        "url",
+        "endpoint",
+        "table",
+        "table_name",
+        "document_id",
+        "dataset_id",
+        "object_name",
+        "resource",
+    )
+    has_location = any(
+        str(source_config.get(name) or payload.get(name) or "").strip()
+        for name in location_keys
+    )
+    if not has_location:
+        return ""
+    descriptor = {
+        "source_type": _duplicate_text(
+            payload.get("source_type") or source_config.get("source_type")
+        ),
+        "source_adapter": _duplicate_text(
+            payload.get("source_adapter")
+            or payload.get("source_type")
+            or source_config.get("source_type")
+        ),
+        "config_ref": _duplicate_text(payload.get("config_ref")),
+        "source_config": source_config,
+        "parameters": deepcopy(
+            payload.get("parameters")
+            or payload.get("parameter_contract")
+            or source_config.get("required_params")
+            or []
+        ),
+        "fields": deepcopy(payload.get("fields") or {}),
+        "time_scope": deepcopy(payload.get("time_scope") or {}),
+    }
+    return json.dumps(
+        descriptor,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+
+
+def _semantic_duplicate_match(
+    collection_kind: str,
+    candidate: Mapping[str, Any],
+    existing: Mapping[str, Any],
+) -> dict[str, Any] | None:
+    """Return safe evidence for a strong semantic duplicate candidate."""
+
+    if str(candidate.get("section")) != str(existing.get("section")):
+        return None
+    section = str(candidate.get("section") or "")
+    if _duplicate_text(candidate.get("key")) == _duplicate_text(existing.get("key")):
+        return {"match_type": "normalized_key", "evidence": ["normalized_key"]}
+
+    if section == "aliases":
+        candidate_type, candidate_target = _alias_target(candidate)
+        existing_type, existing_target = _alias_target(existing)
+        if not candidate_type or candidate_type != existing_type:
+            return None
+        if candidate_target and candidate_target == existing_target:
+            return {"match_type": "alias_target", "evidence": ["same_alias_target"]}
+        overlap = _alias_expressions(candidate) & _alias_expressions(existing)
+        if overlap:
+            return {
+                "match_type": "ambiguous_alias_target",
+                "evidence": ["alias_expression_overlap"],
+            }
+        return None
+
+    if collection_kind == "table_catalog" and section == "datasets":
+        candidate_query_ref = _dataset_query_ref(candidate)
+        existing_query_ref = _dataset_query_ref(existing)
+        if candidate_query_ref and candidate_query_ref == existing_query_ref:
+            return {"match_type": "query_ref", "evidence": ["same_query_ref"]}
+        candidate_descriptor = _dataset_source_descriptor(candidate)
+        existing_descriptor = _dataset_source_descriptor(existing)
+        if candidate_descriptor and candidate_descriptor == existing_descriptor:
+            return {
+                "match_type": "source_descriptor",
+                "evidence": ["same_source_descriptor"],
+            }
+        return None
+
+    if collection_kind == "domain" and section in _DOMAIN_MAP_SECTIONS:
+        candidate_payload = (
+            candidate.get("payload") if isinstance(candidate.get("payload"), Mapping) else {}
+        )
+        existing_payload = (
+            existing.get("payload") if isinstance(existing.get("payload"), Mapping) else {}
+        )
+        identity_field = _DOMAIN_SECTION_ID_FIELDS.get(section)
+        if identity_field:
+            candidate_identity = _duplicate_text(candidate_payload.get(identity_field))
+            existing_identities = {
+                _duplicate_text(existing.get("key")),
+                _duplicate_text(existing_payload.get(identity_field)),
+            }
+            if candidate_identity and candidate_identity in existing_identities:
+                return {
+                    "match_type": "typed_identity",
+                    "evidence": ["same_typed_identity"],
+                }
+        candidate_legacy = _duplicate_text(candidate_payload.get("legacy_identity"))
+        existing_legacy = _duplicate_text(existing_payload.get("legacy_identity"))
+        if candidate_legacy and candidate_legacy == existing_legacy:
+            return {
+                "match_type": "legacy_identity",
+                "evidence": ["same_legacy_identity"],
+            }
+        candidate_display = _duplicate_text(candidate_payload.get("display_name"))
+        existing_display = _duplicate_text(existing_payload.get("display_name"))
+        if (
+            candidate_display
+            and candidate_display not in _GENERIC_DISPLAY_NAMES
+            and candidate_display == existing_display
+        ):
+            return {
+                "match_type": "display_name",
+                "evidence": ["same_section_display_name"],
+            }
+        alias_overlap = _duplicate_string_values(candidate_payload.get("aliases")) & _duplicate_string_values(
+            existing_payload.get("aliases")
+        )
+        if alias_overlap:
+            return {"match_type": "section_alias", "evidence": ["same_section_alias"]}
+        return None
+
+    if collection_kind == "domain" and section == "specialized_functions":
+        candidate_payload = (
+            candidate.get("payload") if isinstance(candidate.get("payload"), Mapping) else {}
+        )
+        existing_payload = (
+            existing.get("payload") if isinstance(existing.get("payload"), Mapping) else {}
+        )
+        candidate_identity = (
+            _duplicate_text(candidate_payload.get("function_id")),
+            int(candidate_payload.get("version") or 1),
+        )
+        existing_identity = (
+            _duplicate_text(existing_payload.get("function_id")),
+            int(existing_payload.get("version") or 1),
+        )
+        if candidate_identity[0] and candidate_identity == existing_identity:
+            return {
+                "match_type": "specialized_function_identity",
+                "evidence": ["same_function_id_and_version"],
+            }
+    return None
+
+
+def metadata_item_set_projection(
+    documents: Mapping[str, Sequence[Mapping[str, Any]]],
+) -> dict[str, list[dict[str, Any]]]:
+    """Return a deterministic full-item snapshot for transaction conflict checks."""
+
+    return {
+        collection_kind: sorted(
+            (
+                _validated_item(item, collection_kind)
+                for item in documents.get(collection_kind, [])
+            ),
+            key=lambda item: str(item["_id"]),
+        )
+        for collection_kind in ("domain", "table_catalog", "main_filter")
+    }
+
+
+def merge_metadata_items_for_write(
+    current_documents: Mapping[str, Sequence[Mapping[str, Any]]],
+    candidate_documents: Mapping[str, Sequence[Mapping[str, Any]]],
+    *,
+    mode: str,
+) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    """Resolve exact and semantic duplicates without LLM calls or new storage.
+
+    ``natural_text`` is deliberately excluded from identity decisions.  The
+    resolver compares only typed payloads in the same collection and section,
+    preserves every unmentioned item, and blocks ambiguous or cross-key
+    replacements so typed references cannot be silently broken.
+    """
+
+    write_mode = str(mode or "").strip()
+    if write_mode not in {"save", "replace", "validate_only"}:
+        raise ValueError("metadata write mode must be save, replace, or validate_only")
+
+    collection_kinds = ("domain", "table_catalog", "main_filter")
+    validated_current = {
+        collection_kind: [
+            _validated_item(item, collection_kind)
+            for item in current_documents.get(collection_kind, [])
+        ]
+        for collection_kind in collection_kinds
+    }
+    validated_candidates = {
+        collection_kind: [
+            _validated_item(item, collection_kind)
+            for item in candidate_documents.get(collection_kind, [])
+        ]
+        for collection_kind in collection_kinds
+    }
+    current_by_collection = {
+        collection_kind: {
+            str(item["_id"]): item for item in validated_current[collection_kind]
+        }
+        for collection_kind in collection_kinds
+    }
+    global_existing_aliases = [
+        (collection_kind, item)
+        for collection_kind in collection_kinds
+        for item in validated_current[collection_kind]
+        if item["section"] == "aliases"
+    ]
+    global_changed_candidate_aliases = [
+        (collection_kind, item)
+        for collection_kind in collection_kinds
+        for item in validated_candidates[collection_kind]
+        if item["section"] == "aliases"
+        and (
+            str(item["_id"]) not in current_by_collection[collection_kind]
+            or current_by_collection[collection_kind][str(item["_id"])]["payload"]
+            != item["payload"]
+        )
+    ]
+
+    merged: dict[str, list[dict[str, Any]]] = {}
+    operations: dict[str, Any] = {
+        "policy_version": _DUPLICATE_POLICY_VERSION,
+        "identity": "typed_item_identity",
+        "inserted": 0,
+        "replaced": 0,
+        "unchanged": 0,
+        "conflict_count": 0,
+        "conflicts": [],
+    }
+    important_operation_records: list[dict[str, Any]] = []
+    unchanged_operation_records: list[dict[str, Any]] = []
+    operation_record_count = 0
+
+    def record(
+        item: Mapping[str, Any],
+        collection_kind: str,
+        operation: str,
+        reason: str,
+        *,
+        canonical_key: str = "",
+    ) -> None:
+        nonlocal operation_record_count
+        operation_record_count += 1
+        value = {
+            "collection": collection_kind,
+            "section": str(item.get("section") or ""),
+            "key": str(item.get("key") or ""),
+            "operation": operation,
+            "reason": reason,
+        }
+        if canonical_key:
+            value["canonical_key"] = canonical_key
+        target = (
+            unchanged_operation_records
+            if operation == "unchanged"
+            else important_operation_records
+        )
+        if len(target) < _DUPLICATE_OPERATION_LIMIT:
+            target.append(value)
+
+    def conflict(
+        item: Mapping[str, Any],
+        collection_kind: str,
+        reason: str,
+        matches: Sequence[tuple[Mapping[str, Any], Mapping[str, Any], str]],
+    ) -> None:
+        unique_candidates: list[dict[str, str]] = []
+        seen_candidates: set[tuple[str, str, str]] = set()
+        evidence: list[str] = []
+        match_types: list[str] = []
+        for matched_item, match, source in matches:
+            matched_collection = str(matched_item.get("_id") or "").split(":", 1)[0]
+            marker = (
+                matched_collection,
+                str(matched_item.get("section") or ""),
+                str(matched_item.get("key") or ""),
+            )
+            if marker not in seen_candidates and len(unique_candidates) < _DUPLICATE_CANDIDATE_LIMIT:
+                seen_candidates.add(marker)
+                unique_candidates.append(
+                    {
+                        "collection": marker[0],
+                        "section": marker[1],
+                        "key": marker[2],
+                        "source": source,
+                    }
+                )
+            match_types.append(str(match.get("match_type") or "semantic"))
+            evidence.extend(str(value) for value in match.get("evidence") or [])
+        details: dict[str, Any] = {
+            "collection": collection_kind,
+            "section": str(item.get("section") or ""),
+            "key": str(item.get("key") or ""),
+            "reason": reason,
+            "resolution": "blocked",
+            "match_types": list(dict.fromkeys(match_types)),
+            "evidence": list(dict.fromkeys(evidence)),
+            "duplicate_candidates": unique_candidates,
+        }
+        if (
+            len(unique_candidates) == 1
+            and unique_candidates[0]["source"].startswith("existing")
+        ):
+            details["canonical_key"] = unique_candidates[0]["key"]
+        operations["conflict_count"] += 1
+        if len(operations["conflicts"]) < _DUPLICATE_CONFLICT_LIMIT:
+            operations["conflicts"].append(details)
+        record(
+            item,
+            collection_kind,
+            "blocked",
+            reason,
+            canonical_key=str(details.get("canonical_key") or ""),
+        )
+
+    for collection_kind in collection_kinds:
+        existing_by_id = current_by_collection[collection_kind]
+        merged_by_id = deepcopy(existing_by_id)
+        candidate_by_id: dict[str, dict[str, Any]] = {}
+        duplicate_candidate_ids: set[str] = set()
+        for candidate in validated_candidates[collection_kind]:
+            candidate_id = str(candidate["_id"])
+            if candidate_id in candidate_by_id:
+                duplicate_candidate_ids.add(candidate_id)
+                continue
+            candidate_by_id[candidate_id] = candidate
+
+        changed_candidates = {
+            candidate_id: candidate
+            for candidate_id, candidate in candidate_by_id.items()
+            if candidate_id not in existing_by_id
+            or existing_by_id[candidate_id]["payload"] != candidate["payload"]
+        }
+        for candidate_id in sorted(candidate_by_id):
+            candidate = candidate_by_id[candidate_id]
+            if candidate_id in duplicate_candidate_ids:
+                conflict(candidate, collection_kind, "duplicate_candidate_id", [])
+                continue
+            existing = existing_by_id.get(candidate_id)
+            unchanged = bool(
+                existing is not None
+                and existing["section"] == candidate["section"]
+                and existing["key"] == candidate["key"]
+                and existing["payload"] == candidate["payload"]
+            )
+            if unchanged:
+                operations["unchanged"] += 1
+                record(candidate, collection_kind, "unchanged", "exact_payload_replay")
+                continue
+            if existing is not None and write_mode == "save":
+                conflict(
+                    candidate,
+                    collection_kind,
+                    "exact_key_changed",
+                    [(existing, {"match_type": "exact_key", "evidence": ["same_exact_key"]}, "existing")],
+                )
+                continue
+
+            semantic_matches: list[tuple[Mapping[str, Any], Mapping[str, Any], str]] = []
+            for existing_id, existing_item in existing_by_id.items():
+                if existing_id == candidate_id:
+                    continue
+                match = _semantic_duplicate_match(collection_kind, candidate, existing_item)
+                if match:
+                    semantic_matches.append((existing_item, match, "existing"))
+            if candidate["section"] == "aliases":
+                for other_collection, existing_item in global_existing_aliases:
+                    if other_collection == collection_kind:
+                        continue
+                    match = _semantic_duplicate_match(
+                        collection_kind, candidate, existing_item
+                    )
+                    if match:
+                        semantic_matches.append(
+                            (existing_item, match, "existing_other_collection")
+                        )
+                for other_collection, peer_item in global_changed_candidate_aliases:
+                    if other_collection == collection_kind:
+                        continue
+                    match = _semantic_duplicate_match(
+                        collection_kind, candidate, peer_item
+                    )
+                    if match:
+                        semantic_matches.append(
+                            (peer_item, match, "candidate_other_collection")
+                        )
+            for peer_id, peer_item in changed_candidates.items():
+                if peer_id == candidate_id:
+                    continue
+                match = _semantic_duplicate_match(collection_kind, candidate, peer_item)
+                if match:
+                    semantic_matches.append((peer_item, match, "candidate"))
+            if semantic_matches:
+                match_ids = {
+                    (str(item.get("section") or ""), str(item.get("key") or ""))
+                    for item, _match, _source in semantic_matches
+                }
+                has_alias_ambiguity = any(
+                    str(match.get("match_type") or "") == "ambiguous_alias_target"
+                    for _item, match, _source in semantic_matches
+                )
+                reason = (
+                    "ambiguous_alias_target"
+                    if has_alias_ambiguity
+                    else "ambiguous_duplicate_target"
+                    if len(match_ids) > 1
+                    else "submitted_duplicate"
+                    if not any(
+                        source.startswith("existing")
+                        for _item, _match, source in semantic_matches
+                    )
+                    else "canonical_key_required"
+                )
+                conflict(candidate, collection_kind, reason, semantic_matches)
+                continue
+
+            if existing is None:
+                merged_by_id[candidate_id] = candidate
+                operations["inserted"] += 1
+                record(
+                    candidate,
+                    collection_kind,
+                    "would_insert" if write_mode == "validate_only" else "inserted",
+                    "new_typed_identity",
+                )
+            else:
+                merged_by_id[candidate_id] = candidate
+                operations["replaced"] += 1
+                record(
+                    candidate,
+                    collection_kind,
+                    "would_replace" if write_mode == "validate_only" else "replaced",
+                    "exact_key_replace",
+                )
+        merged[collection_kind] = [merged_by_id[item_id] for item_id in sorted(merged_by_id)]
+    operations["conflicts_truncated"] = (
+        operations["conflict_count"] > len(operations["conflicts"])
+    )
+    remaining = max(0, _DUPLICATE_OPERATION_LIMIT - len(important_operation_records))
+    operations["operation_record_count"] = operation_record_count
+    operations["operation_by_key"] = [
+        *important_operation_records,
+        *unchanged_operation_records[:remaining],
+    ]
+    operations["operation_records_truncated"] = (
+        operation_record_count > len(operations["operation_by_key"])
+    )
+    return merged, operations
+
+
 def replace_metadata_items(
     database: Any,
     documents: Mapping[str, Sequence[Mapping[str, Any]]],
@@ -549,7 +1153,12 @@ def replace_metadata_items(
     table_collection: str = TABLE_CATALOG_COLLECTION,
     main_filter_collection: str = MAIN_FILTER_COLLECTION,
 ) -> None:
-    """Replace the three item sets after a complete in-memory compile check."""
+    """Upsert a complete checked projection without deleting concurrent items.
+
+    Normal registration never treats absence from the candidate as a deletion
+    request.  Full-set deletion belongs to an explicit migration workflow, not
+    to natural-language item authoring.
+    """
 
     actual = _metadata_collection_names(domain_collection, table_collection, main_filter_collection)
     prepared = {
@@ -566,9 +1175,20 @@ def replace_metadata_items(
             if not document.get("natural_text") and isinstance(existing.get(document["_id"]), dict):
                 document["natural_text"] = _clean_natural_text(existing[document["_id"]].get("natural_text"))
             items.append(document)
-        ids = [item["_id"] for item in items]
-        collection.delete_many({"_id": {"$nin": ids}}, session=session)
         for document in items:
+            serialization_lock = kind == "domain" and document["section"] == "profile"
+            if serialization_lock:
+                # Every registration transaction writes the one required
+                # profile item.  This creates a shared MongoDB write-conflict
+                # boundary for otherwise disjoint item updates without adding
+                # a lock collection or a persisted lock-only field.
+                document["updated_at"] = datetime.now(timezone.utc).isoformat()
+            if (
+                not serialization_lock
+                and isinstance(existing.get(document["_id"]), dict)
+                and _validated_item(existing[document["_id"]], kind) == document
+            ):
+                continue
             collection.replace_one(
                 {"_id": document["_id"]},
                 document,
@@ -607,6 +1227,8 @@ __all__ = [
     "assemble_domain_package_from_sections",
     "load_available_domain_package_from_three_collections",
     "load_domain_package_from_three_collections",
+    "metadata_item_set_projection",
+    "merge_metadata_items_for_write",
     "make_metadata_item_documents",
     "make_metadata_section_documents",
     "replace_metadata_items",

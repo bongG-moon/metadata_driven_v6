@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 
-EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"0b035cefd556b3c37b166e73270dee3e7070a2adf2dd56750b8e1015516bfcce","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"15dbb187f458d03ad4d55063eef898b862529dc68e9f64840d08ab20df9cfb76","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"41c4152f45577f05c925d5d782a48f8db45f67f8e48aac8805b822269516bd58","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"a24b7d2fc3798f1dd69e1af94a7071eae8fb56d93a4191258953fd63b4211568","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"3f7f6c5154c9e7922dd65490e9166ba0038c6a242258ec30d409d8a553948fed","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"c02824f9ddba81496d99a4b58bda8e6bedf0ce464d47abca682071ab24cae57d","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"95f5821b05d7d70f70ebd0339a316bcc1367b5499553319b8d8995df251a4c56","reference_runtime/generic_v2_planner.py":"142665c8050c9302830cedf45928a25b73cd34e80bec66de9ba77003209176d3","reference_runtime/metadata_collections.py":"c10d21cab4fdb54e95f1e23b262842be51d1b74f85aedda7b99a7d48f1a84857","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"e3782e6e86e41968a7bab1be4056ac2e9459c28188efa92f6532d2898d12abee","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"d2125d6902ca246b2239e8569959ac37f45847bf17dafaf93b857e088c750e42","reference_runtime/request_literals.py":"00493f9e342ab3065215805ae32f3068cb594209434bf280f2bb4f23c4be62ff","reference_runtime/source_contracts.py":"c43d8865ff045f4c26c5194262620a50961be5b56552c5cc6e7d580b2c11d7b0","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"0c1fc3bbb055cd32d1da3446afab0aca5351e844536624ae9ab953c78c5dfe3b"}}')
+EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"0b035cefd556b3c37b166e73270dee3e7070a2adf2dd56750b8e1015516bfcce","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"15dbb187f458d03ad4d55063eef898b862529dc68e9f64840d08ab20df9cfb76","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"41c4152f45577f05c925d5d782a48f8db45f67f8e48aac8805b822269516bd58","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"a24b7d2fc3798f1dd69e1af94a7071eae8fb56d93a4191258953fd63b4211568","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"3f7f6c5154c9e7922dd65490e9166ba0038c6a242258ec30d409d8a553948fed","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"c02824f9ddba81496d99a4b58bda8e6bedf0ce464d47abca682071ab24cae57d","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"95f5821b05d7d70f70ebd0339a316bcc1367b5499553319b8d8995df251a4c56","reference_runtime/generic_v2_planner.py":"142665c8050c9302830cedf45928a25b73cd34e80bec66de9ba77003209176d3","reference_runtime/metadata_collections.py":"f7c7be58ed30d63713a875b392ba621bde2d3b2033da35d5a49637549e86ad25","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"e3782e6e86e41968a7bab1be4056ac2e9459c28188efa92f6532d2898d12abee","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"d2125d6902ca246b2239e8569959ac37f45847bf17dafaf93b857e088c750e42","reference_runtime/request_literals.py":"00493f9e342ab3065215805ae32f3068cb594209434bf280f2bb4f23c4be62ff","reference_runtime/source_contracts.py":"c43d8865ff045f4c26c5194262620a50961be5b56552c5cc6e7d580b2c11d7b0","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"0c1fc3bbb055cd32d1da3446afab0aca5351e844536624ae9ab953c78c5dfe3b"}}')
 
 
 import hashlib
@@ -1157,6 +1157,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import json
 import re
+import unicodedata
 from typing import Any, Mapping, Sequence
 METADATA_SECTION_VERSION = 'metadata.item.v1'
 METADATA_RELEASE_VERSION = 'runtime_only'
@@ -1168,9 +1169,44 @@ _COLLECTION_NAME_PATTERN = re.compile('^[A-Za-z][A-Za-z0-9_.-]{0,127}$')
 _ITEM_KEYS = {'_id', 'section', 'key', 'natural_text', 'payload', 'updated_at'}
 _DOMAIN_MAP_SECTIONS = ('metrics', 'entity_groups', 'grains', 'relations', 'orderings', 'predicates', 'recipes')
 _ALIAS_PROVENANCE_TO_COLLECTION = {'domain': 'domain', 'table_catalog': 'table_catalog', 'main_filters': 'main_filter'}
+_DUPLICATE_POLICY_VERSION = 'metadata.duplicate-policy.v1'
+_DUPLICATE_OPERATION_LIMIT = 64
+_DUPLICATE_CANDIDATE_LIMIT = 8
+_DUPLICATE_CONFLICT_LIMIT = 32
+_DOMAIN_SECTION_ID_FIELDS = {'metrics': 'metric_id', 'entity_groups': 'group_id', 'grains': 'grain_id', 'relations': 'relation_id', 'orderings': 'ordering_id', 'predicates': 'predicate_id', 'recipes': 'recipe_id'}
+_GENERIC_DISPLAY_NAMES = {'default', 'unknown', '기본', '기타', '미정', '항목'}
 
 def _fail(message: str, details: Mapping[str, Any] | None=None) -> None:
     raise ContractError('metadata_dependency_error', 'metadata_three_collection', message, deepcopy(dict(details or {})))
+
+def _duplicate_text(value: Any) -> str:
+    """Normalize identifiers conservatively for duplicate comparison only."""
+    normalized = unicodedata.normalize('NFKC', str(value or ''))
+    return ' '.join(normalized.strip().split()).casefold()
+
+def _duplicate_string_values(value: Any) -> set[str]:
+    values: list[Any]
+    if isinstance(value, (list, tuple)):
+        values = list(value)
+    else:
+        values = [value]
+    result: set[str] = set()
+    for raw in values:
+        if isinstance(raw, Mapping):
+            raw = raw.get('text')
+        marker = _duplicate_text(raw)
+        if marker:
+            result.add(marker)
+    return result
+
+def _alias_payload_target(payload: Mapping[str, Any]) -> tuple[str, str]:
+    return (_duplicate_text(payload.get('target_type')), _duplicate_text(payload.get('target_key')))
+
+def _alias_payload_expressions(payload: Mapping[str, Any]) -> set[str]:
+    values = payload.get('values')
+    if not isinstance(values, list):
+        values = payload.get('aliases')
+    return _duplicate_string_values(values)
 
 def _metadata_collection_names(domain_collection: Any, table_collection: Any, main_filter_collection: Any) -> dict[str, str]:
     actual = {'domain': str(domain_collection or '').strip(), 'table_catalog': str(table_collection or '').strip(), 'main_filter': str(main_filter_collection or '').strip()}
@@ -1345,6 +1381,9 @@ def assemble_domain_package_from_items(documents: Mapping[str, Sequence[Mapping[
     profile_payload = deepcopy(profile['payload'])
     draft: dict[str, Any] = {'contract_version': 'metadata.authoring.draft.v1', 'display_name': str(profile_payload.get('display_name') or domain_id), 'description': str(profile_payload.get('description') or ''), 'locale': str(profile_payload.get('locale') or 'ko-KR'), 'timezone': str(profile_payload.get('timezone') or 'Asia/Seoul'), 'datasets': {}, 'metrics': {}, 'entity_groups': {}, 'grains': {}, 'relations': {}, 'orderings': {}, 'predicates': {}, 'recipes': {}, 'aliases': {}, 'prompt_extensions': {'intent': '', 'answer': ''}, 'specialized_functions': [], 'output_profile': {}}
     seen: set[tuple[str, str, str]] = set()
+    alias_owners: dict[str, tuple[str, str]] = {}
+    alias_target_owners: dict[tuple[str, str], tuple[str, str]] = {}
+    alias_expression_owners: dict[tuple[str, str], tuple[str, str, str]] = {}
     for collection_kind, items in values.items():
         for item in items:
             marker = (collection_kind, item['section'], item['key'])
@@ -1354,6 +1393,26 @@ def assemble_domain_package_from_items(documents: Mapping[str, Sequence[Mapping[
             section = item['section']
             key = item['key']
             payload = deepcopy(item['payload'])
+            if section == 'aliases':
+                alias_marker = _duplicate_text(key)
+                previous_owner = alias_owners.get(alias_marker)
+                if previous_owner is not None:
+                    _fail('정규화한 같은 alias key가 메타데이터 전역에 둘 이상 등록되어 있습니다.', {'alias_key': key, 'current_collection': collection_kind, 'previous_collection': previous_owner[0], 'previous_key': previous_owner[1], 'reason': 'cross_collection_alias_duplicate'})
+                alias_owners[alias_marker] = (collection_kind, key)
+                target_type, target_key = _alias_payload_target(payload)
+                if not target_type or not target_key:
+                    _fail('alias card의 target_type과 target_key가 비어 있습니다.', {'collection': collection_kind, 'key': key})
+                target_marker = (target_type, target_key)
+                previous_target_owner = alias_target_owners.get(target_marker)
+                if previous_target_owner is not None:
+                    _fail('같은 alias target이 여러 card에 등록되어 있습니다.', {'collection': collection_kind, 'key': key, 'previous_collection': previous_target_owner[0], 'previous_key': previous_target_owner[1], 'reason': 'global_alias_target_duplicate'})
+                alias_target_owners[target_marker] = (collection_kind, key)
+                for expression in _alias_payload_expressions(payload):
+                    expression_marker = (target_type, expression)
+                    previous_expression_owner = alias_expression_owners.get(expression_marker)
+                    if previous_expression_owner is not None and previous_expression_owner[0] != target_key:
+                        _fail('같은 target_type의 alias 표현이 여러 target을 가리킵니다.', {'collection': collection_kind, 'key': key, 'previous_collection': previous_expression_owner[1], 'previous_key': previous_expression_owner[2], 'reason': 'global_alias_expression_ambiguous'})
+                    alias_expression_owners[expression_marker] = (target_key, collection_kind, key)
             if collection_kind == 'domain' and section in _DOMAIN_MAP_SECTIONS:
                 draft[section][key] = payload
             elif collection_kind == 'table_catalog' and section == 'datasets':
@@ -1397,8 +1456,230 @@ def load_domain_package_from_three_collections(database: Any, domain_id: str, en
         _fail('항목형 메타데이터의 실행 환경은 production으로 고정됩니다.')
     return package
 
+def _alias_target(item: Mapping[str, Any]) -> tuple[str, str]:
+    payload = item.get('payload') if isinstance(item.get('payload'), Mapping) else {}
+    return _alias_payload_target(payload)
+
+def _alias_expressions(item: Mapping[str, Any]) -> set[str]:
+    payload = item.get('payload') if isinstance(item.get('payload'), Mapping) else {}
+    return _alias_payload_expressions(payload)
+
+def _dataset_query_ref(item: Mapping[str, Any]) -> str:
+    payload = item.get('payload') if isinstance(item.get('payload'), Mapping) else {}
+    return _duplicate_text(payload.get('query_ref'))
+
+def _dataset_source_descriptor(item: Mapping[str, Any]) -> str:
+    """Return an in-memory physical-source descriptor without changing SQL.
+
+    Query text, including comments and Oracle optimizer hints, is compared as
+    an exact value.  ``config_ref`` is included only as part of the complete
+    descriptor and can never identify a duplicate by itself.
+    """
+    payload = item.get('payload') if isinstance(item.get('payload'), Mapping) else {}
+    source_config = deepcopy(dict(payload.get('source_config'))) if isinstance(payload.get('source_config'), Mapping) else {}
+    location_keys = ('query_template', 'path', 'uri', 'url', 'endpoint', 'table', 'table_name', 'document_id', 'dataset_id', 'object_name', 'resource')
+    has_location = any((str(source_config.get(name) or payload.get(name) or '').strip() for name in location_keys))
+    if not has_location:
+        return ''
+    descriptor = {'source_type': _duplicate_text(payload.get('source_type') or source_config.get('source_type')), 'source_adapter': _duplicate_text(payload.get('source_adapter') or payload.get('source_type') or source_config.get('source_type')), 'config_ref': _duplicate_text(payload.get('config_ref')), 'source_config': source_config, 'parameters': deepcopy(payload.get('parameters') or payload.get('parameter_contract') or source_config.get('required_params') or []), 'fields': deepcopy(payload.get('fields') or {}), 'time_scope': deepcopy(payload.get('time_scope') or {})}
+    return json.dumps(descriptor, ensure_ascii=False, sort_keys=True, separators=(',', ':'))
+
+def _semantic_duplicate_match(collection_kind: str, candidate: Mapping[str, Any], existing: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Return safe evidence for a strong semantic duplicate candidate."""
+    if str(candidate.get('section')) != str(existing.get('section')):
+        return None
+    section = str(candidate.get('section') or '')
+    if _duplicate_text(candidate.get('key')) == _duplicate_text(existing.get('key')):
+        return {'match_type': 'normalized_key', 'evidence': ['normalized_key']}
+    if section == 'aliases':
+        candidate_type, candidate_target = _alias_target(candidate)
+        existing_type, existing_target = _alias_target(existing)
+        if not candidate_type or candidate_type != existing_type:
+            return None
+        if candidate_target and candidate_target == existing_target:
+            return {'match_type': 'alias_target', 'evidence': ['same_alias_target']}
+        overlap = _alias_expressions(candidate) & _alias_expressions(existing)
+        if overlap:
+            return {'match_type': 'ambiguous_alias_target', 'evidence': ['alias_expression_overlap']}
+        return None
+    if collection_kind == 'table_catalog' and section == 'datasets':
+        candidate_query_ref = _dataset_query_ref(candidate)
+        existing_query_ref = _dataset_query_ref(existing)
+        if candidate_query_ref and candidate_query_ref == existing_query_ref:
+            return {'match_type': 'query_ref', 'evidence': ['same_query_ref']}
+        candidate_descriptor = _dataset_source_descriptor(candidate)
+        existing_descriptor = _dataset_source_descriptor(existing)
+        if candidate_descriptor and candidate_descriptor == existing_descriptor:
+            return {'match_type': 'source_descriptor', 'evidence': ['same_source_descriptor']}
+        return None
+    if collection_kind == 'domain' and section in _DOMAIN_MAP_SECTIONS:
+        candidate_payload = candidate.get('payload') if isinstance(candidate.get('payload'), Mapping) else {}
+        existing_payload = existing.get('payload') if isinstance(existing.get('payload'), Mapping) else {}
+        identity_field = _DOMAIN_SECTION_ID_FIELDS.get(section)
+        if identity_field:
+            candidate_identity = _duplicate_text(candidate_payload.get(identity_field))
+            existing_identities = {_duplicate_text(existing.get('key')), _duplicate_text(existing_payload.get(identity_field))}
+            if candidate_identity and candidate_identity in existing_identities:
+                return {'match_type': 'typed_identity', 'evidence': ['same_typed_identity']}
+        candidate_legacy = _duplicate_text(candidate_payload.get('legacy_identity'))
+        existing_legacy = _duplicate_text(existing_payload.get('legacy_identity'))
+        if candidate_legacy and candidate_legacy == existing_legacy:
+            return {'match_type': 'legacy_identity', 'evidence': ['same_legacy_identity']}
+        candidate_display = _duplicate_text(candidate_payload.get('display_name'))
+        existing_display = _duplicate_text(existing_payload.get('display_name'))
+        if candidate_display and candidate_display not in _GENERIC_DISPLAY_NAMES and (candidate_display == existing_display):
+            return {'match_type': 'display_name', 'evidence': ['same_section_display_name']}
+        alias_overlap = _duplicate_string_values(candidate_payload.get('aliases')) & _duplicate_string_values(existing_payload.get('aliases'))
+        if alias_overlap:
+            return {'match_type': 'section_alias', 'evidence': ['same_section_alias']}
+        return None
+    if collection_kind == 'domain' and section == 'specialized_functions':
+        candidate_payload = candidate.get('payload') if isinstance(candidate.get('payload'), Mapping) else {}
+        existing_payload = existing.get('payload') if isinstance(existing.get('payload'), Mapping) else {}
+        candidate_identity = (_duplicate_text(candidate_payload.get('function_id')), int(candidate_payload.get('version') or 1))
+        existing_identity = (_duplicate_text(existing_payload.get('function_id')), int(existing_payload.get('version') or 1))
+        if candidate_identity[0] and candidate_identity == existing_identity:
+            return {'match_type': 'specialized_function_identity', 'evidence': ['same_function_id_and_version']}
+    return None
+
+def metadata_item_set_projection(documents: Mapping[str, Sequence[Mapping[str, Any]]]) -> dict[str, list[dict[str, Any]]]:
+    """Return a deterministic full-item snapshot for transaction conflict checks."""
+    return {collection_kind: sorted((_validated_item(item, collection_kind) for item in documents.get(collection_kind, [])), key=lambda item: str(item['_id'])) for collection_kind in ('domain', 'table_catalog', 'main_filter')}
+
+def merge_metadata_items_for_write(current_documents: Mapping[str, Sequence[Mapping[str, Any]]], candidate_documents: Mapping[str, Sequence[Mapping[str, Any]]], *, mode: str) -> tuple[dict[str, list[dict[str, Any]]], dict[str, Any]]:
+    """Resolve exact and semantic duplicates without LLM calls or new storage.
+
+    ``natural_text`` is deliberately excluded from identity decisions.  The
+    resolver compares only typed payloads in the same collection and section,
+    preserves every unmentioned item, and blocks ambiguous or cross-key
+    replacements so typed references cannot be silently broken.
+    """
+    write_mode = str(mode or '').strip()
+    if write_mode not in {'save', 'replace', 'validate_only'}:
+        raise ValueError('metadata write mode must be save, replace, or validate_only')
+    collection_kinds = ('domain', 'table_catalog', 'main_filter')
+    validated_current = {collection_kind: [_validated_item(item, collection_kind) for item in current_documents.get(collection_kind, [])] for collection_kind in collection_kinds}
+    validated_candidates = {collection_kind: [_validated_item(item, collection_kind) for item in candidate_documents.get(collection_kind, [])] for collection_kind in collection_kinds}
+    current_by_collection = {collection_kind: {str(item['_id']): item for item in validated_current[collection_kind]} for collection_kind in collection_kinds}
+    global_existing_aliases = [(collection_kind, item) for collection_kind in collection_kinds for item in validated_current[collection_kind] if item['section'] == 'aliases']
+    global_changed_candidate_aliases = [(collection_kind, item) for collection_kind in collection_kinds for item in validated_candidates[collection_kind] if item['section'] == 'aliases' and (str(item['_id']) not in current_by_collection[collection_kind] or current_by_collection[collection_kind][str(item['_id'])]['payload'] != item['payload'])]
+    merged: dict[str, list[dict[str, Any]]] = {}
+    operations: dict[str, Any] = {'policy_version': _DUPLICATE_POLICY_VERSION, 'identity': 'typed_item_identity', 'inserted': 0, 'replaced': 0, 'unchanged': 0, 'conflict_count': 0, 'conflicts': []}
+    important_operation_records: list[dict[str, Any]] = []
+    unchanged_operation_records: list[dict[str, Any]] = []
+    operation_record_count = 0
+
+    def record(item: Mapping[str, Any], collection_kind: str, operation: str, reason: str, *, canonical_key: str='') -> None:
+        nonlocal operation_record_count
+        operation_record_count += 1
+        value = {'collection': collection_kind, 'section': str(item.get('section') or ''), 'key': str(item.get('key') or ''), 'operation': operation, 'reason': reason}
+        if canonical_key:
+            value['canonical_key'] = canonical_key
+        target = unchanged_operation_records if operation == 'unchanged' else important_operation_records
+        if len(target) < _DUPLICATE_OPERATION_LIMIT:
+            target.append(value)
+
+    def conflict(item: Mapping[str, Any], collection_kind: str, reason: str, matches: Sequence[tuple[Mapping[str, Any], Mapping[str, Any], str]]) -> None:
+        unique_candidates: list[dict[str, str]] = []
+        seen_candidates: set[tuple[str, str, str]] = set()
+        evidence: list[str] = []
+        match_types: list[str] = []
+        for matched_item, match, source in matches:
+            matched_collection = str(matched_item.get('_id') or '').split(':', 1)[0]
+            marker = (matched_collection, str(matched_item.get('section') or ''), str(matched_item.get('key') or ''))
+            if marker not in seen_candidates and len(unique_candidates) < _DUPLICATE_CANDIDATE_LIMIT:
+                seen_candidates.add(marker)
+                unique_candidates.append({'collection': marker[0], 'section': marker[1], 'key': marker[2], 'source': source})
+            match_types.append(str(match.get('match_type') or 'semantic'))
+            evidence.extend((str(value) for value in match.get('evidence') or []))
+        details: dict[str, Any] = {'collection': collection_kind, 'section': str(item.get('section') or ''), 'key': str(item.get('key') or ''), 'reason': reason, 'resolution': 'blocked', 'match_types': list(dict.fromkeys(match_types)), 'evidence': list(dict.fromkeys(evidence)), 'duplicate_candidates': unique_candidates}
+        if len(unique_candidates) == 1 and unique_candidates[0]['source'].startswith('existing'):
+            details['canonical_key'] = unique_candidates[0]['key']
+        operations['conflict_count'] += 1
+        if len(operations['conflicts']) < _DUPLICATE_CONFLICT_LIMIT:
+            operations['conflicts'].append(details)
+        record(item, collection_kind, 'blocked', reason, canonical_key=str(details.get('canonical_key') or ''))
+    for collection_kind in collection_kinds:
+        existing_by_id = current_by_collection[collection_kind]
+        merged_by_id = deepcopy(existing_by_id)
+        candidate_by_id: dict[str, dict[str, Any]] = {}
+        duplicate_candidate_ids: set[str] = set()
+        for candidate in validated_candidates[collection_kind]:
+            candidate_id = str(candidate['_id'])
+            if candidate_id in candidate_by_id:
+                duplicate_candidate_ids.add(candidate_id)
+                continue
+            candidate_by_id[candidate_id] = candidate
+        changed_candidates = {candidate_id: candidate for candidate_id, candidate in candidate_by_id.items() if candidate_id not in existing_by_id or existing_by_id[candidate_id]['payload'] != candidate['payload']}
+        for candidate_id in sorted(candidate_by_id):
+            candidate = candidate_by_id[candidate_id]
+            if candidate_id in duplicate_candidate_ids:
+                conflict(candidate, collection_kind, 'duplicate_candidate_id', [])
+                continue
+            existing = existing_by_id.get(candidate_id)
+            unchanged = bool(existing is not None and existing['section'] == candidate['section'] and (existing['key'] == candidate['key']) and (existing['payload'] == candidate['payload']))
+            if unchanged:
+                operations['unchanged'] += 1
+                record(candidate, collection_kind, 'unchanged', 'exact_payload_replay')
+                continue
+            if existing is not None and write_mode == 'save':
+                conflict(candidate, collection_kind, 'exact_key_changed', [(existing, {'match_type': 'exact_key', 'evidence': ['same_exact_key']}, 'existing')])
+                continue
+            semantic_matches: list[tuple[Mapping[str, Any], Mapping[str, Any], str]] = []
+            for existing_id, existing_item in existing_by_id.items():
+                if existing_id == candidate_id:
+                    continue
+                match = _semantic_duplicate_match(collection_kind, candidate, existing_item)
+                if match:
+                    semantic_matches.append((existing_item, match, 'existing'))
+            if candidate['section'] == 'aliases':
+                for other_collection, existing_item in global_existing_aliases:
+                    if other_collection == collection_kind:
+                        continue
+                    match = _semantic_duplicate_match(collection_kind, candidate, existing_item)
+                    if match:
+                        semantic_matches.append((existing_item, match, 'existing_other_collection'))
+                for other_collection, peer_item in global_changed_candidate_aliases:
+                    if other_collection == collection_kind:
+                        continue
+                    match = _semantic_duplicate_match(collection_kind, candidate, peer_item)
+                    if match:
+                        semantic_matches.append((peer_item, match, 'candidate_other_collection'))
+            for peer_id, peer_item in changed_candidates.items():
+                if peer_id == candidate_id:
+                    continue
+                match = _semantic_duplicate_match(collection_kind, candidate, peer_item)
+                if match:
+                    semantic_matches.append((peer_item, match, 'candidate'))
+            if semantic_matches:
+                match_ids = {(str(item.get('section') or ''), str(item.get('key') or '')) for item, _match, _source in semantic_matches}
+                has_alias_ambiguity = any((str(match.get('match_type') or '') == 'ambiguous_alias_target' for _item, match, _source in semantic_matches))
+                reason = 'ambiguous_alias_target' if has_alias_ambiguity else 'ambiguous_duplicate_target' if len(match_ids) > 1 else 'submitted_duplicate' if not any((source.startswith('existing') for _item, _match, source in semantic_matches)) else 'canonical_key_required'
+                conflict(candidate, collection_kind, reason, semantic_matches)
+                continue
+            if existing is None:
+                merged_by_id[candidate_id] = candidate
+                operations['inserted'] += 1
+                record(candidate, collection_kind, 'would_insert' if write_mode == 'validate_only' else 'inserted', 'new_typed_identity')
+            else:
+                merged_by_id[candidate_id] = candidate
+                operations['replaced'] += 1
+                record(candidate, collection_kind, 'would_replace' if write_mode == 'validate_only' else 'replaced', 'exact_key_replace')
+        merged[collection_kind] = [merged_by_id[item_id] for item_id in sorted(merged_by_id)]
+    operations['conflicts_truncated'] = operations['conflict_count'] > len(operations['conflicts'])
+    remaining = max(0, _DUPLICATE_OPERATION_LIMIT - len(important_operation_records))
+    operations['operation_record_count'] = operation_record_count
+    operations['operation_by_key'] = [*important_operation_records, *unchanged_operation_records[:remaining]]
+    operations['operation_records_truncated'] = operation_record_count > len(operations['operation_by_key'])
+    return (merged, operations)
+
 def replace_metadata_items(database: Any, documents: Mapping[str, Sequence[Mapping[str, Any]]], *, session: Any=None, domain_collection: str=DOMAIN_METADATA_COLLECTION, table_collection: str=TABLE_CATALOG_COLLECTION, main_filter_collection: str=MAIN_FILTER_COLLECTION) -> None:
-    """Replace the three item sets after a complete in-memory compile check."""
+    """Upsert a complete checked projection without deleting concurrent items.
+
+    Normal registration never treats absence from the candidate as a deletion
+    request.  Full-set deletion belongs to an explicit migration workflow, not
+    to natural-language item authoring.
+    """
     actual = _metadata_collection_names(domain_collection, table_collection, main_filter_collection)
     prepared = {kind: [_validated_item(item, kind) for item in documents.get(kind, [])] for kind in actual}
     assemble_domain_package_from_items(prepared)
@@ -1411,9 +1692,12 @@ def replace_metadata_items(database: Any, documents: Mapping[str, Sequence[Mappi
             if not document.get('natural_text') and isinstance(existing.get(document['_id']), dict):
                 document['natural_text'] = _clean_natural_text(existing[document['_id']].get('natural_text'))
             items.append(document)
-        ids = [item['_id'] for item in items]
-        collection.delete_many({'_id': {'$nin': ids}}, session=session)
         for document in items:
+            serialization_lock = kind == 'domain' and document['section'] == 'profile'
+            if serialization_lock:
+                document['updated_at'] = datetime.now(timezone.utc).isoformat()
+            if not serialization_lock and isinstance(existing.get(document['_id']), dict) and (_validated_item(existing[document['_id']], kind) == document):
+                continue
             collection.replace_one({'_id': document['_id']}, document, upsert=True, session=session)
 make_metadata_section_documents = make_metadata_item_documents
 replace_metadata_release = replace_metadata_items
@@ -1425,7 +1709,7 @@ def assemble_domain_package_from_sections(documents: Mapping[str, Sequence[Mappi
     if environment and str(environment) != 'production':
         _fail('항목형 메타데이터의 실행 환경은 production으로 고정됩니다.')
     return package
-__all__ = ['DOMAIN_METADATA_COLLECTION', 'MAIN_FILTER_COLLECTION', 'METADATA_COLLECTIONS', 'METADATA_RELEASE_VERSION', 'METADATA_SECTION_VERSION', 'TABLE_CATALOG_COLLECTION', 'assemble_domain_package_from_items', 'assemble_domain_package_from_sections', 'load_available_domain_package_from_three_collections', 'load_domain_package_from_three_collections', 'make_metadata_item_documents', 'make_metadata_section_documents', 'replace_metadata_items', 'replace_metadata_release']
+__all__ = ['DOMAIN_METADATA_COLLECTION', 'MAIN_FILTER_COLLECTION', 'METADATA_COLLECTIONS', 'METADATA_RELEASE_VERSION', 'METADATA_SECTION_VERSION', 'TABLE_CATALOG_COLLECTION', 'assemble_domain_package_from_items', 'assemble_domain_package_from_sections', 'load_available_domain_package_from_three_collections', 'load_domain_package_from_three_collections', 'metadata_item_set_projection', 'merge_metadata_items_for_write', 'make_metadata_item_documents', 'make_metadata_section_documents', 'replace_metadata_items', 'replace_metadata_release']
 
 
 import hashlib
@@ -7320,7 +7604,7 @@ class MetadataAuthoringEngine(Component):
         MultilineInput(name="answer_prompt_extension", display_name="결과 생성 특화 프롬프트", value="", required=False, info="공통 결과 생성 프롬프트 뒤에 연결할 도메인별 표현·주의 규칙입니다."),
         MultilineInput(name="specialized_functions_json", display_name="등록 특화 함수 JSON", value="", required=False, info="Typed IR 기본 연산으로 표현하기 어려운 검토 완료 격리 함수 등록 정보입니다."),
         MultilineInput(name="output_profile_json", display_name="출력 프로필 JSON", value="", required=False, info="표시 컬럼, 표 미리보기, 다운로드 등 도메인별 기본 출력 설정입니다."),
-        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", info="save는 검증 성공 후 세 컬렉션을 원자적으로 갱신하고 validate_only는 저장하지 않습니다."),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "replace", "validate_only"], value="save", info="save는 신규 key만 허용하고 기존 key 변경을 차단합니다. replace는 동일 section+key 항목을 교체하며 validate_only는 저장하지 않습니다."),
         SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="도메인·테이블·메인필터 컬렉션을 저장할 MongoDB 연결 문자열입니다."),
         StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, info="운영 메타데이터가 저장되는 데이터베이스 이름입니다."),
         StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", info="자연어 도메인 원문과 검증된 도메인 규칙을 저장합니다."),
@@ -7851,9 +8135,15 @@ class MetadataAuthoringEngine(Component):
                     domain_id=domain_id,
                 )
         draft_llm_calls = 0
-        dry_run = bool(getattr(self, "dry_run", False)) or str(getattr(self, "mode", "save")) in {"validate_only", "prepare"}
+        requested_write_mode = str(getattr(self, "mode", "save") or "save").strip()
+        write_mode = requested_write_mode
+        if write_mode == "prepare":
+            write_mode = "validate_only"
+        explicit_dry_run = bool(getattr(self, "dry_run", False))
+        dry_run = explicit_dry_run or write_mode == "validate_only"
         active_package = None
         current_source_texts = {"domain": "", "table_catalog": "", "main_filter": ""}
+        current_documents = {"domain": [], "table_catalog": [], "main_filter": []}
         client = db = None
 
         inline_value = getattr(getattr(self, "inline_base_domain_bundle", None), "data", getattr(self, "inline_base_domain_bundle", None))
@@ -7866,9 +8156,16 @@ class MetadataAuthoringEngine(Component):
         # Read the three current documents as one release. Section patches use
         # that exact package as their base; a full-domain save uses it only for
         # monotonic revisioning and source preservation.
-        # Section validate-only runs still need the current three-collection
-        # package as their immutable base. They read it but never write.
-        if not dry_run or (kind != "domain" and active_package is None):
+        # The public validate_only mode must read MongoDB as well: otherwise it
+        # cannot report duplicates against registered items.  Legacy internal
+        # ``prepare`` calls with an inline base remain available for offline
+        # contract tests, but the import-ready flows expose validate_only.
+        if (
+            not dry_run
+            or requested_write_mode == "validate_only"
+            or (explicit_dry_run and requested_write_mode != "prepare")
+            or (kind != "domain" and active_package is None)
+        ):
             client, db = self._mongo()
             try:
                 current_documents = {
@@ -8245,16 +8542,66 @@ class MetadataAuthoringEngine(Component):
             marker = "\n\n--- 도메인 정책 변경 원문 ---\n"
             source_texts["domain"] = (source_texts["domain"] + marker + source_text).strip()
 
-        item_documents = make_metadata_item_documents(
+        candidate_item_documents = make_metadata_item_documents(
             package,
             source_texts,
             updated_at=now.isoformat(),
         )
+        merged_item_documents, write_operations = merge_metadata_items_for_write(
+            current_documents,
+            candidate_item_documents,
+            mode=write_mode,
+        )
+        conflict_count = int(write_operations.get("conflict_count") or 0)
+        conflicts = list(write_operations.pop("conflicts", []))
+
+        if conflict_count:
+            raise ContractError(
+                "metadata_policy_error",
+                "metadata_duplicate",
+                "기존 메타데이터와 중복되거나 어느 항목을 바꿀지 모호합니다. 표시된 canonical key를 확인해 주세요.",
+                {
+                    "conflicts": conflicts,
+                    "conflict_count": conflict_count,
+                    "conflicts_truncated": bool(
+                        write_operations.get("conflicts_truncated")
+                    ),
+                },
+            )
+
+        # Every persisted item remains active.  Candidate documents are merged
+        # with all existing items, then the complete catalog is compiled again
+        # before the transaction.  No unrelated key is deleted by save/replace.
+        # Existing documents must be compiled together with the candidate.
+        # On an empty store the candidate package was already compiled once,
+        # and the resolver's global candidate indexes cover the additional
+        # cross-collection duplicate rules without a redundant recompile.
+        if any(current_documents.values()):
+            merged_projection = assemble_domain_package_from_items(merged_item_documents)
+            merged_draft = runtime_catalog_v2_to_authoring_draft(
+                merged_projection["runtime_catalog"]
+            )
+            package = compile_domain_package(
+                merged_draft,
+                domain_id,
+                environment,
+                revision=revision,
+                lifecycle_status="validated",
+            )
+            package = validate_domain_package(package)
+            validate_runtime_catalog_v2(package["runtime_catalog"])
+        item_documents = merged_item_documents
         item_counts = {name: len(items) for name, items in item_documents.items()}
+        validation["write_policy"] = {
+            "mode": write_mode,
+            "identity": "typed_item_identity",
+            "preserve_unmentioned": True,
+            "operations": deepcopy(write_operations),
+        }
         candidate_hash = sha256_json(
             {
                 "contract_version": "metadata.save-candidate.v1",
-                "domain_id": domain_id,
+                "write_mode": write_mode,
                 "item_counts": item_counts,
                 "runtime_catalog_sha256": package["runtime_catalog"]["catalog_sha256"],
                 "validation": validation,
@@ -8266,6 +8613,27 @@ class MetadataAuthoringEngine(Component):
             try:
                 with client.start_session() as session:
                     with session.start_transaction():
+                        transaction_documents = {
+                            "domain": _find_items(
+                                db[collections["domain_collection"]], session=session
+                            ),
+                            "table_catalog": _find_items(
+                                db[collections["table_collection"]], session=session
+                            ),
+                            "main_filter": _find_items(
+                                db[collections["main_filter_collection"]], session=session
+                            ),
+                        }
+                        if metadata_item_set_projection(
+                            transaction_documents
+                        ) != metadata_item_set_projection(current_documents):
+                            raise ContractError(
+                                "state_conflict",
+                                "metadata_duplicate",
+                                "중복 확인 이후 기존 메타데이터가 변경되었습니다. 다시 실행해 주세요.",
+                                {"reason": "concurrent_metadata_update"},
+                                retryable=True,
+                            )
                         replace_metadata_items(
                             db,
                             item_documents,
@@ -8289,6 +8657,27 @@ class MetadataAuthoringEngine(Component):
                                 "metadata_three_collection",
                                 "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
                             )
+            except ContractError:
+                raise
+            except Exception as exc:
+                error_code = int(getattr(exc, "code", 0) or 0)
+                has_error_label = getattr(exc, "has_error_label", None)
+                transient = bool(
+                    callable(has_error_label)
+                    and (
+                        has_error_label("TransientTransactionError")
+                        or has_error_label("UnknownTransactionCommitResult")
+                    )
+                )
+                if transient or error_code in {112, 251} or "WriteConflict" in exc.__class__.__name__:
+                    raise ContractError(
+                        "state_conflict",
+                        "metadata_duplicate",
+                        "다른 작업자의 메타데이터 저장과 충돌했습니다. 다시 실행해 주세요.",
+                        {"reason": "concurrent_metadata_write"},
+                        retryable=True,
+                    ) from exc
+                raise
             finally:
                 client.close()
         catalog = package["runtime_catalog"]
@@ -8305,6 +8694,8 @@ class MetadataAuthoringEngine(Component):
             idempotent_replay=False,
             diff={
                 "authoring_kind": kind,
+                "write_mode": write_mode,
+                "write_operations": write_operations,
                 "item_counts": item_counts,
                 "datasets": len(catalog.get("datasets") or {}),
                 "fields": len(catalog.get("fields") or {}),
@@ -8352,8 +8743,8 @@ class MetadataAuthoringEngine(Component):
             # write-free validation lane and never creates pending records.
             if mode == "prepare":
                 mode = "validate_only"
-            if mode not in {"save", "validate_only"}:
-                raise ContractError("metadata_policy_error", "metadata_store_mode", "저장 모드는 save 또는 validate_only여야 합니다.")
+            if mode not in {"save", "replace", "validate_only"}:
+                raise ContractError("metadata_policy_error", "metadata_store_mode", "저장 모드는 save, replace, validate_only 중 하나여야 합니다.")
             return self._prepare()
         except ContractError as exc:
             usage = deepcopy(getattr(self, "_observed_authoring_llm_usage", None) or {})

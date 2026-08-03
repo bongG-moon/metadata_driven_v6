@@ -71,7 +71,7 @@ def test_current_authoring_flows_use_save_and_fixed_three_collections() -> None:
     assert all(item["model_names"] == [AUTHORING_GEMINI_MODEL] for item in defaults)
 
 
-def test_authoring_tweaks_expose_only_save_or_validate_only_contract() -> None:
+def test_authoring_tweaks_expose_selector_free_save_replace_validate_contract() -> None:
     sources, _, _ = _load_v6_authoring_sources(
         worker_input_dir=V6_INPUT_DIR,
         source_set_id=DEFAULT_SOURCE_SET_ID,
@@ -92,10 +92,14 @@ def test_authoring_tweaks_expose_only_save_or_validate_only_contract() -> None:
         "approval_event",
         "reference_instant",
         "reference_timezone",
+        "authoring_kind",
+        "domain_id",
+        "environment",
+        "dry_run",
     }
 
     for kind in ("domain", "dataset", "main_filter"):
-        for mode in ("save", "validate_only"):
+        for mode in ("save", "replace", "validate_only"):
             tweaks = _authoring_tweaks(kind=kind, mode=mode, **common)
             serialized_keys = {
                 key

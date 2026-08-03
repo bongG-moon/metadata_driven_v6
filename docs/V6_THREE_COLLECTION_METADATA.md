@@ -76,7 +76,9 @@ MongoDB에는 `source_sha256`, `section_sha256`, `release_manifest_sha256`, `pac
 - `01 사용 가능 메타데이터 불러오기`: URI, database, 세 collection 이름, timeout을 입력받아 모든 항목을 결합·컴파일한다. domain/environment/source mode 입력은 없다.
 - `24 채팅 메시지 표시 설정`: 결과표·적용 기준·Pandas 등가 코드·Typed Execution IR 등 표시 항목을 각각 선택한다.
 
-`mode=save`가 기본이다. `mode=validate_only` 또는 `dry_run=true`는 같은 item→catalog compile을 수행하되 MongoDB에 쓰지 않는다.
+`mode=save`가 기본이다. 신규 `section+key`는 저장하지만 기존 key의 payload가 다르면 안전하게 중단하고 `replace`를 안내한다. `mode=replace`는 동일 `section+key`만 교체하고 입력에서 언급하지 않은 기존 항목은 유지한다. `mode=validate_only`는 같은 병합·컴파일 검증을 수행하되 MongoDB에는 쓰지 않는다.
+
+등록 유형, 도메인 ID, 운영 환경, dry-run은 작업자 입력이 아니다. 등록 유형은 도메인/테이블 카탈로그/메인 필터 Flow별로 고정되며, 도메인 ID는 승인 레지스트리에서 내부적으로 읽고 운영 환경은 `production`으로 고정한다.
 
 ## 정합성과 이력
 

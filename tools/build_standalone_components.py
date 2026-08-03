@@ -3242,7 +3242,7 @@ import re
 import unicodedata
 
 from lfx.custom.custom_component.component import Component
-from lfx.io import MultilineInput, Output, StrInput
+from lfx.io import MultilineInput, Output
 from lfx.schema.data import Data
 
 
@@ -3258,7 +3258,6 @@ class AuthoringReferenceRegistry(Component):
     metadata = {"logical_stage": "authoring_reference_registry"}
     inputs = [
         MultilineInput(name="registry_json", display_name="승인 업무 어휘·원천 레지스트리 JSON", value="", required=True, info="운영자가 검토한 축약 업무 어휘와 데이터셋별 어댑터·설정·조회 식별자를 포함합니다. 비밀값이나 실행 쿼리는 입력하지 않습니다."),
-        StrInput(name="domain_id", display_name="도메인 ID", value="default", required=True, info="레지스트리가 적용되는 업무 도메인의 고유 식별자입니다. 공유 시 대상 도메인 ID로 바꿉니다."),
     ]
     outputs = [
         Output(name="reference_context", display_name="검증된 업무 어휘·원천 컨텍스트", method="load_registry", types=["Data"])
@@ -3280,7 +3279,7 @@ class AuthoringReferenceRegistry(Component):
             "semantic_templates_projection_sha256",
         }:
             raise ValueError("승인 Source 레지스트리 root 계약이 닫혀 있지 않습니다.")
-        domain_id = str(getattr(self, "domain_id", "") or "").strip()
+        domain_id = str(registry.get("domain_id") or "").strip()
         if (
             registry.get("contract_version") != "metadata.authoring.source-registry.v3"
             or registry.get("domain_id") != domain_id
@@ -3770,7 +3769,7 @@ class AuthoringPromptContextBuilder(Component):
         DataInput(name="approved_reference_context", display_name="승인 원천 참조 컨텍스트", required=False, info="LLM에는 승인 데이터셋 ID allowlist와 hash만 제공하고, 실행 참조는 엔진이 별도 입력에서 봉인하는 운영자 승인 정보입니다."),
         BoolInput(name="bootstrap_fragment", display_name="초기 등록 분할 제안", value=False, advanced=True, info="도메인 최초 등록에서 원문 종류별 작은 폐쇄형 조각만 제안해 모델 응답 크기를 제한합니다."),
         DropdownInput(name="authoring_kind", display_name="등록 유형", options=["domain", "dataset", "main_filter", "domain_policy"], value="domain", info="도메인, 데이터셋, 주요 필터, 관리자 정책 중 이번에 등록할 항목을 선택합니다."),
-        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", info="save는 검증된 결과를 세 컬렉션에 저장하고 validate_only는 저장 없이 컴파일·검증만 수행합니다."),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "replace", "validate_only"], value="save", info="save는 신규 key만 허용하고, replace는 동일 section+key를 교체하며, validate_only는 저장 없이 검증합니다."),
         DropdownInput(name="source_grounding_mode", display_name="자연어 입력 해석 방식", options=["freeform_llm", "explicit_inventory"], value="freeform_llm", advanced=True, info="일반 작업자 입력은 freeform_llm을 사용합니다. explicit_inventory는 관리자 검증 경로 전용입니다."),
         StrInput(name="domain_id", display_name="도메인 ID", value="default", info="등록 대상 업무 도메인의 고유 식별자입니다. 공유 시 대상 도메인 ID로 바꿉니다."),
         StrInput(name="environment", display_name="운영 환경", value="production", info="메타데이터 리비전을 구분할 운영 환경 이름입니다."),
@@ -3786,7 +3785,7 @@ class AuthoringPromptContextBuilder(Component):
         # longer exposes prepare and this alias never creates pending state.
         if mode == "prepare":
             mode = "validate_only"
-        if kind not in {"domain", "dataset", "main_filter", "domain_policy"} or mode not in {"save", "validate_only"}:
+        if kind not in {"domain", "dataset", "main_filter", "domain_policy"} or mode not in {"save", "replace", "validate_only"}:
             raise ContractError("metadata_schema_error", "metadata_prompt_context", "등록 유형 또는 실행 모드가 유효하지 않습니다.")
         source_text = str(getattr(getattr(self, "input_message", None), "text", getattr(self, "input_message", "")) or "").strip()
         if not source_text or len(source_text.encode("utf-8")) > 65536:
@@ -7657,7 +7656,7 @@ class MetadataAuthoringEngine(Component):
         MultilineInput(name="answer_prompt_extension", display_name="결과 생성 특화 프롬프트", value="", required=False, info="공통 결과 생성 프롬프트 뒤에 연결할 도메인별 표현·주의 규칙입니다."),
         MultilineInput(name="specialized_functions_json", display_name="등록 특화 함수 JSON", value="", required=False, info="Typed IR 기본 연산으로 표현하기 어려운 검토 완료 격리 함수 등록 정보입니다."),
         MultilineInput(name="output_profile_json", display_name="출력 프로필 JSON", value="", required=False, info="표시 컬럼, 표 미리보기, 다운로드 등 도메인별 기본 출력 설정입니다."),
-        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", info="save는 검증 성공 후 세 컬렉션을 원자적으로 갱신하고 validate_only는 저장하지 않습니다."),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "replace", "validate_only"], value="save", info="save는 신규 key만 허용하고 기존 key 변경을 차단합니다. replace는 동일 section+key 항목을 교체하며 validate_only는 저장하지 않습니다."),
         SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, info="도메인·테이블·메인필터 컬렉션을 저장할 MongoDB 연결 문자열입니다."),
         StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, info="운영 메타데이터가 저장되는 데이터베이스 이름입니다."),
         StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", info="자연어 도메인 원문과 검증된 도메인 규칙을 저장합니다."),
@@ -8377,9 +8376,15 @@ class MetadataAuthoringEngine(Component):
                     domain_id=domain_id,
                 )
         draft_llm_calls = 0
-        dry_run = bool(getattr(self, "dry_run", False)) or str(getattr(self, "mode", "save")) in {"validate_only", "prepare"}
+        requested_write_mode = str(getattr(self, "mode", "save") or "save").strip()
+        write_mode = requested_write_mode
+        if write_mode == "prepare":
+            write_mode = "validate_only"
+        explicit_dry_run = bool(getattr(self, "dry_run", False))
+        dry_run = explicit_dry_run or write_mode == "validate_only"
         active_package = None
         current_source_texts = {"domain": "", "table_catalog": "", "main_filter": ""}
+        current_documents = {"domain": [], "table_catalog": [], "main_filter": []}
         client = db = None
 
         inline_value = getattr(getattr(self, "inline_base_domain_bundle", None), "data", getattr(self, "inline_base_domain_bundle", None))
@@ -8392,9 +8397,16 @@ class MetadataAuthoringEngine(Component):
         # Read the three current documents as one release. Section patches use
         # that exact package as their base; a full-domain save uses it only for
         # monotonic revisioning and source preservation.
-        # Section validate-only runs still need the current three-collection
-        # package as their immutable base. They read it but never write.
-        if not dry_run or (kind != "domain" and active_package is None):
+        # The public validate_only mode must read MongoDB as well: otherwise it
+        # cannot report duplicates against registered items.  Legacy internal
+        # ``prepare`` calls with an inline base remain available for offline
+        # contract tests, but the import-ready flows expose validate_only.
+        if (
+            not dry_run
+            or requested_write_mode == "validate_only"
+            or (explicit_dry_run and requested_write_mode != "prepare")
+            or (kind != "domain" and active_package is None)
+        ):
             client, db = self._mongo()
             try:
                 current_documents = {
@@ -8771,16 +8783,66 @@ class MetadataAuthoringEngine(Component):
             marker = "\n\n--- 도메인 정책 변경 원문 ---\n"
             source_texts["domain"] = (source_texts["domain"] + marker + source_text).strip()
 
-        item_documents = make_metadata_item_documents(
+        candidate_item_documents = make_metadata_item_documents(
             package,
             source_texts,
             updated_at=now.isoformat(),
         )
+        merged_item_documents, write_operations = merge_metadata_items_for_write(
+            current_documents,
+            candidate_item_documents,
+            mode=write_mode,
+        )
+        conflict_count = int(write_operations.get("conflict_count") or 0)
+        conflicts = list(write_operations.pop("conflicts", []))
+
+        if conflict_count:
+            raise ContractError(
+                "metadata_policy_error",
+                "metadata_duplicate",
+                "기존 메타데이터와 중복되거나 어느 항목을 바꿀지 모호합니다. 표시된 canonical key를 확인해 주세요.",
+                {
+                    "conflicts": conflicts,
+                    "conflict_count": conflict_count,
+                    "conflicts_truncated": bool(
+                        write_operations.get("conflicts_truncated")
+                    ),
+                },
+            )
+
+        # Every persisted item remains active.  Candidate documents are merged
+        # with all existing items, then the complete catalog is compiled again
+        # before the transaction.  No unrelated key is deleted by save/replace.
+        # Existing documents must be compiled together with the candidate.
+        # On an empty store the candidate package was already compiled once,
+        # and the resolver's global candidate indexes cover the additional
+        # cross-collection duplicate rules without a redundant recompile.
+        if any(current_documents.values()):
+            merged_projection = assemble_domain_package_from_items(merged_item_documents)
+            merged_draft = runtime_catalog_v2_to_authoring_draft(
+                merged_projection["runtime_catalog"]
+            )
+            package = compile_domain_package(
+                merged_draft,
+                domain_id,
+                environment,
+                revision=revision,
+                lifecycle_status="validated",
+            )
+            package = validate_domain_package(package)
+            validate_runtime_catalog_v2(package["runtime_catalog"])
+        item_documents = merged_item_documents
         item_counts = {name: len(items) for name, items in item_documents.items()}
+        validation["write_policy"] = {
+            "mode": write_mode,
+            "identity": "typed_item_identity",
+            "preserve_unmentioned": True,
+            "operations": deepcopy(write_operations),
+        }
         candidate_hash = sha256_json(
             {
                 "contract_version": "metadata.save-candidate.v1",
-                "domain_id": domain_id,
+                "write_mode": write_mode,
                 "item_counts": item_counts,
                 "runtime_catalog_sha256": package["runtime_catalog"]["catalog_sha256"],
                 "validation": validation,
@@ -8792,6 +8854,27 @@ class MetadataAuthoringEngine(Component):
             try:
                 with client.start_session() as session:
                     with session.start_transaction():
+                        transaction_documents = {
+                            "domain": _find_items(
+                                db[collections["domain_collection"]], session=session
+                            ),
+                            "table_catalog": _find_items(
+                                db[collections["table_collection"]], session=session
+                            ),
+                            "main_filter": _find_items(
+                                db[collections["main_filter_collection"]], session=session
+                            ),
+                        }
+                        if metadata_item_set_projection(
+                            transaction_documents
+                        ) != metadata_item_set_projection(current_documents):
+                            raise ContractError(
+                                "state_conflict",
+                                "metadata_duplicate",
+                                "중복 확인 이후 기존 메타데이터가 변경되었습니다. 다시 실행해 주세요.",
+                                {"reason": "concurrent_metadata_update"},
+                                retryable=True,
+                            )
                         replace_metadata_items(
                             db,
                             item_documents,
@@ -8815,6 +8898,27 @@ class MetadataAuthoringEngine(Component):
                                 "metadata_three_collection",
                                 "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
                             )
+            except ContractError:
+                raise
+            except Exception as exc:
+                error_code = int(getattr(exc, "code", 0) or 0)
+                has_error_label = getattr(exc, "has_error_label", None)
+                transient = bool(
+                    callable(has_error_label)
+                    and (
+                        has_error_label("TransientTransactionError")
+                        or has_error_label("UnknownTransactionCommitResult")
+                    )
+                )
+                if transient or error_code in {112, 251} or "WriteConflict" in exc.__class__.__name__:
+                    raise ContractError(
+                        "state_conflict",
+                        "metadata_duplicate",
+                        "다른 작업자의 메타데이터 저장과 충돌했습니다. 다시 실행해 주세요.",
+                        {"reason": "concurrent_metadata_write"},
+                        retryable=True,
+                    ) from exc
+                raise
             finally:
                 client.close()
         catalog = package["runtime_catalog"]
@@ -8831,6 +8935,8 @@ class MetadataAuthoringEngine(Component):
             idempotent_replay=False,
             diff={
                 "authoring_kind": kind,
+                "write_mode": write_mode,
+                "write_operations": write_operations,
                 "item_counts": item_counts,
                 "datasets": len(catalog.get("datasets") or {}),
                 "fields": len(catalog.get("fields") or {}),
@@ -9235,8 +9341,8 @@ class MetadataAuthoringEngine(Component):
             # write-free validation lane and never creates pending records.
             if mode == "prepare":
                 mode = "validate_only"
-            if mode not in {"save", "validate_only"}:
-                raise ContractError("metadata_policy_error", "metadata_store_mode", "저장 모드는 save 또는 validate_only여야 합니다.")
+            if mode not in {"save", "replace", "validate_only"}:
+                raise ContractError("metadata_policy_error", "metadata_store_mode", "저장 모드는 save, replace, validate_only 중 하나여야 합니다.")
             return self._prepare()
         except ContractError as exc:
             usage = deepcopy(getattr(self, "_observed_authoring_llm_usage", None) or {})
@@ -9299,10 +9405,17 @@ class AuthoringMessagePresentation(Component):
     def build_message(self) -> Message:
         raw = getattr(getattr(self, "response", None), "data", getattr(self, "response", None))
         response = deepcopy(validate_authoring_response_hash(raw)) if isinstance(raw, dict) else {}
+        diff = response.get("diff") if isinstance(response.get("diff"), dict) else {}
+        operations = diff.get("write_operations") if isinstance(diff.get("write_operations"), dict) else {}
+        operation_summary = (
+            f"- 처리 결과: 신규 {int(operations.get('inserted') or 0)} / "
+            f"교체 {int(operations.get('replaced') or 0)} / "
+            f"동일 {int(operations.get('unchanged') or 0)}"
+        )
         if response.get("status") == "ok" and response.get("stage") == "validated":
-            text = "### 메타데이터 검증 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Revision: {response.get('revision', '')}\n- MongoDB 저장: 안 함"
+            text = "### 메타데이터 검증 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- MongoDB 저장: 안 함"
         elif response.get("status") == "ok":
-            text = "### 메타데이터 저장 완료\n\n" + f"- Candidate: `{response.get('candidate_id', '')}`\n- Revision: {response.get('revision', '')}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터"
+            text = "### 메타데이터 저장 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터"
         elif response.get("status") == "needs_clarification":
             clarification = response.get("clarification") if isinstance(response.get("clarification"), dict) else {}
             questions = [str(item) for item in (clarification.get("questions") or [])[:3]]
@@ -9312,6 +9425,25 @@ class AuthoringMessagePresentation(Component):
         else:
             error = response.get("error") if isinstance(response.get("error"), dict) else {}
             text = "### 메타데이터 등록 실패\n\n" + f"- Code: `{error.get('code', 'metadata_authoring_failed')}`\n- Message: {error.get('message', '')}"
+            details = error.get("details") if isinstance(error.get("details"), dict) else {}
+            conflicts = details.get("conflicts") if isinstance(details.get("conflicts"), list) else []
+            conflict_lines = []
+            for item in conflicts[:3]:
+                if not isinstance(item, dict):
+                    continue
+                candidates = item.get("duplicate_candidates") if isinstance(item.get("duplicate_candidates"), list) else []
+                candidate_keys = ", ".join(
+                    str(candidate.get("key") or "")
+                    for candidate in candidates[:3]
+                    if isinstance(candidate, dict) and str(candidate.get("key") or "")
+                )
+                suffix = f" → 기존 후보 {candidate_keys}" if candidate_keys else ""
+                conflict_lines.append(
+                    f"- 중복 확인: {item.get('collection', '')}/{item.get('section', '')}/{item.get('key', '')} "
+                    f"({item.get('reason', '')}){suffix}"
+                )
+            if conflict_lines:
+                text += "\n" + "\n".join(conflict_lines)
         message = Message(
             text=text,
             sender="Machine",
@@ -9474,7 +9606,12 @@ class SimpleMetadataDraftGenerator(Component):
     display_name = "자연어 메타데이터 변환"
     description = "자유형 자연어와 외부 공통·특화 프롬프트를 묶어 Gemini를 정확히 한 번 호출하고 검증용 등록 컨텍스트를 만듭니다."
     icon = "wand-sparkles"
-    metadata = {"logical_stage": "simple_metadata_draft", "automatic_retry_count": 0}
+    metadata = {
+        "logical_stage": "simple_metadata_draft",
+        "automatic_retry_count": 0,
+        "authoring_kind": "__SIMPLE_AUTHORING_KIND__",
+    }
+    _authoring_kind = "__SIMPLE_AUTHORING_KIND__"
 
     inputs = [
         MessageInput(name="input_message", display_name="자연어 메타데이터 입력", required=True, info="작업자가 형식 제약 없이 작성한 자연어 설명입니다."),
@@ -9482,28 +9619,25 @@ class SimpleMetadataDraftGenerator(Component):
         MessageInput(name="specialized_prompt_message", display_name="업무 특화 등록 프롬프트", required=False, info="현재 업무에서만 사용하는 용어와 해석 규칙입니다."),
         HandleInput(name="language_model", display_name="등록 변환 언어 모델", input_types=["LanguageModel"], required=True),
         MultilineInput(name="registry_json", display_name="승인 업무 어휘·원천 레지스트리", value="", required=True, advanced=True, info="Flow 생성 시 검토된 레지스트리가 자동 주입됩니다."),
-        DropdownInput(name="authoring_kind", display_name="등록 항목", options=["domain", "dataset", "main_filter"], value="domain", advanced=True),
-        StrInput(name="domain_id", display_name="도메인 ID", value="manufacturing", advanced=True),
-        StrInput(name="environment", display_name="운영 환경", value="production", advanced=True),
     ]
     outputs = [
         Output(name="authoring_context", display_name="검증 대기 등록 컨텍스트", method="build_authoring_context", types=["Data"])
     ]
 
     def build_authoring_context(self) -> Data:
-        kind = str(getattr(self, "authoring_kind", "domain") or "domain").strip()
+        kind = str(self._authoring_kind or "").strip()
         if kind not in {"domain", "dataset", "main_filter"}:
-            raise ValueError("등록 항목은 domain, dataset, main_filter 중 하나여야 합니다.")
-        domain_id = str(getattr(self, "domain_id", "") or "").strip()
-        environment = str(getattr(self, "environment", "") or "").strip()
+            raise ValueError("Flow에 고정된 등록 항목이 유효하지 않습니다.")
         source_text = str(
             getattr(getattr(self, "input_message", None), "text", getattr(self, "input_message", "")) or ""
         ).strip()
 
         registry = AuthoringReferenceRegistry()
         registry.registry_json = str(getattr(self, "registry_json", "") or "")
-        registry.domain_id = domain_id
         reference_context = registry.load_registry()
+        reference_payload = deepcopy(getattr(reference_context, "data", reference_context))
+        domain_id = str(reference_payload.get("domain_id") or "").strip()
+        environment = "production"
 
         context_builder = AuthoringPromptContextBuilder()
         context_builder.input_message = getattr(self, "input_message", None)
@@ -9557,17 +9691,19 @@ class SimpleMetadataAuthoringEngine(Component):
 
     inputs = [
         DataInput(name="authoring_context", display_name="검증 대기 등록 컨텍스트", required=True),
-        DropdownInput(name="authoring_kind", display_name="등록 항목", options=["domain", "dataset", "main_filter"], value="domain", advanced=True),
-        StrInput(name="domain_id", display_name="도메인 ID", value="manufacturing", advanced=True),
-        StrInput(name="environment", display_name="운영 환경", value="production", advanced=True),
-        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", advanced=True),
+        DropdownInput(
+            name="mode",
+            display_name="저장 모드",
+            options=["save", "replace", "validate_only"],
+            value="save",
+            info="save는 신규 key만 저장하고 기존 key 변경은 차단합니다. replace는 같은 section+key를 교체하며, validate_only는 저장 없이 검증합니다.",
+        ),
         SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, advanced=True, info="빈 값이면 MONGODB_URI 환경변수를 사용합니다."),
         StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, advanced=True, info="빈 값이면 MONGODB_DATABASE 환경변수를 사용합니다."),
         StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", advanced=True),
         StrInput(name="table_collection", display_name="테이블 카탈로그 컬렉션", value="agent_v6_table_catalog", advanced=True),
         StrInput(name="main_filter_collection", display_name="메인 필터 컬렉션", value="agent_v6_main_filter", advanced=True),
         IntInput(name="mongo_timeout_ms", display_name="MongoDB 제한 시간(ms)", value=5000, advanced=True),
-        BoolInput(name="dry_run", display_name="저장 없는 검증", value=False, advanced=True),
     ]
     outputs = [Output(name="response", display_name="메타데이터 등록 결과", method="run_authoring", types=["Data"])]
 
@@ -9575,16 +9711,24 @@ class SimpleMetadataAuthoringEngine(Component):
         raw = getattr(getattr(self, "authoring_context", None), "data", getattr(self, "authoring_context", None))
         if not isinstance(raw, dict) or raw.get("contract_version") != "metadata.simple-authoring-context.v1":
             raise ValueError("자연어 메타데이터 변환 노드의 등록 컨텍스트가 필요합니다.")
-        kind = str(getattr(self, "authoring_kind", "domain") or "domain").strip()
-        domain_id = str(getattr(self, "domain_id", "") or "").strip()
-        environment = str(getattr(self, "environment", "") or "").strip()
+        kind = str(raw.get("authoring_kind") or "").strip()
+        domain_id = str(raw.get("domain_id") or "").strip()
+        environment = str(raw.get("environment") or "").strip()
+        reference_context = raw.get("approved_reference_context")
+        registered_domain_id = str(
+            reference_context.get("domain_id") if isinstance(reference_context, dict) else ""
+        ).strip()
         if (
             kind not in {"domain", "dataset", "main_filter"}
-            or raw.get("authoring_kind") != kind
-            or raw.get("domain_id") != domain_id
-            or raw.get("environment") != environment
+            or not domain_id
+            or domain_id != registered_domain_id
+            or environment != "production"
         ):
-            raise ValueError("변환 노드와 저장 노드의 등록 항목·도메인·운영 환경 설정이 일치하지 않습니다.")
+            raise ValueError("등록 Flow의 내부 유형 또는 승인 레지스트리 식별 정보가 올바르지 않습니다.")
+
+        mode = str(getattr(self, "mode", "save") or "save").strip()
+        if mode not in {"save", "replace", "validate_only"}:
+            raise ValueError("저장 모드는 save, replace, validate_only 중 하나여야 합니다.")
 
         engine = MetadataAuthoringEngine()
         engine.input_message = str(raw.get("source_text") or "")
@@ -9598,14 +9742,14 @@ class SimpleMetadataAuthoringEngine(Component):
         engine.domain_id = domain_id
         engine.environment = environment
         engine.revision_policy = "auto_next"
-        engine.mode = str(getattr(self, "mode", "save") or "save")
+        engine.mode = mode
         engine.mongo_uri = getattr(self, "mongo_uri", "")
         engine.mongo_database = str(getattr(self, "mongo_database", "") or "")
         engine.domain_collection = str(getattr(self, "domain_collection", "") or "")
         engine.table_collection = str(getattr(self, "table_collection", "") or "")
         engine.main_filter_collection = str(getattr(self, "main_filter_collection", "") or "")
         engine.mongo_timeout_ms = int(getattr(self, "mongo_timeout_ms", 5000) or 5000)
-        engine.dry_run = bool(getattr(self, "dry_run", False))
+        engine.dry_run = mode == "validate_only"
         result = engine.run_authoring()
         self.status = str(getattr(engine, "status", "메타데이터 검증 완료") or "메타데이터 검증 완료")
         return result
@@ -9649,8 +9793,14 @@ def _embedded_module_body(source: str) -> str:
 
 
 def _simple_authoring_pipeline_source(
-    catalog: dict[str, Any], schemas: dict[str, dict[str, Any]], manifest: dict[str, Any]
+    catalog: dict[str, Any],
+    schemas: dict[str, dict[str, Any]],
+    manifest: dict[str, Any],
+    *,
+    authoring_kind: str,
 ) -> str:
+    if authoring_kind not in {"domain", "dataset", "main_filter"}:
+        raise GenerationError(f"unsupported simple authoring kind: {authoring_kind}")
     context_source = _authoring_prompt_context_source(catalog, schemas, manifest)
     registry_source = _analysis_phase_source(
         "AuthoringReferenceRegistry",
@@ -9667,7 +9817,9 @@ def _simple_authoring_pipeline_source(
     blocks = [
         _header(manifest, "SimpleMetadataDraftGenerator"),
         _embedded_module_imports(*sources),
-        SIMPLE_AUTHORING_PIPELINE_COMPONENT,
+        SIMPLE_AUTHORING_PIPELINE_COMPONENT.replace(
+            "__SIMPLE_AUTHORING_KIND__", authoring_kind
+        ),
         *(_embedded_module_body(source) for source in sources),
     ]
     return "\n\n".join(block.strip() for block in blocks if block.strip()) + "\n"
@@ -10229,8 +10381,14 @@ def build_components(*, check: bool = False) -> list[Path]:
         OUTPUT_ROOT / "metadata_authoring" / "authoring_prompt_context_builder.py": _authoring_prompt_context_source(
             catalog, schemas, manifest
         ),
-        OUTPUT_ROOT / "metadata_authoring" / "simple_metadata_draft_generator.py": _simple_authoring_pipeline_source(
-            catalog, schemas, manifest
+        OUTPUT_ROOT / "metadata_authoring" / "03_domain_metadata_draft_generator.py": _simple_authoring_pipeline_source(
+            catalog, schemas, manifest, authoring_kind="domain"
+        ),
+        OUTPUT_ROOT / "metadata_authoring" / "03_dataset_metadata_draft_generator.py": _simple_authoring_pipeline_source(
+            catalog, schemas, manifest, authoring_kind="dataset"
+        ),
+        OUTPUT_ROOT / "metadata_authoring" / "03_main_filter_metadata_draft_generator.py": _simple_authoring_pipeline_source(
+            catalog, schemas, manifest, authoring_kind="main_filter"
         ),
         OUTPUT_ROOT / "metadata_authoring" / "00_metadata_authoring_engine.py": _authoring_source(
             catalog, schemas, manifest

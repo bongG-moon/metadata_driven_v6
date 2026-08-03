@@ -229,7 +229,7 @@ v5 호환 surface는 다음과 같이 이전한다.
 - optional explicit-inventory Main Filter도 Prompt Template/Composer/envelope/LLM은 0회
 - JSON Schema와 semantic·dependency·security lint가 실행 가능성을 검증한다. 누락·모호한 정보는 포맷 재작성 요구가 아니라 draft/candidate 없는 `status=needs_clarification`으로 반환하며, 질문은 내부 ID나 타입 대신 작업자가 고를 수 있는 쉬운 업무 label을 사용한다.
 - dependency closure 후 전체 runtime catalog를 검증하고 MongoDB 저장용 항목 문서로 분할
-- `validate_only`는 write 0건, `save`는 노드에 지정된 3컬렉션을 하나의 transaction으로 교체
+- `validate_only`는 실제 current item을 읽고 write 0건으로 중복·compile 결과를 반환한다. `save`는 신규 typed identity만 추가하고 `replace`는 같은 exact `section+key`만 교체한다. 다른 key의 의미 중복은 typed reference 보호를 위해 canonical key를 안내하고 차단한다. 세 모드 모두 언급되지 않은 기존 항목을 보존한다.
 - raw source/hash와 compiled runtime record 분리
 
 ### FR-09. Observability
@@ -326,7 +326,7 @@ Turn 2:
 3. Main filter authoring
 4. Domain Policy authoring
 
-네 Flow는 같은 typed 검증과 `save|validate_only` 저장 경계를 공유하지만 변경 가능한 metadata 구간은 다음처럼 분리한다.
+네 Flow는 같은 typed 검증과 `save|replace|validate_only` 저장 경계를 공유하지만 변경 가능한 metadata 구간은 다음처럼 분리한다.
 
 ```text
 Free-form Raw Text Input
@@ -398,10 +398,10 @@ Dataset은 자유 연결 정보 대신 다음 versioned reference를 revision/ha
 
 ### 6.3 Langflow 1.9.2 저장 프로토콜
 
-현재 기본 등록 Flow는 `save`와 `validate_only` 두 모드만 제공한다. 두 모드 모두 자연어 TXT를 LLM으로 typed 등록 IR로 바꾼 뒤 동일한 schema, 참조, hash 검증을 수행한다.
+현재 기본 등록 Flow는 `save`, `replace`, `validate_only` 세 모드를 제공한다. 세 모드 모두 자연어 TXT를 LLM으로 typed 등록 IR로 바꾼 뒤 동일한 schema·참조·중복 검증을 수행한다. 중복 판정은 `04 검증 및 저장` 내부의 결정론적 substage이므로 새 노드, 새 LLM 호출, 새 MongoDB 컬렉션이 필요 없다. `save`는 변경 충돌을 차단하고, `replace`는 동일 exact `section+key`를 명시적으로 교체하며, `validate_only`는 MongoDB를 읽되 저장하지 않는다.
 
-- `validate_only`: 변환·컴파일·검증 결과만 반환하고 MongoDB를 변경하지 않는다.
-- `save`: 검증된 도메인, 테이블 카탈로그, 메인필터 항목 문서를 노드에 지정된 서로 다른 3개 컬렉션에 transaction으로 교체한다.
+- `validate_only`: 변환·컴파일·기존 항목 중복 검증 결과만 반환하고 MongoDB를 변경하지 않는다.
+- `save`: 검증된 도메인, 테이블 카탈로그, 메인필터 항목 문서를 노드에 지정된 서로 다른 3개 컬렉션에 transaction으로 upsert한다. transaction 시작 뒤 current snapshot이 달라졌으면 동시 변경 충돌로 중단하며, 언급되지 않은 item은 삭제하지 않는다.
 
 별도의 pending collection이나 active pointer는 사용하지 않는다. 각 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. 분석 Flow의 selector-free loader는 세 컬렉션의 항목 전체를 결합한 뒤 Domain Package를 메모리에서 다시 컴파일한다. 필수 항목 누락, 중복 key, 지원하지 않는 section, typed payload 오류가 있으면 저장 결과를 사용하지 않는다.
 

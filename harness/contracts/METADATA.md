@@ -640,10 +640,21 @@ Langflow 등록 Flow는 자연어 해석과 결정론적 검증이 성공한 한
 2. Compiler가 `source-registry.v3`의 hash-pinned template/descriptor를 결합하고 전체 package schema, semantic lint, dependency/security closure, section ownership을 검증한다. 실패 또는 clarification이면 MongoDB write는 0건이다.
 3. 검증된 runtime catalog를 도메인 규칙, 데이터셋, alias 등 실제 등록 항목 단위로 분할한다.
 4. 각 MongoDB 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. 작업자가 새 원문을 주지 않은 기존 항목은 저장된 `natural_text`를 보존한다.
-5. MongoDB transaction에서 세 collection의 stale 항목을 제거하고 현재 item set을 `replace_one(upsert=true)`한다. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 저장 전 runtime catalog와 동치인지 확인한다.
-6. `mode=validate_only` 또는 `dry_run=true`이면 같은 item→catalog 컴파일 검증을 수행하지만 MongoDB write는 하지 않는다.
+5. MongoDB transaction을 시작한 뒤 중복 판정에 사용한 current item snapshot과 실제 transaction snapshot이 같은지 먼저 비교한다. 다르면 동시 변경 충돌로 중단하고 재실행을 요구한다. 일치하면 실제 변경 항목만 `_id` 단위 `replace_one(upsert=true)`로 반영하되, 유일한 domain profile 문서는 모든 등록 transaction이 함께 쓰는 serialization boundary로 갱신한다. 서로 다른 key를 동시에 바꾸는 두 transaction도 이 공통 profile write에서 MongoDB WriteConflict가 발생하며 retryable `state_conflict`로 변환된다. 언급되지 않은 문서나 중복 검사 뒤 추가된 문서를 `delete_many`로 제거하지 않는다. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 저장 전 runtime catalog와 동치인지 확인한다.
+6. `mode=save`는 신규 typed identity만 저장하고 같은 exact key의 payload가 다르면 `replace` 선택을 요구한다. `mode=replace`는 동일 exact key만 교체하며, 다른 key로 발견된 의미 중복은 참조 무결성을 위해 자동 rekey하지 않고 기존 canonical key를 안내하며 차단한다. `mode=validate_only`도 MongoDB current item을 읽어 같은 중복 판정과 replace projection 검증을 수행하지만 write는 하지 않는다. 세 모드 모두 언급되지 않은 항목을 보존한다.
+
+### 13.1 결정론적 중복 판정
+
+- 중복 판정은 `04 검증 및 저장` 컴포넌트 안의 순수 결정론적 단계다. 추가 LLM 호출과 별도 중복 관리 컬렉션은 사용하지 않는다.
+- `natural_text`와 `updated_at`은 중복 identity에 사용하지 않는다. LLM이 만든 typed payload만 비교하며 텍스트 정규화는 Unicode NFKC, 앞뒤 공백 제거, 연속 공백 축약, casefold까지만 수행한다. `/`, `-`, 구두점은 삭제하지 않는다.
+- 모든 항목은 같은 collection·section 안에서 exact key와 정규화 key를 먼저 비교한다. 도메인 map 항목은 section별 typed ID, `legacy_identity`, generic 값이 아닌 표시명, 명시적 alias를 추가 비교한다. 같은 alias가 둘 이상의 기존 항목과 겹치면 모호성 오류로 닫힌다.
+- 데이터셋은 같은 `query_ref` 또는 source type/adapter, config, SQL·경로·endpoint, parameter, field binding, time scope를 포함한 전체 source descriptor가 같을 때만 강한 의미 중복으로 본다. `config_ref`나 family만 같은 것은 허용한다. SQL은 주석과 Oracle optimizer hint를 포함한 원문 그대로 비교하며 저장 문자열을 바꾸지 않는다.
+- alias card는 세 컬렉션을 합친 전역 namespace를 사용하며 `(target_type, target_key)`가 canonical identity다. 같은 alias key가 provenance 변경으로 다른 컬렉션에도 남으면 자동 이동·덮어쓰지 않고 migration-required 충돌로 차단한다. 같은 target type에서 동일 표현이 다른 target을 가리키면 모호성 오류다. 서로 다른 target type에서 `UPH`, `3DS`, `생산달성률` 같은 표현을 의도적으로 재사용하는 것은 허용한다.
+- 결과는 신규·교체·동일 건수와 bounded `operation_by_key`, 안전한 `duplicate_candidates`만 반환한다. SQL, URL, source configuration, credential은 충돌 응답에 포함하지 않는다.
 
 Runtime loader는 selector나 active pointer 없이 세 collection의 항목 전체를 읽는다. 도메인 프로필은 `section=profile` 문서 하나여야 하고 데이터셋 collection은 비어 있으면 안 된다. 중복 key, 지원하지 않는 section, 잘못된 typed payload, dependency 불일치가 있으면 package를 제공하지 않는다. `domain_id`, environment, revision, contract, package hash는 MongoDB 필드가 아니라 실행 시 생성되는 내부 값이다. 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 change stream·백업 또는 별도 운영 감사 시스템을 사용한다.
+
+세 등록 Flow의 유형은 Flow별 standalone 컴포넌트에 고정되어 작업자 입력으로 노출하지 않는다. `domain_id`는 Flow에 봉인된 승인 레지스트리에서 읽고 environment는 내부 `production`으로 고정한다.
 
 ## 14. v5 migration 원칙
 

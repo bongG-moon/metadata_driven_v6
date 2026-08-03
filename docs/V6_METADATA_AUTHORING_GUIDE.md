@@ -272,7 +272,9 @@ Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 
 ## 8. Save와 validate-only
 
-기본은 `mode=save`다. `mode=validate_only` 또는 `dry_run=true`는 같은 item→catalog compile 검증을 수행하지만 MongoDB에는 쓰지 않는다.
+기본은 `mode=save`다. 신규 typed identity만 저장하며 기존 exact key의 payload가 다르면 중단한다. 기존 exact key 항목을 바꾸려면 `mode=replace`를 선택한다. 다른 key로 발견된 의미 중복은 `replace`에서도 자동 교체하지 않고 기존 canonical key를 안내한다. 자동 rekey는 metric·recipe·alias 등의 typed 참조를 깨뜨릴 수 있기 때문이다. `mode=validate_only`도 실제 MongoDB 항목을 읽어 동일한 중복 판정과 item→catalog compile 검증을 수행하지만 쓰지는 않는다. 등록 유형·도메인 ID·운영 환경·dry-run은 작업자 입력으로 노출하지 않는다.
+
+중복 검사는 Gemini 호출 뒤 `04 검증 및 저장` 내부에서 실행되는 결정론적 단계다. 추가 LLM 호출과 추가 MongoDB 컬렉션은 없다. 도메인은 같은 section의 정규화 key·typed ID·표시명·명시적 alias, 테이블 카탈로그는 `query_ref` 또는 전체 source descriptor, 메인 필터는 같은 `target_type` 안의 target·표현을 비교한다. alias key는 세 컬렉션 전역에서 유일해야 하므로 provenance 변경으로 다른 컬렉션에 이동한 항목은 기존 문서를 자동 삭제하지 않고 migration-required 충돌로 차단한다. `config_ref`만 같은 데이터셋과 서로 다른 `target_type`의 동일 표현은 정상 등록으로 허용한다. 중복 결과에는 key와 이유만 표시하고 SQL·URL·접속 설정은 표시하지 않는다.
 
 기본 full-domain save 순서는 다음과 같다.
 
@@ -310,9 +312,10 @@ Compiler는 저장 전에 전체 runtime catalog를 검증한다. 응답의 `can
 1. Domain Package를 도메인 규칙, 데이터셋, alias 등 실제 등록 항목 단위로 나눈다.
 2. 각 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다.
 3. `domain_id`, environment, revision, contract, release, manifest, hash는 MongoDB에 저장하지 않는다.
-4. MongoDB transaction에서 세 collection의 current item set을 `replace_one(upsert=true)`로 교체한다.
-5. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 원래 runtime catalog와 동치인지 확인한다.
-6. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 같은 item compile을 수행한다. domain/environment/source mode는 UI에 없다.
+4. MongoDB transaction 안에서 중복 판정 때 읽은 snapshot과 현재 snapshot이 같은지 먼저 확인한다. 달라졌으면 다른 작업자의 동시 등록으로 보고 저장하지 않은 채 재실행을 요청한다.
+5. 검증된 실제 변경 item만 `_id` 단위 `replace_one(upsert=true)`로 반영한다. 단, 모든 등록 transaction은 유일한 domain profile 문서도 함께 갱신해 서로 다른 key의 동시 저장까지 MongoDB WriteConflict로 직렬화한다. 따라서 profile의 `updated_at`은 profile 내용만의 수정 시각이 아니라 마지막 메타데이터 저장 transaction 시각이다. 충돌은 retryable `state_conflict`로 반환한다. 입력에서 언급하지 않은 기존 item과 동시 등록 item은 삭제하지 않는다.
+6. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 원래 runtime catalog와 동치인지 확인한다.
+7. 하나라도 다르면 transaction 전체를 중단한다. `01 사용 가능 메타데이터 불러오기`는 MongoDB URI·database·세 collection 이름·timeout을 입력받고 같은 item compile을 수행한다. domain/environment/source mode는 UI에 없다.
 
 이 단순 current 구조에는 자동 승인 대기열, active pointer, revision archive나 자동 rollback이 없다. 이력이 필요한 조직은 MongoDB change stream/backup 또는 별도 감사 서비스를 사용한다. 세부 계약은 [V6_THREE_COLLECTION_METADATA.md](V6_THREE_COLLECTION_METADATA.md)를 따른다.
 
@@ -320,8 +323,9 @@ Compiler는 저장 전에 전체 runtime catalog를 검증한다. 응답의 `can
 
 | 요청 | 동작 |
 | --- | --- |
-| 신규 항목 등록 | `collection-role:section:key` ID로 항목 하나를 upsert |
-| 같은 항목 수정 | 해당 항목의 `natural_text`와 검증된 `payload`를 새 입력으로 교체 |
+| 신규 항목 등록 | exact·정규화·typed 의미 중복이 없으면 `collection-role:section:key` ID로 항목 하나를 upsert |
+| 같은 항목 수정 | `replace`에서 동일 exact key의 typed `payload`가 실제로 바뀐 항목만 교체. payload가 같으면 idempotent replay로 보고 기존 `natural_text`를 보존 |
+| 다른 key의 의미 중복 | 자동 rekey하지 않고 기존 canonical key와 판정 이유를 표시한 뒤 차단 |
 | 전체 도메인 재등록 | 컴파일된 전체 항목 집합으로 세 current collection을 transaction 교체 |
 | 저장하지 않음 | `validate_only` 결과만 반환하고 MongoDB write 0건 |
 | 모호하거나 잘못된 입력 | 저장 차단 후 확인 질문 또는 오류 반환 |
