@@ -16,10 +16,11 @@
 
 1. 작업자는 JSON이나 DSL이 아니라 기존 TXT와 같은 자유로운 업무 문장 한 항목을 입력한다.
 2. 외부 공통 Prompt Template과 특화 Prompt Template이 자연어를 closed annotation/IR로 변환한다.
-3. 결정론적 compiler가 schema, field binding, dependency, join/cardinality, security를 검증한다.
+3. 결정론적 compiler가 이번 항목의 schema, 승인 어휘·Source binding, 중복과 security를 검증한다.
 4. 모호하면 짧은 업무 확인 질문을 반환하고 저장하지 않는다.
-5. 성공하면 변경된 의미를 전체 runtime catalog로 검증한 뒤, MongoDB에는 다시 항목 단위로 upsert한다.
-6. 분석 Flow의 01번 loader는 세 collection의 항목을 읽어 실행 시점에만 typed Domain Package를 메모리에서 컴파일한다.
+5. 빈 DB에서는 메인 필터부터 저장할 수 있다. 아직 비어 있는 영역이 있으면 정상 항목으로 저장하고 `실행 준비 중`과 누락 영역을 반환한다.
+6. 테이블 카탈로그와 도메인 항목까지 채워지는 순간 세 collection 전체를 runtime catalog로 자동 결합·검증한다. 마지막 항목이 dependency closure를 깨면 그 마지막 write는 거부한다.
+7. 분석 Flow의 01번 loader는 세 collection이 모두 완전할 때만 typed Domain Package를 메모리에서 컴파일한다. 부분 등록 상태는 분석 실행에 사용하지 않는다.
 
 LLM은 자연어 해석에만 관여한다. MongoDB 항목을 실행 가능한 package로 만드는 작업과 분석 실행은 LLM이 아니라 compiler와 Typed Execution IR 실행기가 담당한다.
 
@@ -76,12 +77,12 @@ MongoDB에는 `source_sha256`, `section_sha256`, `release_manifest_sha256`, `pac
 - `01 사용 가능 메타데이터 불러오기`: URI, database, 세 collection 이름, timeout을 입력받아 모든 항목을 결합·컴파일한다. domain/environment/source mode 입력은 없다.
 - `24 채팅 메시지 표시 설정`: 결과표·적용 기준·Pandas 등가 코드·Typed Execution IR 등 표시 항목을 각각 선택한다.
 
-`mode=save`가 기본이다. 신규 `section+key`는 저장하지만 기존 key의 payload가 다르면 안전하게 중단하고 `replace`를 안내한다. `mode=replace`는 동일 `section+key`만 교체하고 입력에서 언급하지 않은 기존 항목은 유지한다. `mode=validate_only`는 같은 병합·컴파일 검증을 수행하되 MongoDB에는 쓰지 않는다.
+`mode=save`가 기본이다. 신규 `section+key`는 저장하지만 기존 key의 payload가 다르면 안전하게 중단하고 `replace`를 안내한다. `mode=replace`는 동일 `section+key`만 교체하고 입력에서 언급하지 않은 기존 항목은 유지한다. `mode=validate_only`는 같은 항목·중복 검증을 수행하되 MongoDB에는 쓰지 않는다. 세 영역이 모두 준비된 경우에만 `validate_only`도 전체 compile 결과를 함께 반환한다.
 
 등록 유형, 도메인 ID, 운영 환경, dry-run은 작업자 입력이 아니다. 등록 유형은 도메인/테이블 카탈로그/메인 필터 Flow별로 고정되며, 도메인 ID는 승인 레지스트리에서 내부적으로 읽고 운영 환경은 `production`으로 고정한다.
 
 ## 정합성과 이력
 
-저장 전 전체 item set을 메모리에서 다시 컴파일하므로 잘못된 payload, 누락된 데이터셋, 중복 key, 지원하지 않는 section은 transaction 전에 거부한다. 저장 후 같은 loader로 다시 읽어 runtime catalog 동치를 확인한다. Hash를 MongoDB 문서 사이 전달하거나 비교하지 않는다.
+부분 등록 중에는 이번 항목의 닫힌 구조·승인 대상·중복을 검증하고, 세 영역이 모두 준비되면 저장 전 전체 item set을 메모리에서 다시 컴파일한다. 따라서 잘못된 payload, 누락된 데이터셋, 중복 key, 지원하지 않는 section은 실행 가능 상태가 되기 전에 거부된다. 완성 저장 후에는 같은 loader로 다시 읽어 runtime catalog 동치를 확인한다. Hash를 MongoDB 문서 사이 전달하거나 비교하지 않는다.
 
 이 구조는 자동 revision history나 active pointer rollback을 제공하지 않는다. 이력이 필요하면 MongoDB 백업/change stream 또는 별도 감사 시스템을 사용하며, 그것을 runtime metadata collection으로 추가하지 않는다.

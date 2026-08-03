@@ -1396,10 +1396,166 @@ def test_authoring_component_accepts_safe_distinct_collection_names() -> None:
         "table_collection": "orders_catalog",
         "main_filter_collection": "orders_filter",
     }
-
     component.main_filter_collection = "orders_catalog"
     with pytest.raises(Exception, match="safe and distinct"):
         component._collection_names()
+
+
+def test_empty_store_main_filter_is_a_successful_partial_registration() -> None:
+    component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
+    component = component_cls()
+    component.authoring_kind = "main_filter"
+    component.metadata_contract_mode = "domain_package_v2"
+    component.domain_id = "manufacturing"
+    component.environment = "production"
+    component.mongo_uri = ""
+    component.mongo_database = ""
+    component.domain_collection = "agent_v6_domain_metadata"
+    component.table_collection = "agent_v6_table_catalog"
+    component.main_filter_collection = "agent_v6_main_filter"
+    response = component._save_initial_section_items(
+        kind="main_filter",
+        raw_patch={
+            "aliases": {
+                "field:DATE": {
+                    "target_type": "field",
+                    "target_key": "DATE",
+                    "values": [{"text": "날짜", "priority": 100}],
+                    "normalization": ["unicode_nfkc", "trim", "collapse_space", "latin_casefold"],
+                    "match": "bounded_longest",
+                    "conflict": "fail_ambiguous",
+                    "provenance_source": "natural_authoring",
+                }
+            }
+        },
+        source_text="날짜는 DATE를 뜻합니다.",
+        source_manifest={"source_sha256": "a" * 64},
+        authoring_proposal_validation=None,
+        current_documents={"domain": [], "table_catalog": [], "main_filter": []},
+        collections={
+            "domain_collection": "agent_v6_domain_metadata",
+            "table_collection": "agent_v6_table_catalog",
+            "main_filter_collection": "agent_v6_main_filter",
+        },
+        write_mode="validate_only",
+        dry_run=True,
+        draft_llm_calls=1,
+    ).data
+
+    assert response["status"] == "ok"
+    assert response["stage"] == "validated"
+    assert response["persisted"] is False
+    assert response["revision"] == 0
+    assert response["diff"]["activation_status"] == "waiting_for_sections"
+    assert response["diff"]["ready_sections"] == ["main_filter"]
+    assert response["diff"]["missing_sections"] == ["domain", "table_catalog"]
+    assert response["validation"]["runtime_compile"] == "waiting_for_remaining_collections"
+
+
+def test_full_main_filter_flow_path_accepts_an_empty_three_collection_store() -> None:
+    from lfx.schema.message import Message
+
+    class EmptyCollection:
+        def __init__(self):
+            self.documents = {}
+
+        def find(self, *args, **kwargs):
+            del args, kwargs
+            return [deepcopy(value) for value in self.documents.values()]
+
+        def replace_one(self, query, document, *, upsert, session=None):
+            del session
+            assert upsert is True
+            assert query == {"_id": document["_id"]}
+            self.documents[str(document["_id"])] = deepcopy(document)
+
+    class EmptyDatabase:
+        def __init__(self):
+            self.collections = {}
+
+        def __getitem__(self, name):
+            return self.collections.setdefault(name, EmptyCollection())
+
+    class EmptySession:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            del args
+            return False
+
+        def start_transaction(self):
+            return self
+
+    class EmptyClient:
+        def start_session(self):
+            return EmptySession()
+
+        def close(self):
+            return None
+
+    registry = _approved_reference_context("manufacturing")
+    source_text = "기준일은 DATE 필드를 뜻합니다."
+    context = _bootstrap_prompt_context(
+        kind="main_filter",
+        source_text=source_text,
+        domain_id="manufacturing",
+        environment="production",
+        approved_reference_context=registry,
+        bootstrap_fragment=False,
+    )
+    component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
+    component = component_cls()
+    component.input_message = Message(text=source_text)
+    component.authoring_source_context = context
+    component.authoring_invocation_result = _bootstrap_invocation(
+        kind="main_filter",
+        source_text=source_text,
+        output_schema=context.data["variables"]["output_schema"],
+        runtime_context=context.data,
+        draft={
+            "alias_additions": [
+                {
+                    "target_type": "field",
+                    "target_id": "DATE",
+                    "expressions": ["기준일"],
+                }
+            ]
+        },
+    )
+    component.approved_reference_context = registry
+    component.split_bootstrap = False
+    component.authoring_kind = "main_filter"
+    component.source_grounding_mode = "freeform_llm"
+    component.metadata_contract_mode = "domain_package_v2"
+    component.domain_id = "manufacturing"
+    component.environment = "production"
+    component.revision_policy = "auto_next"
+    component.mode = "save"
+    component.dry_run = False
+    component.domain_collection = "agent_v6_domain_metadata"
+    component.table_collection = "agent_v6_table_catalog"
+    component.main_filter_collection = "agent_v6_main_filter"
+    database = EmptyDatabase()
+    component._mongo = lambda: (EmptyClient(), database)
+
+    response = component.run_authoring().data
+    assert response["status"] == "ok", json.dumps(response, ensure_ascii=False, indent=2)
+    assert response["stage"] == "committed"
+    assert response["persisted"] is True
+    assert response["diff"]["activation_status"] == "waiting_for_sections"
+    assert response["diff"]["ready_sections"] == ["main_filter"]
+    assert response["diff"]["missing_sections"] == ["domain", "table_catalog"]
+    assert response["llm_usage"] == {
+        "draft_llm_calls": 1,
+        "annotation_llm_calls": 0,
+        "repair_llm_calls": 0,
+    }
+    stored = database["agent_v6_main_filter"].documents
+    assert list(stored) == ["main_filter:aliases:field:DATE"]
+    assert set(next(iter(stored.values()))) == {
+        "_id", "section", "key", "natural_text", "payload", "updated_at"
+    }
 
 
 def test_generated_authoring_prompt_uses_embedded_schema_without_external_globals() -> None:

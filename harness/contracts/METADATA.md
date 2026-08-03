@@ -17,9 +17,10 @@ Free-form natural-language TXT → immutable source block
   └─ domain_policy: explicit admin node inputs → LLM 0회
 → branch별 closed schema 검증 → v3 template/descriptor 결정론적 확장·병합
 → full draft JSON Schema validation → semantic lint → dependency/security closure
-→ operator diff review → 전체 runtime catalog 검증
-→ MongoDB transaction으로 세 collection의 항목 문서 upsert
-→ 세 collection 항목 재컴파일 → runtime metadata bundle
+→ operator diff review → 이번 section 항목·중복·승인 참조 검증
+→ MongoDB transaction으로 해당 collection의 항목 문서 upsert
+→ 세 collection이 모두 준비되면 전체 runtime catalog 자동 검증
+→ 완전한 세 collection만 재컴파일 → runtime metadata bundle
 ```
 
 기본 Full-domain lane의 세 LLM 출력은 역할이 서로 다르다. Domain branch는 실행 metadata를 작성하지 않고 `metadata-annotation-proposal.schema.json`의 `display_name`과 `description`만 반환한다. Dataset branch는 내부용 compact Dataset IR을, Main Filter branch는 각 항목에 `target_type`, `target_id`, `expressions`를 요구하는 typed IR을 반환한다. 작업자는 이 IR, JSON, canonical ID inventory, relation endpoint/field-role 선언 문법을 알거나 맞출 필요가 없다.
@@ -47,6 +48,8 @@ v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 �
 | result/source ref | `agent_v6_result_store` |
 
 운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·세 metadata collection 이름·timeout이 보이며, domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 입력받은 안전하고 서로 다른 3컬렉션의 모든 항목을 결합하고 전체 typed catalog를 다시 컴파일한다. 누락·중복·잘못된 payload는 fail-closed한다. Oracle·SQL·Datalake dataset의 실제 read-only query는 테이블 카탈로그 항목의 `payload.source_config.query_template`에 저장하며, `db_key`와 `required_params`도 같은 항목이 소유한다. credential·접속 문자열은 저장하지 않는다.
+
+초기 등록 순서는 `main_filter → table_catalog → domain`을 포함해 section별로 독립적이다. 빈 DB의 Main Filter 등록은 완성 package의 patch가 아니라 정상적인 첫 항목 저장이며, 응답은 `activation_status=waiting_for_sections`와 아직 비어 있는 collection role을 표시한다. 부분 item set은 같은 세 collection에 저장하지만 Data Analysis loader에는 노출하지 않는다. 세 role이 모두 채워지는 마지막 write에서 전체 schema·semantic lint·dependency closure·runtime compile을 통과해야 `activation_status=ready`가 된다. 별도 pending collection이나 active pointer는 사용하지 않는다.
 
 ## 3. 공통 envelope
 

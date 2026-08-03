@@ -7774,6 +7774,214 @@ class MetadataAuthoringEngine(Component):
         material["response_sha256"] = sha256_json(material)
         return Data(data=validate_authoring_response_hash(material))
 
+    def _save_initial_section_items(
+        self,
+        *,
+        kind,
+        raw_patch,
+        source_text,
+        source_manifest,
+        authoring_proposal_validation,
+        current_documents,
+        collections,
+        write_mode,
+        dry_run,
+        draft_llm_calls,
+    ):
+        """Store Dataset/Main Filter items before a complete package exists."""
+
+        source_binding_validation = {
+            "contract_version": "metadata.source-binding.validation.v1",
+            "status": "not_applicable",
+            "binding_authority": "approved_semantic_vocabulary",
+        }
+        source_query_extraction = {
+            "contract_version": "metadata.source-query-extraction.v1",
+            "status": "not_applicable",
+            "query_count": 0,
+            "dataset_keys": [],
+            "datasets": {},
+            "missing_query_dataset_keys": [],
+        }
+        normalized_patch = deepcopy(raw_patch)
+        if kind == "dataset":
+            partial_draft = {"datasets": deepcopy(raw_patch.get("datasets") or {})}
+            source_binding_validation = _validate_authoring_source_bindings(
+                partial_draft,
+                source_sha256=str(source_manifest.get("source_sha256") or ""),
+                proposal_sha256=str((authoring_proposal_validation or {}).get("proposal_sha256") or ""),
+                approved_reference_context=getattr(self, "approved_reference_context", None),
+                domain_id=str(getattr(self, "domain_id", "") or ""),
+            )
+            partial_draft, source_query_extraction = apply_dataset_source_configs_from_text(
+                partial_draft,
+                source_text,
+                require_complete=False,
+            )
+            normalized_patch = {"datasets": partial_draft["datasets"]}
+
+        now = _bson_millisecond_utc(datetime.now(timezone.utc))
+        candidate_items = make_partial_metadata_item_documents(
+            kind,
+            normalized_patch,
+            source_text,
+            updated_at=now.isoformat(),
+        )
+        merged_items, write_operations = merge_metadata_items_for_write(
+            current_documents,
+            candidate_items,
+            mode=write_mode,
+        )
+        conflict_count = int(write_operations.get("conflict_count") or 0)
+        conflicts = list(write_operations.pop("conflicts", []))
+        if conflict_count:
+            raise ContractError(
+                "metadata_policy_error",
+                "metadata_duplicate",
+                "기존 메타데이터와 중복되거나 어느 항목을 바꿀지 모호합니다. 표시된 canonical key를 확인해 주세요.",
+                {
+                    "conflicts": conflicts,
+                    "conflict_count": conflict_count,
+                    "conflicts_truncated": bool(write_operations.get("conflicts_truncated")),
+                },
+            )
+
+        ready_sections = sorted(name for name, items in merged_items.items() if items)
+        missing_sections = sorted(name for name, items in merged_items.items() if not items)
+        package = None
+        if not missing_sections:
+            # The third completed collection is the activation boundary.  A
+            # failed dependency closure blocks that final write; earlier partial
+            # items remain editable but are never exposed to Data Analysis.
+            package = assemble_domain_package_from_items(merged_items)
+            validate_runtime_catalog_v2(package["runtime_catalog"])
+
+        validation = {
+            "schema": "passed",
+            "semantic_lint": "passed" if package is not None else "deferred",
+            "dependency_closure": "passed" if package is not None else "deferred",
+            "runtime_compile": "passed" if package is not None else "waiting_for_remaining_collections",
+            "section_ownership": "passed",
+            "three_collection_items": "complete" if package is not None else "partial",
+            "ready_sections": ready_sections,
+            "missing_sections": missing_sections,
+            "source_bindings": source_binding_validation,
+            "source_queries": source_query_extraction,
+        }
+        if authoring_proposal_validation is not None:
+            validation["authoring_proposal"] = authoring_proposal_validation
+        item_counts = {name: len(items) for name, items in merged_items.items()}
+        validation["write_policy"] = {
+            "mode": write_mode,
+            "identity": "typed_item_identity",
+            "preserve_unmentioned": True,
+            "operations": deepcopy(write_operations),
+        }
+        candidate_hash = sha256_json(
+            {
+                "contract_version": "metadata.initial-section-candidate.v1",
+                "authoring_kind": kind,
+                "write_mode": write_mode,
+                "item_counts": item_counts,
+                "runtime_catalog_sha256": (
+                    str(package["runtime_catalog"].get("catalog_sha256") or "")
+                    if package is not None
+                    else ""
+                ),
+                "validation": validation,
+            }
+        )
+        candidate_id = f"candidate:{candidate_hash}"
+
+        if not dry_run:
+            client, db = self._mongo()
+            try:
+                with client.start_session() as session:
+                    with session.start_transaction():
+                        transaction_documents = {
+                            "domain": _find_items(db[collections["domain_collection"]], session=session),
+                            "table_catalog": _find_items(db[collections["table_collection"]], session=session),
+                            "main_filter": _find_items(db[collections["main_filter_collection"]], session=session),
+                        }
+                        if metadata_item_set_projection(transaction_documents) != metadata_item_set_projection(current_documents):
+                            raise ContractError(
+                                "state_conflict",
+                                "metadata_duplicate",
+                                "중복 확인 이후 기존 메타데이터가 변경되었습니다. 다시 실행해 주세요.",
+                                {"reason": "concurrent_metadata_update"},
+                                retryable=True,
+                            )
+                        if package is None:
+                            upsert_partial_metadata_items(
+                                db,
+                                merged_items,
+                                session=session,
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
+                            )
+                        else:
+                            replace_metadata_items(
+                                db,
+                                merged_items,
+                                session=session,
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
+                            )
+                            persisted = load_domain_package_from_three_collections(
+                                db,
+                                str(getattr(self, "domain_id", "") or ""),
+                                str(getattr(self, "environment", "production") or "production"),
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
+                                session=session,
+                            )
+                            if persisted["runtime_catalog"] != package["runtime_catalog"]:
+                                raise ContractError(
+                                    "metadata_hash_conflict",
+                                    "metadata_three_collection",
+                                    "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
+                                )
+            finally:
+                client.close()
+
+        response_values = {
+            "candidate_id": candidate_id,
+            "candidate_sha256": candidate_hash,
+            "revision": int((package or {}).get("revision") or 0),
+            "persisted": not dry_run,
+            "idempotent_replay": False,
+            "diff": {
+                "authoring_kind": kind,
+                "write_mode": write_mode,
+                "write_operations": write_operations,
+                "item_counts": item_counts,
+                "activation_status": "ready" if package is not None else "waiting_for_sections",
+                "ready_sections": ready_sections,
+                "missing_sections": missing_sections,
+            },
+            "unchanged_section_checks": {},
+            "validation": validation,
+            "llm_usage": {
+                "draft_llm_calls": draft_llm_calls,
+                "annotation_llm_calls": 0,
+                "repair_llm_calls": 0,
+            },
+        }
+        if package is not None:
+            response_values.update(
+                package_sha256=package["package_sha256"],
+                bundle_sha256=package["bundle_sha256"],
+                catalog_sha256=package["runtime_catalog"]["catalog_sha256"],
+            )
+        return self._response(
+            "ok",
+            stage="validated" if dry_run else "committed",
+            **response_values,
+        )
+
     def _prepare_v2_full_compat(self):
         source_text = _authoring_source_text(self)
         if not source_text or len(source_text.encode("utf-8")) > 65536:
@@ -8415,13 +8623,6 @@ class MetadataAuthoringEngine(Component):
                     "main_filter": list(db[collections["main_filter_collection"]].find({})),
                 }
                 present = [name for name, value in current_documents.items() if value]
-                if present and len(present) != 3:
-                    raise ContractError(
-                        "metadata_dependency_error",
-                        "metadata_three_collection",
-                        "기존 메타데이터 release가 세 컬렉션에 완전하게 존재하지 않습니다.",
-                        {"present_sections": present},
-                    )
                 if len(present) == 3:
                     active_package = assemble_domain_package_from_items(current_documents)
                     current_source_texts = {
@@ -8449,15 +8650,10 @@ class MetadataAuthoringEngine(Component):
             finally:
                 client.close()
                 client = db = None
-        if kind != "domain" and active_package is None:
-            raise ContractError(
-                "metadata_dependency_error",
-                "metadata_prepare",
-                "Section patches require an exact active v2 domain package or inline dry-run base.",
-            )
         base_draft = (
             runtime_catalog_v2_to_authoring_draft(active_package["runtime_catalog"])
             if kind != "domain"
+            and active_package is not None
             else None
         )
 
@@ -8500,7 +8696,11 @@ class MetadataAuthoringEngine(Component):
                 raw_patch = deepcopy(invocation_draft)
                 draft_llm_calls = 1
             normalization_manifest = source_manifest
-            if kind == "dataset" and grounding_mode == "freeform_llm":
+            if (
+                kind == "dataset"
+                and grounding_mode == "freeform_llm"
+                and base_draft is not None
+            ):
                 normalization_manifest = _freeform_dataset_patch_authorization_manifest(
                     source_manifest,
                     base_draft,
@@ -8509,7 +8709,32 @@ class MetadataAuthoringEngine(Component):
                 # The typed IR was already schema-bound to the approved target
                 # vocabulary. Merge its full alias cards directly so legacy
                 # shorthand normalization cannot reinterpret value-card shape.
-                raw_patch = _merge_typed_main_filter_patch(base_draft, raw_patch)
+                if base_draft is not None:
+                    alias_base = base_draft
+                else:
+                    alias_base = {
+                        "aliases": {
+                            str(item.get("key") or ""): deepcopy(item.get("payload") or {})
+                            for items in current_documents.values()
+                            for item in items
+                            if isinstance(item, dict)
+                            and item.get("section") == "aliases"
+                            and str(item.get("key") or "")
+                        }
+                    }
+                raw_patch = _merge_typed_main_filter_patch(alias_base, raw_patch)
+            elif kind == "dataset" and grounding_mode == "freeform_llm" and base_draft is None:
+                if (
+                    not isinstance(raw_patch, dict)
+                    or set(raw_patch) != {"datasets"}
+                    or not isinstance(raw_patch.get("datasets"), dict)
+                    or not raw_patch["datasets"]
+                ):
+                    raise ContractError(
+                        "metadata_schema_error",
+                        "metadata_section_patch",
+                        "최초 데이터셋 등록 제안은 비어 있지 않은 datasets patch여야 합니다.",
+                    )
             else:
                 try:
                     raw_patch = normalize_authoring_section_patch_shorthand(
@@ -8587,6 +8812,19 @@ class MetadataAuthoringEngine(Component):
                         "실행 planner 호환 정책은 승인 템플릿이 소유하며 출력 프로필 입력으로 변경할 수 없습니다.",
                     )
                 raw_patch["output_profile"] = output_value
+        if active_package is None and kind in {"dataset", "main_filter"}:
+            return self._save_initial_section_items(
+                kind=kind,
+                raw_patch=raw_patch,
+                source_text=source_text,
+                source_manifest=source_manifest,
+                authoring_proposal_validation=authoring_proposal_validation,
+                current_documents=current_documents,
+                collections=collections,
+                write_mode=write_mode,
+                dry_run=dry_run,
+                draft_llm_calls=draft_llm_calls,
+            )
         if kind == "domain":
             if not annotation_only and prevalidated_domain_draft is None:
                 raw_patch = _enforce_domain_policy_boundary(
@@ -8788,6 +9026,20 @@ class MetadataAuthoringEngine(Component):
             source_texts,
             updated_at=now.isoformat(),
         )
+        if (
+            kind == "domain"
+            and active_package is None
+            and requested_write_mode != "prepare"
+        ):
+            # A domain proposal is compiled against the approved registry so
+            # its own cards can be validated, but an initial Domain Flow must
+            # not silently prefill Dataset/Main Filter collections.  Each Flow
+            # owns and stores only its natural-language section.
+            candidate_item_documents = {
+                "domain": candidate_item_documents["domain"],
+                "table_catalog": [],
+                "main_filter": [],
+            }
         merged_item_documents, write_operations = merge_metadata_items_for_write(
             current_documents,
             candidate_item_documents,
@@ -8817,7 +9069,10 @@ class MetadataAuthoringEngine(Component):
         # On an empty store the candidate package was already compiled once,
         # and the resolver's global candidate indexes cover the additional
         # cross-collection duplicate rules without a redundant recompile.
-        if any(current_documents.values()):
+        missing_sections = sorted(
+            name for name, items in merged_item_documents.items() if not items
+        )
+        if any(current_documents.values()) and not missing_sections:
             merged_projection = assemble_domain_package_from_items(merged_item_documents)
             merged_draft = runtime_catalog_v2_to_authoring_draft(
                 merged_projection["runtime_catalog"]
@@ -8831,8 +9086,19 @@ class MetadataAuthoringEngine(Component):
             )
             package = validate_domain_package(package)
             validate_runtime_catalog_v2(package["runtime_catalog"])
+        elif missing_sections and requested_write_mode != "prepare":
+            package = None
         item_documents = merged_item_documents
         item_counts = {name: len(items) for name, items in item_documents.items()}
+        if package is None:
+            validation.update(
+                semantic_lint="deferred",
+                dependency_closure="deferred",
+                runtime_compile="waiting_for_remaining_collections",
+                three_collection_items="partial",
+                ready_sections=sorted(name for name, items in item_documents.items() if items),
+                missing_sections=missing_sections,
+            )
         validation["write_policy"] = {
             "mode": write_mode,
             "identity": "typed_item_identity",
@@ -8844,7 +9110,11 @@ class MetadataAuthoringEngine(Component):
                 "contract_version": "metadata.save-candidate.v1",
                 "write_mode": write_mode,
                 "item_counts": item_counts,
-                "runtime_catalog_sha256": package["runtime_catalog"]["catalog_sha256"],
+                "runtime_catalog_sha256": (
+                    package["runtime_catalog"]["catalog_sha256"]
+                    if package is not None
+                    else ""
+                ),
                 "validation": validation,
             }
         )
@@ -8875,29 +9145,39 @@ class MetadataAuthoringEngine(Component):
                                 {"reason": "concurrent_metadata_update"},
                                 retryable=True,
                             )
-                        replace_metadata_items(
-                            db,
-                            item_documents,
-                            session=session,
-                            domain_collection=collections["domain_collection"],
-                            table_collection=collections["table_collection"],
-                            main_filter_collection=collections["main_filter_collection"],
-                        )
-                        persisted = load_domain_package_from_three_collections(
-                            db,
-                            domain_id,
-                            environment,
-                            domain_collection=collections["domain_collection"],
-                            table_collection=collections["table_collection"],
-                            main_filter_collection=collections["main_filter_collection"],
-                            session=session,
-                        )
-                        if persisted["runtime_catalog"] != package["runtime_catalog"]:
-                            raise ContractError(
-                                "metadata_hash_conflict",
-                                "metadata_three_collection",
-                                "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
+                        if package is None:
+                            upsert_partial_metadata_items(
+                                db,
+                                item_documents,
+                                session=session,
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
                             )
+                        else:
+                            replace_metadata_items(
+                                db,
+                                item_documents,
+                                session=session,
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
+                            )
+                            persisted = load_domain_package_from_three_collections(
+                                db,
+                                domain_id,
+                                environment,
+                                domain_collection=collections["domain_collection"],
+                                table_collection=collections["table_collection"],
+                                main_filter_collection=collections["main_filter_collection"],
+                                session=session,
+                            )
+                            if persisted["runtime_catalog"] != package["runtime_catalog"]:
+                                raise ContractError(
+                                    "metadata_hash_conflict",
+                                    "metadata_three_collection",
+                                    "저장 후 다시 결합한 메타데이터 package가 컴파일 결과와 다릅니다.",
+                                )
             except ContractError:
                 raise
             except Exception as exc:
@@ -8921,36 +9201,45 @@ class MetadataAuthoringEngine(Component):
                 raise
             finally:
                 client.close()
-        catalog = package["runtime_catalog"]
-        return self._response(
-            "ok",
-            stage="validated" if dry_run else "committed",
-            candidate_id=candidate_id,
-            candidate_sha256=candidate_hash,
-            package_sha256=package["package_sha256"],
-            bundle_sha256=package["bundle_sha256"],
-            catalog_sha256=catalog["catalog_sha256"],
-            revision=package["revision"],
-            persisted=not dry_run,
-            idempotent_replay=False,
-            diff={
+        catalog = package["runtime_catalog"] if package is not None else {}
+        response_values = {
+            "candidate_id": candidate_id,
+            "candidate_sha256": candidate_hash,
+            "revision": int((package or {}).get("revision") or 0),
+            "persisted": not dry_run,
+            "idempotent_replay": False,
+            "diff": {
                 "authoring_kind": kind,
                 "write_mode": write_mode,
                 "write_operations": write_operations,
                 "item_counts": item_counts,
+                "activation_status": "ready" if package is not None else "waiting_for_sections",
+                "ready_sections": sorted(name for name, items in item_documents.items() if items),
+                "missing_sections": missing_sections,
                 "datasets": len(catalog.get("datasets") or {}),
                 "fields": len(catalog.get("fields") or {}),
                 "metrics": len(catalog.get("metrics") or {}),
                 "relations": len(catalog.get("relations") or {}),
                 "recipes": len(catalog.get("recipes") or {}),
             },
-            unchanged_section_checks=unchanged_sections,
-            validation=validation,
-            llm_usage={
+            "unchanged_section_checks": unchanged_sections,
+            "validation": validation,
+            "llm_usage": {
                 "draft_llm_calls": draft_llm_calls,
                 "annotation_llm_calls": 1 if annotation_only else 0,
                 "repair_llm_calls": 0,
             },
+        }
+        if package is not None:
+            response_values.update(
+                package_sha256=package["package_sha256"],
+                bundle_sha256=package["bundle_sha256"],
+                catalog_sha256=catalog["catalog_sha256"],
+            )
+        return self._response(
+            "ok",
+            stage="validated" if dry_run else "committed",
+            **response_values,
         )
 
     def _prepare_legacy(self):
@@ -9415,7 +9704,18 @@ class AuthoringMessagePresentation(Component):
         if response.get("status") == "ok" and response.get("stage") == "validated":
             text = "### 메타데이터 검증 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- MongoDB 저장: 안 함"
         elif response.get("status") == "ok":
-            text = "### 메타데이터 저장 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터"
+            activation_status = str(diff.get("activation_status") or "ready")
+            if activation_status == "waiting_for_sections":
+                ready_sections = ", ".join(str(value) for value in diff.get("ready_sections") or []) or "없음"
+                missing_sections = ", ".join(str(value) for value in diff.get("missing_sections") or []) or "없음"
+                text = (
+                    "### 메타데이터 항목 저장 완료 (실행 준비 중)\n\n"
+                    + f"{operation_summary}\n- 등록 완료 영역: {ready_sections}\n"
+                    + f"- 추가 등록 필요 영역: {missing_sections}\n"
+                    + "- 세 영역이 모두 등록되면 자동으로 전체 실행 메타데이터를 검증합니다."
+                )
+            else:
+                text = "### 메타데이터 저장 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능"
         elif response.get("status") == "needs_clarification":
             clarification = response.get("clarification") if isinstance(response.get("clarification"), dict) else {}
             questions = [str(item) for item in (clarification.get("questions") or [])[:3]]

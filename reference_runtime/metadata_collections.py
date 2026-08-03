@@ -451,6 +451,92 @@ def make_metadata_item_documents(
     return documents
 
 
+def make_partial_metadata_item_documents(
+    authoring_kind: str,
+    patch: Mapping[str, Any],
+    source_text: str,
+    *,
+    updated_at: str | None = None,
+) -> dict[str, list[dict[str, Any]]]:
+    """Convert one independently authored section into normal item documents.
+
+    Initial authoring is intentionally order-independent.  Main-filter and
+    dataset items may therefore be stored before a domain profile exists.  The
+    documents use the exact same six-field shape as fully compiled metadata;
+    once all three collections are populated the normal package assembler is
+    the only activation gate.
+    """
+
+    kind = str(authoring_kind or "").strip().casefold()
+    if kind not in {"dataset", "main_filter"}:
+        _fail("부분 메타데이터 항목으로 저장할 수 없는 등록 유형입니다.", {"authoring_kind": kind})
+    if not isinstance(patch, Mapping):
+        _fail("부분 메타데이터 patch는 object여야 합니다.", {"authoring_kind": kind})
+
+    timestamp = str(updated_at or datetime.now(timezone.utc).isoformat())
+    documents: dict[str, list[dict[str, Any]]] = {
+        "domain": [],
+        "table_catalog": [],
+        "main_filter": [],
+    }
+    if kind == "dataset":
+        if set(patch) != {"datasets"} or not isinstance(patch.get("datasets"), Mapping) or not patch["datasets"]:
+            _fail("최초 데이터셋 등록 patch에는 비어 있지 않은 datasets만 있어야 합니다.")
+        for key in sorted(patch["datasets"]):
+            payload = deepcopy(patch["datasets"][key])
+            if not isinstance(payload, Mapping):
+                _fail("데이터셋 항목 payload는 object여야 합니다.", {"key": str(key)})
+            payload = deepcopy(dict(payload))
+            payload.pop("key", None)
+            fields = payload.get("fields")
+            if not isinstance(fields, Mapping) or not fields:
+                _fail("데이터셋 항목에는 비어 있지 않은 fields가 필요합니다.", {"key": str(key)})
+            documents["table_catalog"].append(
+                _item_document(
+                    "table_catalog",
+                    "datasets",
+                    str(key),
+                    payload,
+                    source_text=str(source_text or ""),
+                    legacy_natural_texts=None,
+                    updated_at=timestamp,
+                )
+            )
+    else:
+        if set(patch) != {"aliases"} or not isinstance(patch.get("aliases"), Mapping) or not patch["aliases"]:
+            _fail("최초 메인 필터 등록 patch에는 비어 있지 않은 aliases만 있어야 합니다.")
+        for key in sorted(patch["aliases"]):
+            raw_payload = patch["aliases"][key]
+            if not isinstance(raw_payload, Mapping):
+                _fail("메인 필터 alias payload는 object여야 합니다.", {"key": str(key)})
+            payload = deepcopy(dict(raw_payload))
+            target_type, target_key = _alias_payload_target(payload)
+            expressions = _alias_payload_expressions(payload)
+            expected_key = f"{target_type}:{target_key}" if target_type and target_key else ""
+            if not expected_key or _duplicate_text(key) != _duplicate_text(expected_key) or not expressions:
+                _fail(
+                    "메인 필터 alias의 key, target 또는 표현식이 완전하지 않습니다.",
+                    {"key": str(key)},
+                )
+            # Collection ownership is a storage concern.  Natural authoring
+            # evidence remains in ``natural_text``; the runtime provenance must
+            # identify this card as a Main Filter item so later full-package
+            # projections keep it in the same collection.
+            payload["provenance_source"] = "main_filters"
+            documents["main_filter"].append(
+                _item_document(
+                    "main_filter",
+                    "aliases",
+                    str(key),
+                    payload,
+                    source_text=str(source_text or ""),
+                    legacy_natural_texts=None,
+                    updated_at=timestamp,
+                )
+            )
+    return documents
+
+
 def _validated_item(document: Mapping[str, Any], expected_prefix: str) -> dict[str, Any]:
     value = deepcopy(dict(document))
     unknown = set(value) - _ITEM_KEYS
@@ -1144,6 +1230,43 @@ def merge_metadata_items_for_write(
     return merged, operations
 
 
+def upsert_partial_metadata_items(
+    database: Any,
+    documents: Mapping[str, Sequence[Mapping[str, Any]]],
+    *,
+    session: Any = None,
+    domain_collection: str = DOMAIN_METADATA_COLLECTION,
+    table_collection: str = TABLE_CATALOG_COLLECTION,
+    main_filter_collection: str = MAIN_FILTER_COLLECTION,
+) -> None:
+    """Upsert validated item documents without requiring a complete package.
+
+    This is used only while one or more of the three authoring collections are
+    still empty.  It never deletes existing documents and never marks a partial
+    set executable.  Full-package assembly remains mandatory as soon as all
+    collections contain items and for every Data Analysis load.
+    """
+
+    actual = _metadata_collection_names(domain_collection, table_collection, main_filter_collection)
+    prepared = {
+        kind: [_validated_item(item, kind) for item in documents.get(kind, [])]
+        for kind in actual
+    }
+    for kind, collection_name in actual.items():
+        collection = database[collection_name]
+        existing = {str(item.get("_id")): item for item in _find_items(collection, session=session)}
+        for document in prepared[kind]:
+            current = existing.get(document["_id"])
+            if isinstance(current, Mapping) and _validated_item(current, kind) == document:
+                continue
+            collection.replace_one(
+                {"_id": document["_id"]},
+                deepcopy(document),
+                upsert=True,
+                session=session,
+            )
+
+
 def replace_metadata_items(
     database: Any,
     documents: Mapping[str, Sequence[Mapping[str, Any]]],
@@ -1229,8 +1352,10 @@ __all__ = [
     "load_domain_package_from_three_collections",
     "metadata_item_set_projection",
     "merge_metadata_items_for_write",
+    "make_partial_metadata_item_documents",
     "make_metadata_item_documents",
     "make_metadata_section_documents",
     "replace_metadata_items",
     "replace_metadata_release",
+    "upsert_partial_metadata_items",
 ]

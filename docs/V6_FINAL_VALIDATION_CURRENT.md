@@ -12,10 +12,10 @@
 
 | Flow | 실행 노드 | Edge | SHA-256 |
 | --- | ---: | ---: | --- |
-| Data Analysis | 32 + Sticky Note 4 | 47 | `4cf4242fc623342f620c81781a2dce0a15683876a1048554c4bbebe89e334a4d` |
-| Domain 등록 | 8 + Sticky Note 1 | 7 | `a1dda864eb11da3def6646bbd098bc19251995d73b289cd6c7b5a000e96269e8` |
-| Table Catalog 등록 | 8 + Sticky Note 1 | 7 | `69de372ba70e5ddb82201f48990674e04bbd2b1b9dbe903aa238b2c062b95e60` |
-| Main Filter 등록 | 8 + Sticky Note 1 | 7 | `aba410bb5e9b1845f63a92d0eeb1ec8086f68d6ba3b76ca6861a87f3e6c65b99` |
+| Data Analysis | 32 + Sticky Note 4 | 47 | `331482f34fc203c3d173517ff5a66af9b2d290b9b91c4df80be47dc81ab4f46d` |
+| Domain 등록 | 8 + Sticky Note 1 | 7 | `233ef61e91c6be78c30036b75decc24860527f5b93476b1a5df4b69fae654e95` |
+| Table Catalog 등록 | 8 + Sticky Note 1 | 7 | `aa7ddf8916c26666588132ffba2f5d67031a0d836a8cdadeedf73f07cd5f0a81` |
+| Main Filter 등록 | 8 + Sticky Note 1 | 7 | `70afdf2177b65967ab6e7450db16247d445c5cdc67d086d9d95c24136813cf50` |
 
 별도 Domain Policy 등록 Flow는 제거했다. 업무별 해석 차이는 Domain/Table Catalog/Main Filter 각 Flow의 특화 Prompt Template에서 관리한다. 실행 함수 descriptor와 planner policy 같은 실행 권한 계약은 자연어 등록으로 변경하지 않는다.
 
@@ -39,14 +39,15 @@ Chat Input
 - Table Catalog의 주석·줄바꿈을 포함한 SQL 원문은 LLM payload에서 제외하고 compiler가 승인된 registry binding으로 결합한다.
 - `04 검증 및 저장`은 별도 LLM·컬렉션 없이 exact/정규화 key, typed ID, 동일 section 표시명·별칭, dataset `query_ref`·전체 source descriptor, 세 컬렉션 전역 alias target·표현 중복을 결정론적으로 검사한다.
 - 충돌 응답은 최대 32건, 항목별 처리 결과는 최대 64건으로 제한하며 SQL·URL·접속 설정은 노출하지 않는다.
-- 실제 변경 item만 upsert하되 모든 transaction이 domain profile을 공통 serialization boundary로 써서 서로 다른 key의 동시 저장도 retryable `state_conflict`로 닫는다.
+- 빈 DB에서도 Main Filter를 먼저 항목 저장할 수 있다. 부분 상태는 `activation_status=waiting_for_sections`와 누락 영역을 반환하며 Data Analysis에는 노출하지 않는다.
+- 실제 변경 item만 upsert하고 transaction 직전에 읽은 item set이 중복 검사 시점과 같은지 재확인한다. 세 영역이 완성되는 마지막 write는 전체 compile과 저장 후 loader 동치 검증을 모두 통과해야 한다.
 
 ## 3. 검증 결과
 
 ### 코드 및 Flow
 
-- 전체 pytest: 520/520 통과
-- 중복·저장 정책 단위 테스트: 32/32 통과
+- 전체 pytest: 525/525 통과
+- 메타데이터 항목·중복·부분 저장 정책 단위 테스트: 35/35 통과
 - standalone 생성물: 29/29 동기화 통과
 - Flow source parity: 4개 Flow, 3개 artifact layer, custom-node instance 99개, 오류 0
 - Langflow runtime parse: 4개 Flow의 실행 노드 56/56 통과
@@ -72,15 +73,15 @@ Chat Input
 - 결정론적 compiler 검증 통과
 - `validate_only`로 실행하여 MongoDB 쓰기 없음
 
-Dataset/Main Filter의 read-only 후속 검증에서는 현재 운영 3컬렉션의 일부 dataset field set이 승인 registry와 다른 상태임을 fail-closed로 검출했다. 이는 간결 Flow나 Gemini schema 실패가 아니라 기존 MongoDB 데이터의 registry drift이며, 승인된 Domain 등록 결과를 먼저 저장한 뒤 후속 등록을 실행해야 한다. 이번 수정에서는 운영 MongoDB를 변경하지 않았다.
+빈 DB Main Filter 최초 등록 경로는 standalone component의 실제 `save` transaction으로 직접 검증했다. 결과는 `status=ok`, `stage=committed`, `persisted=true`, `revision=0`, `activation_status=waiting_for_sections`, `ready_sections=[main_filter]`, `missing_sections=[domain, table_catalog]`이며 기존의 `Section patches require ...` 오류는 발생하지 않는다. 이후 Table Catalog와 Domain 항목이 채워지면 전체 package를 자동 compile한다. 이번 검증에서는 운영 MongoDB를 변경하지 않았다.
 
 ## 4. 최종 산출물
 
 - 개별 Flow: `flow_exports/`
 - Langflow import-ready 개별/통합 JSON: `import_ready_flows/`
 - import-ready ZIP: `import_ready_flows.zip`
-- 통합 bundle SHA-256: `5ff161a7c62b6393b8f76ff4180d19d9deea2716cdfc3c6a2c4ade30c216f0c9`
-- ZIP SHA-256: `0e53ed7a1d2412c8be1ad8f36990c10634eb1a6a10e8a23c12a060d31a5ddc32`
+- 통합 bundle SHA-256: `ed957ac8e788e287346912632c39bc8ed61cc78361bccf05d83d147297215a0f`
+- ZIP SHA-256: `4a4570acb005dde077e13d160333dcbfd5af396d1937042a7032ec860c58efce`
 
 ## 5. 재현 명령
 

@@ -15,9 +15,11 @@ from reference_runtime.metadata_collections import (
     load_available_domain_package_from_three_collections,
     load_domain_package_from_three_collections,
     make_metadata_item_documents,
+    make_partial_metadata_item_documents,
     metadata_item_set_projection,
     merge_metadata_items_for_write,
     replace_metadata_items,
+    upsert_partial_metadata_items,
 )
 
 
@@ -123,6 +125,79 @@ def test_items_round_trip_to_exact_runtime_catalog_without_release_fields() -> N
     assert source_config["required_params"] == ["DATE"]
     assert "\nFROM PROD_TABLE2\n" in source_config["query_template"]
     assert source_config["query_template"].endswith("AND WORK_DATE = {DATE}")
+
+
+def test_main_filter_can_be_saved_first_as_normal_item_documents() -> None:
+    alias = deepcopy(_package()["runtime_catalog"]["aliases"]["field:DATE"])
+    alias["provenance_source"] = "natural_authoring"
+    partial = make_partial_metadata_item_documents(
+        "main_filter",
+        {"aliases": {"field:DATE": alias}},
+        "날짜와 기준일은 DATE를 뜻해.",
+        updated_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert partial["domain"] == []
+    assert partial["table_catalog"] == []
+    assert len(partial["main_filter"]) == 1
+    item = partial["main_filter"][0]
+    assert set(item) == ITEM_FIELDS
+    assert item["_id"] == "main_filter:aliases:field:DATE"
+    assert item["natural_text"]
+    assert item["payload"]["provenance_source"] == "main_filters"
+
+    database = _Database()
+    upsert_partial_metadata_items(database, partial)
+    assert len(database[MAIN_FILTER_COLLECTION].documents) == 1
+    assert database[DOMAIN_METADATA_COLLECTION].documents == {}
+    assert database[TABLE_CATALOG_COLLECTION].documents == {}
+    with pytest.raises(ContractError):
+        load_available_domain_package_from_three_collections(database)
+
+
+def test_dataset_can_extend_main_filter_partial_store_without_domain_profile() -> None:
+    package = _package()
+    alias = deepcopy(package["runtime_catalog"]["aliases"]["field:DATE"])
+    main_filter = make_partial_metadata_item_documents(
+        "main_filter",
+        {"aliases": {"field:DATE": alias}},
+        "날짜는 DATE야.",
+    )
+    dataset_payload = deepcopy(package["runtime_catalog"]["datasets"]["production"])
+    dataset_payload.pop("key", None)
+    dataset = make_partial_metadata_item_documents(
+        "dataset",
+        {"datasets": {"production": dataset_payload}},
+        "production은 생산 실적 테이블이야.",
+    )
+    database = _Database()
+    upsert_partial_metadata_items(database, main_filter)
+    upsert_partial_metadata_items(database, dataset)
+
+    assert len(database[MAIN_FILTER_COLLECTION].documents) == 1
+    assert len(database[TABLE_CATALOG_COLLECTION].documents) == 1
+    assert database[DOMAIN_METADATA_COLLECTION].documents == {}
+    with pytest.raises(ContractError):
+        load_available_domain_package_from_three_collections(database)
+
+
+def test_main_filter_then_dataset_then_domain_activates_exact_package() -> None:
+    documents = _documents()
+    database = _Database()
+    upsert_partial_metadata_items(
+        database,
+        {"domain": [], "table_catalog": [], "main_filter": documents["main_filter"]},
+    )
+    upsert_partial_metadata_items(
+        database,
+        {"domain": [], "table_catalog": documents["table_catalog"], "main_filter": documents["main_filter"]},
+    )
+    with pytest.raises(ContractError):
+        load_available_domain_package_from_three_collections(database)
+
+    replace_metadata_items(database, documents)
+    loaded = load_available_domain_package_from_three_collections(database)
+    assert loaded["runtime_catalog"] == _package()["runtime_catalog"]
 
 
 def test_loader_and_writer_use_only_registered_three_collections_and_session() -> None:
