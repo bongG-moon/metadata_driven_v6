@@ -4,7 +4,7 @@
   "uuid_namespace": "9d1be18e-0f18-52aa-8d0e-b6f8e53f4f6d",
   "inventory": {
     "path": "contracts/flow_inventory.json",
-    "sha256": "3b7bc296d72d151ac08c7cb1177e9acdd0cd1f0bde1870f7e14f892685ac59db",
+    "sha256": "d7f139fdef5d3fa62244a4c2ec451ab8886afde399a5e553455c97cd04fcd18b",
     "contract_version": "flow.inventory.v1"
   },
   "runtime_assets": {
@@ -31,7 +31,7 @@
     },
     {
       "path": "contracts/flow_inventory.json",
-      "sha256": "3b7bc296d72d151ac08c7cb1177e9acdd0cd1f0bde1870f7e14f892685ac59db"
+      "sha256": "d7f139fdef5d3fa62244a4c2ec451ab8886afde399a5e553455c97cd04fcd18b"
     },
     {
       "path": "contracts/operator_registry.json",
@@ -115,7 +115,7 @@
     },
     {
       "path": "contracts/schemas/metadata-authoring-draft.schema.json",
-      "sha256": "035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2"
+      "sha256": "c2b00a9f4e910220c413c557eaec188d143491f04484533db3d8fe3963ed309d"
     },
     {
       "path": "contracts/schemas/metadata-authoring-proposal.schema.json",
@@ -140,6 +140,18 @@
     {
       "path": "contracts/schemas/metadata-envelope.schema.json",
       "sha256": "9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048"
+    },
+    {
+      "path": "contracts/schemas/metadata-freeform-dataset-ir.schema.json",
+      "sha256": "1b22d18352b484e2ed847c2859bd4361aef4e9bb7fe52584c17ad5e4381d0642"
+    },
+    {
+      "path": "contracts/schemas/metadata-freeform-domain-ir.schema.json",
+      "sha256": "28cf27865e798227662a452dd83dba1a1ae4e7ef1a14e706ab17ed22747a970e"
+    },
+    {
+      "path": "contracts/schemas/metadata-freeform-main-filter-ir.schema.json",
+      "sha256": "d8cacb5b86029087e568b0ee2d5aabf76a8e91866cb3954bd0aa8c6e1d2e4e9f"
     },
     {
       "path": "contracts/schemas/model-profile.schema.json",
@@ -232,22 +244,22 @@
         {
           "node_id": "request_state_capsule",
           "source": "langflow_components/data_analysis/request_state_capsule.py",
-          "sha256": "80da661db23e5ea5afdc46dd92e06a41b9107f324874086188c51322e2fcd5d4"
+          "sha256": "13b9277efa4d40be0be5a463d8db58731c52b163e69b05a85a7a45ace2790885"
         },
         {
           "node_id": "domain_bundle_loader",
           "source": "langflow_components/data_analysis/domain_bundle_loader.py",
-          "sha256": "78f31ca82b1f4f573d51e893db41a9a669caf6177d136cf0c4aea3aa8fff37c8"
+          "sha256": "f84a00741511eb574c9ca67f0f1f818b5ae84df93f219f2c03cd6cac8cca4497"
         },
         {
           "node_id": "candidate_route_gate",
           "source": "langflow_components/data_analysis/candidate_route_gate.py",
-          "sha256": "7d3d87e64dd54c69d17534411f57ae9493c7edc35608a6afa676d2b21adadf41"
+          "sha256": "8c0d86f2d96c433bb863a814205f67ddcd07715bdcee15ed3d4f95a1bf0d3016"
         },
         {
           "node_id": "intent_prompt_context_builder",
           "source": "langflow_components/data_analysis/intent_prompt_context_builder.py",
-          "sha256": "db5ceefd72f9023b7ce1e78108de3991becee296090744fff7de599c431e5f50"
+          "sha256": "31a13dc18a3c8a01f579470aaab7fc8ed79acdcc308c702fe56a6f72420037e7"
         },
         {
           "node_id": "intent_prompt_bundle_composer",
@@ -262,57 +274,57 @@
         {
           "node_id": "common_intent_resolver",
           "source": "langflow_components/data_analysis/common_intent_resolver.py",
-          "sha256": "49b70d34f090f92988b38862b10bca1e4fb7ee0043e93cbac63f69fce908a7f1"
+          "sha256": "a873da4b759ca267403a8b1ac54ab34e8d5f6b38cd64f128b342a35ab14874b5"
         },
         {
           "node_id": "plan_compiler_validator",
           "source": "langflow_components/data_analysis/plan_compiler_validator.py",
-          "sha256": "3d8d363d2b06795116081cea074925d6200d9b2ab7da783b1663c6cdd8d0e834"
+          "sha256": "84d4ce69387606df53267d299a93c5ce4b9f4e3a1da282a62f383f42e9fd772a"
         },
         {
           "node_id": "retrieval_job_router",
           "source": "langflow_components/data_analysis/retrieval_job_router.py",
-          "sha256": "03824a93c576a2c19a83734e6a2f56b437b86a50519e81cbb1435e2388266444"
+          "sha256": "254e8b5308cec3f14ecd95d483d0c2dcf401479a1804779a1ab5aae650d373ae"
         },
         {
           "node_id": "dummy_source_retriever",
           "source": "langflow_components/data_analysis/dummy_source_retriever.py",
-          "sha256": "fa0ce4cb905dad3a62a77f3aff58a5bf4ff9976f59499a09c5dd60655901ca57"
+          "sha256": "c74bcee4dfbf6b59866955d3aaf73f2c1a5a7e5e4801c62032d2ea11fd534cec"
         },
         {
           "node_id": "oracle_source_retriever",
           "source": "langflow_components/data_analysis/12_oracle_source_retriever.py",
-          "sha256": "5427a01c0280d8af26907a20ca22c903c924595273849cf96f99ea44b3189fb1"
+          "sha256": "6ebcbcd2a0a5a8d2edbd6c9b3512d9eeacfed2c4120e8d8b984d85fd19b46155"
         },
         {
           "node_id": "h_api_source_retriever",
           "source": "langflow_components/data_analysis/13_h_api_source_retriever.py",
-          "sha256": "7db6137b93a28b2663db450cc7112735a3606f5e584792b66250bab36086a7a5"
+          "sha256": "12cd97d93b4999252c6e95b8fde66c64cf3d7d69cdac6279ea222ddec9df690e"
         },
         {
           "node_id": "datalake_source_retriever",
           "source": "langflow_components/data_analysis/14_datalake_source_retriever.py",
-          "sha256": "569664c960efe6afa12fa606ebd4009a371aa43dd8e37a7d17ae820e4acc1598"
+          "sha256": "b1c7b0c90415e035604ca0f5359a4779607cb5ef53c7b22acdfb5bc8997fac63"
         },
         {
           "node_id": "goodocs_source_retriever",
           "source": "langflow_components/data_analysis/15_goodocs_source_retriever.py",
-          "sha256": "7543efa198fd8702a73d721305028279cae1ecc2a3eb5e20aa85b07007b34ab2"
+          "sha256": "d1864e885026ae334f09af0ddd75178eecbcfd07dd3cbc7cf91c0da41967a219"
         },
         {
           "node_id": "source_merger",
           "source": "langflow_components/data_analysis/source_contract_merger.py",
-          "sha256": "243b736e77b619235f0d4d2d2e02ae6fc07fc0d8e464eb5df464c97d626be785"
+          "sha256": "fb9b2aa72f55134c09cd8d1989a2474f5c9ee779994ab7b4fbaff9a5821143d2"
         },
         {
           "node_id": "typed_executor_publisher",
           "source": "langflow_components/data_analysis/typed_executor_publisher.py",
-          "sha256": "dc399f3ce911a1812cd3a4a158616ca334e9a87fe8344bcb2c8c7f5c9eb1f3f0"
+          "sha256": "ede9685467968e986b6cf7065e3bb51c66dc5eb3ac64a781786e18bd95eec6a3"
         },
         {
           "node_id": "answer_facts_context_builder",
           "source": "langflow_components/data_analysis/answer_facts_context_builder.py",
-          "sha256": "ff2d7e87974896d3cf70cb50c7db66f0111734858a0df57d1bcd6013d0f87e35"
+          "sha256": "d927066ee00f6a21eff5b2b1daee2fc16f371fae5c9e3823ff26c01e04c467b7"
         },
         {
           "node_id": "answer_prompt_bundle_composer",
@@ -327,27 +339,27 @@
         {
           "node_id": "answer_claim_validator",
           "source": "langflow_components/data_analysis/answer_claim_validator.py",
-          "sha256": "018a100e7118b2076aad51910887bb60f6c4de661b306269d46726d33a3e737b"
+          "sha256": "a244c3e9744cf9b21893c51bc39ee972dc87e01f1c166f66bc52c8b16c7cc324"
         },
         {
           "node_id": "response_state_commit",
           "source": "langflow_components/data_analysis/response_state_commit.py",
-          "sha256": "ead2e9d3b87b0a9bf4112eeb92c0bb27f6cb4ad97cca1d0a5411bc110ac46d71"
+          "sha256": "b5fccf360a4fd8c167d66015f570e5af3e34ae277fcf4bd85765f807bb941197"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/data_analysis/01_message_presentation.py",
-          "sha256": "95c8de56e2e67ba40c066d7ee21c3ca92cd39ff18926a143123b0a499ff69855"
+          "sha256": "b823a183c961d0d4bc8d3c0116c81d15a2785098f32a53ae61eb98f13241b901"
         },
         {
           "node_id": "gaia_output",
           "source": "langflow_components/data_analysis/02_gaia_output.py",
-          "sha256": "29fb98c8e12a5ef0e8fe8e6723befd1d034ed6c46eaa2a87e3c713e5e10d2f01"
+          "sha256": "dbc572b4f44bf3912d54a54a7aa011cf945bf144c814d73e2215b99029f0c304"
         },
         {
           "node_id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "sha256": "db0763e1054331c5f23f7f2fd48af650fd32c801c0bb56d3de690d59aed7da48"
+          "sha256": "75c4dfbd1213f064b0b7efd145f770633ac03e5ab916291bf8c6f1cd1d1d791e"
         }
       ],
       "prompt_sources": [
@@ -378,7 +390,7 @@
         }
       ],
       "file": "metadata_v6_data_analysis_flow_v6_standalone.json",
-      "sha256": "331482f34fc203c3d173517ff5a66af9b2d290b9b91c4df80be47dc81ab4f46d"
+      "sha256": "39a2de9430a3e78862d0a7ebe83e53cc0c1ef0df1f7bac9bc7b7222ba71a77ed"
     },
     {
       "logical_key": "metadata_v6_domain_authoring",
@@ -393,35 +405,33 @@
         {
           "node_id": "simple_metadata_draft_generator",
           "source": "langflow_components/metadata_authoring/03_domain_metadata_draft_generator.py",
-          "sha256": "8de9e29f646dc36e6292c9e5d290cdc82e7847b7eaecc80bb05331ec0c7a709f",
-          "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
+          "sha256": "14e7f63e3f3b51361aa1014450ac8a89dca59c93cbad13bae436ef60d8538121"
         },
         {
           "node_id": "simple_metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
-          "sha256": "af52c3ad0fd7f12097b3ea640a25b3f4dc9d62bb170f0425f67b825c9c311590"
+          "sha256": "eedc4287560c510cf74b649acf45201f5a3e5fb5261f4fa39dd23a38bb54b0e6"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "e4c2f266c573a8b428b763b3653a6ff4e4e3eebde0370cdf91a3ae9d330f2490"
+          "sha256": "c8300addfb32be2a933d50c7cb5c2f707c4497fe1e8506defa2777f6b2944ed2"
         }
       ],
       "prompt_sources": [
         {
           "node_id": "authoring_common_prompt",
           "source": "prompts/metadata_authoring/domain_common_ko.md",
-          "sha256": "2b1c3ab02067282107cf80448f614b55df9ba596e470b79ed964883ffe4dab7a"
+          "sha256": "35576a37d7131c8ab2619589961d11c9b01b3e4d45a696d1c03a7a3423be01c4"
         },
         {
           "node_id": "authoring_specialized_prompt",
           "source": "prompts/metadata_authoring/domain_specialized_ko.md",
-          "sha256": "52ec51f3e3b918769a0759468cf67d406f68a8f10e58ffec265cfb27fafe11c3"
+          "sha256": "61ce2c5de240d1fc2dd950789dfcbbd5713944de582a69ddb4f922eb91f02959"
         }
       ],
       "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
-      "sha256": "233ef61e91c6be78c30036b75decc24860527f5b93476b1a5df4b69fae654e95"
+      "sha256": "b67444eb9bede53e562b3039e0fdcb0a3bc924534b33d44c758633432d11e3f0"
     },
     {
       "logical_key": "metadata_v6_dataset_catalog_authoring",
@@ -436,35 +446,33 @@
         {
           "node_id": "simple_metadata_draft_generator",
           "source": "langflow_components/metadata_authoring/03_dataset_metadata_draft_generator.py",
-          "sha256": "4d9ced53861c1817120cea5e48c270a6b22a2428598c246630cd0193e0f9701d",
-          "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
+          "sha256": "2d82e3d92d60b7067b58caaaf5dbc94f7ad1f6cf82d8ee6cae9cf1820e2c9f38"
         },
         {
           "node_id": "simple_metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
-          "sha256": "af52c3ad0fd7f12097b3ea640a25b3f4dc9d62bb170f0425f67b825c9c311590"
+          "sha256": "eedc4287560c510cf74b649acf45201f5a3e5fb5261f4fa39dd23a38bb54b0e6"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "e4c2f266c573a8b428b763b3653a6ff4e4e3eebde0370cdf91a3ae9d330f2490"
+          "sha256": "c8300addfb32be2a933d50c7cb5c2f707c4497fe1e8506defa2777f6b2944ed2"
         }
       ],
       "prompt_sources": [
         {
           "node_id": "authoring_common_prompt",
           "source": "prompts/metadata_authoring/dataset_common_ko.md",
-          "sha256": "6985d95a8dabef90fbbdcabba5532102e300c7d276cd408c521947d851a227a1"
+          "sha256": "380c291b0ba2dc0fd349ade9e89453e3efef5e70e3a1a5b2b0a6e8216bb5d1b9"
         },
         {
           "node_id": "authoring_specialized_prompt",
           "source": "prompts/metadata_authoring/dataset_specialized_ko.md",
-          "sha256": "24111620aa9d7cc198a9e7cf208a131170be1faf556fb12e56bc2e94f9a35083"
+          "sha256": "62b8134768613f598822425fed09a1bb4bf0b39b024dfb075f045982141a7618"
         }
       ],
       "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
-      "sha256": "aa7ddf8916c26666588132ffba2f5d67031a0d836a8cdadeedf73f07cd5f0a81"
+      "sha256": "6e9289ee3a16f18a98b3bec55b18a6459d63d98e28a845e7e47fae0928655eae"
     },
     {
       "logical_key": "metadata_v6_main_filter_authoring",
@@ -479,35 +487,33 @@
         {
           "node_id": "simple_metadata_draft_generator",
           "source": "langflow_components/metadata_authoring/03_main_filter_metadata_draft_generator.py",
-          "sha256": "0e63d797ad68b5ebbdf6d7a3b397c1be54bac64f06701814178712c236774675",
-          "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
-          "registry_source_sha256": "241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587"
+          "sha256": "623b2b6f79fded7b43f7c75ba58dc4b32e7aed305127e6efd78ecce2809e8110"
         },
         {
           "node_id": "simple_metadata_authoring_engine",
           "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
-          "sha256": "af52c3ad0fd7f12097b3ea640a25b3f4dc9d62bb170f0425f67b825c9c311590"
+          "sha256": "eedc4287560c510cf74b649acf45201f5a3e5fb5261f4fa39dd23a38bb54b0e6"
         },
         {
           "node_id": "message_presentation",
           "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
-          "sha256": "e4c2f266c573a8b428b763b3653a6ff4e4e3eebde0370cdf91a3ae9d330f2490"
+          "sha256": "c8300addfb32be2a933d50c7cb5c2f707c4497fe1e8506defa2777f6b2944ed2"
         }
       ],
       "prompt_sources": [
         {
           "node_id": "authoring_common_prompt",
           "source": "prompts/metadata_authoring/main_filter_common_ko.md",
-          "sha256": "14e4aee5a6198730f89f6ddfb80d00bbab9198dbff512422241bff558935f33f"
+          "sha256": "fcb71af9e9372ac739d61094638d6e1ecb986a9c9509240289542f0e384a1ce2"
         },
         {
           "node_id": "authoring_specialized_prompt",
           "source": "prompts/metadata_authoring/main_filter_specialized_ko.md",
-          "sha256": "a5ee26ca4440c66d209586ef19a6ea835d84a9e6093131909e6196fcdbedfac2"
+          "sha256": "687643f0c4612a9572f2e035fcbcfe17eb9156b0a4bd66ce7ae14bb743637d36"
         }
       ],
       "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-      "sha256": "70afdf2177b65967ab6e7450db16247d445c5cdc67d086d9d95c24136813cf50"
+      "sha256": "d6da47044f0363b36d3fdd3c5851612b06d7e9758539d6ef607d02fb2eb6c34f"
     }
   ]
 }

@@ -1,5 +1,7 @@
 # v6 Domain Package와 Mongo 저장 계약
 
+> 현재 import-ready 등록 계약: 작업자는 자연어 원문만 입력하며 승인 어휘·원천 레지스트리를 입력하지 않는다. LLM은 등록 종류별 폐쇄형 schema로 원문을 구조화하고, 결정론적 compiler는 도메인 메타데이터·테이블 카탈로그·메인 필터 컬렉션을 결합해 실행 참조와 전체 무결성을 검증한다. 이 문서의 `source-registry.v3` 경로는 과거 bootstrap 및 내부 회귀 검증 계약을 설명하는 부분이다.
+
 ## 1. 목적
 
 분석 Core는 특정 공정 이름을 소유하지 않는다. 사용자는 기존처럼 정형화되지 않은 Domain·Dataset·Main Filter 자연어 TXT를 입력한다. 외부 작업별 Authoring Prompt는 각 원문에 LLM을 최대 한 번씩 호출하지만 실행 metadata를 자유 생성하지 않는다. Domain은 표시명·설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR을 반환한다. 결정론적 engine이 `metadata.authoring.source-registry.v3`의 compiler-owned `semantic_templates`, dataset descriptor와 Source binding으로 세 결과를 확장·병합해 full draft를 컴파일한다. 정확성과 저장 권한은 LLM이 아니라 registry hash, schema·semantic·dependency·security compiler와 3컬렉션 transaction writer가 책임진다.

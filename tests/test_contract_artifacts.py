@@ -63,9 +63,9 @@ def test_generated_artifacts_are_current() -> None:
     assert stale == []
 
 
-def test_all_45_schemas_are_draft_2020_12_and_recursively_closed() -> None:
+def test_all_48_schemas_are_draft_2020_12_and_recursively_closed() -> None:
     schema_paths = sorted((ROOT / "contracts" / "schemas").glob("*.schema.json"))
-    assert len(schema_paths) == 45
+    assert len(schema_paths) == 48
     names = {path.name for path in schema_paths}
     assert {
         "analysis-route.schema.json",

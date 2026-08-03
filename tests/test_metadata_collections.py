@@ -155,6 +155,298 @@ def test_main_filter_can_be_saved_first_as_normal_item_documents() -> None:
         load_available_domain_package_from_three_collections(database)
 
 
+def test_domain_profile_can_be_saved_without_registry_or_other_sections() -> None:
+    partial = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "domain_id": "default",
+            "display_name": "주문 분석",
+            "description": "주문과 매출 데이터를 분석한다.",
+        },
+        "주문과 매출 데이터를 조회하는 업무야.",
+        updated_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert partial["table_catalog"] == []
+    assert partial["main_filter"] == []
+    assert len(partial["domain"]) == 1
+    item = partial["domain"][0]
+    assert item["_id"] == "domain:profile:default"
+    assert item["section"] == "profile"
+    assert item["key"] == "default"
+    assert item["natural_text"]
+    assert item["payload"] == {
+        "display_name": "주문 분석",
+        "description": "주문과 매출 데이터를 분석한다.",
+        "locale": "ko-KR",
+        "timezone": "Asia/Seoul",
+    }
+    assert item["updated_at"] == "2026-08-03T00:00:00+00:00"
+
+
+def test_process_group_is_one_domain_item_with_one_compiler_derived_alias_card() -> None:
+    partial = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "entity_groups": {
+                "DP": {
+                    "group_id": "DP",
+                    "display_name": "DP",
+                    "target_field": "OPER_NAME",
+                    "members": ["AA", "BB", "CC"],
+                    "aliases": ["DP", "D/P", "DP공정", "D/P공정", "DP 공정", "D/P 공정"],
+                }
+            }
+        },
+        "DP 공정 그룹은 OPER_NAME의 AA, BB, CC를 포함해.",
+        updated_at="2026-08-03T00:00:00+00:00",
+    )
+
+    assert partial["table_catalog"] == []
+    assert partial["main_filter"] == []
+    assert [item["_id"] for item in partial["domain"]] == [
+        "domain:entity_groups:DP",
+        "domain:aliases:entity_group:DP",
+    ]
+    group, alias = partial["domain"]
+    assert group["payload"]["target_field"] == "OPER_NAME"
+    assert group["payload"]["members"] == ["AA", "BB", "CC"]
+    assert group["payload"]["selection"] == {
+        "operator": "in",
+        "value": ["AA", "BB", "CC"],
+    }
+    assert alias["payload"]["target_type"] == "entity_group"
+    assert alias["payload"]["target_key"] == "DP"
+    assert [value["text"] for value in alias["payload"]["values"]] == [
+        "DP", "D/P", "DP공정", "D/P공정", "DP 공정", "D/P 공정"
+    ]
+    assert not any(item["key"] == "field:OPER_NAME" for item in partial["domain"])
+
+
+def test_metric_and_recipe_items_create_domain_owned_alias_cards() -> None:
+    partial = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "metrics": {
+                "WIP_QTY": {
+                    "metric_id": "WIP_QTY",
+                    "aliases": ["WIP", "재공"],
+                }
+            },
+            "recipes": {
+                "product.standard": {
+                    "recipe_id": "product.standard",
+                    "aliases": ["제품별", "제품 집계"],
+                }
+            },
+        },
+        "WIP 지표와 제품별 recipe를 등록해줘.",
+    )
+
+    rows = {item["_id"]: item for item in partial["domain"]}
+    assert rows["domain:aliases:metric:WIP_QTY"]["payload"]["target_type"] == "metric"
+    assert rows["domain:aliases:recipe:product.standard"]["payload"]["target_type"] == "recipe"
+    assert [
+        value["text"]
+        for value in rows["domain:aliases:metric:WIP_QTY"]["payload"]["values"]
+    ] == ["WIP", "재공"]
+
+
+def test_oper_name_filter_then_dp_group_then_dataset_compiles_without_cross_owner_alias() -> None:
+    package = _package()
+    profile = make_partial_metadata_item_documents(
+        "domain",
+        {"domain_id": "default", "display_name": "Manufacturing Analysis"},
+        "Manufacturing Analysis 도메인을 등록해줘.",
+    )
+    group = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "entity_groups": {
+                "DP": {
+                    "group_id": "DP",
+                    "display_name": "DP",
+                    "target_field": "OPER_NAME",
+                    "members": ["AA", "BB", "CC"],
+                    "aliases": ["DP", "D/P", "DP공정", "D/P공정", "DP 공정", "D/P 공정"],
+                }
+            }
+        },
+        "DP는 OPER_NAME의 AA, BB, CC 공정 그룹이야.",
+    )
+    field_alias = deepcopy(package["runtime_catalog"]["aliases"]["field:OPER_NAME"])
+    main_filter = make_partial_metadata_item_documents(
+        "main_filter",
+        {"aliases": {"field:OPER_NAME": field_alias}},
+        "공정은 OPER_NAME 필터야.",
+    )
+    dataset_payload = deepcopy(package["runtime_catalog"]["datasets"]["production"])
+    dataset_payload.pop("key", None)
+    dataset = make_partial_metadata_item_documents(
+        "dataset",
+        {"datasets": {"production": dataset_payload}},
+        "production 데이터에는 OPER_NAME이 있어.",
+    )
+    documents = {
+        "domain": [*profile["domain"], *group["domain"]],
+        "table_catalog": dataset["table_catalog"],
+        "main_filter": main_filter["main_filter"],
+    }
+
+    compiled = assemble_domain_package_from_items(documents)
+
+    assert compiled["runtime_catalog"]["entity_groups"]["DP"]["members"] == [
+        "AA", "BB", "CC"
+    ]
+    assert compiled["runtime_catalog"]["aliases"]["field:OPER_NAME"]["target_type"] == "field"
+    assert compiled["runtime_catalog"]["aliases"]["entity_group:DP"]["target_type"] == "entity_group"
+
+
+def test_group_first_domain_collection_compiles_with_internal_default_profile() -> None:
+    package = _package()
+    group = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "entity_groups": {
+                "DP": {
+                    "group_id": "DP",
+                    "display_name": "DP",
+                    "target_field": "OPER_NAME",
+                    "members": ["WET1", "WET2", "C/C1"],
+                    "aliases": ["DP", "D/P", "DP 공정"],
+                }
+            }
+        },
+        "DP 공정 그룹을 등록해줘.",
+    )
+    main_filter = make_partial_metadata_item_documents(
+        "main_filter",
+        {"aliases": {"field:OPER_NAME": deepcopy(package["runtime_catalog"]["aliases"]["field:OPER_NAME"])}},
+        "OPER_NAME을 주요 조회 조건으로 등록해줘.",
+    )
+    dataset_payload = deepcopy(package["runtime_catalog"]["datasets"]["production"])
+    dataset_payload.pop("key", None)
+    dataset = make_partial_metadata_item_documents(
+        "dataset", {"datasets": {"production": dataset_payload}}, "production을 등록해줘."
+    )
+
+    compiled = assemble_domain_package_from_items(
+        {
+            "domain": group["domain"],
+            "table_catalog": dataset["table_catalog"],
+            "main_filter": main_filter["main_filter"],
+        }
+    )
+
+    assert compiled["domain_id"] == "default"
+    assert compiled["runtime_catalog"]["entity_groups"]["DP"]["members"] == ["WET1", "WET2", "C/C1"]
+
+
+def test_unrelated_main_filter_target_does_not_block_domain_group_registration() -> None:
+    """A stored EQP_ID filter must not invalidate an unrelated DP group write."""
+
+    package = _package()
+    group = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "entity_groups": {
+                "DP": {
+                    "group_id": "DP",
+                    "display_name": "DP",
+                    "target_field": "OPER_NAME",
+                    "members": ["WET1", "WET2", "C/C1"],
+                    "aliases": ["DP", "D/P", "DP 공정"],
+                }
+            }
+        },
+        "DP 공정 그룹을 등록해줘.",
+    )
+    dataset_payload = deepcopy(package["runtime_catalog"]["datasets"]["production_today"])
+    dataset_payload.pop("key", None)
+    dataset = make_partial_metadata_item_documents(
+        "dataset",
+        {"datasets": {"production_today": dataset_payload}},
+        "당일 생산 실적 데이터를 등록해줘.",
+    )
+    eqp_alias = deepcopy(package["runtime_catalog"]["aliases"]["field:EQP_ID"])
+    main_filter = make_partial_metadata_item_documents(
+        "main_filter",
+        {"aliases": {"field:EQP_ID": eqp_alias}},
+        "설비 ID는 EQP_ID 필터야.",
+    )
+    documents = {
+        "domain": group["domain"],
+        "table_catalog": dataset["table_catalog"],
+        "main_filter": main_filter["main_filter"],
+    }
+    activation = {}
+
+    compiled = assemble_domain_package_from_items(
+        documents,
+        alias_activation_out=activation,
+    )
+
+    assert compiled["runtime_catalog"]["entity_groups"]["DP"]["target_field"] == "OPER_NAME"
+    assert "entity_group:DP" in compiled["runtime_catalog"]["aliases"]
+    assert "field:EQP_ID" not in compiled["runtime_catalog"]["aliases"]
+    assert activation["deferred"] == [
+        {
+            "alias_id": "field:EQP_ID",
+            "target_type": "field",
+            "target_key": "EQP_ID",
+        }
+    ]
+    # Runtime activation is a projection only.  The natural-language item is
+    # still stored and can activate automatically after a matching dataset is
+    # registered.
+    assert documents["main_filter"][0]["key"] == "field:EQP_ID"
+
+
+def test_deferred_main_filter_activates_when_matching_dataset_is_registered() -> None:
+    package = _package()
+    documents = _documents()
+    only_eqp_alias = next(
+        deepcopy(item)
+        for item in documents["main_filter"]
+        if item["key"] == "field:EQP_ID"
+    )
+    equipment_payload = deepcopy(package["runtime_catalog"]["datasets"]["equipment_assign"])
+    equipment_payload.pop("key", None)
+    equipment = make_partial_metadata_item_documents(
+        "dataset",
+        {"datasets": {"equipment_assign": equipment_payload}},
+        "설비 배정 데이터를 등록해줘.",
+    )
+    group = make_partial_metadata_item_documents(
+        "domain",
+        {
+            "entity_groups": {
+                "DP": {
+                    "group_id": "DP",
+                    "display_name": "DP",
+                    "target_field": "OPER_NAME",
+                    "members": ["WET1"],
+                    "aliases": ["DP"],
+                }
+            }
+        },
+        "DP 공정 그룹을 등록해줘.",
+    )
+    activation = {}
+
+    compiled = assemble_domain_package_from_items(
+        {
+            "domain": group["domain"],
+            "table_catalog": equipment["table_catalog"],
+            "main_filter": [only_eqp_alias],
+        },
+        alias_activation_out=activation,
+    )
+
+    assert "field:EQP_ID" in compiled["runtime_catalog"]["aliases"]
+    assert activation["deferred_count"] == 0
+
+
 def test_dataset_can_extend_main_filter_partial_store_without_domain_profile() -> None:
     package = _package()
     alias = deepcopy(package["runtime_catalog"]["aliases"]["field:DATE"])

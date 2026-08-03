@@ -1,0 +1,135 @@
+{
+  "status": "ok",
+  "contract_version": "three-collection-live-validation.v1",
+  "model": "gemini-3.5-flash-lite",
+  "database": "datagov_v6_validation",
+  "database_mode": "isolated_validation",
+  "environment": "production",
+  "domain_id": "default",
+  "collections": {
+    "domain": "agent_v6_domain_metadata",
+    "table_catalog": "agent_v6_table_catalog",
+    "main_filter": "agent_v6_main_filter"
+  },
+  "source_sha256": {
+    "domain": "af69d1abfa33b65c97b69cd5a5ed45f7613df71f4ead6a4a7a0d6a3f071fd15f",
+    "dataset": "d23a055ba45cd737f0f357f3f23fc67de51532ed0c992b30360e7f8128474702",
+    "main_filter": "4160b269332a4458581e9fe73da306ffcd77721bddf40038702978b9150e128f"
+  },
+  "prompt_bundle_sha256": {
+    "domain": "d90b9a3f8c4cad11885fa315f627b1ad976b767860cac6948d4bfb3b022efe90",
+    "dataset": "a2b5e6fb10389fec1afe98b3067d2355a790e0ab08850a1aa3540755cf6387d8",
+    "main_filter": "2e0abd1d5bc61bea07fc2ec3a4c1af4d443b422d80b6b2104df6c6dd4646dd3b"
+  },
+  "llm": {
+    "model": "gemini-3.5-flash-lite",
+    "model_contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "fallback_used": false,
+    "provider_model_versions_exact": true,
+    "calls": 3,
+    "prompt_sha256": [
+      "971f6b43e0755b5c6e5c96f0174cc18e6d32fa5a76805f549ee680a91fd0e0ed",
+      "cdaa9faa6d125c97b297323fb7d8c72206f0d57bedce224ea8998dd7de8c5b32",
+      "3d669c39b6f17af4d10326f2fc6cda24da88ab3c67a04c7c73f12adcb66f34f2"
+    ],
+    "provider_response_sha256": [
+      "9a4f55f928523749a380821fb9417bf442e9623467799b156c82cfae7efdcf0f",
+      "3d1cba99d8bf0b8410c24e922c5c649f428c1d77f465e02fa01326541550efd6",
+      "a98a8427211b0eb93b7a641382d141aa0ad5dc743746f6201d80ee9739967076"
+    ],
+    "provider_model_versions": [
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite"
+    ],
+    "finish_reasons": [
+      "STOP",
+      "STOP",
+      "STOP"
+    ],
+    "candidate_text_bytes": [
+      966,
+      817,
+      1132
+    ],
+    "usage": {
+      "prompt_tokens": 6989,
+      "candidate_tokens": 1020,
+      "total_tokens": 8009
+    }
+  },
+  "authoring": {
+    "stage": "committed",
+    "revision": 1,
+    "candidate_sha256": "e216dd90afe6b48c3b94d064dfe4a43d867b62c02763927a89e43db294b0bc4a",
+    "catalog_sha256": "057ed9d82f019986f61ef81259ec59ed32abd520e6f056eb748249f746c4dd67",
+    "llm_usage": {
+      "draft_llm_calls": 1,
+      "annotation_llm_calls": 0,
+      "repair_llm_calls": 0
+    },
+    "stages": {
+      "domain": "committed",
+      "dataset": "committed",
+      "main_filter": "committed"
+    },
+    "activation": {
+      "domain": null,
+      "dataset": null,
+      "main_filter": null
+    }
+  },
+  "storage": {
+    "collection_count": 3,
+    "item_count": 5,
+    "item_counts": {
+      "domain": 2,
+      "table_catalog": 1,
+      "main_filter": 2
+    },
+    "natural_source_present": {
+      "domain": true,
+      "table_catalog": true,
+      "main_filter": true
+    }
+  },
+  "loader": {
+    "ok": true,
+    "selection": "latest_available_release",
+    "input_names": [
+      "domain_collection",
+      "main_filter_collection",
+      "mongo_database",
+      "mongo_timeout_ms",
+      "mongo_uri",
+      "table_collection"
+    ],
+    "source_mode": "three_collections",
+    "revision": "1",
+    "catalog_sha256": "057ed9d82f019986f61ef81259ec59ed32abd520e6f056eb748249f746c4dd67",
+    "checks": {
+      "source_mode_exact": true,
+      "identity_exact": true,
+      "revision_exact": true,
+      "package_sha256_exact": true,
+      "bundle_sha256_exact": true,
+      "catalog_sha256_exact": true,
+      "loader_inputs_exact": true
+    }
+  },
+  "temporary_validation": {
+    "backup_path": "validation_outputs/mongodb_backups/v6_validation_before_temporary_run_20260803T132352Z.json.gz",
+    "previous_item_counts": {
+      "domain": 1,
+      "table_catalog": 1,
+      "main_filter": 1
+    },
+    "restore_policy": "always"
+  }
+}

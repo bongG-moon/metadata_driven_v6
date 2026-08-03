@@ -1,0 +1,15 @@
+{
+  "contract_version": "langflow.http.authoring-e2e.validation.v4",
+  "model": "gemini-3.5-flash-lite",
+  "all_passed": false,
+  "failure": {
+    "type": "ContractError",
+    "code": "langflow_validation_error",
+    "stage": "http_or_runtime",
+    "details": {}
+  },
+  "source_text_persisted": false,
+  "provider_output_persisted": false,
+  "raw_http_responses_persisted": false,
+  "secrets_persisted": false
+}

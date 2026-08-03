@@ -163,7 +163,13 @@ def _filter_mask(frame: pd.DataFrame, tree: dict[str, Any], depth: int = 0) -> p
     raw = frame[field]
     series = _typed_series(raw, tree.get("semantic_type"))
     value = tree.get("value")
-    values = tree.get("values") if isinstance(tree.get("values"), list) else []
+    values = (
+        tree.get("values")
+        if isinstance(tree.get("values"), list)
+        else value
+        if isinstance(value, list)
+        else []
+    )
 
     if operator == "is_null":
         return raw.isna()

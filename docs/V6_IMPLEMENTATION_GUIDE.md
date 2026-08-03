@@ -1,5 +1,7 @@
 # metadata_driven_v6 구현 가이드
 
+> 현재 import-ready 등록 Flow의 작업자 입력에는 `registry_json`, `domain_id`, `environment`가 없다. 세 컬렉션의 항목 단위 저장값을 compiler가 결합하며, source registry 관련 컴포넌트와 검증기는 레거시 마이그레이션 및 내부 회귀 용도로만 유지한다.
+
 ## 1. 구현 순서
 
 v5 Python 파일을 먼저 복사하지 않는다. contract, case manifest, compiler/operator를 Python 단위에서 검증한 뒤 Langflow component와 Flow JSON을 만든다. 이 문서가 놓인 `metadata_driven_v6` 폴더 자체가 독립 project/repository root다. Phase 1은 이 root에 파일을 추가하며 `metadata_driven_v6/metadata_driven_v6/` 같은 중첩 폴더를 만들지 않는다.

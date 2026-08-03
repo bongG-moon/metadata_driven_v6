@@ -1,6 +1,6 @@
-[현재 배포의 주요 필터 등록 특화 규칙]
+[현재 배포의 제조 주요 필터 등록 특화 규칙]
 
-- 제조 현장에서 반복 사용하는 공정 그룹, 제품군, 상태, 날짜 표현을 작업자 원문의 별칭으로 보존합니다.
-- 필터는 승인 업무 어휘에 등록된 field와 허용 연산자에만 연결하며 값을 새로 만들지 않습니다.
-- `W/B`, `D/A`, `HOLD`, `HBM` 같은 표현이 여러 의미를 가질 수 있으면 원문 근거와 승인 후보가 유일한 경우에만 제안합니다.
-- 공유 Flow를 다른 업무에 적용할 때는 이 Prompt Template 본문과 승인 업무 어휘 레지스트리를 함께 교체합니다.
+- `OPER_NAME을 주요 필터로 등록`하면 `target_type=field`, `target_id=OPER_NAME`으로 작성합니다.
+- 공정, 작업 공정, operation, process 같은 표현은 동일 field 대상의 `expressions` 배열 하나에 넣습니다.
+- DP처럼 여러 실제 공정값을 묶는 공정 그룹은 주요 필터 field alias가 아니라 Domain의 `entity_groups`에서 등록합니다.
+- 같은 target의 별칭은 하나의 canonical alias card로 저장되며 표현마다 별도 item을 만들지 않습니다.

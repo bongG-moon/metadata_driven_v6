@@ -1,0 +1,168 @@
+{
+  "status": "ok",
+  "contract_version": "metadata.authoring.live-replay.v1",
+  "model": "gemini-3.5-flash-lite",
+  "database": "datagov",
+  "collections": {
+    "domain": "agent_v6_domain_metadata",
+    "table_catalog": "agent_v6_table_catalog",
+    "main_filter": "agent_v6_main_filter"
+  },
+  "backup_path": "C:\\Users\\qkekt\\Desktop\\metadata_driven_v6\\validation_outputs\\mongodb_backups\\v6_metadata_before_replay_20260803T100706Z.json.gz",
+  "before_counts": {
+    "domain": 147,
+    "table_catalog": 20,
+    "main_filter": 49
+  },
+  "after_counts": {
+    "domain": 3,
+    "table_catalog": 1,
+    "main_filter": 1
+  },
+  "steps": [
+    {
+      "label": "main_filter_oper_name",
+      "kind": "main_filter",
+      "stage": "committed",
+      "activation_status": null,
+      "ready_sections": null,
+      "missing_sections": null,
+      "revision": 0,
+      "draft_llm_calls": 1,
+      "counts_after": {
+        "domain": 0,
+        "table_catalog": 0,
+        "main_filter": 1
+      }
+    },
+    {
+      "label": "domain_profile",
+      "kind": "domain",
+      "stage": "committed",
+      "activation_status": null,
+      "ready_sections": null,
+      "missing_sections": null,
+      "revision": 0,
+      "draft_llm_calls": 1,
+      "counts_after": {
+        "domain": 1,
+        "table_catalog": 0,
+        "main_filter": 1
+      }
+    },
+    {
+      "label": "domain_group_dp",
+      "kind": "domain",
+      "stage": "committed",
+      "activation_status": null,
+      "ready_sections": null,
+      "missing_sections": null,
+      "revision": 0,
+      "draft_llm_calls": 1,
+      "counts_after": {
+        "domain": 3,
+        "table_catalog": 0,
+        "main_filter": 1
+      }
+    },
+    {
+      "label": "dataset_process_status",
+      "kind": "dataset",
+      "stage": "committed",
+      "activation_status": null,
+      "ready_sections": null,
+      "missing_sections": null,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "counts_after": {
+        "domain": 3,
+        "table_catalog": 1,
+        "main_filter": 1
+      }
+    }
+  ],
+  "stored_ids": {
+    "domain": [
+      "domain:aliases:entity_group:DP",
+      "domain:entity_groups:DP",
+      "domain:profile:default"
+    ],
+    "table_catalog": [
+      "table_catalog:datasets:process_status"
+    ],
+    "main_filter": [
+      "main_filter:aliases:field:OPER_NAME"
+    ]
+  },
+  "dp_group": {
+    "target_field": "OPER_NAME",
+    "members": [
+      "AA",
+      "BB",
+      "CC"
+    ],
+    "aliases": [
+      "DP",
+      "D/P",
+      "DP공정",
+      "D/P공정",
+      "DP 공정",
+      "D/P 공정"
+    ]
+  },
+  "loader": {
+    "ok": true,
+    "domain_id": "default",
+    "environment": "production",
+    "source_mode": "three_collections",
+    "catalog_sha256": "e3da1031f21c0f26e184ab37a2eceb3b4c31a7d5542cb8f40f2733b4c677794a"
+  },
+  "llm": {
+    "model": "gemini-3.5-flash-lite",
+    "model_contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "fallback_used": false,
+    "provider_model_versions_exact": true,
+    "calls": 4,
+    "prompt_sha256": [
+      "49ab5685ff6c7007809a62f72f162a97aeb42c5feccc8b94bab3e70f8f653ba6",
+      "46e2731c659b27d6a70b22af55819cb49c7e2e04cccddca28758b168f0248081",
+      "88cafb5ecde6cc9e2afdff20aff3fe7184da796ab23295fd69f678a1008989ad",
+      "82d3f4d2b433905e7aadca933a2cab97bc146722a7ecbef3ef3c7aa75e41c94b"
+    ],
+    "provider_response_sha256": [
+      "aeb28e55d83160bb5ef76778568d5c17bb31962a41926136bc5b2220c1a879a1",
+      "15b04657b0b49545ee8e0b0c08103770c7438cdc5193e6bbdb0d2b94677b57b6",
+      "ccea880627923b1fd4e7fa031640cdb3d749c6b11088f00a77ca821682c39382",
+      "7e8b853de98c343172777a83da69e672169acd88531a457e5c82487b7c0f8155"
+    ],
+    "provider_model_versions": [
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite",
+      "gemini-3.5-flash-lite"
+    ],
+    "finish_reasons": [
+      "STOP",
+      "STOP",
+      "STOP",
+      "STOP"
+    ],
+    "candidate_text_bytes": [
+      471,
+      413,
+      565,
+      689
+    ],
+    "usage": {
+      "prompt_tokens": 9052,
+      "candidate_tokens": 850,
+      "total_tokens": 9902
+    }
+  }
+}

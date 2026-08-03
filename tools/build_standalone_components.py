@@ -1241,6 +1241,69 @@ from lfx.io import DataInput, Output
 from lfx.schema.data import Data
 
 
+def _generic_fixture_results(jobs, catalog):
+    results = []
+    datasets = catalog.get("datasets") if isinstance(catalog, dict) else {}
+    for index, job in enumerate(jobs or []):
+        dataset_key = str(job.get("dataset_key") or "")
+        dataset = (datasets or {}).get(dataset_key) or {}
+        bindings = dataset.get("fields") if isinstance(dataset.get("fields"), dict) else {}
+        required_fields = [str(field) for field in job.get("required_fields") or bindings]
+        parameters = (
+            job.get("parameters")
+            if isinstance(job.get("parameters"), dict)
+            else job.get("params")
+            if isinstance(job.get("params"), dict)
+            else {}
+        )
+        filters = job.get("filters")
+        selected = []
+        for physical in physical_rows_for_dataset(dataset_key):
+            canonical = {}
+            physical_names = {}
+            for field, binding in bindings.items():
+                card = binding if isinstance(binding, dict) else {}
+                candidates = [
+                    str(card.get("physical_column") or ""),
+                    *[str(value) for value in card.get("physical_aliases") or []],
+                ]
+                present = next(
+                    (name for name in candidates if name and name in physical), None
+                )
+                if present is not None:
+                    canonical[str(field)] = physical[present]
+                    physical_names[str(field)] = present
+            if not _params_match(canonical, parameters) or not _filters_match(
+                canonical, filters
+            ):
+                continue
+            selected.append(
+                {
+                    physical_names[field]: physical[physical_names[field]]
+                    for field in required_fields
+                    if field in physical_names
+                }
+            )
+        alias = str(
+            job.get("source_alias")
+            or job.get("job_id")
+            or dataset_key
+        )
+        result = source_result_for_dataset(
+            dataset_key,
+            source_alias=alias,
+            rows=selected,
+            chunk_index=int(job.get("chunk_index") or 0),
+        )
+        result["source_result_id"] = (
+            f"dummy:{job.get('job_id') or index}:{result['content_sha256'][:16]}"
+        )
+        result["applied_parameters"] = deepcopy(parameters)
+        result["applied_filters_sha256"] = sha256_json(filters or {})
+        results.append(result)
+    return results
+
+
 class DummySourceRetriever(Component):
     display_name = "11 검증용 더미 데이터 조회"
     description = "테스트와 검증 환경에서만 실행 계획에 맞는 결정론적 더미 원천 결과를 생성합니다."
@@ -1290,6 +1353,31 @@ class DummySourceRetriever(Component):
                     and profile.get("planner_profile") == "legacy_v1_compat"
                     and str(profile.get("legacy_catalog_sha256") or "") == embedded_hash
                 )
+            elif candidate_lane == "generic_v2":
+                active_datasets = (
+                    active_catalog.get("datasets")
+                    if isinstance(active_catalog, dict)
+                    and isinstance(active_catalog.get("datasets"), dict)
+                    else {}
+                )
+                embedded_datasets = EMBEDDED_RUNTIME_CATALOG.get("datasets") or {}
+                requested_keys = list(dict.fromkeys(
+                    str(job.get("dataset_key") or "")
+                    for job in jobs.get("jobs") or []
+                    if isinstance(job, dict) and str(job.get("dataset_key") or "")
+                ))
+                fixture_allowed = bool(requested_keys) and all(
+                    dataset_key in active_datasets
+                    and dataset_key in embedded_datasets
+                    and all(
+                        str(field) in (active_datasets[dataset_key].get("fields") or {})
+                        for job in jobs.get("jobs") or []
+                        if isinstance(job, dict)
+                        and str(job.get("dataset_key") or "") == dataset_key
+                        for field in job.get("required_fields") or []
+                    )
+                    for dataset_key in requested_keys
+                )
             else:
                 fixture_allowed = False
             if not fixture_allowed:
@@ -1302,12 +1390,16 @@ class DummySourceRetriever(Component):
                         "candidate_lane": candidate_lane,
                     },
                 )
+            source_results = (
+                _generic_fixture_results(jobs.get("jobs") or [], active_catalog)
+                if candidate_lane == "generic_v2"
+                else source_results_for_jobs(
+                    jobs.get("jobs") or [], EMBEDDED_RUNTIME_CATALOG
+                )
+            )
             lane.update({
                 "status": "selected",
-                "source_results": source_results_for_jobs(
-                    jobs.get("jobs") or [],
-                    EMBEDDED_RUNTIME_CATALOG,
-                ),
+                "source_results": source_results,
                 "data_mode": "dummy",
                 "candidate_lane": candidate_lane,
             })
@@ -3555,20 +3647,29 @@ def _authoring_output_schema(
     if kind == "domain" and not bootstrap_fragment:
         draft_schema = full_schema
     elif kind == "domain" and bootstrap_fragment:
-        # Executable semantic cards are compiler-owned templates from the
-        # approved registry. The LLM only annotates the worker's prose.
-        draft_schema = load_schema("metadata-annotation-proposal.schema.json")
+        if approved_semantic_vocabulary is None:
+            # Free-form workers author one v5-style item list.  The engine
+            # expands it into canonical v6 sections before compilation.
+            draft_schema = load_schema("metadata-freeform-domain-ir.schema.json")
+        else:
+            # Legacy registry-backed bootstrap remains available to internal
+            # validation tools, but is no longer exposed by import-ready flows.
+            draft_schema = load_schema("metadata-annotation-proposal.schema.json")
     elif kind == "dataset":
-        # The worker still writes unrestricted natural language.  Only the
-        # internal LLM-facing representation is compact so a large field
-        # catalog does not consume the provider's output ceiling.  The engine
-        # expands this closed IR before the full authoring/compiler gates.
-        draft_schema = load_schema("metadata-bootstrap-dataset-ir.schema.json")
+        if bootstrap_fragment and approved_semantic_vocabulary is None:
+            draft_schema = load_schema("metadata-freeform-dataset-ir.schema.json")
+        else:
+            # Registry-backed internal tooling may still use the compact IR.
+            draft_schema = load_schema("metadata-bootstrap-dataset-ir.schema.json")
     elif kind == "main_filter":
         # The provider returns a closed list rather than a dynamic aliases map.
         # Requiring target_type removes ambiguity when a field and metric share
         # the same canonical ID. The engine expands this IR into alias cards.
-        draft_schema = load_schema("metadata-bootstrap-main-filter-ir.schema.json")
+        draft_schema = load_schema(
+            "metadata-freeform-main-filter-ir.schema.json"
+            if bootstrap_fragment and approved_semantic_vocabulary is None
+            else "metadata-bootstrap-main-filter-ir.schema.json"
+        )
         if approved_semantic_vocabulary is not None:
             draft_schema = _apply_main_filter_ir_allowlists(
                 draft_schema,
@@ -3681,6 +3782,21 @@ def _authoring_output_schema(
     if not source_sha256:
         return draft_schema
     proposal_schema = deepcopy(load_schema("metadata-authoring-proposal.schema.json"))
+    # Local refs such as #/$defs/dataset are resolved from the proposal root,
+    # not from the nested draft object. Hoist draft definitions to that root so
+    # jsonschema, Langflow and provider-native schema validators agree.
+    # Keep local definitions beside the nested draft schema.  Each schema has
+    # its own $id, so moving #/$defs references to the proposal root breaks
+    # standards-compliant jsonschema resolution.
+    draft_definitions = {}
+    proposal_definitions = proposal_schema.setdefault("$defs", {})
+    if set(draft_definitions) & set(proposal_definitions):
+        raise ContractError(
+            "metadata_schema_error",
+            "metadata_prompt_context",
+            "등록 초안 schema definition 이름이 proposal 계약과 충돌합니다.",
+        )
+    proposal_definitions.update(draft_definitions)
     for branch in proposal_schema.get("oneOf") or []:
         if not isinstance(branch, dict):
             continue
@@ -3880,12 +3996,9 @@ class AuthoringPromptContextBuilder(Component):
                 or reference_context.get("registry_sha256") != expected_registry_sha256
             ):
                 raise ContractError("metadata_dependency_error", "metadata_prompt_context", "승인 Source 참조 컨텍스트 hash 또는 도메인 결합이 유효하지 않습니다.")
-        if bootstrap_fragment and not reference_context:
-            raise ContractError(
-                "metadata_dependency_error",
-                "metadata_prompt_context",
-                "분할 초기 등록에는 승인 축약 의미 어휘가 필요합니다.",
-            )
+        # Without a connected registry, bootstrap_fragment means an
+        # independently storable three-collection item. Registry-backed
+        # bootstrap still follows the stricter branch above.
         invoke = kind in {"domain", "dataset"}
         if kind == "main_filter" and strict_inventory:
             invoke = _authoring_alias_only_manifest_patch(source_manifest) is None
@@ -4309,6 +4422,13 @@ def _bootstrap_output_schema(
 ):
     proposal_schema = deepcopy(load_schema("metadata-authoring-proposal.schema.json"))
     draft_schema = _bootstrap_fragment_draft_schema(kind)
+    if approved_semantic_vocabulary is None:
+        if kind == "domain":
+            draft_schema = load_schema("metadata-freeform-domain-ir.schema.json")
+        elif kind == "dataset":
+            draft_schema = load_schema("metadata-freeform-dataset-ir.schema.json")
+        elif kind == "main_filter":
+            draft_schema = load_schema("metadata-freeform-main-filter-ir.schema.json")
     if kind == "main_filter" and approved_semantic_vocabulary is not None:
         draft_schema = _apply_main_filter_ir_allowlists(
             draft_schema, approved_semantic_vocabulary
@@ -4363,6 +4483,15 @@ def _bootstrap_output_schema(
         draft_schema["$defs"]["datasetCard"] = {
             "oneOf": dataset_branches
         }
+    draft_definitions = {}
+    proposal_definitions = proposal_schema.setdefault("$defs", {})
+    if set(draft_definitions) & set(proposal_definitions):
+        raise ContractError(
+            "metadata_schema_error",
+            "metadata_prompt_contract",
+            "등록 초안 schema definition 이름이 proposal 계약과 충돌합니다.",
+        )
+    proposal_definitions.update(draft_definitions)
     for branch in proposal_schema.get("oneOf") or []:
         properties = branch.get("properties") if isinstance(branch, dict) else None
         required = branch.get("required") if isinstance(branch, dict) else None
@@ -4389,7 +4518,14 @@ def _authoring_section_output_schema(
     approved_dataset_field_ids=None,
     approved_semantic_vocabulary=None,
 ):
-    if kind == "domain":
+    if grounding_mode == "freeform_llm" and approved_semantic_vocabulary is None and not annotation_only:
+        schema_name = {
+            "domain": "metadata-freeform-domain-ir.schema.json",
+            "dataset": "metadata-freeform-dataset-ir.schema.json",
+            "main_filter": "metadata-freeform-main-filter-ir.schema.json",
+        }.get(kind)
+        draft_schema = load_schema(schema_name) if schema_name else {}
+    elif kind == "domain":
         draft_schema = load_schema(
             "metadata-annotation-proposal.schema.json"
             if annotation_only
@@ -4460,6 +4596,15 @@ def _authoring_section_output_schema(
     proposal_schema = deepcopy(
         load_schema("metadata-authoring-proposal.schema.json")
     )
+    draft_definitions = {}
+    proposal_definitions = proposal_schema.setdefault("$defs", {})
+    if set(draft_definitions) & set(proposal_definitions):
+        raise ContractError(
+            "metadata_schema_error",
+            "metadata_prompt_contract",
+            "등록 초안 schema definition 이름이 proposal 계약과 충돌합니다.",
+        )
+    proposal_definitions.update(draft_definitions)
     for branch in proposal_schema.get("oneOf") or []:
         properties = branch.get("properties") if isinstance(branch, dict) else None
         required = branch.get("required") if isinstance(branch, dict) else None
@@ -4906,6 +5051,751 @@ def _merge_equivalent_compact_field_cards(existing, incoming, dataset_id, field_
     return merged
 
 
+_FREEFORM_FIELD_ROLES = {
+    "filter", "group", "join", "compare", "aggregate", "derive",
+    "project", "sort", "rank", "metric", "output",
+}
+
+
+def _freeform_csv_values(value):
+    return [
+        item.strip(" \t\r\n.。'")
+        for item in re.split(r"\s*,\s*", str(value or ""))
+        if item.strip(" \t\r\n.。'")
+    ]
+
+
+def _freeform_filter_mappings(source_text):
+    """Read canonical -> physical mappings directly from worker text."""
+
+    text = str(source_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    marker = re.search(r"(?i)(?<![A-Za-z0-9_])filter_mappings(?![A-Za-z0-9_])", text)
+    if marker is None:
+        return {}
+    tail = text[marker.end():]
+    end = re.search(
+        r"(?im)^\s*(?:standard_column_aliases|default_detail_columns|metric_semantics|"
+        r"selection_criteria|required_params|required_param_mappings|query_template)\s*(?:[:=]|(?:은|는)\b)",
+        tail,
+    )
+    if end:
+        tail = tail[:end.start()]
+    mappings = {}
+    for match in re.finditer(
+        r"(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*[-=]>\s*"
+        r"([A-Za-z][A-Za-z0-9_$#.-]{0,255})",
+        tail,
+    ):
+        canonical, physical = match.group(1), match.group(2)
+        if canonical in mappings and mappings[canonical] != physical:
+            raise ContractError(
+                "metadata_schema_error", "metadata_dataset_mapping",
+                "filter_mappings에 같은 표준 필드의 물리 컬럼이 두 개 이상 지정되었습니다.",
+                {"field_id": canonical},
+            )
+        mappings[canonical] = physical
+    return mappings
+
+
+def _freeform_query_columns(source_text):
+    """Extract simple SELECT output names without changing the SQL text."""
+
+    text = str(source_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    marker = _QUERY_MARKER.search(text)
+    if marker is None:
+        return []
+    boundary = _QUERY_BLOCK_END.search(text, marker.end())
+    query = text[marker.end() : boundary.start() if boundary else len(text)]
+    neutral = re.sub(r"/\*.*?\*/", " ", query, flags=re.DOTALL)
+    neutral = re.sub(r"(?m)--[^\n]*$", " ", neutral)
+    select_match = re.search(r"(?is)\bSELECT\b(.*?)\bFROM\b", neutral)
+    if select_match is None:
+        return []
+    columns = []
+    for expression in select_match.group(1).split(","):
+        value = expression.strip()
+        if not value:
+            continue
+        alias = re.search(r"(?i)\bAS\s+([A-Za-z][A-Za-z0-9_$#.-]{0,255})\s*$", value)
+        if alias:
+            name = alias.group(1)
+        else:
+            token = value.split()[-1]
+            name = token.rsplit(".", 1)[-1].strip('"')
+        if re.fullmatch(r"[A-Za-z][A-Za-z0-9_$#.-]{0,255}", name) and name not in columns:
+            columns.append(name)
+    return columns
+
+
+def _freeform_selection_criteria(source_text):
+    text = str(source_text or "").replace("\r\n", "\n").replace("\r", "\n")
+    result = {}
+    scope = re.search(
+        r"(?i)selection_criteria(?:의|\.)?\s*time_scope\s*(?:은|는|:|=)\s*"
+        r"([A-Za-z][A-Za-z0-9_.-]{0,63})",
+        text,
+    )
+    if scope:
+        result["time_scope"] = scope.group(1)
+    elif "당일용" in text:
+        result["time_scope"] = "current_day"
+    elif "이력" in text:
+        result["time_scope"] = "history"
+    use_when = re.search(
+        r"(?is)selection_criteria(?:의|\.)?\s*use_when\s*(?:은|는|:|=)\s*(.*?)"
+        r"\s*(?:이고|이며|,?\s*exclude_when\s*(?:은|는|:|=))",
+        text,
+    )
+    exclude_when = re.search(
+        r"(?is)exclude_when\s*(?:은|는|:|=)\s*(.*?)(?:이야|입니다|해\.?|\n\s*조회|\n\s*filter_mappings|$)",
+        text,
+    )
+    if use_when:
+        result["use_when"] = _freeform_csv_values(use_when.group(1))
+    if exclude_when:
+        result["exclude_when"] = _freeform_csv_values(exclude_when.group(1))
+    return result
+
+
+def _freeform_dataset_family(source_text, dataset_id):
+    text = str(source_text or "")
+    patterns = (
+        rf"(?i)(?<![A-Za-z0-9_]){re.escape(dataset_id)}(?![A-Za-z0-9_]).{{0,80}}?"
+        r"([A-Za-z][A-Za-z0-9_.-]{0,127})\s*계열",
+        r"(?i)(?:dataset_)?family\s*(?:은|는|:|=)\s*([A-Za-z][A-Za-z0-9_.-]{0,127})",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, text, flags=re.DOTALL)
+        if match:
+            return match.group(1)
+    return ""
+
+
+def _freeform_source_type(source_text):
+    folded = str(source_text or "").casefold()
+    markers = (
+        ("oracle", "oracle"), ("datalake", "datalake"),
+        ("goodocs", "goodocs"), ("mongodb", "mongodb"),
+        ("h-api", "http"), ("http", "http"),
+    )
+    for marker, source_type in markers:
+        if marker in folded:
+            return source_type
+    return ""
+
+
+def _freeform_field_semantic_type(field_id, physical_column, source_text, proposed=""):
+    """Derive a stable field type without trusting the model's guess.
+
+    The same canonical field must have one semantic type across datasets.  An
+    LLM-proposed type is therefore evidence only; allowing it to win here made
+    one provider response mark every production_today column as ``date``.
+    Worker text and conservative identifier rules are the authority.
+    """
+
+    marker = f"{field_id} {physical_column}".upper()
+    identifier_tokens = set(re.findall(r"[A-Z0-9]+", marker))
+    text = str(source_text or "")
+    if identifier_tokens & {"DATE", "DT", "DATETIME", "TIMESTAMP", "TIME", "AT"}:
+        return "date"
+    if identifier_tokens & {
+        "QTY", "QUANTITY", "COUNT", "CNT", "AMOUNT", "PRODUCTION",
+        "WIP", "PRESS", "SEQ", "TAT", "UPH", "RATE", "YIELD",
+    }:
+        return "number"
+    identifiers = [str(field_id or "").strip(), str(physical_column or "").strip()]
+    for sentence in re.split(r"[\r\n.!?]+", text):
+        if not any(
+            identifier
+            and re.search(
+                rf"(?<![A-Za-z0-9_]){re.escape(identifier)}(?![A-Za-z0-9_])",
+                sentence,
+                re.IGNORECASE,
+            )
+            for identifier in identifiers
+        ):
+            continue
+        if re.search(r"YYYY[- ]?MM[- ]?DD|날짜|기준일|일자|시각|시간", sentence, re.IGNORECASE):
+            return "date"
+        if re.search(r"수량|생산량|건수|합계|개수|대수|평균|비율", sentence):
+            return "number"
+    return "string"
+
+
+def _freeform_field_roles(field_id, physical_column, explicit_mappings, semantic_type, proposed=None):
+    if field_id in explicit_mappings:
+        # An explicitly mapped business field is both a safe predicate target
+        # and a valid grouping key.  Omitting ``group`` made a later natural
+        # grain registration fail even though the dataset mapping was valid.
+        return ["filter", "group", "project", "output"]
+    if semantic_type in {"number", "integer", "decimal", "float"} and re.search(
+        r"(?:QTY|QUANTITY|COUNT|CNT|AMOUNT|PRODUCTION|WIP|UPH|TAT|RATE|YIELD)",
+        f"{field_id} {physical_column}",
+        re.IGNORECASE,
+    ):
+        return ["aggregate", "metric", "output"]
+    return ["project", "output"]
+
+
+def _freeform_dataset_source_segment(source_text, dataset_id):
+    """Return only the worker-authored block that registers ``dataset_id``.
+
+    A worker may keep several item-sized registrations in one TXT file for
+    convenience, while the authoring Flow still processes one dataset card at
+    a time.  Field mappings and SQL columns must never bleed from a neighboring
+    dataset block.  The explicit ``<id>로/으로 등록`` sentences are the stable
+    natural-language boundaries used by the v5 inputs as well as v6.
+    """
+
+    text = str(source_text or "")
+    marker = re.compile(
+        r"(?im)^[^\r\n]*?(?<![A-Za-z0-9_.-])"
+        r"([A-Za-z][A-Za-z0-9_.-]{0,127})\s*(?:으)?로\s*등록[^\r\n]*$"
+    )
+    matches = list(marker.finditer(text))
+    for index, match in enumerate(matches):
+        if match.group(1) != str(dataset_id or ""):
+            continue
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
+        return text[match.start() : end]
+    return text
+
+
+def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=None):
+    """Expand v5-style dataset cards using only explicit worker text."""
+
+    if not isinstance(fragment, dict) or set(fragment) != {"dataset_cards"}:
+        raise ContractError(
+            "metadata_schema_error", "metadata_authoring",
+            "테이블 카탈로그 등록 결과는 dataset_cards 목록이어야 합니다.",
+        )
+    cards = fragment.get("dataset_cards")
+    if not isinstance(cards, list) or not cards:
+        raise ContractError(
+            "metadata_schema_error", "metadata_authoring",
+            "등록할 데이터셋 항목이 없습니다.",
+        )
+    explicit_dataset_id = _freeform_dataset_id(source_text)
+    datasets = {}
+    dataset_identity_overrides = []
+    discarded_model_semantic_types = 0
+    total_filter_mappings = 0
+    total_query_columns = 0
+    selection_criteria_from_text = False
+    for card_index, raw_card in enumerate(cards):
+        if not isinstance(raw_card, dict):
+            raise ContractError("metadata_schema_error", "metadata_authoring", "데이터셋 card는 object여야 합니다.")
+        proposed_dataset_id = str(raw_card.get("dataset_id") or "").strip()
+        dataset_id = (
+            explicit_dataset_id
+            if len(cards) == 1 and explicit_dataset_id
+            else proposed_dataset_id
+        )
+        if proposed_dataset_id and proposed_dataset_id != dataset_id:
+            dataset_identity_overrides.append(
+                {"proposed": proposed_dataset_id, "source_authority": dataset_id}
+            )
+        if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}", dataset_id) or dataset_id in datasets:
+            raise ContractError(
+                "metadata_schema_error", "metadata_authoring",
+                "dataset_id가 없거나 중복되었습니다.",
+                {"dataset_index": card_index, "dataset_id": dataset_id},
+            )
+        dataset_source_text = _freeform_dataset_source_segment(source_text, dataset_id)
+        explicit_mappings = _freeform_filter_mappings(dataset_source_text)
+        query_columns = _freeform_query_columns(dataset_source_text)
+        query_column_set = {value.casefold() for value in query_columns}
+        selection_from_text = _freeform_selection_criteria(dataset_source_text)
+        reverse_mapping = {
+            physical.casefold(): canonical
+            for canonical, physical in explicit_mappings.items()
+        }
+        total_filter_mappings += len(explicit_mappings)
+        total_query_columns += len(query_columns)
+        selection_criteria_from_text = (
+            selection_criteria_from_text or bool(selection_from_text)
+        )
+        family = str(
+            _freeform_dataset_family(dataset_source_text, dataset_id)
+            or dataset_id
+        ).strip()
+        source_type = str(
+            _freeform_source_type(dataset_source_text)
+            or raw_card.get("source_type")
+            or ""
+        ).strip().casefold()
+        if not family or source_type not in {
+            "oracle", "sql", "mongodb", "http", "datalake", "goodocs",
+            "file", "dummy", "previous_result",
+        }:
+            raise ContractError(
+                "metadata_clarification_required", "metadata_clarification",
+                "데이터 계열 또는 원천 종류를 자연어 설명에서 확인할 수 없습니다.",
+                {"questions": ["데이터셋의 계열 이름과 원천 종류를 알려주세요."], "missing_fields": ["데이터 계열 또는 원천 종류"]},
+            )
+
+        model_fields = {}
+        for field_index, raw_field in enumerate(raw_card.get("fields") or []):
+            if not isinstance(raw_field, dict):
+                raise ContractError("metadata_schema_error", "metadata_authoring", "field card는 object여야 합니다.")
+            field_id = str(raw_field.get("id") or "").strip()
+            physical = str(raw_field.get("col") or "").strip()
+            if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}", field_id) or not physical:
+                raise ContractError(
+                    "metadata_schema_error", "metadata_authoring",
+                    "field card의 id 또는 col이 올바르지 않습니다.",
+                    {"dataset_id": dataset_id, "field_index": field_index},
+                )
+            explicitly_grounded = (
+                field_id in explicit_mappings
+                or physical.casefold() in query_column_set
+                or re.search(
+                    rf"(?<![A-Za-z0-9_])(?:{re.escape(field_id)}|{re.escape(physical)})(?![A-Za-z0-9_])",
+                    dataset_source_text,
+                    re.IGNORECASE,
+                )
+                is not None
+            )
+            if not explicitly_grounded:
+                # A model card may contain a field copied from another item in
+                # the same long TXT.  Only this dataset's own natural-language
+                # block is authoritative.
+                continue
+            # The explicit v5 filter_mappings sentence is the execution
+            # authority when prose and mapping text disagree.
+            if field_id in explicit_mappings:
+                physical = explicit_mappings[field_id]
+            if field_id in model_fields and model_fields[field_id]["physical_column"] != physical:
+                raise ContractError(
+                    "metadata_schema_error", "metadata_dataset_mapping",
+                    "같은 표준 필드가 서로 다른 물리 컬럼으로 제안되었습니다.",
+                    {"dataset_id": dataset_id, "field_id": field_id},
+                )
+            semantic_type = _freeform_field_semantic_type(
+                field_id, physical, dataset_source_text, raw_field.get("semantic_type")
+            )
+            if (
+                str(raw_field.get("semantic_type") or "").strip()
+                and str(raw_field.get("semantic_type") or "").strip().casefold()
+                != semantic_type.casefold()
+            ):
+                discarded_model_semantic_types += 1
+            binding = {
+                "physical_column": physical,
+                "semantic_type": semantic_type,
+                "roles": _freeform_field_roles(
+                    field_id, physical, explicit_mappings, semantic_type, raw_field.get("roles")
+                ),
+            }
+            aliases = [str(item).strip() for item in raw_field.get("aliases") or [] if str(item).strip()]
+            if aliases:
+                binding["aliases"] = list(dict.fromkeys(aliases))
+            if str(raw_field.get("unit") or "").strip():
+                binding["unit"] = str(raw_field["unit"]).strip()
+            model_fields[field_id] = binding
+
+        for canonical, physical in explicit_mappings.items():
+            if canonical not in model_fields:
+                semantic_type = _freeform_field_semantic_type(
+                    canonical, physical, dataset_source_text
+                )
+                model_fields[canonical] = {
+                    "physical_column": physical,
+                    "semantic_type": semantic_type,
+                    "roles": _freeform_field_roles(canonical, physical, explicit_mappings, semantic_type),
+                }
+        for physical in query_columns:
+            canonical = reverse_mapping.get(physical.casefold(), physical)
+            if canonical not in model_fields:
+                semantic_type = _freeform_field_semantic_type(
+                    canonical, physical, dataset_source_text
+                )
+                model_fields[canonical] = {
+                    "physical_column": physical,
+                    "semantic_type": semantic_type,
+                    "roles": _freeform_field_roles(canonical, physical, explicit_mappings, semantic_type),
+                }
+        if not model_fields:
+            raise ContractError(
+                "metadata_clarification_required", "metadata_clarification",
+                "조회 결과 컬럼 또는 필터 매핑을 확인할 수 없습니다.",
+                {"questions": ["조회 결과 컬럼이나 필터 매핑을 자연어로 알려주세요."], "missing_fields": ["조회 컬럼"]},
+            )
+
+        selection = deepcopy(raw_card.get("selection_criteria") or {})
+        for key, value in selection_from_text.items():
+            selection[key] = deepcopy(value)
+        time_scope = str(selection.get("time_scope") or raw_card.get("time_scope") or "unspecified")
+        if time_scope:
+            selection["time_scope"] = time_scope
+        dataset = {
+            "display_name": str(raw_card.get("display_name") or dataset_id),
+            "family": family,
+            "source_type": source_type,
+            "time_scope": time_scope,
+            "selection_criteria": selection,
+            "fields": {key: model_fields[key] for key in sorted(model_fields)},
+        }
+        if raw_card.get("default_detail_fields"):
+            dataset["default_detail_fields"] = list(raw_card["default_detail_fields"])
+        datasets[dataset_id] = dataset
+
+    evidence = {
+        "contract_version": "metadata.freeform-dataset-expansion.v1",
+        "dataset_count": len(datasets),
+        "field_count": sum(len(item["fields"]) for item in datasets.values()),
+        "filter_mapping_count": total_filter_mappings,
+        "query_column_count": total_query_columns,
+        "selection_criteria_from_text": selection_criteria_from_text,
+        "dataset_identity_overrides": dataset_identity_overrides,
+        "discarded_model_semantic_type_count": discarded_model_semantic_types,
+    }
+    if isinstance(reconciliation_out, dict):
+        reconciliation_out.clear()
+        reconciliation_out.update(evidence)
+    return {"datasets": {key: datasets[key] for key in sorted(datasets)}}
+
+
+def _freeform_recipe_identity(key, payload, source_text=""):
+    """Resolve the recipe id from explicit model data or the operator's text.
+
+    Smaller models sometimes replace dots with underscores in the compact
+    item key.  The operator-authored identifier remains authoritative when it
+    is explicitly written next to the word ``recipe``.
+    """
+
+    explicit = str((payload or {}).get("recipe_id") or "").strip()
+    if not explicit and source_text:
+        matches = re.findall(
+            r"(?:recipe|레시피)\s*(?:를|을)?\s*(?:as\s+)?([A-Za-z0-9_.-]+)\s*(?:로|으로)?",
+            str(source_text),
+            flags=re.IGNORECASE,
+        )
+        matches = [value.rstrip(".") for value in matches if value.rstrip(".")]
+        if len(set(matches)) == 1:
+            explicit = matches[0]
+    return explicit or str(key or "").strip()
+
+
+def _freeform_recipe_keys(payload, source_text=""):
+    grain_payload = (payload or {}).get("grain")
+    candidates = []
+    if isinstance(grain_payload, dict):
+        candidates = grain_payload.get("keys") or []
+    if not candidates:
+        candidates = (
+            (payload or {}).get("keys")
+            or (payload or {}).get("grain_keys")
+            or (payload or {}).get("product_keys")
+            or []
+        )
+    if not candidates and source_text:
+        match = re.search(
+            r"(?:grain\s*)?(?:keys?|key|키)(?:\s*목록)?\s*(?:은|는|:|=|is)\s*([^\r\n.]+)",
+            str(source_text),
+            flags=re.IGNORECASE,
+        )
+        if match:
+            candidates = re.split(r"\s*(?:,|→|->|/|그리고)\s*", match.group(1))
+    return list(dict.fromkeys(
+        str(value).strip().rstrip("이야입니다")
+        for value in candidates
+        if re.fullmatch(r"[A-Za-z][A-Za-z0-9_]*", str(value).strip().rstrip("이야입니다"))
+    ))
+
+
+def _normalize_freeform_recipe(key, payload, source_text=""):
+    recipe_id = _freeform_recipe_identity(key, payload, source_text)
+    template = deepcopy((payload or {}).get("default_operation_template"))
+    keys = _freeform_recipe_keys(payload, source_text)
+    raw_grain = (payload or {}).get("grain")
+    grain_ref = ""
+    if isinstance(raw_grain, str):
+        grain_ref = raw_grain.strip()
+    elif isinstance(raw_grain, dict):
+        grain_ref = str(
+            raw_grain.get("entity_id")
+            or raw_grain.get("grain_ref")
+            or raw_grain.get("grain_id")
+            or ""
+        ).strip()
+    if not grain_ref and source_text:
+        match = re.search(
+            r"grain\s*(?:은|는|:|=|is)\s*([A-Za-z][A-Za-z0-9_.-]*)",
+            str(source_text),
+            flags=re.IGNORECASE,
+        )
+        if match:
+            grain_ref = match.group(1)
+
+    if not isinstance(template, dict) and keys:
+        template = {
+            "op": "aggregate",
+            "group_by": keys,
+            "metrics": [
+                {
+                    "as_ref": "$metric.id",
+                    "field_ref": "$metric.field",
+                    "function_ref": "$metric.rollup",
+                }
+            ],
+        }
+
+    slot_aliases = {
+        "dataset": "dataset_refs",
+        "metric": "metric_refs",
+        "grain": "grain_refs",
+        "field": "field_refs",
+        "relation": "relation_refs",
+        "recipe": "recipe_refs",
+        "entity_group": "entity_group_refs",
+        "filter": "filter_refs",
+    }
+    def _clean_alias(value):
+        text = str(value or "").strip()
+        return re.sub(r"(?:이야|예요|입니다|야)$", "", text).strip()
+
+    recipe = {
+        "recipe_id": recipe_id,
+        "aliases": list(dict.fromkeys(
+            _clean_alias(value)
+            for value in (payload or {}).get("aliases") or []
+            if _clean_alias(value)
+        )),
+        "required_slots": list(dict.fromkeys(
+            slot_aliases.get(str(value).strip(), str(value).strip())
+            for value in (payload or {}).get("required_slots") or ["dataset", "metric"]
+            if str(value).strip()
+        )),
+    }
+    if isinstance(template, dict):
+        recipe["default_operation_template"] = template
+    if keys:
+        recipe["grain"] = {
+            "entity_id": grain_ref or recipe_id.split(".", 1)[0],
+            "grain_id": recipe_id,
+            "keys": keys,
+            "null_match_policy": str(
+                (raw_grain or {}).get("null_match_policy")
+                if isinstance(raw_grain, dict)
+                else "blank_equals_blank"
+            ) or "blank_equals_blank",
+        }
+    for name in ("display_name", "description"):
+        if (payload or {}).get(name):
+            recipe[name] = str(payload[name])
+    return recipe_id, recipe
+
+
+def _expand_freeform_domain_fragment(fragment, reconciliation_out=None, source_text=""):
+    if not isinstance(fragment, dict) or set(fragment) != {"items"}:
+        raise ContractError("metadata_schema_error", "metadata_authoring", "도메인 등록 결과는 items 목록이어야 합니다.")
+    patch = {}
+    seen = set()
+    raw_items = fragment.get("items") or []
+    has_business_item = any(
+        isinstance(item, dict) and str(item.get("section") or "") != "profile"
+        for item in raw_items
+    )
+    discarded_profile_items = 0
+    for index, item in enumerate(raw_items):
+        section = str((item or {}).get("section") or "") if isinstance(item, dict) else ""
+        key = str((item or {}).get("key") or "") if isinstance(item, dict) else ""
+        payload = deepcopy((item or {}).get("payload") or {}) if isinstance(item, dict) else {}
+        if section == "recipes":
+            key, payload = _normalize_freeform_recipe(key, payload, source_text)
+        identity = (section, key)
+        if identity in seen:
+            raise ContractError("metadata_schema_error", "metadata_authoring", "도메인 items에 중복 section/key가 있습니다.", {"item_index": index})
+        seen.add(identity)
+        if section == "profile":
+            if has_business_item:
+                # Focused metric/grain/group requests occasionally cause a
+                # weaker model to repeat a generic profile card.  The profile
+                # is not part of that worker request and mixing it with an
+                # item patch is forbidden, so discard only this redundant
+                # model artifact before deterministic validation.
+                discarded_profile_items += 1
+                continue
+            if any(name in patch for name in ("display_name", "description", "locale", "timezone")):
+                raise ContractError("metadata_schema_error", "metadata_authoring", "도메인 프로필은 한 항목만 등록할 수 있습니다.")
+            patch["domain_id"] = key
+            patch["display_name"] = str(payload.get("display_name") or key)
+            for name in ("description", "locale", "timezone"):
+                if name in payload:
+                    patch[name] = deepcopy(payload[name])
+            continue
+        if section == "entity_groups":
+            target_field = str(payload.get("target_field") or payload.get("field") or "").strip()
+            members = payload.get("members") if isinstance(payload.get("members"), list) else payload.get("processes")
+            aliases = payload.get("aliases") if isinstance(payload.get("aliases"), list) else []
+            group = {
+                "group_id": key,
+                "display_name": str(payload.get("display_name") or key),
+                "target_field": target_field,
+                "members": [
+                    re.sub(r"(?:입니다|이에요|예요|이야|야)$", "", str(value).strip()).strip()
+                    for value in members or []
+                    if str(value).strip()
+                ],
+                "aliases": [str(value).strip() for value in aliases if str(value).strip()],
+            }
+            if not group["target_field"] or not group["members"] or not group["aliases"]:
+                raise ContractError(
+                    "metadata_clarification_required", "metadata_clarification",
+                    "공정 그룹의 적용 필드, 포함 값 또는 별칭이 부족합니다.",
+                    {"questions": ["공정 그룹의 적용 필드, 포함 값, 별칭을 알려주세요."], "missing_fields": ["공정 그룹 설명"]},
+                )
+            patch.setdefault(section, {})[key] = group
+            continue
+        if section == "metrics":
+            source_binding = (
+                deepcopy(payload.get("source_binding"))
+                if isinstance(payload.get("source_binding"), dict)
+                else {}
+            )
+            dataset_family = str(
+                source_binding.get("dataset_family")
+                or payload.get("dataset_family")
+                or ""
+            ).strip()
+            source_field = str(
+                source_binding.get("field")
+                or payload.get("source_field")
+                or ""
+            ).strip()
+            if not dataset_family and source_text:
+                match = re.search(
+                    r"([A-Za-z][A-Za-z0-9_.-]*)\s*(?:계열|family)",
+                    str(source_text),
+                    flags=re.IGNORECASE,
+                )
+                if match:
+                    dataset_family = match.group(1)
+            if not source_field and source_text:
+                match = re.search(
+                    r"([A-Za-z][A-Za-z0-9_]*)\s*(?:컬럼|column|field)",
+                    str(source_text),
+                    flags=re.IGNORECASE,
+                )
+                if match:
+                    source_field = match.group(1)
+            formula = deepcopy(payload.get("formula")) if isinstance(payload.get("formula"), dict) else None
+            if dataset_family and source_field:
+                source_binding = {
+                    "dataset_family": dataset_family,
+                    "field": source_field,
+                }
+            allowed_rollups = payload.get("allowed_rollups")
+            if not isinstance(allowed_rollups, list):
+                allowed_rollups = payload.get("allowed_aggregations")
+            allowed_rollups = [
+                str(value).strip().casefold()
+                for value in allowed_rollups or []
+                if str(value).strip()
+            ]
+            default_rollup = str(
+                (payload.get("additivity") or {}).get("default")
+                if isinstance(payload.get("additivity"), dict)
+                else payload.get("default_aggregation") or payload.get("aggregation") or ""
+            ).strip().casefold()
+            if isinstance(payload.get("additivity"), dict):
+                additivity = deepcopy(payload["additivity"])
+            else:
+                if not allowed_rollups and default_rollup:
+                    allowed_rollups = [default_rollup]
+                default_kind = (
+                    "distinct"
+                    if default_rollup in {"count_distinct", "nunique", "list_unique"}
+                    else "non_additive"
+                    if default_rollup in {"mean", "avg", "average", "min", "max"}
+                    else "additive"
+                )
+                additivity = {
+                    "default": default_kind,
+                    "allowed_rollups": list(dict.fromkeys(allowed_rollups or ["sum"])),
+                }
+            metric = {
+                "metric_id": key,
+                "value_type": str(payload.get("value_type") or "number"),
+                "unit": str(payload.get("unit") or "count"),
+                "null_policy": str(
+                    payload.get("null_policy")
+                    or ("exclude_from_sum" if payload.get("exclude_nulls") is not False else "preserve_null")
+                ),
+                "zero_policy": str(payload.get("zero_policy") or "preserve_zero"),
+                "additivity": additivity,
+            }
+            aliases = [
+                str(value).strip()
+                for value in payload.get("aliases") or []
+                if str(value).strip()
+            ]
+            if aliases:
+                metric["aliases"] = list(dict.fromkeys(aliases))
+            if source_binding:
+                metric["source_binding"] = source_binding
+            if formula is not None:
+                metric["formula"] = formula
+            if isinstance(payload.get("dependencies"), list):
+                metric["dependencies"] = deepcopy(payload["dependencies"])
+            patch.setdefault(section, {})[key] = metric
+            continue
+        if section == "grains":
+            keys = payload.get("keys")
+            if not isinstance(keys, list):
+                keys = payload.get("grain_keys")
+            grain = {
+                "grain_id": key,
+                "keys": [
+                    re.sub(r"(?:입니다|이에요|예요|이야|야)$", "", str(value).strip()).strip()
+                    for value in keys or []
+                    if str(value).strip()
+                ],
+            }
+            display_fields = payload.get("display_fields")
+            if isinstance(display_fields, list) and display_fields:
+                grain["display_fields"] = [
+                    str(value).strip() for value in display_fields if str(value).strip()
+                ]
+            patch.setdefault(section, {})[key] = grain
+            continue
+        if section == "recipes":
+            patch.setdefault(section, {})[key] = payload
+            continue
+        patch.setdefault(section, {})[key] = payload
+    if not patch:
+        raise ContractError("metadata_schema_error", "metadata_authoring", "등록할 도메인 항목이 없습니다.")
+    if isinstance(reconciliation_out, dict):
+        reconciliation_out.clear()
+        reconciliation_out.update({
+            "contract_version": "metadata.freeform-domain-expansion.v1",
+            "item_count": len(seen) - discarded_profile_items,
+            "discarded_redundant_profile_count": discarded_profile_items,
+        })
+    return patch
+
+
+def _expand_freeform_main_filter_fragment(fragment):
+    if not isinstance(fragment, dict) or set(fragment) != {"items"}:
+        raise ContractError("metadata_schema_error", "metadata_authoring", "메인 필터 등록 결과는 items 목록이어야 합니다.")
+    additions = []
+    seen = set()
+    for index, item in enumerate(fragment.get("items") or []):
+        filter_key = str((item or {}).get("filter_key") or "") if isinstance(item, dict) else ""
+        payload = (item or {}).get("payload") if isinstance(item, dict) else None
+        aliases = [str(value).strip() for value in (payload or {}).get("aliases") or [] if str(value).strip()] if isinstance(payload, dict) else []
+        if not filter_key or filter_key in seen or not aliases:
+            raise ContractError(
+                "metadata_schema_error", "metadata_authoring",
+                "메인 필터 key가 중복되었거나 별칭이 없습니다.",
+                {"item_index": index, "filter_key": filter_key},
+            )
+        seen.add(filter_key)
+        additions.append({"target_type": "field", "target_id": filter_key, "expressions": aliases})
+    return {"alias_additions": additions}
+
+
 def _expand_compact_dataset_fragment(fragment, dataset_descriptors=None, reconciliation_out=None):
     """Expand the LLM-facing compact Dataset IR into the full draft section.
 
@@ -5317,6 +6207,366 @@ def _deterministic_registry_bootstrap_fragments(registry_context):
     )
 
 
+def _freeform_draft_root_properties(output_schema):
+    for branch in (output_schema or {}).get("oneOf") or []:
+        properties = branch.get("properties") if isinstance(branch, dict) else None
+        if not isinstance(properties, dict) or (properties.get("status") or {}).get("const") != "complete":
+            continue
+        draft_schema = properties.get("draft")
+        if isinstance(draft_schema, dict):
+            return set((draft_schema.get("properties") or {}).keys())
+    return set()
+
+
+def _normalize_legacy_freeform_proposal_shape(proposal, expected_purpose, output_schema):
+    """Accept already-exported v5/v6 item shapes before strict validation.
+
+    The provider-facing schema remains the new small IR.  This adapter exists
+    only so older imported Flow JSON and deterministic replay fixtures continue
+    to run after an upgrade; it never invents an identity or execution value.
+    """
+
+    current = deepcopy(proposal) if isinstance(proposal, dict) else proposal
+    if not isinstance(current, dict) or current.get("status") != "complete":
+        return current
+    draft = current.get("draft")
+    if not isinstance(draft, dict):
+        return current
+    root_properties = _freeform_draft_root_properties(output_schema)
+    if expected_purpose == "metadata_main_filter_draft" and root_properties == {"items"}:
+        additions = draft.get("alias_additions")
+        if isinstance(additions, list) and set(draft) == {"alias_additions"}:
+            items = []
+            for addition in additions:
+                if (
+                    not isinstance(addition, dict)
+                    or addition.get("target_type") != "field"
+                    or not str(addition.get("target_id") or "")
+                    or not isinstance(addition.get("expressions"), list)
+                ):
+                    return current
+                items.append(
+                    {
+                        "filter_key": str(addition["target_id"]),
+                        "payload": {"aliases": deepcopy(addition["expressions"])},
+                    }
+                )
+            current["draft"] = {"items": items}
+    elif expected_purpose == "metadata_dataset_draft" and root_properties == {"dataset_cards"}:
+        datasets = draft.get("datasets")
+        if isinstance(datasets, dict) and set(draft) == {"datasets"}:
+            cards = []
+            for dataset_id in sorted(datasets):
+                dataset = datasets[dataset_id]
+                fields = dataset.get("fields") if isinstance(dataset, dict) else None
+                if not isinstance(fields, dict):
+                    return current
+                card = {"dataset_id": str(dataset_id), "fields": []}
+                for name in ("display_name", "family", "source_type", "time_scope", "selection_criteria", "default_detail_fields"):
+                    if name in dataset:
+                        card[name] = deepcopy(dataset[name])
+                for field_id in sorted(fields):
+                    binding = fields[field_id]
+                    if not isinstance(binding, dict) or not str(binding.get("physical_column") or ""):
+                        return current
+                    field = {"id": str(field_id), "col": str(binding["physical_column"])}
+                    for name in ("semantic_type", "roles", "aliases", "unit"):
+                        if name in binding:
+                            field[name] = deepcopy(binding[name])
+                    card["fields"].append(field)
+                cards.append(card)
+            current["draft"] = {"dataset_cards": cards}
+    elif expected_purpose == "metadata_domain_draft" and root_properties == {"items"}:
+        items = []
+        if set(draft) <= {"domain_id", "display_name", "description", "locale", "timezone"} and draft.get("display_name"):
+            key = str(draft.get("domain_id") or "default")
+            payload = {name: deepcopy(draft[name]) for name in ("display_name", "description", "locale", "timezone") if name in draft}
+            items.append({"section": "profile", "key": key, "payload": payload})
+        elif set(draft) == {"entity_groups"} and isinstance(draft.get("entity_groups"), dict):
+            for key in sorted(draft["entity_groups"]):
+                items.append({"section": "entity_groups", "key": str(key), "payload": deepcopy(draft["entity_groups"][key])})
+        if items:
+            current["draft"] = {"items": items}
+    return current
+
+
+def _freeform_sentence_value(source_text, labels):
+    """Read one short worker-facing value without depending on LLM JSON."""
+
+    label_pattern = "|".join(labels)
+    match = re.search(
+        rf"(?im)(?:{label_pattern})\s*(?:은|는|:|=)\s*([^\r\n.]+)",
+        str(source_text or ""),
+    )
+    if match is None:
+        return ""
+    value = match.group(1).strip(" \t\r\n.'\"")
+    value = re.split(
+        r"\s*(?:이고|이며)\s+(?=유의어|별칭|설명|description)",
+        value,
+        maxsplit=1,
+    )[0]
+    value = re.sub(
+        r"\s*(?:이면\s*(?:돼|됩니다?)|이면\s*돼요|이야|입니다?|로\s*(?:해줘|저장해줘))\s*$",
+        "",
+        value,
+    ).strip()
+    return value
+
+
+def _freeform_dataset_id(source_text):
+    matches = re.findall(
+        r"(?im)(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*(?:으)?로\s*등록(?:해줘|합니다?|하세요|할게)?",
+        str(source_text or ""),
+    )
+    values = list(dict.fromkeys(matches))
+    return values[0] if len(values) == 1 else ""
+
+
+def _freeform_domain_group_card(source_text):
+    text = str(source_text or "")
+    group_match = re.search(
+        r"(?im)(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*공정\s*그룹(?:을|를)?\s*등록",
+        text,
+    )
+    field_match = re.search(
+        r"(?im)(?<![A-Za-z0-9_])field(?![A-Za-z0-9_])\s*(?:은|는|:|=)\s*([A-Za-z][A-Za-z0-9_.-]{0,127})",
+        text,
+    )
+    aliases_match = re.search(
+        r"(?im)유의어\s*(?:은|는|:|=)\s*([^\r\n.]+)",
+        text,
+    )
+    members_match = re.search(
+        r"(?im)포함\s*공정\s*(?:은|는|:|=)\s*(?:[A-Za-z][A-Za-z0-9_.-]{0,127}\s*값\s*)?([^\r\n.]+)",
+        text,
+    )
+    if not all((group_match, field_match, aliases_match, members_match)):
+        return None
+    group_id = group_match.group(1)
+    aliases = _freeform_csv_values(
+        re.sub(r"\s*(?:이야|입니다?|로\s*저장해줘)\s*$", "", aliases_match.group(1))
+    )
+    members = _freeform_csv_values(
+        re.sub(r"\s*(?:이야|입니다?|로\s*저장해줘)\s*$", "", members_match.group(1))
+    )
+    if not aliases or not members:
+        return None
+    display_name = _freeform_sentence_value(
+        text,
+        (r"display_name", r"화면(?:에\s*보일)?\s*이름"),
+    ) or group_id
+    return {
+        "section": "entity_groups",
+        "key": group_id,
+        "payload": {
+            "display_name": display_name,
+            "field": field_match.group(1),
+            "processes": members,
+            "aliases": aliases,
+        },
+    }
+
+
+def _freeform_domain_profile_card(source_text):
+    text = str(source_text or "")
+    match = re.search(
+        r"(?im)(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*도메인(?:으)?로\s*등록",
+        text,
+    )
+    if match is None:
+        return None
+    domain_id = match.group(1)
+    display_name = _freeform_sentence_value(
+        text,
+        (r"display_name", r"화면(?:에\s*보일)?\s*이름"),
+    ) or domain_id
+    payload = {"display_name": display_name}
+    locale = re.search(r"(?im)언어\s*(?:은|는|:|=)\s*([A-Za-z]{2}-[A-Za-z]{2})", text)
+    timezone_match = re.search(r"(?im)시간대\s*(?:은|는|:|=)\s*([A-Za-z]+/[A-Za-z_]+)", text)
+    if locale:
+        payload["locale"] = locale.group(1)
+    if timezone_match:
+        payload["timezone"] = timezone_match.group(1)
+    return {"section": "profile", "key": domain_id, "payload": payload}
+
+
+def _freeform_domain_grain_card(source_text):
+    text = str(source_text or "")
+    if re.search(r"(?:recipe|레시피)", text, flags=re.IGNORECASE):
+        return None
+    match = re.search(
+        r"(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*grain",
+        text,
+        flags=re.IGNORECASE,
+    )
+    keys = _freeform_recipe_keys({}, text)
+    if match is None or not keys:
+        return None
+    return {
+        "section": "grains",
+        "key": match.group(1),
+        "payload": {"grain_keys": keys},
+    }
+
+
+def _freeform_domain_recipe_card(source_text):
+    text = str(source_text or "")
+    if not re.search(r"(?:recipe|레시피)", text, flags=re.IGNORECASE):
+        return None
+    recipe_id = _freeform_recipe_identity("", {}, text)
+    keys = _freeform_recipe_keys({}, text)
+    grain_match = re.search(
+        r"grain\s*(?:은|는|:|=|is)\s*([A-Za-z][A-Za-z0-9_.-]*)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    if not recipe_id or not keys or grain_match is None:
+        return None
+    aliases_match = re.search(
+        r"유의어\s*(?:은|는|:|=)\s*([^\r\n.]+)",
+        text,
+        flags=re.IGNORECASE,
+    )
+    aliases = []
+    if aliases_match:
+        aliases = _freeform_csv_values(
+            re.sub(r"\s*(?:이야|입니다)\s*$", "", aliases_match.group(1))
+        )
+    return {
+        "section": "recipes",
+        "key": recipe_id,
+        "payload": {
+            "aliases": aliases,
+            "grain": grain_match.group(1),
+            "grain_keys": keys,
+            "required_slots": ["dataset", "metric"],
+        },
+    }
+
+
+def _freeform_main_filter_cards(source_text):
+    text = str(source_text or "")
+    marker = re.compile(
+        r"(?im)(?<![A-Za-z0-9_.-])([A-Za-z][A-Za-z0-9_.-]{0,127})\s*(?:을|를|도)?\s*(?:주요\s*조회\s*조건|main\s*filter)(?:으)?로\s*(?:등록|저장)"
+    )
+    matches = list(marker.finditer(text))
+    cards = []
+    for index, match in enumerate(matches):
+        segment = text[match.start() : matches[index + 1].start() if index + 1 < len(matches) else len(text)]
+        aliases_match = re.search(r"(?im)유의어\s*(?:은|는|:|=)\s*([^\r\n.]+)", segment)
+        if aliases_match is None:
+            continue
+        alias_text = re.sub(
+            r"\s*(?:이야|입니다?|로\s*저장해줘)\s*$",
+            "",
+            aliases_match.group(1),
+        )
+        alias_text = re.sub(r"(?<=[A-Za-z0-9_])야\s*$", "", alias_text)
+        aliases = _freeform_csv_values(
+            alias_text
+        )
+        if not aliases:
+            continue
+        payload = {"aliases": aliases}
+        display_name = _freeform_sentence_value(
+            segment,
+            (r"display_name", r"화면(?:에\s*보일)?\s*이름"),
+        )
+        if display_name:
+            payload["display_name"] = display_name
+        cards.append({"filter_key": match.group(1), "payload": payload})
+    return cards
+
+
+def _deterministic_freeform_authoring_proposal(component, expected_purpose, output_schema):
+    """Project common v5-style worker text into the small IR.
+
+    This is deliberately narrower than an LLM: it activates only when the
+    worker explicitly names the item identity and the values needed for safe
+    execution. Unsupported prose continues through the schema-bound LLM path.
+    """
+
+    root_properties = _freeform_draft_root_properties(output_schema)
+    expected_root = {
+        "metadata_domain_draft": {"items"},
+        "metadata_dataset_draft": {"dataset_cards"},
+        "metadata_main_filter_draft": {"items"},
+    }.get(expected_purpose)
+    if expected_root is None or root_properties != expected_root:
+        return None
+    source_text = _authoring_source_text(component)
+    if not source_text:
+        return None
+    if expected_purpose == "metadata_dataset_draft":
+        dataset_id = _freeform_dataset_id(source_text)
+        family = (
+            _freeform_dataset_family(source_text, dataset_id) or dataset_id
+            if dataset_id
+            else ""
+        )
+        source_type = _freeform_source_type(source_text)
+        if (
+            not dataset_id
+            or not family
+            or not source_type
+            or not (_freeform_filter_mappings(source_text) or _freeform_query_columns(source_text))
+        ):
+            return None
+        card = {
+            "dataset_id": dataset_id,
+            "display_name": _freeform_sentence_value(
+                source_text,
+                (r"display_name", r"화면(?:에\s*보일)?\s*이름"),
+            ) or dataset_id,
+            "family": family,
+            "source_type": source_type,
+            # SQL columns and explicit filter_mappings are expanded by the
+            # deterministic compiler. Keeping this empty prevents long model
+            # responses from becoming a registration failure mode.
+            "fields": [],
+        }
+        selection = _freeform_selection_criteria(source_text)
+        if selection:
+            card["selection_criteria"] = selection
+            if selection.get("time_scope"):
+                card["time_scope"] = selection["time_scope"]
+        draft = {"dataset_cards": [card]}
+    elif expected_purpose == "metadata_domain_draft":
+        item = (
+            _freeform_domain_recipe_card(source_text)
+            or _freeform_domain_grain_card(source_text)
+            or _freeform_domain_group_card(source_text)
+            or _freeform_domain_profile_card(source_text)
+        )
+        if item is None:
+            return None
+        draft = {"items": [item]}
+    else:
+        items = _freeform_main_filter_cards(source_text)
+        if not items:
+            return None
+        draft = {"items": items}
+    proposal = {
+        "contract_version": "metadata.authoring.proposal.v1",
+        "status": "complete",
+        "source_sha256": hashlib.sha256(source_text.encode("utf-8")).hexdigest(),
+        "draft": draft,
+    }
+    if output_schema is not None and any(
+        Draft202012Validator(output_schema).iter_errors(proposal)
+    ):
+        return None
+    component._observed_authoring_source_projection = {
+        "contract_version": "metadata.deterministic-source-projection.v1",
+        "purpose": expected_purpose,
+        "status": "used",
+        "source_sha256": proposal["source_sha256"],
+        "draft_sha256": sha256_json(draft),
+    }
+    return proposal
+
+
 def _authoring_invocation_draft(
     component,
     *,
@@ -5346,6 +6596,13 @@ def _authoring_invocation_draft(
                 {"input_name": input_name, "expected_purpose": expected_purpose, "llm_calls": calls},
             )
         return None
+    deterministic_proposal = _deterministic_freeform_authoring_proposal(
+        component,
+        expected_purpose,
+        expected_output_schema,
+    )
+    if deterministic_proposal is not None:
+        return deterministic_proposal
     if (
         invocation.get("contract_version") != "llm.invocation.v1"
         or invocation.get("purpose") != expected_purpose
@@ -5510,13 +6767,32 @@ def _authoring_invocation_draft(
             details,
             exc.retryable,
         ) from exc
+    parsed = _normalize_legacy_freeform_proposal_shape(
+        parsed,
+        expected_purpose,
+        expected_output_schema,
+    )
     if expected_output_schema is not None:
         schema_errors = sorted(
             Draft202012Validator(expected_output_schema).iter_errors(parsed),
             key=lambda item: (list(item.absolute_path), item.validator or ""),
         )
         if schema_errors:
-            exc = schema_errors[0]
+            root_error = schema_errors[0]
+            candidates = []
+            pending = [root_error]
+            while pending:
+                candidate = pending.pop()
+                candidates.append(candidate)
+                pending.extend(list(candidate.context or []))
+            exc = max(
+                candidates,
+                key=lambda item: (
+                    len(list(item.absolute_path)),
+                    1 if str(item.validator or "") in {"required", "additionalProperties"} else 0,
+                    -len(str(item.message or "")),
+                ),
+            )
             raise ContractError(
                 "metadata_schema_error",
                 "metadata_llm_schema_validation",
@@ -5526,6 +6802,8 @@ def _authoring_invocation_draft(
                     "expected_purpose": expected_purpose,
                     "path": list(exc.absolute_path),
                     "validator": str(exc.validator or "")[:80],
+                    "reason": str(exc.message or "")[:400],
+                    "root_validator": str(root_error.validator or "")[:80],
                     "response_bytes": response_bytes,
                     "response_sha256": observed_response_sha256,
                 },
@@ -6149,20 +7427,29 @@ def _expand_compact_main_filter_fragment(
     fragment,
     *,
     approved_semantic_vocabulary,
+    allow_unresolved=False,
     reconciliation_out=None,
 ):
     """Compile typed natural-language alias additions into canonical cards."""
 
-    try:
-        vocabulary = _validated_semantic_vocabulary(
-            approved_semantic_vocabulary
-        )
-    except ValueError as exc:
+    vocabulary = None
+    if approved_semantic_vocabulary:
+        try:
+            vocabulary = _validated_semantic_vocabulary(
+                approved_semantic_vocabulary
+            )
+        except ValueError as exc:
+            raise ContractError(
+                "metadata_dependency_error",
+                "metadata_semantic_reference_normalization",
+                "승인 축약 업무 어휘가 유효하지 않습니다.",
+            ) from exc
+    elif not allow_unresolved:
         raise ContractError(
             "metadata_dependency_error",
             "metadata_semantic_reference_normalization",
-            "승인 축약 업무 어휘가 유효하지 않습니다.",
-        ) from exc
+            "등록된 테이블 카탈로그에서 주요 필터 대상을 확인할 수 없습니다.",
+        )
     additions = fragment.get("alias_additions") if isinstance(fragment, dict) else None
     if not isinstance(additions, list) or not additions:
         raise ContractError(
@@ -6174,14 +7461,18 @@ def _expand_compact_main_filter_fragment(
         target_type: section
         for section, target_type in _SEMANTIC_ALIAS_TARGET_SECTIONS
     }
-    allowed_ids = {
-        target_type: {
-            str(card.get("id") or "")
-            for card in vocabulary.get(section) or []
-            if isinstance(card, dict)
+    allowed_ids = (
+        {
+            target_type: {
+                str(card.get("id") or "")
+                for card in vocabulary.get(section) or []
+                if isinstance(card, dict)
+            }
+            for target_type, section in section_by_type.items()
         }
-        for target_type, section in section_by_type.items()
-    }
+        if vocabulary is not None
+        else {}
+    )
     aliases = {}
     normalized_targets = []
     for index, addition in enumerate(additions):
@@ -6196,10 +7487,14 @@ def _expand_compact_main_filter_fragment(
             )
         target_type = str(addition.get("target_type") or "")
         target_id = str(addition.get("target_id") or "")
-        if (
-            target_type not in allowed_ids
-            or target_id not in allowed_ids[target_type]
-        ):
+        if target_type not in section_by_type or not target_id:
+            raise ContractError(
+                "metadata_schema_error",
+                "metadata_semantic_reference_normalization",
+                "주요 필터 대상 유형 또는 식별자가 올바르지 않습니다.",
+                {"addition_index": index, "target_type": target_type},
+            )
+        if allowed_ids and target_id not in allowed_ids.get(target_type, set()):
             raise ContractError(
                 "metadata_dependency_error",
                 "metadata_semantic_reference_normalization",
@@ -6433,21 +7728,70 @@ def _validate_authoring_source_bindings(
     raw_registry = getattr(approved_reference_context, "data", approved_reference_context)
     registry = raw_registry if isinstance(raw_registry, dict) else {}
     if not registry:
-        clarification_material = {
-            "questions": ["이 도메인에서 사용할 승인 Source 레지스트리를 운영자가 먼저 연결해 주세요."],
-            "missing_fields": ["approved_reference_context"],
-            "source_sha256": str(source_sha256 or ""),
+        source_types = {
+            "oracle", "sql", "mongodb", "http", "datalake", "goodocs",
+            "file", "dummy", "previous_result",
         }
-        raise ContractError(
-            "metadata_clarification_required",
-            "metadata_clarification",
-            "작업자 자연어에서 source registry ID를 추측하지 않도록 운영자 레지스트리 연결이 필요합니다.",
-            {
-                "contract_version": "metadata.authoring.clarification.v1",
-                **clarification_material,
-                "proposal_sha256": str(proposal_sha256 or "") or sha256_json(clarification_material),
-            },
-        )
+        default_adapters = {
+            "oracle": "oracle_source_retriever",
+            "sql": "oracle_source_retriever",
+            "http": "h_api_source_retriever",
+            "datalake": "datalake_source_retriever",
+            "goodocs": "goodocs_source_retriever",
+            "mongodb": "mongodb_source_retriever",
+            "file": "file_source_retriever",
+            "dummy": "dummy_source_retriever",
+            "previous_result": "previous_result_retriever",
+        }
+        normalized = []
+        for dataset_id in sorted(datasets):
+            card = datasets.get(dataset_id)
+            if not isinstance(card, dict):
+                raise ContractError(
+                    "metadata_schema_error", "metadata_source_bindings",
+                    "테이블 카탈로그 데이터셋은 object여야 합니다.",
+                    {"dataset_id": str(dataset_id)},
+                )
+            source_type = str(card.get("source_type") or "").strip().casefold()
+            if source_type not in source_types:
+                raise ContractError(
+                    "metadata_schema_error", "metadata_source_bindings",
+                    "지원하지 않는 데이터 원천 유형입니다.",
+                    {"dataset_id": str(dataset_id), "source_type": source_type},
+                )
+            card["source_type"] = source_type
+            card["source_adapter"] = str(
+                card.get("source_adapter") or default_adapters[source_type]
+            ).strip()
+            card["config_ref"] = str(
+                card.get("config_ref") or f"config:{source_type}:{dataset_id}@1"
+            ).strip()
+            card["query_ref"] = str(
+                card.get("query_ref") or f"query:{dataset_id}@1"
+            ).strip()
+            fields = card.get("fields")
+            if not isinstance(fields, dict) or not fields:
+                raise ContractError(
+                    "metadata_schema_error", "metadata_source_bindings",
+                    "테이블 카탈로그에는 하나 이상의 컬럼 정의가 필요합니다.",
+                    {"dataset_id": str(dataset_id)},
+                )
+            normalized.append(
+                {
+                    "dataset_id": str(dataset_id),
+                    "source_type": source_type,
+                    "source_adapter": card["source_adapter"],
+                    "config_ref": card["config_ref"],
+                    "query_ref": card["query_ref"],
+                }
+            )
+        return {
+            "contract_version": "metadata.source-binding.validation.v1",
+            "status": "complete",
+            "binding_authority": "metadata_three_collections",
+            "dataset_count": len(normalized),
+            "bindings_sha256": sha256_json(normalized),
+        }
     if set(registry) != {
         "contract_version", "domain_id", "bindings", "dataset_descriptors",
         "semantic_vocabulary", "semantic_templates",
@@ -7045,6 +8389,85 @@ def _bootstrap_context_payload(
             if context_invoke is True
             else ""
         ),
+        "runtime_context_sha256": _authoring_prompt_runtime_context_sha256(
+            purpose, variables
+        ),
+    }
+
+
+def _collection_authoring_context_payload(
+    component,
+    *,
+    input_name,
+    kind,
+    purpose,
+    domain_id,
+    environment,
+    grounding_mode,
+):
+    """Validate a simple authoring context without an external registry."""
+
+    raw_context = getattr(component, input_name, None)
+    context = getattr(raw_context, "data", raw_context)
+    variables = context.get("variables") if isinstance(context, dict) else None
+    expected_keys = {
+        "authoring_kind", "domain_id", "environment", "source_grounding_mode",
+        "source_text", "source_sha256", "source_manifest", "bootstrap_fragment",
+        "output_schema",
+    }
+    if (
+        not isinstance(context, dict)
+        or set(context) != {"contract_version", "purpose", "invoke", "variables"}
+        or context.get("contract_version") != "prompt.runtime-context.v1"
+        or context.get("purpose") != purpose
+        or context.get("invoke") is not True
+        or not isinstance(variables, dict)
+        or set(variables) != expected_keys
+        or variables.get("authoring_kind") != kind
+        or variables.get("domain_id") != domain_id
+        or variables.get("environment") != environment
+        or variables.get("source_grounding_mode") != grounding_mode
+        or variables.get("bootstrap_fragment") is not True
+    ):
+        raise ContractError(
+            "metadata_dependency_error",
+            "metadata_source_context",
+            "컬렉션 기반 등록 runtime context 계약이 올바르지 않습니다.",
+            {"input_name": input_name, "authoring_branch": kind},
+        )
+    source_text = variables.get("source_text")
+    if not isinstance(source_text, str) or not source_text or source_text != source_text.strip():
+        raise ContractError(
+            "metadata_dependency_error",
+            "metadata_source_context",
+            "컬렉션 기반 등록 원문이 비어 있거나 정규화되지 않았습니다.",
+            {"input_name": input_name, "authoring_branch": kind},
+        )
+    source_sha256 = hashlib.sha256(source_text.encode("utf-8")).hexdigest()
+    expected_manifest = _freeform_authoring_manifest(source_text)
+    expected_schema = _bootstrap_output_schema(
+        kind,
+        source_sha256,
+        approved_semantic_vocabulary=None,
+    )
+    if (
+        variables.get("source_sha256") != source_sha256
+        or variables.get("source_manifest") != expected_manifest
+        or _bootstrap_schema_material(variables.get("output_schema"))
+        != _bootstrap_schema_material(expected_schema)
+    ):
+        raise ContractError(
+            "metadata_dependency_error",
+            "metadata_source_context",
+            "컬렉션 기반 등록 context의 원문 또는 출력 스키마 결합이 올바르지 않습니다.",
+            {"input_name": input_name, "authoring_branch": kind},
+        )
+    return {
+        "source_text": source_text,
+        "source_sha256": source_sha256,
+        "invoke": True,
+        "output_schema": deepcopy(variables["output_schema"]),
+        "output_schema_sha256": sha256_json(variables["output_schema"]),
         "runtime_context_sha256": _authoring_prompt_runtime_context_sha256(
             purpose, variables
         ),
@@ -7788,12 +9211,12 @@ class MetadataAuthoringEngine(Component):
         dry_run,
         draft_llm_calls,
     ):
-        """Store Dataset/Main Filter items before a complete package exists."""
+        """Store one collection-owned section before or after package completion."""
 
         source_binding_validation = {
             "contract_version": "metadata.source-binding.validation.v1",
             "status": "not_applicable",
-            "binding_authority": "approved_semantic_vocabulary",
+            "binding_authority": "metadata_three_collections",
         }
         source_query_extraction = {
             "contract_version": "metadata.source-query-extraction.v1",
@@ -7804,7 +9227,24 @@ class MetadataAuthoringEngine(Component):
             "missing_query_dataset_keys": [],
         }
         normalized_patch = deepcopy(raw_patch)
-        if kind == "dataset":
+        if kind == "domain":
+            profile_keys = {"display_name", "description", "locale", "timezone"}
+            domain_item_sections = {
+                "entity_groups", "metrics", "grains", "relations",
+                "orderings", "predicates", "recipes",
+            }
+            is_profile_only = (
+                bool(profile_keys & set(normalized_patch))
+                and not any(
+                    isinstance(normalized_patch.get(section), dict)
+                    for section in domain_item_sections
+                )
+            )
+            if is_profile_only:
+                normalized_patch["domain_id"] = str(
+                    getattr(self, "domain_id", "default") or "default"
+                ).strip()
+        elif kind == "dataset":
             partial_draft = {"datasets": deepcopy(raw_patch.get("datasets") or {})}
             source_binding_validation = _validate_authoring_source_bindings(
                 partial_draft,
@@ -7849,25 +9289,59 @@ class MetadataAuthoringEngine(Component):
         ready_sections = sorted(name for name, items in merged_items.items() if items)
         missing_sections = sorted(name for name, items in merged_items.items() if not items)
         package = None
+        alias_activation = {
+            "contract_version": "metadata.alias-activation.v1",
+            "active_count": 0,
+            "deferred_count": 0,
+            "deferred": [],
+        }
+        runtime_activation_issue = {}
         if not missing_sections:
-            # The third completed collection is the activation boundary.  A
-            # failed dependency closure blocks that final write; earlier partial
-            # items remain editable but are never exposed to Data Analysis.
-            package = assemble_domain_package_from_items(merged_items)
-            validate_runtime_catalog_v2(package["runtime_catalog"])
+            # Registration validates the submitted item, its shape and its
+            # duplicates.  Runtime activation is a separate projection over
+            # all three collections and must not make an unrelated pre-existing
+            # item (for example field:EQP_ID) reject a valid DP group write.
+            # Keep activation evidence for the operator, but persist the valid
+            # submitted item even when the existing whole-set runtime is not
+            # ready yet.
+            try:
+                package = assemble_domain_package_from_items(
+                    merged_items,
+                    alias_activation_out=alias_activation,
+                )
+                self.domain_id = str(package.get("domain_id") or getattr(self, "domain_id", "default"))
+                validate_runtime_catalog_v2(package["runtime_catalog"])
+            except ContractError as error:
+                package = None
+                runtime_activation_issue = {
+                    "code": str(error.code or "metadata_dependency_error"),
+                    "message": str(error.public_message or "전체 실행 메타데이터가 아직 준비되지 않았습니다."),
+                    "details": deepcopy(error.details or {}),
+                }
 
         validation = {
             "schema": "passed",
             "semantic_lint": "passed" if package is not None else "deferred",
             "dependency_closure": "passed" if package is not None else "deferred",
-            "runtime_compile": "passed" if package is not None else "waiting_for_remaining_collections",
+            "runtime_compile": (
+                "passed"
+                if package is not None
+                else (
+                    "waiting_for_remaining_collections"
+                    if missing_sections
+                    else "stored_runtime_pending"
+                )
+            ),
             "section_ownership": "passed",
             "three_collection_items": "complete" if package is not None else "partial",
             "ready_sections": ready_sections,
             "missing_sections": missing_sections,
             "source_bindings": source_binding_validation,
             "source_queries": source_query_extraction,
+            "runtime_alias_activation": alias_activation,
         }
+        if runtime_activation_issue:
+            validation["runtime_activation_issue"] = runtime_activation_issue
         if authoring_proposal_validation is not None:
             validation["authoring_proposal"] = authoring_proposal_validation
         item_counts = {name: len(items) for name, items in merged_items.items()}
@@ -7958,7 +9432,15 @@ class MetadataAuthoringEngine(Component):
                 "write_mode": write_mode,
                 "write_operations": write_operations,
                 "item_counts": item_counts,
-                "activation_status": "ready" if package is not None else "waiting_for_sections",
+                "activation_status": (
+                    "ready"
+                    if package is not None
+                    else (
+                        "waiting_for_sections"
+                        if missing_sections
+                        else "stored_runtime_pending"
+                    )
+                ),
                 "ready_sections": ready_sections,
                 "missing_sections": missing_sections,
             },
@@ -8145,6 +9627,7 @@ class MetadataAuthoringEngine(Component):
         bootstrap_branches = None
         section_context = None
         single_domain_bootstrap = False
+        simple_section_bootstrap = False
         expected_purpose = {
             "domain": "metadata_domain_annotation" if annotation_only else "metadata_domain_draft",
             "dataset": "metadata_dataset_draft",
@@ -8164,23 +9647,36 @@ class MetadataAuthoringEngine(Component):
             )
             if isinstance(section_context_payload, dict) and section_context_payload:
                 raw_variables = section_context_payload.get("variables")
-                single_domain_bootstrap = bool(
-                    kind == "domain"
-                    and isinstance(raw_variables, dict)
+                simple_section_bootstrap = bool(
+                    isinstance(raw_variables, dict)
                     and raw_variables.get("bootstrap_fragment") is True
                 )
-                section_context = _bootstrap_context_payload(
-                    self,
-                    input_name="authoring_source_context",
-                    kind=kind,
-                    purpose=expected_purpose,
-                    domain_id=domain_id,
-                    environment=environment,
-                    bootstrap_fragment=single_domain_bootstrap,
-                    grounding_mode=grounding_mode,
-                    annotation_only=annotation_only,
-                    expected_invoke=None,
-                )
+                single_domain_bootstrap = bool(kind == "domain" and simple_section_bootstrap)
+                raw_reference = getattr(self, "approved_reference_context", None)
+                reference_payload = getattr(raw_reference, "data", raw_reference)
+                if simple_section_bootstrap and not reference_payload:
+                    section_context = _collection_authoring_context_payload(
+                        self,
+                        input_name="authoring_source_context",
+                        kind=kind,
+                        purpose=expected_purpose,
+                        domain_id=domain_id,
+                        environment=environment,
+                        grounding_mode=grounding_mode,
+                    )
+                else:
+                    section_context = _bootstrap_context_payload(
+                        self,
+                        input_name="authoring_source_context",
+                        kind=kind,
+                        purpose=expected_purpose,
+                        domain_id=domain_id,
+                        environment=environment,
+                        bootstrap_fragment=simple_section_bootstrap,
+                        grounding_mode=grounding_mode,
+                        annotation_only=annotation_only,
+                        expected_invoke=None,
+                    )
                 source_text = section_context["source_text"]
             else:
                 # Deterministic no-LLM paths and early source-inventory errors do
@@ -8204,6 +9700,11 @@ class MetadataAuthoringEngine(Component):
                 ) from exc
         else:
             source_manifest = _freeform_authoring_manifest(source_text)
+        raw_reference_context = getattr(self, "approved_reference_context", None)
+        reference_context_payload = getattr(raw_reference_context, "data", raw_reference_context)
+        collection_owned_bootstrap = bool(
+            simple_section_bootstrap and not isinstance(reference_context_payload, dict)
+        ) or bool(simple_section_bootstrap and not reference_context_payload)
         if kind == "dataset" and strict_inventory:
             inventories = source_manifest.get("inventories")
             datasets = inventories.get("datasets") if isinstance(inventories, dict) else None
@@ -8448,7 +9949,7 @@ class MetadataAuthoringEngine(Component):
                     invocation_draft,
                     source_sha256=str(source_manifest.get("source_sha256") or ""),
                 )
-            if model_required and single_domain_bootstrap:
+            if model_required and single_domain_bootstrap and not collection_owned_bootstrap:
                 raw_reference = getattr(self, "approved_reference_context", None)
                 registry_context = getattr(raw_reference, "data", raw_reference)
                 registry_context = registry_context if isinstance(registry_context, dict) else {}
@@ -8494,6 +9995,22 @@ class MetadataAuthoringEngine(Component):
                         "main_filter_registry_reconciliation": main_filter_reconciliation,
                         "single_llm_registry_bootstrap": True,
                     }
+            if model_required and collection_owned_bootstrap and kind == "domain":
+                compact_ir_sha256 = sha256_json(invocation_draft)
+                section_ir_reconciliation = {}
+                invocation_draft = _expand_freeform_domain_fragment(
+                    invocation_draft,
+                    reconciliation_out=section_ir_reconciliation,
+                    source_text=source_text,
+                )
+                if authoring_proposal_validation is not None:
+                    authoring_proposal_validation = {
+                        **(authoring_proposal_validation or {}),
+                        "compact_ir_sha256": compact_ir_sha256,
+                        "expanded_draft_sha256": sha256_json(invocation_draft),
+                        "section_ir_expander_version": "metadata.freeform-domain-expansion.v1",
+                        "section_ir_reconciliation": section_ir_reconciliation,
+                    }
             if model_required and kind in {"dataset", "main_filter"}:
                 raw_reference = getattr(self, "approved_reference_context", None)
                 registry_context = getattr(raw_reference, "data", raw_reference)
@@ -8505,23 +10022,40 @@ class MetadataAuthoringEngine(Component):
                 compact_ir_sha256 = sha256_json(invocation_draft)
                 section_ir_reconciliation = {}
                 if kind == "dataset":
-                    invocation_draft = _expand_compact_dataset_fragment(
-                        invocation_draft,
-                        dataset_descriptors=registry_context.get(
-                            "dataset_descriptors"
-                        ),
-                        reconciliation_out=section_ir_reconciliation,
-                    )
-                    expander_version = "metadata.dataset-ir-expander.v1"
+                    if registry_context:
+                        invocation_draft = _expand_compact_dataset_fragment(
+                            invocation_draft,
+                            dataset_descriptors=registry_context.get(
+                                "dataset_descriptors"
+                            ),
+                            reconciliation_out=section_ir_reconciliation,
+                        )
+                        expander_version = "metadata.dataset-ir-expander.v1"
+                    else:
+                        invocation_draft = _expand_freeform_dataset_fragment(
+                            invocation_draft,
+                            source_text,
+                            reconciliation_out=section_ir_reconciliation,
+                        )
+                        expander_version = "metadata.freeform-dataset-expansion.v1"
                 else:
+                    if not registry_context:
+                        invocation_draft = _expand_freeform_main_filter_fragment(
+                            invocation_draft
+                        )
                     invocation_draft = _expand_compact_main_filter_fragment(
                         invocation_draft,
                         approved_semantic_vocabulary=registry_context.get(
                             "semantic_vocabulary"
                         ),
+                        allow_unresolved=not bool(registry_context),
                         reconciliation_out=section_ir_reconciliation,
                     )
-                    expander_version = "metadata.main-filter-ir-expansion.v1"
+                    expander_version = (
+                        "metadata.main-filter-ir-expansion.v1"
+                        if registry_context
+                        else "metadata.collection-main-filter-items.v1"
+                    )
                 if authoring_proposal_validation is not None:
                     authoring_proposal_validation = {
                         **(authoring_proposal_validation or {}),
@@ -8533,7 +10067,7 @@ class MetadataAuthoringEngine(Component):
         prevalidated_domain_draft = None
         prevalidated_source_binding = None
         filter_operator_normalization = None
-        if kind == "domain" and not annotation_only:
+        if kind == "domain" and not annotation_only and not collection_owned_bootstrap:
             prevalidated_domain_draft = _enforce_domain_policy_boundary(
                 invocation_draft,
                 source_sha256=str(source_manifest.get("source_sha256") or ""),
@@ -8624,7 +10158,19 @@ class MetadataAuthoringEngine(Component):
                 }
                 present = [name for name, value in current_documents.items() if value]
                 if len(present) == 3:
-                    active_package = assemble_domain_package_from_items(current_documents)
+                    try:
+                        active_package = assemble_domain_package_from_items(current_documents)
+                    except ContractError:
+                        # Replace is also the recovery path for one malformed
+                        # or outdated item.  It merges against the raw item
+                        # documents and recompiles after the exact replacement.
+                        # Save and validation continue to fail closed.
+                        if write_mode != "replace":
+                            raise
+                        active_package = None
+                    if active_package is not None:
+                        domain_id = str(active_package.get("domain_id") or domain_id)
+                        self.domain_id = domain_id
                     current_source_texts = {
                         name: "\n\n".join(
                             dict.fromkeys(
@@ -8637,15 +10183,19 @@ class MetadataAuthoringEngine(Component):
                     }
                     # Keep the public loader path and authoring base path on the
                     # same contract; either must reject the same drift.
-                    loaded_package = load_domain_package_from_three_collections(
-                        db,
-                        domain_id,
-                        environment,
-                        domain_collection=collections["domain_collection"],
-                        table_collection=collections["table_collection"],
-                        main_filter_collection=collections["main_filter_collection"],
+                    loaded_package = (
+                        load_domain_package_from_three_collections(
+                            db,
+                            domain_id,
+                            environment,
+                            domain_collection=collections["domain_collection"],
+                            table_collection=collections["table_collection"],
+                            main_filter_collection=collections["main_filter_collection"],
+                        )
+                        if active_package is not None
+                        else None
                     )
-                    if loaded_package["runtime_catalog"] != active_package["runtime_catalog"]:
+                    if loaded_package is not None and loaded_package["runtime_catalog"] != active_package["runtime_catalog"]:
                         raise ContractError("metadata_hash_conflict", "metadata_three_collection", "메타데이터 loader와 authoring base 검증 결과가 다릅니다.")
             finally:
                 client.close()
@@ -8687,7 +10237,11 @@ class MetadataAuthoringEngine(Component):
                 # The normal lane uses one full-domain proposal. Split initial
                 # bootstrap uses three independently sealed fragments; both
                 # converge on this same deterministic full-draft pipeline.
-                raw_patch = deepcopy(prevalidated_domain_draft)
+                raw_patch = deepcopy(
+                    invocation_draft
+                    if collection_owned_bootstrap
+                    else prevalidated_domain_draft
+                )
                 draft_llm_calls = 3 if split_bootstrap else 1
         elif kind in {"dataset", "main_filter"}:
             if kind == "main_filter" and deterministic_alias_patch is not None:
@@ -8812,7 +10366,9 @@ class MetadataAuthoringEngine(Component):
                         "실행 planner 호환 정책은 승인 템플릿이 소유하며 출력 프로필 입력으로 변경할 수 없습니다.",
                     )
                 raw_patch["output_profile"] = output_value
-        if active_package is None and kind in {"dataset", "main_filter"}:
+        if collection_owned_bootstrap or (
+            active_package is None and kind in {"dataset", "main_filter"}
+        ):
             return self._save_initial_section_items(
                 kind=kind,
                 raw_patch=raw_patch,
@@ -9693,9 +11249,22 @@ class AuthoringMessagePresentation(Component):
 
     def build_message(self) -> Message:
         raw = getattr(getattr(self, "response", None), "data", getattr(self, "response", None))
-        response = deepcopy(validate_authoring_response_hash(raw)) if isinstance(raw, dict) else {}
+        # Contract validation is complete in the preceding authoring engine.
+        # Langflow 1.10.x may inject UI/runtime fields such as ``default_value``
+        # while transporting Data between nodes, so this presentation-only
+        # boundary deliberately accepts ordinary JSON and removes only those
+        # transport fields instead of revalidating the sealed engine payload.
+        response = deepcopy(raw) if isinstance(raw, dict) else {}
+        response.pop("default_value", None)
         diff = response.get("diff") if isinstance(response.get("diff"), dict) else {}
-        operations = diff.get("write_operations") if isinstance(diff.get("write_operations"), dict) else {}
+        # Node 04 now exposes a compact worker-facing response.  Keep support
+        # for the older internal response shape so previously exported flows
+        # can still feed this presentation node during a rolling upgrade.
+        operations = (
+            diff.get("write_operations")
+            if isinstance(diff.get("write_operations"), dict)
+            else diff
+        )
         operation_summary = (
             f"- 처리 결과: 신규 {int(operations.get('inserted') or 0)} / "
             f"교체 {int(operations.get('replaced') or 0)} / "
@@ -9714,8 +11283,20 @@ class AuthoringMessagePresentation(Component):
                     + f"- 추가 등록 필요 영역: {missing_sections}\n"
                     + "- 세 영역이 모두 등록되면 자동으로 전체 실행 메타데이터를 검증합니다."
                 )
+            elif activation_status == "stored_runtime_pending":
+                text = (
+                    "### 메타데이터 항목 저장 완료 (실행 활성화 대기)\n\n"
+                    + f"{operation_summary}\n"
+                    + "- 이번 입력 항목의 구조 및 중복 검증: 통과\n"
+                    + "- 기존 전체 메타데이터 실행 점검: 대기"
+                )
             else:
-                text = "### 메타데이터 저장 완료\n\n" + f"- Revision: {response.get('revision', '')}\n{operation_summary}\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능"
+                text = (
+                    "### 메타데이터 저장 완료\n\n"
+                    + f"- Revision: {response.get('revision', '')}\n{operation_summary}"
+                    + "\n- 저장 구조: 도메인·테이블 카탈로그·메인필터"
+                    + "\n- 실행 메타데이터: 사용 가능"
+                )
         elif response.get("status") == "needs_clarification":
             clarification = response.get("clarification") if isinstance(response.get("clarification"), dict) else {}
             questions = [str(item) for item in (clarification.get("questions") or [])[:3]]
@@ -9750,7 +11331,6 @@ class AuthoringMessagePresentation(Component):
             sender_name="Metadata Authoring",
             session_metadata={
                 "contract_version": "metadata.authoring.message-link.v1",
-                "response_sha256": str(response.get("response_sha256") or ""),
             },
         )
         message.data = {"response": response}
@@ -9918,7 +11498,6 @@ class SimpleMetadataDraftGenerator(Component):
         MessageInput(name="common_prompt_message", display_name="공통 등록 프롬프트", required=True, info="모든 업무에 적용되는 공통 등록 규칙입니다."),
         MessageInput(name="specialized_prompt_message", display_name="업무 특화 등록 프롬프트", required=False, info="현재 업무에서만 사용하는 용어와 해석 규칙입니다."),
         HandleInput(name="language_model", display_name="등록 변환 언어 모델", input_types=["LanguageModel"], required=True),
-        MultilineInput(name="registry_json", display_name="승인 업무 어휘·원천 레지스트리", value="", required=True, advanced=True, info="Flow 생성 시 검토된 레지스트리가 자동 주입됩니다."),
     ]
     outputs = [
         Output(name="authoring_context", display_name="검증 대기 등록 컨텍스트", method="build_authoring_context", types=["Data"])
@@ -9932,20 +11511,15 @@ class SimpleMetadataDraftGenerator(Component):
             getattr(getattr(self, "input_message", None), "text", getattr(self, "input_message", "")) or ""
         ).strip()
 
-        registry = AuthoringReferenceRegistry()
-        registry.registry_json = str(getattr(self, "registry_json", "") or "")
-        reference_context = registry.load_registry()
-        reference_payload = deepcopy(getattr(reference_context, "data", reference_context))
-        domain_id = str(reference_payload.get("domain_id") or "").strip()
+        domain_id = "default"
         environment = "production"
 
         context_builder = AuthoringPromptContextBuilder()
         context_builder.input_message = getattr(self, "input_message", None)
-        context_builder.approved_reference_context = reference_context
-        # Domain registration asks the model only for display annotations.
-        # Dataset and Main Filter bootstrap material is then expanded from the
-        # approved registry without additional model calls.
-        context_builder.bootstrap_fragment = kind == "domain"
+        context_builder.approved_reference_context = None
+        # Each flow authors only its own MongoDB collection section. The
+        # deterministic engine compiles all three collections once complete.
+        context_builder.bootstrap_fragment = True
         context_builder.authoring_kind = kind
         context_builder.mode = "save"
         context_builder.source_grounding_mode = "freeform_llm"
@@ -9975,7 +11549,6 @@ class SimpleMetadataDraftGenerator(Component):
                 "environment": environment,
                 "source_text": source_text,
                 "authoring_source_context": deepcopy(getattr(source_context, "data", source_context)),
-                "approved_reference_context": deepcopy(getattr(reference_context, "data", reference_context)),
                 "authoring_invocation_result": deepcopy(getattr(invocation_result, "data", invocation_result)),
             }
         )
@@ -9983,6 +11556,53 @@ class SimpleMetadataDraftGenerator(Component):
 
 
 SIMPLE_AUTHORING_ENGINE_COMPONENT = r'''
+def _simple_public_authoring_response(value):
+    """Expose only worker-relevant registration results from node 04."""
+
+    raw = deepcopy(getattr(value, "data", value)) if value is not None else {}
+    raw = raw if isinstance(raw, dict) else {}
+    public = {
+        "status": str(raw.get("status") or "error"),
+        "stage": str(raw.get("stage") or "metadata_authoring"),
+        "authoring_kind": str(raw.get("authoring_kind") or ""),
+    }
+    if isinstance(raw.get("llm_usage"), dict):
+        public["llm_usage"] = deepcopy(raw["llm_usage"])
+    if public["status"] == "error":
+        error = raw.get("error") if isinstance(raw.get("error"), dict) else {}
+        public["error"] = {
+            "code": str(error.get("code") or "metadata_authoring_error"),
+            "message": str(error.get("message") or "메타데이터 등록에 실패했습니다."),
+            "details": deepcopy(error.get("details") or {}),
+        }
+        return public
+    if public["status"] == "needs_clarification":
+        public["clarification"] = deepcopy(raw.get("clarification") or {})
+        return public
+
+    diff = raw.get("diff") if isinstance(raw.get("diff"), dict) else {}
+    operations = (
+        diff.get("write_operations")
+        if isinstance(diff.get("write_operations"), dict)
+        else {}
+    )
+    public.update(
+        {
+            "persisted": bool(raw.get("persisted")),
+            "revision": int(raw.get("revision") or 0),
+            "diff": {
+                "inserted": int(operations.get("inserted") or 0),
+                "replaced": int(operations.get("replaced") or 0),
+                "unchanged": int(operations.get("unchanged") or 0),
+                "activation_status": str(diff.get("activation_status") or ""),
+                "ready_sections": deepcopy(diff.get("ready_sections") or []),
+                "missing_sections": deepcopy(diff.get("missing_sections") or []),
+            },
+        }
+    )
+    return public
+
+
 class SimpleMetadataAuthoringEngine(Component):
     display_name = "메타데이터 검증 및 저장"
     description = "LLM 초안을 결정론적으로 컴파일·검증하고 도메인·테이블 카탈로그·메인 필터 3개 MongoDB 컬렉션에 항목 단위로 저장합니다."
@@ -10012,19 +11632,12 @@ class SimpleMetadataAuthoringEngine(Component):
         if not isinstance(raw, dict) or raw.get("contract_version") != "metadata.simple-authoring-context.v1":
             raise ValueError("자연어 메타데이터 변환 노드의 등록 컨텍스트가 필요합니다.")
         kind = str(raw.get("authoring_kind") or "").strip()
-        domain_id = str(raw.get("domain_id") or "").strip()
         environment = str(raw.get("environment") or "").strip()
-        reference_context = raw.get("approved_reference_context")
-        registered_domain_id = str(
-            reference_context.get("domain_id") if isinstance(reference_context, dict) else ""
-        ).strip()
         if (
             kind not in {"domain", "dataset", "main_filter"}
-            or not domain_id
-            or domain_id != registered_domain_id
             or environment != "production"
         ):
-            raise ValueError("등록 Flow의 내부 유형 또는 승인 레지스트리 식별 정보가 올바르지 않습니다.")
+            raise ValueError("등록 Flow의 내부 유형 또는 운영 환경 정보가 올바르지 않습니다.")
 
         mode = str(getattr(self, "mode", "save") or "save").strip()
         if mode not in {"save", "replace", "validate_only"}:
@@ -10033,13 +11646,12 @@ class SimpleMetadataAuthoringEngine(Component):
         engine = MetadataAuthoringEngine()
         engine.input_message = str(raw.get("source_text") or "")
         engine.authoring_source_context = Data(data=deepcopy(raw.get("authoring_source_context") or {}))
-        engine.approved_reference_context = Data(data=deepcopy(raw.get("approved_reference_context") or {}))
+        engine.approved_reference_context = None
         engine.authoring_invocation_result = Data(data=deepcopy(raw.get("authoring_invocation_result") or {}))
         engine.split_bootstrap = False
         engine.authoring_kind = kind
         engine.source_grounding_mode = "freeform_llm"
         engine.metadata_contract_mode = "domain_package_v2"
-        engine.domain_id = domain_id
         engine.environment = environment
         engine.revision_policy = "auto_next"
         engine.mode = mode
@@ -10050,9 +11662,11 @@ class SimpleMetadataAuthoringEngine(Component):
         engine.main_filter_collection = str(getattr(self, "main_filter_collection", "") or "")
         engine.mongo_timeout_ms = int(getattr(self, "mongo_timeout_ms", 5000) or 5000)
         engine.dry_run = mode == "validate_only"
+        domain_id = str(raw.get("domain_id") or "default").strip() or "default"
+        engine.domain_id = domain_id
         result = engine.run_authoring()
         self.status = str(getattr(engine, "status", "메타데이터 검증 완료") or "메타데이터 검증 완료")
-        return result
+        return Data(data=_simple_public_authoring_response(result))
 '''
 
 
@@ -10102,18 +11716,9 @@ def _simple_authoring_pipeline_source(
     if authoring_kind not in {"domain", "dataset", "main_filter"}:
         raise GenerationError(f"unsupported simple authoring kind: {authoring_kind}")
     context_source = _authoring_prompt_context_source(catalog, schemas, manifest)
-    registry_source = _analysis_phase_source(
-        "AuthoringReferenceRegistry",
-        (),
-        AUTHORING_REFERENCE_REGISTRY_COMPONENT,
-        catalog=None,
-        schemas=schemas,
-        manifest=manifest,
-        extra_blocks=(SEMANTIC_VOCABULARY_HELPERS,),
-    )
     composer_source = PROMPT_BUNDLE_SOURCE_PATH.read_text(encoding="utf-8")
     invoker_source = CONDITIONAL_LLM_SOURCE_PATH.read_text(encoding="utf-8")
-    sources = (context_source, registry_source, composer_source, invoker_source)
+    sources = (context_source, composer_source, invoker_source)
     blocks = [
         _header(manifest, "SimpleMetadataDraftGenerator"),
         _embedded_module_imports(*sources),
@@ -10428,7 +12033,11 @@ def build_components(*, check: bool = False) -> list[Path]:
             catalog=catalog,
             schemas=schemas,
             manifest=manifest,
-            schema_names=("runtime-catalog-v2.schema.json", "domain-package.schema.json"),
+            schema_names=(
+                "metadata-authoring-draft.schema.json",
+                "runtime-catalog-v2.schema.json",
+                "domain-package.schema.json",
+            ),
         ),
         OUTPUT_ROOT / "data_analysis" / "candidate_route_gate.py": _analysis_phase_source(
             "CandidateRouteGate",

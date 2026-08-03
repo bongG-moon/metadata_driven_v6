@@ -1,5 +1,7 @@
 # metadata_driven_v6 기능 설계서
 
+> 현재 import-ready 메타데이터 등록 Flow는 승인 어휘·원천 레지스트리 입력을 노출하지 않는다. 자연어 원문과 공통/특화 Prompt Template만 LLM에 전달하고, 세 MongoDB 컬렉션의 검증된 항목을 compiler authority로 사용한다. 아래 registry 기반 설명은 마이그레이션 및 내부 회귀 검증 경로에만 해당한다.
+
 - 작성일: 2026-07-31
 - 설계 기준: v5 `bb6df1a` tracked source, 내용상 `f5a2a79`
 - 런타임 기준: Langflow 1.9.2 / Langflow Base 0.9.2 / LFX 0.4.2 / Python 3.12

@@ -1,0 +1,411 @@
+{
+  "contract_version": "langflow.http.e2e.validation.v1",
+  "server_url_sha256": "afcb26583a5c2db7bcde7dd5545241f2fe3de50c387c4051d5c52c0b4927d675",
+  "flow_file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+  "flow_sha256": "7b2be5af9f916933f3150b04a0f01acf4c2d1ad2307a3109870ea86c09fa0e10",
+  "uploaded_flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+  "uploaded_endpoint_name": "metadata_v6_data_analysis",
+  "upload_node_count": 36,
+  "model": "gemini-3.5-flash-lite",
+  "model_contract": {
+    "requested_model": "gemini-3.5-flash-lite",
+    "temperature": 0,
+    "candidate_count": 1,
+    "fallback_enabled": false,
+    "fallback_models": []
+  },
+  "flow_model_contract": {
+    "contract": {
+      "requested_model": "gemini-3.5-flash-lite",
+      "temperature": 0,
+      "candidate_count": 1,
+      "fallback_enabled": false,
+      "fallback_models": []
+    },
+    "required": true,
+    "model_node_count": 1,
+    "nodes": [
+      {
+        "node_id": "intent_language_model",
+        "model_names": [
+          "gemini-3.5-flash-lite"
+        ],
+        "providers": [
+          "Google Generative AI"
+        ],
+        "temperature": 0.0,
+        "stream": false,
+        "configured_fallback_fields": [],
+        "passed": true
+      }
+    ],
+    "passed": true
+  },
+  "domain_id": "default",
+  "environment": "production",
+  "metadata_release": {
+    "selection": "latest_available_release",
+    "domain_id": "default",
+    "environment": "production",
+    "revision": 1,
+    "package_sha256": "bc555035acd7c755746f5c6e04b21bf893d97ca7164dc112d2656a159faab53b",
+    "bundle_sha256": "b19a9504789b3468e16bd52bc8a56cf43b7275b5c97a207c11b6144855b989e0",
+    "catalog_sha256": "52d2ea40597956b7c9ae083eaa1f93aab6bb0225b5b6ff71785cd9d44eebe81d",
+    "dataset_source_types": {
+      "eqp_uph": "oracle",
+      "equipment_assign": "oracle",
+      "hold_history": "oracle",
+      "lot_status": "oracle",
+      "production": "oracle",
+      "production_today": "oracle",
+      "target": "oracle",
+      "wip": "oracle",
+      "wip_today": "oracle"
+    },
+    "item_set_sha256": "8b5ce10cb3a6bdaee10cf3bdb45689a80f7f5206e397c682a21fd16a4dda6aed",
+    "item_counts": {
+      "domain": 1,
+      "table_catalog": 9,
+      "main_filter": 8
+    },
+    "collections": {
+      "domain": "agent_v6_domain_metadata",
+      "table_catalog": "agent_v6_table_catalog",
+      "main_filter": "agent_v6_main_filter"
+    },
+    "checks": {
+      "three_collections_nonempty": true,
+      "fixed_collection_roles": true,
+      "typed_item_documents": true,
+      "expected_domain": true,
+      "expected_environment": true,
+      "revision_positive": true,
+      "package_sha256_valid": true,
+      "bundle_sha256_valid": true,
+      "catalog_sha256_valid": true
+    }
+  },
+  "metadata_source_mode": "three_collections_auto_latest",
+  "validation_clock": {
+    "mode": "environment_only",
+    "reference_instant": "2026-07-30T09:00:00+09:00",
+    "timezone": "Asia/Seoul",
+    "checks": {
+      "validation_mode_enabled": true,
+      "reference_instant_exact": true,
+      "timezone_internal": true,
+      "flow_clock_tweak_used": false
+    }
+  },
+  "anonymous_multiturn_export_defaults": {
+    "request_state_capsule": false,
+    "response_state_commit": false
+  },
+  "anonymous_multiturn_validation_opt_in": true,
+  "raw_langflow_responses_persisted": false,
+  "prompts_persisted": false,
+  "secrets_persisted": false,
+  "case_count": 4,
+  "passed": 0,
+  "failed": 4,
+  "multiturn_state_progression": false,
+  "rows": [
+    {
+      "case_id": "HTTP-DETERMINISTIC",
+      "session_group": "deterministic",
+      "http_status": 200,
+      "http_response_sha256": "4c71b3bb4ccc876bff3742f50712a3dec1de2843db2df5d50cf0eac7114d1cd2",
+      "expected_route": "deterministic",
+      "expected_intent_llm_calls": 0,
+      "evidence": {
+        "canonical_response_sha256": "",
+        "canonical_hash_count": 0,
+        "terminal_hashes": {
+          "message": [],
+          "gaia": [],
+          "api": [],
+          "chat_output": []
+        },
+        "gaia_metadata_response_sha256": [],
+        "terminal_block_counts": {
+          "message": 1,
+          "gaia": 1,
+          "api": 1,
+          "chat_output": 0
+        },
+        "terminal_equivalent": false,
+        "status": null,
+        "route": null,
+        "error": {
+          "code": "",
+          "stage": "",
+          "detail_keys": []
+        },
+        "usage": {
+          "intent_llm_calls": 0,
+          "intent_retry_calls": 0,
+          "answer_llm_calls": 0,
+          "pandas_code_llm_calls": 0,
+          "pandas_repair_llm_calls": 0
+        },
+        "state_version": 0,
+        "executed_result_ref_sha256": "",
+        "persistence_contract": {
+          "state_present": false,
+          "data_ref_count": 0,
+          "data_ref_roles": [],
+          "answer_download_count": 0,
+          "download_url_count": 0,
+          "all_data_ref_ids_valid": false,
+          "all_download_ref_ids_valid": false,
+          "download_refs_match_data_refs": true,
+          "one_analysis_result_ref": false,
+          "state_ref_matches_analysis_result": false,
+          "result_table_ref_matches_analysis_result": false
+        }
+      },
+      "checks": {
+        "http_200": true,
+        "status_ok_or_empty": false,
+        "route_exact": false,
+        "intent_calls_exact": true,
+        "intent_retry_zero": true,
+        "answer_calls_zero": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true,
+        "state_version_exact": false,
+        "persistent_state_present": false,
+        "persistent_data_refs_present": false,
+        "persistent_download_entries_present": true,
+        "persistent_ref_ids_valid": false,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": false,
+        "terminal_equivalent": false
+      },
+      "passed": false
+    },
+    {
+      "case_id": "HTTP-INTENT",
+      "session_group": "intent",
+      "http_status": 200,
+      "http_response_sha256": "faf3d52329e2ecb9665f01e9e0506bff5d6ca38b4d4bdb143458f3f8a0c706d1",
+      "expected_route": "intent_llm",
+      "expected_intent_llm_calls": 1,
+      "evidence": {
+        "canonical_response_sha256": "",
+        "canonical_hash_count": 0,
+        "terminal_hashes": {
+          "message": [],
+          "gaia": [],
+          "api": [],
+          "chat_output": []
+        },
+        "gaia_metadata_response_sha256": [],
+        "terminal_block_counts": {
+          "message": 1,
+          "gaia": 1,
+          "api": 1,
+          "chat_output": 0
+        },
+        "terminal_equivalent": false,
+        "status": null,
+        "route": null,
+        "error": {
+          "code": "",
+          "stage": "",
+          "detail_keys": []
+        },
+        "usage": {
+          "intent_llm_calls": 0,
+          "intent_retry_calls": 0,
+          "answer_llm_calls": 0,
+          "pandas_code_llm_calls": 0,
+          "pandas_repair_llm_calls": 0
+        },
+        "state_version": 0,
+        "executed_result_ref_sha256": "",
+        "persistence_contract": {
+          "state_present": false,
+          "data_ref_count": 0,
+          "data_ref_roles": [],
+          "answer_download_count": 0,
+          "download_url_count": 0,
+          "all_data_ref_ids_valid": false,
+          "all_download_ref_ids_valid": false,
+          "download_refs_match_data_refs": true,
+          "one_analysis_result_ref": false,
+          "state_ref_matches_analysis_result": false,
+          "result_table_ref_matches_analysis_result": false
+        }
+      },
+      "checks": {
+        "http_200": true,
+        "status_ok_or_empty": false,
+        "route_exact": false,
+        "intent_calls_exact": false,
+        "intent_retry_zero": true,
+        "answer_calls_zero": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true,
+        "state_version_exact": false,
+        "persistent_state_present": false,
+        "persistent_data_refs_present": false,
+        "persistent_download_entries_present": true,
+        "persistent_ref_ids_valid": false,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": false,
+        "terminal_equivalent": false
+      },
+      "passed": false
+    },
+    {
+      "case_id": "HTTP-MULTITURN-1",
+      "session_group": "multiturn",
+      "http_status": 200,
+      "http_response_sha256": "26439f9d119e07cc12e5c0e5782110305f74c5e619a520401d1b0df3b2a9938a",
+      "expected_route": "deterministic",
+      "expected_intent_llm_calls": 0,
+      "evidence": {
+        "canonical_response_sha256": "",
+        "canonical_hash_count": 0,
+        "terminal_hashes": {
+          "message": [],
+          "gaia": [],
+          "api": [],
+          "chat_output": []
+        },
+        "gaia_metadata_response_sha256": [],
+        "terminal_block_counts": {
+          "message": 1,
+          "gaia": 1,
+          "api": 1,
+          "chat_output": 0
+        },
+        "terminal_equivalent": false,
+        "status": null,
+        "route": null,
+        "error": {
+          "code": "",
+          "stage": "",
+          "detail_keys": []
+        },
+        "usage": {
+          "intent_llm_calls": 0,
+          "intent_retry_calls": 0,
+          "answer_llm_calls": 0,
+          "pandas_code_llm_calls": 0,
+          "pandas_repair_llm_calls": 0
+        },
+        "state_version": 0,
+        "executed_result_ref_sha256": "",
+        "persistence_contract": {
+          "state_present": false,
+          "data_ref_count": 0,
+          "data_ref_roles": [],
+          "answer_download_count": 0,
+          "download_url_count": 0,
+          "all_data_ref_ids_valid": false,
+          "all_download_ref_ids_valid": false,
+          "download_refs_match_data_refs": true,
+          "one_analysis_result_ref": false,
+          "state_ref_matches_analysis_result": false,
+          "result_table_ref_matches_analysis_result": false
+        }
+      },
+      "checks": {
+        "http_200": true,
+        "status_ok_or_empty": false,
+        "route_exact": false,
+        "intent_calls_exact": true,
+        "intent_retry_zero": true,
+        "answer_calls_zero": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true,
+        "state_version_exact": false,
+        "persistent_state_present": false,
+        "persistent_data_refs_present": false,
+        "persistent_download_entries_present": true,
+        "persistent_ref_ids_valid": false,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": false,
+        "terminal_equivalent": false
+      },
+      "passed": false
+    },
+    {
+      "case_id": "HTTP-MULTITURN-2",
+      "session_group": "multiturn",
+      "http_status": 200,
+      "http_response_sha256": "6293fe80ab6b9097b30c89e4ce5bae372b9034eea6085342b35c22e6139ea05c",
+      "expected_route": "deterministic",
+      "expected_intent_llm_calls": 0,
+      "evidence": {
+        "canonical_response_sha256": "",
+        "canonical_hash_count": 0,
+        "terminal_hashes": {
+          "message": [],
+          "gaia": [],
+          "api": [],
+          "chat_output": []
+        },
+        "gaia_metadata_response_sha256": [],
+        "terminal_block_counts": {
+          "message": 1,
+          "gaia": 1,
+          "api": 1,
+          "chat_output": 0
+        },
+        "terminal_equivalent": false,
+        "status": null,
+        "route": null,
+        "error": {
+          "code": "",
+          "stage": "",
+          "detail_keys": []
+        },
+        "usage": {
+          "intent_llm_calls": 0,
+          "intent_retry_calls": 0,
+          "answer_llm_calls": 0,
+          "pandas_code_llm_calls": 0,
+          "pandas_repair_llm_calls": 0
+        },
+        "state_version": 0,
+        "executed_result_ref_sha256": "",
+        "persistence_contract": {
+          "state_present": false,
+          "data_ref_count": 0,
+          "data_ref_roles": [],
+          "answer_download_count": 0,
+          "download_url_count": 0,
+          "all_data_ref_ids_valid": false,
+          "all_download_ref_ids_valid": false,
+          "download_refs_match_data_refs": true,
+          "one_analysis_result_ref": false,
+          "state_ref_matches_analysis_result": false,
+          "result_table_ref_matches_analysis_result": false
+        }
+      },
+      "checks": {
+        "http_200": true,
+        "status_ok_or_empty": false,
+        "route_exact": false,
+        "intent_calls_exact": true,
+        "intent_retry_zero": true,
+        "answer_calls_zero": true,
+        "pandas_code_calls_zero": true,
+        "pandas_repair_calls_zero": true,
+        "state_version_exact": false,
+        "persistent_state_present": false,
+        "persistent_data_refs_present": false,
+        "persistent_download_entries_present": true,
+        "persistent_ref_ids_valid": false,
+        "persistent_ref_sets_exact": true,
+        "persistent_analysis_ref_exact": false,
+        "terminal_equivalent": false
+      },
+      "passed": false
+    }
+  ],
+  "all_passed": false
+}

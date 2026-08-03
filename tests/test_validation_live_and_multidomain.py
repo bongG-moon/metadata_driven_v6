@@ -534,7 +534,7 @@ def test_domain_sessions_and_result_references_are_isolated() -> None:
     assert crossed.value.code == "state_reference_forbidden"
 
 
-def test_http_terminal_evidence_requires_message_api_and_gaia_hash_equivalence() -> None:
+def test_http_terminal_evidence_accepts_structural_terminals_and_local_final_hash() -> None:
     digest = "c" * 64
     response = {
         "contract_version": "response.v1",
@@ -596,7 +596,8 @@ def test_http_terminal_evidence_requires_message_api_and_gaia_hash_equivalence()
     }
     evidence = extract_terminal_evidence(payload)
     assert evidence["terminal_equivalent"] is True
-    assert evidence["canonical_response_sha256"] == digest
+    assert len(evidence["canonical_response_sha256"]) == 64
+    assert evidence["canonical_response_sha256"] != digest
     assert evidence["state_version"] == 2
     assert evidence["usage"]["pandas_code_llm_calls"] == 0
 

@@ -81,7 +81,6 @@ def test_authoring_tweaks_expose_selector_free_save_replace_validate_contract() 
         "environment": "validation_001",
         "mongo_uri": "mongodb://example.invalid",
         "mongo_database": "datagov_v6_validation",
-        "registry_json": "{}",
         "sources": sources,
     }
     forbidden = {
@@ -96,6 +95,7 @@ def test_authoring_tweaks_expose_selector_free_save_replace_validate_contract() 
         "domain_id",
         "environment",
         "dry_run",
+        "registry_json",
     }
 
     for kind in ("domain", "dataset", "main_filter"):

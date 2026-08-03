@@ -1,0 +1,643 @@
+{
+  "contract_version": "connected.langflow.chain.validation.v1",
+  "validated_at": "2026-08-04T01:44:41.243150+09:00",
+  "langflow": {
+    "server": "http://127.0.0.1:7873",
+    "expected_version": "1.9.2"
+  },
+  "model": "gemini-3.5-flash-lite",
+  "database": "datagov_v6_connected_20260804_014124",
+  "flows": {
+    "analysis": {
+      "file": "metadata_v6_data_analysis_flow_v6_standalone.json",
+      "sha256": "39a2de9430a3e78862d0a7ebe83e53cc0c1ef0df1f7bac9bc7b7222ba71a77ed",
+      "flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
+      "node_count": 36,
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "intent_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      }
+    },
+    "domain": {
+      "file": "metadata_v6_domain_authoring_flow_v6_standalone.json",
+      "sha256": "b67444eb9bede53e562b3039e0fdcb0a3bc924534b33d44c758633432d11e3f0",
+      "flow_id": "18ba3690-6b5e-522a-9ed7-3795161d1f11",
+      "node_count": 9,
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      }
+    },
+    "dataset": {
+      "file": "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
+      "sha256": "6e9289ee3a16f18a98b3bec55b18a6459d63d98e28a845e7e47fae0928655eae",
+      "flow_id": "c207326f-3edf-5900-ae1f-40fb1062f1e1",
+      "node_count": 9,
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      }
+    },
+    "main_filter": {
+      "file": "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
+      "sha256": "d6da47044f0363b36d3fdd3c5851612b06d7e9758539d6ef607d02fb2eb6c34f",
+      "flow_id": "3c2dea0c-d508-5fed-95ad-b74aa3e8dca6",
+      "node_count": 9,
+      "model_contract": {
+        "contract": {
+          "requested_model": "gemini-3.5-flash-lite",
+          "temperature": 0,
+          "candidate_count": 1,
+          "fallback_enabled": false,
+          "fallback_models": []
+        },
+        "required": true,
+        "model_node_count": 1,
+        "nodes": [
+          {
+            "node_id": "draft_language_model",
+            "model_names": [
+              "gemini-3.5-flash-lite"
+            ],
+            "providers": [
+              "Google Generative AI"
+            ],
+            "temperature": 0.0,
+            "stream": false,
+            "configured_fallback_fields": [],
+            "passed": true
+          }
+        ],
+        "passed": true
+      }
+    }
+  },
+  "authoring": [
+    {
+      "case_id": "main_filter",
+      "source_sha256": "6972ff1957ee7bdb26008cbdfd3680018bf59110794653fb9351b51ecfcd22a4",
+      "source_chars": 141,
+      "chat_output_sha256": "de6766dae724ed0cfcac8dd818302d633ac15bd1fa7d5d5d2e210b336f55f0af",
+      "chat_output_preview": "### 메타데이터 항목 저장 완료 (실행 준비 중)\n\n- 처리 결과: 신규 2 / 교체 0 / 동일 0\n- 등록 완료 영역: main_filter\n- 추가 등록 필요 영역: domain, table_catalog\n- 세 영역이 모두 등록되면 자동으로 전체 실행 메타데이터를 검증합니다.",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "main_filter",
+      "persisted": false,
+      "revision": 0,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "domain_profile",
+      "source_sha256": "dc656e098f7fd99d5ec43431c2e9740653483b003b11d291963c11b5af60cd58",
+      "source_chars": 106,
+      "chat_output_sha256": "f9349beff90af749fdc43ae3b1056fa900b19aac45dfd813ea6770f119fa074c",
+      "chat_output_preview": "### 메타데이터 항목 저장 완료 (실행 준비 중)\n\n- 처리 결과: 신규 1 / 교체 0 / 동일 0\n- 등록 완료 영역: domain, main_filter\n- 추가 등록 필요 영역: table_catalog\n- 세 영역이 모두 등록되면 자동으로 전체 실행 메타데이터를 검증합니다.",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "domain",
+      "persisted": false,
+      "revision": 0,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "dataset_wip_today",
+      "source_sha256": "41f32d4fe8a637ad37caf68e0ee96f8c3bd7f178f6c6a364a3e55fb4b6073acc",
+      "source_chars": 830,
+      "chat_output_sha256": "703f54fb1f8f1463b370ab6fecee6d8f7ec75a06830e8b4983427e50822267ff",
+      "chat_output_preview": "### 메타데이터 저장 완료\n\n- Revision: 1\n- 처리 결과: 신규 1 / 교체 0 / 동일 0\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "dataset",
+      "persisted": false,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "domain_da_group",
+      "source_sha256": "abe71b6ff241bf950d80b9ad648968b17a07a081f92f61c705d3147a41151129",
+      "source_chars": 190,
+      "chat_output_sha256": "0f2a55d515d6051582993e5133421f6d5100983dcde4bb41def2a00c6b068ef3",
+      "chat_output_preview": "### 메타데이터 저장 완료\n\n- Revision: 1\n- 처리 결과: 신규 2 / 교체 0 / 동일 0\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "domain",
+      "persisted": false,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "domain_wip_metric",
+      "source_sha256": "5ea17158ea9b3d439db1748f359bb11d2e74edd6c7645bfcd47cd5af8342eb7d",
+      "source_chars": 114,
+      "chat_output_sha256": "0f2a55d515d6051582993e5133421f6d5100983dcde4bb41def2a00c6b068ef3",
+      "chat_output_preview": "### 메타데이터 저장 완료\n\n- Revision: 1\n- 처리 결과: 신규 2 / 교체 0 / 동일 0\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "domain",
+      "persisted": false,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "domain_product_grain",
+      "source_sha256": "e7c7a02e3b15ffcdae6aca0da165ee82739a47669bb41afd97a9807558a081f3",
+      "source_chars": 95,
+      "chat_output_sha256": "703f54fb1f8f1463b370ab6fecee6d8f7ec75a06830e8b4983427e50822267ff",
+      "chat_output_preview": "### 메타데이터 저장 완료\n\n- Revision: 1\n- 처리 결과: 신규 1 / 교체 0 / 동일 0\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "domain",
+      "persisted": false,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    },
+    {
+      "case_id": "domain_product_recipe",
+      "source_sha256": "2b0209ba8620bcef04d3323c04abaef436677a852fa9694d279868d197dc7e47",
+      "source_chars": 166,
+      "chat_output_sha256": "0f2a55d515d6051582993e5133421f6d5100983dcde4bb41def2a00c6b068ef3",
+      "chat_output_preview": "### 메타데이터 저장 완료\n\n- Revision: 1\n- 처리 결과: 신규 2 / 교체 0 / 동일 0\n- 저장 구조: 도메인·테이블 카탈로그·메인필터\n- 실행 메타데이터: 사용 가능",
+      "status": "ok",
+      "stage": "validated",
+      "authoring_kind": "domain",
+      "persisted": false,
+      "revision": 1,
+      "draft_llm_calls": 1,
+      "repair_llm_calls": 0,
+      "error": {
+        "code": "",
+        "stage": "",
+        "message": ""
+      },
+      "passed": true
+    }
+  ],
+  "mongodb": {
+    "collections": {
+      "domain": "agent_v6_domain_metadata",
+      "table_catalog": "agent_v6_table_catalog",
+      "main_filter": "agent_v6_main_filter"
+    },
+    "counts": {
+      "domain": 8,
+      "table_catalog": 1,
+      "main_filter": 2
+    },
+    "items": {
+      "domain": [
+        {
+          "id": "domain:aliases:entity_group:DA",
+          "section": "aliases",
+          "key": "entity_group:DA",
+          "natural_text_chars": 190,
+          "payload_keys": [
+            "conflict",
+            "match",
+            "normalization",
+            "provenance_source",
+            "target_key",
+            "target_type",
+            "values"
+          ]
+        },
+        {
+          "id": "domain:aliases:metric:WIP_QTY",
+          "section": "aliases",
+          "key": "metric:WIP_QTY",
+          "natural_text_chars": 114,
+          "payload_keys": [
+            "conflict",
+            "match",
+            "normalization",
+            "provenance_source",
+            "target_key",
+            "target_type",
+            "values"
+          ]
+        },
+        {
+          "id": "domain:aliases:recipe:product.standard",
+          "section": "aliases",
+          "key": "recipe:product.standard",
+          "natural_text_chars": 166,
+          "payload_keys": [
+            "conflict",
+            "match",
+            "normalization",
+            "provenance_source",
+            "target_key",
+            "target_type",
+            "values"
+          ]
+        },
+        {
+          "id": "domain:entity_groups:DA",
+          "section": "entity_groups",
+          "key": "DA",
+          "natural_text_chars": 190,
+          "payload_keys": [
+            "alias_policy",
+            "aliases",
+            "display_name",
+            "expansion",
+            "group_id",
+            "legacy_identity",
+            "members",
+            "selection",
+            "target_field"
+          ]
+        },
+        {
+          "id": "domain:grains:product",
+          "section": "grains",
+          "key": "product",
+          "natural_text_chars": 95,
+          "payload_keys": [
+            "grain_id",
+            "keys"
+          ]
+        },
+        {
+          "id": "domain:metrics:WIP_QTY",
+          "section": "metrics",
+          "key": "WIP_QTY",
+          "natural_text_chars": 114,
+          "payload_keys": [
+            "additivity",
+            "aliases",
+            "metric_id",
+            "null_policy",
+            "source_binding",
+            "unit",
+            "value_type",
+            "zero_policy"
+          ]
+        },
+        {
+          "id": "domain:profile:default",
+          "section": "profile",
+          "key": "default",
+          "natural_text_chars": 106,
+          "payload_keys": [
+            "description",
+            "display_name",
+            "locale",
+            "timezone"
+          ]
+        },
+        {
+          "id": "domain:recipes:product.standard",
+          "section": "recipes",
+          "key": "product.standard",
+          "natural_text_chars": 166,
+          "payload_keys": [
+            "aliases",
+            "default_operation_template",
+            "grain",
+            "recipe_id",
+            "required_slots"
+          ]
+        }
+      ],
+      "table_catalog": [
+        {
+          "id": "table_catalog:datasets:wip_today",
+          "section": "datasets",
+          "key": "wip_today",
+          "natural_text_chars": 244,
+          "payload_keys": [
+            "config_ref",
+            "display_name",
+            "family",
+            "fields",
+            "parameters",
+            "query_ref",
+            "selection_criteria",
+            "source_adapter",
+            "source_config",
+            "source_type",
+            "time_scope"
+          ]
+        }
+      ],
+      "main_filter": [
+        {
+          "id": "main_filter:aliases:field:DATE",
+          "section": "aliases",
+          "key": "field:DATE",
+          "natural_text_chars": 65,
+          "payload_keys": [
+            "conflict",
+            "match",
+            "normalization",
+            "provenance_source",
+            "target_key",
+            "target_type",
+            "values"
+          ]
+        },
+        {
+          "id": "main_filter:aliases:field:OPER_NAME",
+          "section": "aliases",
+          "key": "field:OPER_NAME",
+          "natural_text_chars": 74,
+          "payload_keys": [
+            "conflict",
+            "match",
+            "normalization",
+            "provenance_source",
+            "target_key",
+            "target_type",
+            "values"
+          ]
+        }
+      ]
+    },
+    "critical": {
+      "dataset": {
+        "family": "wip",
+        "source_type": "oracle",
+        "time_scope": "current_day",
+        "date_physical_column": "WORK_DATE",
+        "wip_physical_column": "WIP",
+        "required_params": [
+          "DATE"
+        ],
+        "query_line_count": 7,
+        "query_sha256": "ad2b971da2376922c0185306c2db52991129524d9902f2d96f34afd525097b59",
+        "query_has_date_placeholder": true
+      },
+      "metric": {
+        "field": null,
+        "rollup": null,
+        "source_binding": {
+          "dataset_family": "wip",
+          "field": "WIP"
+        }
+      },
+      "entity_group": {
+        "target_field": "OPER_NAME",
+        "member_count": 6,
+        "selection": {
+          "operator": "in",
+          "value": [
+            "D/A1",
+            "D/A2",
+            "D/A3",
+            "D/A4",
+            "D/A5",
+            "D/A6"
+          ]
+        }
+      },
+      "grain": {
+        "keys": [
+          "TECH",
+          "DEN",
+          "MODE",
+          "PKG_TYPE1",
+          "PKG_TYPE2",
+          "LEAD",
+          "MCP_NO"
+        ]
+      },
+      "recipe": {
+        "aliases": [
+          "제품별",
+          "제품 기준",
+          "제품 집계"
+        ],
+        "required_slots": [
+          "dataset_refs",
+          "metric_refs"
+        ],
+        "operation": {
+          "op": "aggregate",
+          "group_by": [
+            "TECH",
+            "DEN",
+            "MODE",
+            "PKG_TYPE1",
+            "PKG_TYPE2",
+            "LEAD",
+            "MCP_NO"
+          ],
+          "metrics": [
+            {
+              "as_ref": "$metric.id",
+              "field_ref": "$metric.field",
+              "function_ref": "$metric.rollup"
+            }
+          ]
+        }
+      }
+    },
+    "checks": {
+      "all_three_collections_nonempty": true,
+      "wip_dataset_present": true,
+      "query_preserved": true,
+      "time_scope_current_day": true,
+      "metric_bound_to_wip": true,
+      "group_typed_in": true,
+      "grain_exact": true,
+      "recipe_typed_aggregate": true,
+      "recipe_alias_clean": true
+    }
+  },
+  "compiled_package": {
+    "domain_id": "default",
+    "environment": "production",
+    "revision": 1,
+    "catalog_sha256": "9e84c5aef7f95521b8b80fa4c5d7737682998e8ca04d2047d697f470e01cd24d",
+    "planner_profile": null
+  },
+  "analysis": {
+    "status": "ok",
+    "route": "deterministic",
+    "usage": {
+      "intent_llm_calls": 0,
+      "intent_retry_calls": 0,
+      "answer_llm_calls": 0,
+      "pandas_code_llm_calls": 0,
+      "pandas_repair_llm_calls": 0
+    },
+    "terminal_complete": true,
+    "row_count": 2,
+    "columns": [
+      "TECH",
+      "DEN",
+      "MODE",
+      "PKG_TYPE1",
+      "PKG_TYPE2",
+      "LEAD",
+      "MCP_NO",
+      "WIP_QTY"
+    ],
+    "data_ref": "result:aef8912a550db11b865eb54d16936253096bbcf7e4735a2d79aa70e4240334ef:4c120cb393014961905eefd49d430c3d4543f67aa4dd0f13edca63fec9a53f40",
+    "retrieval": [
+      {
+        "job_id": "job_1_wip_today",
+        "dataset_key": "wip_today",
+        "status": "ok",
+        "row_count": 2,
+        "content_sha256": "a53ad277d399ca907a6d9cc4ccb08a841bcd80d44ffefda8ed5710440d8e84b3"
+      }
+    ],
+    "pandas_code_present": true,
+    "state_version": 1,
+    "persistence": {
+      "state_present": true,
+      "data_ref_count": 2,
+      "data_ref_roles": [
+        "analysis_result",
+        "source_snapshot"
+      ],
+      "answer_download_count": 2,
+      "download_url_count": 0,
+      "all_data_ref_ids_valid": true,
+      "all_download_ref_ids_valid": true,
+      "download_refs_match_data_refs": true,
+      "one_analysis_result_ref": true,
+      "state_ref_matches_analysis_result": true,
+      "result_table_ref_matches_analysis_result": true
+    },
+    "passed": true,
+    "typed_rows": [
+      {
+        "TECH": "R1",
+        "DEN": "8G",
+        "MODE": "R1",
+        "PKG_TYPE1": "FBGA",
+        "PKG_TYPE2": "STD",
+        "LEAD": "64",
+        "MCP_NO": "R-001",
+        "WIP_QTY": 300
+      },
+      {
+        "TECH": "R2",
+        "DEN": "8G",
+        "MODE": "R2",
+        "PKG_TYPE1": "FBGA",
+        "PKG_TYPE2": "STD",
+        "LEAD": "64",
+        "MCP_NO": "R-002",
+        "WIP_QTY": 0
+      }
+    ]
+  },
+  "raw_prompts_persisted": false,
+  "secrets_persisted": false,
+  "passed": true,
+  "evidence_sha256": "9ec2d4b33385dda213a292c8f8834df754a812ce375ac2fa41a442be88f9b377"
+}

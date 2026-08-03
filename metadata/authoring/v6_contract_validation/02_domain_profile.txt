@@ -1,0 +1,3 @@
+Manufacturing Analysis 도메인을 등록해줘.
+이 도메인은 제조 공정 현황을 조회하고 분석하기 위한 업무 영역이야.
+기본 언어는 ko-KR이고 시간대는 Asia/Seoul이야.

@@ -384,6 +384,27 @@ def _bootstrap_prompt_context(
     return component.build_context()
 
 
+@pytest.mark.parametrize(
+    "relative_path",
+    [
+        "metadata_authoring/03_domain_metadata_draft_generator.py",
+        "metadata_authoring/03_dataset_metadata_draft_generator.py",
+        "metadata_authoring/03_main_filter_metadata_draft_generator.py",
+    ],
+)
+def test_simple_authoring_generator_has_no_worker_visible_registry_input(relative_path: str) -> None:
+    component_cls = _component_class(relative_path)
+    input_names = {item.name for item in component_cls.inputs}
+
+    assert input_names == {
+        "input_message",
+        "common_prompt_message",
+        "specialized_prompt_message",
+        "language_model",
+    }
+    assert "registry_json" not in Path(COMPONENT_ROOT / relative_path).read_text(encoding="utf-8")
+
+
 def test_manufacturing_dataset_input_is_worker_friendly_and_query_aware() -> None:
     """The baseline may carry reviewed SQL while variants remain plain prose."""
 
@@ -1126,7 +1147,7 @@ def test_dummy_retriever_uses_embedded_fixture_only_for_valid_legacy_lane(
     assert result["source_results"] == []
 
 
-@pytest.mark.parametrize("candidate_lane", ["generic_v2", "", "unknown"])
+@pytest.mark.parametrize("candidate_lane", ["", "unknown"])
 def test_dummy_retriever_fails_closed_for_non_fixture_lane(candidate_lane: str) -> None:
     from lfx.schema.data import Data
 
@@ -1166,6 +1187,50 @@ def test_dummy_retriever_fails_closed_for_non_fixture_lane(candidate_lane: str) 
     assert result["error"]["code"] == "source_missing"
     assert result["error"]["stage"] == "dummy_retrieval"
     assert result["error"]["details"]["reason"] == "dummy_fixture_unavailable"
+
+
+def test_dummy_retriever_accepts_generic_v2_when_requested_fixture_schema_matches() -> None:
+    from lfx.schema.data import Data
+
+    component_cls = _component_class("data_analysis/dummy_source_retriever.py")
+    component = component_cls()
+    component.job_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "stage": "job_routing",
+            "data_mode": "dummy",
+            "candidate_lane": "generic_v2",
+            "jobs": [
+                {
+                    "job_id": "job:wip_today",
+                    "dataset_key": "wip_today",
+                    "required_fields": ["OPER_NAME", "WIP_QTY"],
+                    "filters": {
+                        "field": "OPER_NAME",
+                        "operator": "in",
+                        "value": ["D/A1", "D/A2"],
+                    },
+                }
+            ],
+        }
+    )
+    catalog = json.loads(MANUFACTURING_V2_PATH.read_text(encoding="utf-8"))
+    component.domain_bundle = Data(
+        data={
+            "contract_version": "pipeline.context.v1",
+            "ok": True,
+            "domain_bundle": {"runtime_catalog": catalog},
+        }
+    )
+
+    result = component.retrieve().data
+
+    assert result["ok"] is True
+    assert result["status"] == "selected"
+    assert result["candidate_lane"] == "generic_v2"
+    assert result["source_results"][0]["dataset_key"] == "wip_today"
+    assert result["source_results"][0]["row_count"] == 2
 
 
 @pytest.mark.parametrize(
@@ -1223,6 +1288,17 @@ def test_generated_runtime_embeds_only_declared_phase_schemas() -> None:
     loaded = namespace["load_schema"]("resolved-candidate-bundle.schema.json")
     assert loaded == embedded["resolved-candidate-bundle.schema.json"]
     assert loaded is not embedded["resolved-candidate-bundle.schema.json"]
+
+
+def test_domain_bundle_loader_embeds_every_schema_used_by_three_collection_compile() -> None:
+    component_cls = _component_class("data_analysis/domain_bundle_loader.py")
+    embedded = component_cls.load_bundle.__globals__["EMBEDDED_SCHEMAS"]
+
+    assert set(embedded) == {
+        "metadata-authoring-draft.schema.json",
+        "runtime-catalog-v2.schema.json",
+        "domain-package.schema.json",
+    }
 
 
 def test_flow_inventory_is_exact_decomposed_architecture() -> None:
@@ -1284,9 +1360,9 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
                 "metadata_v6_main_filter_authoring": "main_filter",
             }[key]
             assert authoring["settings"]["mode"] == "save"
-            assert generator["settings"]["registry_source"].endswith("approved_source_registry.json")
+            assert "registry_source" not in generator.get("settings", {})
             assert {"authoring_kind", "domain_id", "environment", "dry_run"}.isdisjoint(authoring["settings"])
-            assert {"authoring_kind", "domain_id", "environment"}.isdisjoint(generator["settings"])
+            assert {"authoring_kind", "domain_id", "environment"}.isdisjoint(generator.get("settings", {}))
             prompt_nodes = [node for node in flow["native_nodes"] if node["type"] == "PromptTemplate"]
             assert len(prompt_nodes) == 2
             assert all(node["expected_prompt_variables"] == [] for node in prompt_nodes)
@@ -1494,15 +1570,14 @@ def test_full_main_filter_flow_path_accepts_an_empty_three_collection_store() ->
         def close(self):
             return None
 
-    registry = _approved_reference_context("manufacturing")
     source_text = "기준일은 DATE 필드를 뜻합니다."
     context = _bootstrap_prompt_context(
         kind="main_filter",
         source_text=source_text,
-        domain_id="manufacturing",
+        domain_id="default",
         environment="production",
-        approved_reference_context=registry,
-        bootstrap_fragment=False,
+        approved_reference_context=None,
+        bootstrap_fragment=True,
     )
     component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
     component = component_cls()
@@ -1523,12 +1598,12 @@ def test_full_main_filter_flow_path_accepts_an_empty_three_collection_store() ->
             ]
         },
     )
-    component.approved_reference_context = registry
+    component.approved_reference_context = None
     component.split_bootstrap = False
     component.authoring_kind = "main_filter"
     component.source_grounding_mode = "freeform_llm"
     component.metadata_contract_mode = "domain_package_v2"
-    component.domain_id = "manufacturing"
+    component.domain_id = "default"
     component.environment = "production"
     component.revision_policy = "auto_next"
     component.mode = "save"
@@ -1595,6 +1670,82 @@ def test_generated_authoring_prompt_uses_embedded_schema_without_external_global
     assert "model.invoke" not in engine_source
     assert "language_model" not in engine_source
     assert "You compile" not in engine_source
+
+
+def test_collection_authoring_schemas_need_no_registry_and_are_section_owned() -> None:
+    domain_context = _bootstrap_prompt_context(
+        kind="domain",
+        source_text="주문과 매출을 분석하는 업무입니다.",
+        domain_id="default",
+        environment="production",
+        approved_reference_context=None,
+        bootstrap_fragment=True,
+    ).data
+    dataset_context = _bootstrap_prompt_context(
+        kind="dataset",
+        source_text="orders는 Oracle 주문 테이블이고 ORDER_ID 컬럼이 있습니다.",
+        domain_id="default",
+        environment="production",
+        approved_reference_context=None,
+        bootstrap_fragment=True,
+    ).data
+
+    domain_complete = next(
+        branch
+        for branch in domain_context["variables"]["output_schema"]["oneOf"]
+        if branch["properties"]["status"]["const"] == "complete"
+    )
+    domain_draft = domain_complete["properties"]["draft"]
+    assert domain_draft["minProperties"] == 1
+    assert domain_draft["required"] == ["items"]
+    assert set(domain_draft["properties"]) == {"items"}
+    domain_item = domain_draft["$defs"]["item"]
+    assert domain_item["required"] == ["section", "key", "payload"]
+    assert "pandas_function_cases" not in domain_item["properties"]["section"]["enum"]
+
+    dataset_complete = next(
+        branch
+        for branch in dataset_context["variables"]["output_schema"]["oneOf"]
+        if branch["properties"]["status"]["const"] == "complete"
+    )
+    dataset_draft = dataset_complete["properties"]["draft"]
+    assert dataset_draft["required"] == ["dataset_cards"]
+    assert set(dataset_draft["properties"]) == {"dataset_cards"}
+    assert dataset_draft["$defs"]["datasetCard"]["required"] == ["dataset_id"]
+    assert dataset_draft["$defs"]["fieldCard"]["required"] == ["id", "col"]
+
+
+def test_collection_dataset_binding_defaults_are_deterministic_without_registry() -> None:
+    component_cls = _component_class("metadata_authoring/00_metadata_authoring_engine.py")
+    namespace = component_cls.run_authoring.__globals__
+    draft = {
+        "datasets": {
+            "orders": {
+                "family": "orders",
+                "source_type": "oracle",
+                "fields": {
+                    "ORDER_ID": {
+                        "physical_column": "ORDER_ID",
+                        "semantic_type": "identifier",
+                        "roles": ["filter", "join", "output"],
+                    }
+                },
+            }
+        }
+    }
+
+    validation = namespace["_validate_authoring_source_bindings"](
+        draft,
+        approved_reference_context=None,
+        domain_id="default",
+    )
+
+    orders = draft["datasets"]["orders"]
+    assert validation["binding_authority"] == "metadata_three_collections"
+    assert validation["status"] == "complete"
+    assert orders["source_adapter"] == "oracle_source_retriever"
+    assert orders["config_ref"] == "config:oracle:orders@1"
+    assert orders["query_ref"] == "query:orders@1"
 
 
 def test_dataset_prompt_schema_is_repeatable_in_the_same_component_module() -> None:
@@ -1812,10 +1963,13 @@ def test_bootstrap_prompt_fragments_are_closed_small_and_registry_minimal() -> N
     )
     namespace = component_cls.build_context.__globals__
     source_sha256 = "a" * 64
+    approved_vocabulary = _approved_reference_context("manufacturing").data[
+        "semantic_vocabulary"
+    ]
     expected_properties = {
         "domain": {"display_name", "description"},
         "dataset": {"dataset_cards"},
-        "main_filter": {"alias_additions"},
+        "main_filter": {"items"},
     }
     full_schema = namespace["load_schema"]("metadata-authoring-draft.schema.json")
     fragment_schemas = {}
@@ -1824,6 +1978,9 @@ def test_bootstrap_prompt_fragments_are_closed_small_and_registry_minimal() -> N
             kind,
             proposal_source_sha256=source_sha256,
             bootstrap_fragment=True,
+            approved_semantic_vocabulary=(
+                approved_vocabulary if kind != "main_filter" else None
+            ),
         )
         complete_branch = next(
             branch
@@ -1857,20 +2014,10 @@ def test_bootstrap_prompt_fragments_are_closed_small_and_registry_minimal() -> N
         )
     )
     assert fragment_schemas["dataset"]["required"] == ["dataset_cards"]
-    assert fragment_schemas["main_filter"]["required"] == ["alias_additions"]
-    alias_addition = fragment_schemas["main_filter"]["properties"][
-        "alias_additions"
-    ]["items"]
-    assert set(alias_addition["properties"]) == {
-        "target_type",
-        "target_id",
-        "expressions",
-    }
-    assert alias_addition["required"] == [
-        "target_type",
-        "target_id",
-        "expressions",
-    ]
+    assert fragment_schemas["main_filter"]["required"] == ["items"]
+    filter_item = fragment_schemas["main_filter"]["$defs"]["filterItem"]
+    assert set(filter_item["properties"]) == {"filter_key", "payload"}
+    assert filter_item["required"] == ["filter_key", "payload"]
     dataset_card = fragment_schemas["dataset"]["$defs"]["datasetCard"]
     field_card = fragment_schemas["dataset"]["$defs"]["fieldCard"]
     assert dataset_card["required"] == ["dataset_id", "fields"]
@@ -4222,9 +4369,146 @@ def test_full_domain_prepare_uses_only_annotation_llm_and_preserves_blueprint() 
     message = presenter.build_message()
     assert message.session_metadata == {
         "contract_version": "metadata.authoring.message-link.v1",
-        "response_sha256": response["response_sha256"],
     }
     assert message.data["response"]["response_sha256"] == response["response_sha256"]
+
+
+def test_authoring_message_presentation_ignores_langflow_runtime_fields_and_hash_drift() -> None:
+    from lfx.schema.data import Data
+
+    presenter_cls = _component_class("metadata_authoring/01_authoring_message_presentation.py")
+    presenter = presenter_cls()
+    presenter.response = Data(
+        data={
+            "contract_version": "metadata.authoring.response.v1",
+            "response_type": "metadata_authoring",
+            "status": "ok",
+            "stage": "committed",
+            "authoring_kind": "main_filter",
+            "metadata_contract_mode": "domain_package_v2",
+            "domain_id": "default",
+            "environment": "production",
+            "revision": 0,
+            "diff": {
+                "activation_status": "waiting_for_sections",
+                "ready_sections": ["main_filter"],
+                "missing_sections": ["domain", "table_catalog"],
+                "write_operations": {"inserted": 3, "replaced": 0, "unchanged": 0},
+            },
+            "llm_usage": {"draft_llm_calls": 1, "repair_llm_calls": 0},
+            "response_sha256": "not-revalidated-between-nodes",
+            "default_value": "",
+        }
+    )
+
+    message = presenter.build_message()
+
+    assert "메타데이터 항목 저장 완료" in message.text
+    assert "신규 3" in message.text
+    assert "default_value" not in message.data["response"]
+    assert message.session_metadata == {
+        "contract_version": "metadata.authoring.message-link.v1",
+    }
+
+
+def test_simple_authoring_public_response_hides_internal_contract_fields() -> None:
+    component_cls = _component_class("metadata_authoring/02_simple_metadata_authoring_engine.py")
+    render_public = component_cls.run_authoring.__globals__["_simple_public_authoring_response"]
+    internal = {
+        "contract_version": "metadata.authoring.response.v1",
+        "response_type": "metadata_authoring",
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain",
+        "metadata_contract_mode": "domain_package_v2",
+        "domain_id": "default",
+        "environment": "production",
+        "revision": 1,
+        "persisted": True,
+        "diff": {
+            "activation_status": "ready",
+            "ready_sections": ["domain", "table_catalog", "main_filter"],
+            "missing_sections": [],
+            "write_operations": {"inserted": 2, "replaced": 0, "unchanged": 0},
+        },
+        "validation": {
+            "runtime_alias_activation": {
+                "active_count": 3,
+                "deferred_count": 1,
+                "deferred": [
+                    {
+                        "alias_id": "field:EQP_ID",
+                        "target_type": "field",
+                        "target_key": "EQP_ID",
+                    }
+                ],
+            }
+        },
+        "response_sha256": "internal-only",
+    }
+
+    public = render_public(internal)
+
+    assert public == {
+        "status": "ok",
+        "stage": "committed",
+        "authoring_kind": "domain",
+        "persisted": True,
+        "revision": 1,
+        "diff": {
+            "inserted": 2,
+            "replaced": 0,
+            "unchanged": 0,
+            "activation_status": "ready",
+            "ready_sections": ["domain", "table_catalog", "main_filter"],
+            "missing_sections": [],
+        },
+    }
+    assert {
+        "contract_version",
+        "metadata_contract_mode",
+        "domain_id",
+        "environment",
+        "response_sha256",
+    }.isdisjoint(public)
+
+
+def test_authoring_message_presentation_supports_compact_public_diff() -> None:
+    from lfx.schema.data import Data
+
+    presenter_cls = _component_class("metadata_authoring/01_authoring_message_presentation.py")
+    presenter = presenter_cls()
+    presenter.response = Data(
+        data={
+            "status": "ok",
+            "stage": "committed",
+            "authoring_kind": "domain",
+            "persisted": True,
+            "revision": 1,
+            "diff": {
+                "inserted": 2,
+                "replaced": 0,
+                "unchanged": 0,
+                "activation_status": "ready",
+                "ready_sections": ["domain", "table_catalog", "main_filter"],
+                "missing_sections": [],
+                "active_alias_count": 3,
+                "deferred_alias_count": 1,
+                "deferred_aliases": [
+                    {
+                        "alias_id": "field:EQP_ID",
+                        "target_type": "field",
+                        "target_key": "EQP_ID",
+                    }
+                ],
+            },
+        }
+    )
+
+    message = presenter.build_message()
+
+    assert "신규 2" in message.text
+    assert "EQP_ID" not in message.text
 
 
 def test_authoring_generated_source_has_no_pending_or_active_writer() -> None:
@@ -4263,7 +4547,7 @@ def test_simple_authoring_flow_identity_is_internal_not_user_input(
 ) -> None:
     generator_cls = _component_class(relative_path)
     generator_inputs = {item.name for item in generator_cls.inputs}
-    assert {"authoring_kind", "domain_id", "environment"}.isdisjoint(generator_inputs)
+    assert {"authoring_kind", "domain_id", "environment", "registry_json"}.isdisjoint(generator_inputs)
     assert generator_cls.metadata["authoring_kind"] == expected_kind
 
     engine_cls = _component_class("metadata_authoring/02_simple_metadata_authoring_engine.py")

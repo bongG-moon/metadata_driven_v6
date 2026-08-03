@@ -1,0 +1,4 @@
+OPER_NAME을 주요 필터로 등록해줘.
+대상 종류는 field이고 대상 ID는 OPER_NAME이야.
+사용자가 OPER_NAME, 공정, 작업 공정, operation, process, oper name이라고 말하면 같은 필드를 뜻해.
+표현마다 별도 item을 만들지 말고 OPER_NAME 필터 하나에 유의어로 저장해.

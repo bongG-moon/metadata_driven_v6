@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://metadata-driven.local/contracts/metadata-freeform-dataset-ir.schema.json",
+  "title": "Natural-language Dataset Item IR v1",
+  "type": "object",
+  "additionalProperties": false,
+  "minProperties": 1,
+  "required": ["dataset_cards"],
+  "properties": {
+    "dataset_cards": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 32,
+      "items": {"$ref": "#/$defs/datasetCard"}
+    }
+  },
+  "$defs": {
+    "datasetCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["dataset_id"],
+      "properties": {
+        "dataset_id": {
+          "type": "string",
+          "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$"
+        },
+        "display_name": {"type": "string", "minLength": 1, "maxLength": 200},
+        "family": {"type": "string", "minLength": 1, "maxLength": 128},
+        "source_type": {
+          "enum": ["oracle", "sql", "mongodb", "http", "datalake", "goodocs", "file", "dummy", "previous_result"]
+        },
+        "time_scope": {"type": "string", "minLength": 1, "maxLength": 64},
+        "selection_criteria": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "time_scope": {"type": "string", "minLength": 1, "maxLength": 64},
+            "use_when": {
+              "type": "array", "maxItems": 64, "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            },
+            "exclude_when": {
+              "type": "array", "maxItems": 64, "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            }
+          }
+        },
+        "fields": {
+          "type": "array",
+          "maxItems": 1024,
+          "items": {"$ref": "#/$defs/fieldCard"},
+          "default": []
+        },
+        "default_detail_fields": {
+          "type": "array", "maxItems": 128, "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 256}
+        }
+      }
+    },
+    "fieldCard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "col"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_.-]{0,127}$"},
+        "col": {"type": "string", "minLength": 1, "maxLength": 256},
+        "semantic_type": {"type": "string", "minLength": 1, "maxLength": 64},
+        "roles": {
+          "type": "array", "maxItems": 16, "uniqueItems": true,
+          "items": {"enum": ["filter", "group", "join", "compare", "aggregate", "derive", "project", "sort", "rank", "metric", "output"]}
+        },
+        "aliases": {
+          "type": "array", "maxItems": 64, "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 256}
+        },
+        "unit": {"type": "string", "minLength": 1, "maxLength": 64}
+      }
+    }
+  }
+}

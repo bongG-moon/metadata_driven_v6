@@ -617,7 +617,13 @@ def _condition(actual: Any, condition: dict[str, Any]) -> bool:
     operator = str(condition.get("operator") or condition.get("op") or "eq").lower()
     operator = {"ge": "gte", "le": "lte"}.get(operator, operator)
     value = condition.get("value")
-    values = condition.get("values") if isinstance(condition.get("values"), list) else []
+    values = (
+        condition.get("values")
+        if isinstance(condition.get("values"), list)
+        else value
+        if isinstance(value, list)
+        else []
+    )
     if operator == "eq":
         return actual == value
     if operator == "ne":

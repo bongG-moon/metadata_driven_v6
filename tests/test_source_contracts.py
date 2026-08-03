@@ -173,6 +173,28 @@ def test_dummy_jobs_apply_canonical_date_and_filter_to_physical_results() -> Non
     assert results[0]["rows"][0]["MCP_NO"] == "L-267A1"
 
 
+def test_dummy_jobs_accept_in_operator_with_value_array() -> None:
+    results = source_results_for_jobs(
+        [
+            {
+                "job_id": "wip-da",
+                "source_alias": "wip",
+                "dataset_key": "wip_today",
+                "filters": {
+                    "field": "OPER_NAME",
+                    "operator": "in",
+                    "value": ["D/A1", "D/A2"],
+                },
+            }
+        ],
+        CATALOG,
+    )
+
+    assert results[0]["status"] == "ok"
+    assert results[0]["row_count"] == 2
+    assert {row["OPER_NAME"] for row in results[0]["rows"]} == {"D/A1", "D/A2"}
+
+
 def test_empty_is_distinct_from_failure_and_keeps_schema_contract() -> None:
     result = source_result_for_dataset("production", source_alias="none", rows=[])
     assert result["status"] == "empty"

@@ -4,9 +4,9 @@
 
 사용자는 JSON Schema, `dataset_key`, physical column mapping 구조나 relation/field-role inventory 문법을 직접 작성할 필요가 없다. canonical/등록 ID, 타입과 물리 컬럼을 몰라도 된다. 기존처럼 Domain, Table Catalog, Main Filter 정보를 자신이 아는 업무 표현으로 자유롭게 적는다. 문장 순서, 제목, 표기 방식, 조사, 오탈자와 줄바꿈이 달라도 괜찮다.
 
-기본 full-domain bootstrap에서 작업자는 기존처럼 Domain·Dataset·Main Filter TXT에 자유로운 자연어만 입력한다. Flow 내부의 작업별 공통·특화 Prompt Template pair가 각 원문을 최대 한 번씩 해석한다. 공통·특화 Template은 별도 node/source/hash/edge이고 특화 업무 규칙은 특화 Template 본문에 직접 작성한다. 그러나 세 LLM 출력은 full draft가 아니다. Domain은 `display_name`과 `description` annotation만, Dataset은 compact `metadata.bootstrap.dataset-ir.v1`, Main Filter는 모든 항목에 `target_type`이 필수인 `metadata.bootstrap.main-filter-ir.v1`만 반환한다. 작업자가 보는 입력 계약에는 JSON/DSL, compact IR, canonical ID inventory, 컬럼 타입 표, `config_ref`/`query_ref` 문법이 없다.
+작업자는 기존처럼 Domain·Dataset·Main Filter TXT에 자유로운 자연어만 입력한다. Flow 내부의 작업별 공통·특화 Prompt Template pair가 각 원문을 최대 한 번씩 해석한다. 공통·특화 Template은 별도 node/source/hash/edge이고 특화 업무 규칙은 특화 Template 본문에 직접 작성한다. v5 저장 Flow를 참고해 LLM 출력은 작은 항목 후보로 제한했다. Domain은 `section/key/payload` items, Dataset은 `dataset_cards`, Main Filter는 `filter_key/payload` items만 반환한다. 작업자가 보는 입력 계약에는 JSON/DSL, compact IR, canonical ID inventory, 컬럼 타입 표, `config_ref`/`query_ref` 문법이 없다.
 
-결정론적 engine은 `metadata.authoring.source-registry.v3`의 compiler-owned `semantic_templates`, dataset descriptor/Source binding과 alias target으로 세 결과를 확장·병합해 완전한 `metadata.authoring.draft.v1` 후보를 만든다. Domain 실행 metric/relation/grain/ordering/predicate/recipe/entity-group/alias는 LLM이 생성하지 않는다. Dataset용 compact IR과 Main Filter typed IR도 Gemini 내부 중간 계약일 뿐이며 registry membership을 통과해야 full section이 된다. 이 후보는 저장되거나 실행되기 전에 JSON Schema, canonical identity, field binding, type, dependency closure, join/cardinality, read-only·secret·registry 정책과 hash를 모두 검증한다. LLM은 자연어 해석과 승인 후보 선택만 담당하며 정확성 authority나 writer가 아니다.
+결정론적 engine은 도메인·테이블 카탈로그·메인 필터 컬렉션의 기존 항목과 이번 변환 결과를 결합해 `metadata.authoring.draft.v1` 후보를 만든다. Dataset의 SQL·주석·줄바꿈·placeholder·db_key는 Gemini 출력에서 받지 않고 원문에서 직접 추출한다. `filter_mappings`가 표준→물리 컬럼 실행 계약이며 SELECT 컬럼과 `selection_criteria`를 결정론적으로 보완한다. 저장·실행 가능 여부는 JSON Schema, canonical identity, field binding, type, dependency closure, read-only·secret 정책을 검사하는 compiler가 결정한다.
 
 `semantic_vocabulary`는 LLM에 필요한 최소 의미 후보만 제공한다. dataset은 `id/family/business labels`, field·metric·relation·grain·ordering·predicate·recipe·entity group은 `id/business labels`만 갖는다. 물리 컬럼, 타입, 역할, coercion, source/config/query ref, metric binding, SQL과 실행 payload는 포함하지 않는다. 선택된 ID는 내부 strict proposal에서만 쓰이고 작업자에게 입력하도록 요구하지 않는다.
 
@@ -18,7 +18,7 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 
 현재 live 검증 model policy는 정확히 `gemini-3.5-flash-lite`, temperature `0`, provider/model fallback `0`, repair LLM `0`이다. 모델 응답이 schema를 통과하지 못하면 같은 질문을 고쳐 재호출하지 않고 canonical validation error로 끝낸다.
 
-첫 등록에는 실행 가능한 도메인 전체를 만들 만큼의 정보가 필요하지만, 그 정보를 정해진 항목 순서나 JSON/DSL 문법으로 쓸 필요는 없다. 제조 기본 검증은 `metadata/authoring/v6_inputs/domain_v6.txt`, `dataset_v6.txt`, `main_filter_v6.txt`의 자유형 자연어를 세 입력 노드에 그대로 넣는다. 문장 순서, 말투, 표기 차이는 LLM이 proposal로 정규화한다. 정보가 부족하면 Flow가 엄격한 포맷을 요구하는 대신 `status=needs_clarification`의 `missing_fields`와 짧은 확인 질문을 작업자가 이해할 수 있는 말로 반환한다. 이 응답에는 draft/candidate/persist 산출물이 없다.
+Domain·Dataset·Main Filter는 어느 순서로든 항목 단위 등록할 수 있다. 공정 그룹부터 등록하는 경우 도메인 프로필을 함께 입력할 필요가 없고, 세 컬렉션이 실행 번들로 결합될 때만 내부 기본 프로필을 적용한다. 문장 순서, 말투, 표기 차이는 작은 proposal 또는 결정론적 원문 투영으로 정규화한다. 정보가 부족하면 Flow가 엄격한 포맷을 요구하는 대신 `status=needs_clarification`의 `missing_fields`와 짧은 확인 질문을 작업자가 이해할 수 있는 말로 반환한다. 이 응답에는 draft/candidate/persist 산출물이 없다.
 
 다음 두 문장은 모두 허용되는 자유형 입력 예다.
 
@@ -38,21 +38,23 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 
 | 종류 | 사용자가 설명할 내용 | 실행 구조 authority |
 | --- | --- | --- |
-| Domain/Semantic | 도메인의 업무 이름과 설명, 승인된 용어를 작업자가 쓰는 맥락 | LLM은 표시명·설명 annotation only; 실행 semantics는 Source Registry v3 `semantic_templates`가 deterministic expansion |
-| Dataset Catalog | 자료의 업무 이름과 용도, 포함된 업무 항목, 날짜 기준과 기본 표시 항목처럼 작업자가 아는 사실 | 내부 compact Dataset IR + v3 dataset descriptor/Source binding expansion + exact active package `datasets` patch |
-| Main Filter | 날짜·제품·공정 등 조회 기준의 업무 의미와 사용자가 실제로 쓰는 표현 | 내부 `target_type` 필수 typed IR + 승인 vocabulary membership + alias-card expansion |
+| Domain/Semantic | 도메인 프로필, 공정 그룹, 지표·관계·grain·recipe처럼 작업자가 아는 업무 항목 | `section/key/payload` item을 compiler가 canonical v6 section으로 확장 |
+| Dataset Catalog | 자료의 업무 이름과 용도, 포함 항목, 날짜 기준, SQL, 필터 매핑과 기본 표시 항목 | `dataset_cards` + 원문 SQL/매핑 결정론적 확장 + 전체 schema 검증 |
+| Main Filter | 날짜·제품·공정 등 조회 기준의 업무 의미와 실제 사용자 표현 | `filter_key/payload` item을 field alias card로 결정론적 확장 |
 
 연결 비밀번호나 token은 어떤 TXT에도 쓰지 않는다. 일반 작업자는 `config_ref`/`query_ref` 문법을 알 필요가 없다. Oracle/Datalake 운영 조회가 필요한 항목에는 `db_key는 PNT_RPT야` 같은 설명과 `query_template:` 아래의 여러 줄 SQL, `{DATE}`·`{LOT_ID}` 같은 변수를 함께 적을 수 있다. Flow는 SQL 본문을 LLM에 보내지 않고 원본 TXT에서 직접 추출해 read-only 여부와 필수 변수를 검증한다.
 
-세 authoring 입력 화면은 분리되어 있지만 저장 결과는 하나의 versioned Domain Package다. Domain/Dataset/Main Filter는 모두 자연어 TXT UX를 유지한다. Dataset Catalog와 Main Filter 입력은 active package의 해당 section만 삭제 없이 upsert하고, 다른 dataset·metric·relation·prompt·output 설정을 보존한 상태에서 전체 package를 다시 컴파일한다. 운영자가 일부 입력을 등록했는데 Data Analysis Flow가 읽지 못하는 별도 legacy pointer만 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
+데이터셋 ID와 field type은 모델 응답을 그대로 저장하지 않는다. `target으로 등록해줘`처럼 작업자가 명시한 ID는 표시명에서 모델이 만든 다른 ID보다 우선한다. 날짜·수량·순번 타입은 원문의 명시 문장과 컬럼 식별자로 결정하고, 근거 없는 속성 필드는 `string`으로 저장한다. 따라서 `DATE` 설명 때문에 같은 데이터셋의 `MODE`, `DEN`, `OPER_NAME`까지 `date`가 되는 응답은 결정론적 변환 단계에서 폐기한다.
 
-각 등록 Flow canvas에는 해당 항목의 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 두 Prompt는 한 템플릿으로 합치지 않으며 `자연어 메타데이터 변환` 노드가 승인 레지스트리, bounded context, 권한 분리 묶음, Gemini 1회 호출을 내부에서 처리한다. Domain Flow가 Dataset/Main Filter 입력까지 동시에 받지 않으며, 각 항목은 자기 Flow에서 한 번씩 등록한다.
+세 authoring 입력 화면은 분리되어 있고 각 결과는 도메인·테이블 카탈로그·메인 필터 컬렉션에 항목 단위로 upsert된다. Domain/Dataset/Main Filter는 모두 자연어 TXT UX를 유지한다. 기존에 언급하지 않은 항목은 보존하며 세 컬렉션이 모두 준비되면 loader가 전체 typed Domain Package를 매번 결정론적으로 결합한다. 별도 active pointer나 package archive를 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
+
+각 등록 Flow canvas에는 해당 항목의 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 두 Prompt는 한 템플릿으로 합치지 않으며 `자연어 메타데이터 변환` 노드는 자연어 원문과 등록 유형별 닫힌 출력 스키마만 묶어 Gemini를 1회 호출한다. 작업자가 입력하는 승인 레지스트리 JSON은 없다. Domain Flow가 Dataset/Main Filter 입력까지 동시에 받지 않으며, 각 항목은 자기 Flow에서 한 번씩 등록한다.
 
 Runtime Intent/Answer와 Authoring은 모두 공통·특화 Prompt Template을 별도 pair로 유지한다. 특화 authoring 지시는 공통 Prompt나 custom component가 아니라 각 특화 Prompt Template 본문에 직접 작성하며 사용자 TXT나 metadata로 동적 교체하지 않는다. 별도 Domain Policy 등록 Flow는 제공하지 않고 실행 함수 descriptor와 planner policy는 compiler 소유 경계로 유지한다.
 
 ## 3. Domain 입력 예시
 
-아래 문장은 자연어 UX 예시이며 복사해야 하는 등록 문법이 아니다. Domain LLM은 이 문장에서 표시명·설명 annotation만 만들고, 실행 규칙은 승인 Source Registry v3 template와 일치하는 경우에만 compiler가 확장한다. 자연어만으로 새로운 metric/relation/recipe/planner 정책을 발명하거나 기존 template를 수정하지 않는다. 실행 규칙을 변경하려면 운영자가 검토된 executable/template projection과 v3 registry hash를 먼저 갱신한 뒤 새 자연어 입력으로 prepare하고 diff를 승인한다.
+아래 문장은 자연어 UX 예시이며 복사해야 하는 등록 문법이 아니다. 공정 그룹처럼 key·적용 field·포함 값·별칭이 원문에 명시된 항목은 작은 `section/key/payload` IR로 구조화하고 compiler가 typed payload와 중복을 검증한다. 자연어만으로 새로운 metric/relation/recipe/planner 정책을 발명하거나 임의 코드를 저장하지 않으며, 그런 실행 규칙 변경은 코드·계약 검토가 포함된 별도 배포 절차를 따른다.
 
 ### BOH 아침재공
 
@@ -241,7 +243,7 @@ Compiled product-group contract는 canonical field만 쓰는 typed predicate와 
 
 ### Closed authoring draft와 선택적 trusted executable blueprint
 
-기본 자유형 lane은 LLM이 반환한 작업별 annotation/compact IR을 저장 후보로 직접 사용하지 않는다. Compiler가 Source Registry v3의 hash-pinned `semantic_templates`, dataset descriptor, Source binding과 승인 alias target으로 이를 결정론적으로 확장·병합하고, 완성된 closed draft가 전체 검증을 통과한 경우에만 저장 후보가 된다.
+기본 자유형 lane은 LLM이 반환한 작업별 item IR을 저장 후보로 바로 쓰지 않는다. Compiler가 원문의 SQL·필터 매핑·선택 조건과 결합해 typed section으로 확장하고, identity·type·source binding·read-only query·중복·dependency 검증을 모두 통과한 경우에만 저장 후보가 된다. 원문에 실행 필수 사실이 명시된 v5식 입력은 같은 compiler 앞단에서 결정론적으로 작은 IR로 투영할 수 있으며, 누락값을 추측하지 않는다.
 
 - `contract_version=metadata.authoring.draft.v1`
 - 자연어 provenance와 prompt/model/hash
@@ -272,7 +274,7 @@ Runtime candidate prompt에는 raw source 전체를 넣지 않는다.
 
 ## 8. Save와 validate-only
 
-기본은 `mode=save`다. 신규 typed identity만 저장하며 기존 exact key의 payload가 다르면 중단한다. 기존 exact key 항목을 바꾸려면 `mode=replace`를 선택한다. 다른 key로 발견된 의미 중복은 `replace`에서도 자동 교체하지 않고 기존 canonical key를 안내한다. 자동 rekey는 metric·recipe·alias 등의 typed 참조를 깨뜨릴 수 있기 때문이다. `mode=validate_only`도 실제 MongoDB 항목을 읽어 동일한 중복 판정과 item→catalog compile 검증을 수행하지만 쓰지는 않는다. 등록 유형·도메인 ID·운영 환경·dry-run은 작업자 입력으로 노출하지 않는다.
+기본은 `mode=save`다. 신규 typed identity만 저장하며 기존 exact key의 payload가 다르면 중단한다. 기존 exact key 항목을 바꾸려면 `mode=replace`를 선택한다. 다른 key로 발견된 의미 중복은 `replace`에서도 자동 교체하지 않고 기존 canonical key를 안내한다. 자동 rekey는 metric·recipe·alias 등의 typed 참조를 깨뜨릴 수 있기 때문이다. `mode=validate_only`도 실제 MongoDB 항목을 읽어 이번 입력 항목과의 동일한 구조·중복 판정을 수행하지만 쓰지는 않는다. 전체 catalog compile은 별도 실행 활성화 점검이며, 기존의 무관한 항목이 준비되지 않았다는 이유로 이번 정상 입력을 실패시키지 않는다. 등록 유형·도메인 ID·운영 환경·dry-run은 작업자 입력으로 노출하지 않는다.
 
 중복 검사는 Gemini 호출 뒤 `04 검증 및 저장` 내부에서 실행되는 결정론적 단계다. 추가 LLM 호출과 추가 MongoDB 컬렉션은 없다. 도메인은 같은 section의 정규화 key·typed ID·표시명·명시적 alias, 테이블 카탈로그는 `query_ref` 또는 전체 source descriptor, 메인 필터는 같은 `target_type` 안의 target·표현을 비교한다. alias key는 세 컬렉션 전역에서 유일해야 하므로 provenance 변경으로 다른 컬렉션에 이동한 항목은 기존 문서를 자동 삭제하지 않고 migration-required 충돌로 차단한다. `config_ref`만 같은 데이터셋과 서로 다른 `target_type`의 동일 표현은 정상 등록으로 허용한다. 중복 결과에는 key와 이유만 표시하고 SQL·URL·접속 설정은 표시하지 않는다.
 
@@ -305,7 +307,9 @@ Dry-run 결과:
 - dependency changes
 - 영향받는 validation cases
 
-Compiler는 저장 전에 전체 runtime catalog를 검증한다. 응답의 `candidate_id`와 hash는 실행 중 결과 추적용이며 MongoDB metadata 문서에 기록하지 않고 별도 pending collection도 만들지 않는다. `needs_clarification`, schema/dependency/security 오류는 MongoDB write 0건으로 끝난다.
+Compiler는 저장 전에 이번 입력 항목의 구조·typed identity·중복·명시 참조를 검증한다. `needs_clarification`과 이번 입력 자체의 schema/security 오류는 MongoDB write 0건으로 끝난다. 저장 뒤 전체 runtime catalog 활성화를 점검하며, 기존의 무관한 dependency 문제는 `stored_runtime_pending`으로 분리한다. 대응 dataset field가 없는 Main Filter alias는 저장하되 runtime에서만 대기한다. 내부 candidate/hash/contract 필드는 MongoDB metadata 문서와 04번 작업자용 응답에 노출하지 않는다.
+
+등록 결과의 내부 계약 검증은 `04 검증 및 저장` 안에서 종료한다. 04번의 공개 출력은 작업자에게 필요한 `status`, 처리 건수, 실행 활성/대기 상태만 제공하고 `contract_version`, `metadata_contract_mode`, `domain_id`, `environment`, hash를 숨긴다. `05 결과 메시지 구성`은 이 일반 JSON을 한글 메시지로 렌더링할 뿐 전체 schema나 hash를 재검증하지 않는다. Langflow 1.10.x가 `Data` 운반 과정에서 추가하는 `default_value` 같은 runtime 필드는 제거한다.
 
 ## 9. 3컬렉션 atomic save
 

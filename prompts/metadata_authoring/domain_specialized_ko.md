@@ -1,6 +1,8 @@
-[현재 배포의 도메인 등록 특화 규칙]
+[현재 배포의 제조 도메인 등록 특화 규칙]
 
-- 제조 업무의 공정, 제품, LOT, 장비, 생산, 재공, HOLD 용어를 작업자 원문의 표현과 연결하되 승인 업무 어휘에 없는 ID를 만들지 않습니다.
-- 업무 용어의 의미, 지표 소유 관계, 데이터셋 간 관계 후보만 제안합니다.
-- 물리 컬럼, 연결 정보, query/config reference, credential은 제안하지 않습니다.
-- 공유 Flow를 다른 업무에 적용할 때는 이 Prompt Template 본문과 승인 업무 어휘 레지스트리를 함께 교체합니다.
+- `공정 그룹`, `공정 묶음`, `포함 공정`이 나오면 하나의 `entity_groups` 항목으로 해석합니다.
+- `field는 OPER_NAME`, `기준 컬럼은 OPER_NAME` 같은 문장은 그룹의 `target_field=OPER_NAME`을 뜻합니다.
+- `포함 공정은 AA, BB, CC`는 `members=["AA", "BB", "CC"]`로 보존합니다.
+- DP, D/P, DP공정처럼 같은 그룹을 가리키는 표현은 하나의 그룹 card 안 `aliases` 배열로 보존합니다.
+- 그룹 요청에서 `field:OPER_NAME` 같은 field alias card를 만들지 않습니다. 그룹 alias card는 compiler가 `entity_group:<group_id>` 하나로 파생합니다.
+- 공정 그룹과 도메인 프로필을 한 요청에서 동시에 등록하지 않습니다.

@@ -6,16 +6,16 @@ v6는 자연어 TXT 입력을 유지하지만 raw text를 runtime 규칙으로 �
 
 ```text
 Free-form natural-language TXT → immutable source block
-  ├─ domain: 자유형 도메인 설명 → LLM 최대 1회 → display_name/description annotation only
-  ├─ dataset: 자유형 데이터 설명 → LLM 최대 1회 → compact metadata.bootstrap.dataset-ir.v1
-  ├─ main_filter: 자유형 조회 표현 → LLM 최대 1회 → target_type 필수 typed alias IR
+  ├─ domain: 자유형 도메인 설명 → LLM 최대 1회 → v5식 section/key/payload items
+  ├─ dataset: 자유형 데이터 설명 → LLM 최대 1회 → 작은 dataset_cards 목록
+  ├─ main_filter: 자유형 조회 표현 → LLM 최대 1회 → v5식 filter_key/payload items
   │                explicit_inventory proof complete → deterministic alias patch, LLM 0회
-  ├─ compiler-owned source-registry.v3
+  ├─ compiler-owned three-collection metadata view
   │    ├─ semantic_vocabulary: LLM에 전달하는 ID/업무 label 후보만
   │    └─ semantic_templates: LLM 비공개 실행 의미 구조와 sealed planner_policy
   ├─ optional high-trust: explicit inventory 또는 trusted Blueprint/external pin
   └─ domain_policy: explicit admin node inputs → LLM 0회
-→ branch별 closed schema 검증 → v3 template/descriptor 결정론적 확장·병합
+→ branch별 closed schema 검증 → 원문 기반 결정론적 정규화·확장
 → full draft JSON Schema validation → semantic lint → dependency/security closure
 → operator diff review → 이번 section 항목·중복·승인 참조 검증
 → MongoDB transaction으로 해당 collection의 항목 문서 upsert
@@ -23,9 +23,13 @@ Free-form natural-language TXT → immutable source block
 → 완전한 세 collection만 재컴파일 → runtime metadata bundle
 ```
 
-기본 Full-domain lane의 세 LLM 출력은 역할이 서로 다르다. Domain branch는 실행 metadata를 작성하지 않고 `metadata-annotation-proposal.schema.json`의 `display_name`과 `description`만 반환한다. Dataset branch는 내부용 compact Dataset IR을, Main Filter branch는 각 항목에 `target_type`, `target_id`, `expressions`를 요구하는 typed IR을 반환한다. 작업자는 이 IR, JSON, canonical ID inventory, relation endpoint/field-role 선언 문법을 알거나 맞출 필요가 없다.
+현재 import-ready 세 등록 Flow는 v5 저장 Flow의 작은 항목 후보 방식을 따른다. Domain은 `items[].section/key/payload`, Dataset은 `dataset_cards[]`, Main Filter는 `items[].filter_key/payload`만 반환한다. LLM은 SQL을 복사하거나 완성된 중첩 runtime catalog를 만들지 않는다. 작업자는 이 IR, JSON, canonical ID inventory, relation endpoint/field-role 선언 문법을 알거나 맞출 필요가 없다.
 
-세 branch가 받는 실행 후보는 `metadata.authoring.source-registry.v3`에서 투영한 `metadata.authoring.semantic-vocabulary.v1`뿐이다. 이 축약 어휘에는 semantic ID, dataset family와 업무용 labels만 있고 physical column, type, adapter/config/query ref와 실제 데이터는 없다. 같은 v3 registry의 `metadata.authoring.semantic-templates.v1`은 LLM에 전달하지 않는다. Compiler가 그 hash-pinned template의 metric/relation/grain/ordering/predicate/recipe/entity-group/alias와 `planner_policy`를 Domain annotation에 결정론적으로 결합하고, Dataset descriptor와 Source binding 및 Main Filter alias card를 확장한다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret·registry 정책을 검증하고 valid item set만 저장한다. LLM은 실행 의미를 새로 만들거나 validator와 writer를 우회할 수 없다.
+Dataset 결정론적 확장기는 원문 `filter_mappings`의 `표준필드 -> 물리컬럼`을 실행 매핑의 최종 권위로 사용하고 SELECT 출력 컬럼을 보완한다. 일반 설명의 컬럼명과 `filter_mappings`가 다르면 명시적 mapping이 우선한다. `query_template`의 주석·줄바꿈·placeholder와 `db_key`는 LLM 응답이 아니라 원문에서 직접 추출하고 read-only SQL 및 필수 변수를 검증한다. `selection_criteria.time_scope/use_when/exclude_when`도 dataset 항목에 보존한다.
+
+Dataset의 `dataset_id`, `family`, `source_type`, field `semantic_type`과 기본 role도 LLM 추측을 실행 authority로 사용하지 않는다. 자연어에 명시된 등록 ID·계열·source가 우선하며, field type은 날짜/시각·수량·순번 등 명시 문장과 보수적인 컬럼 식별자 규칙으로 결정한다. 근거가 없는 field는 `string`으로 고정한다. 같은 canonical field에 대해 모델마다 다른 타입을 출력해도 저장 결과가 달라져서는 안 된다.
+
+현재 import-ready 세 branch는 승인 레지스트리나 기존 MongoDB 문서 전체를 받지 않는다. LLM은 자연어 원문을 branch별 폐쇄형 schema로 구조화할 뿐이며, 도메인 프로필·테이블의 field/source/query binding·메인 필터 alias는 각 컬렉션의 검증된 항목이 기준정보가 된다. Closed decoder와 compiler가 schema, identity, type, field binding, dependency, join/cardinality, read-only·secret 정책을 검증하고 valid item만 저장한다. 세 컬렉션이 모두 준비되면 compiler가 하나의 실행 catalog로 다시 결합하므로 LLM은 validator와 writer를 우회할 수 없다. 과거 `metadata.authoring.source-registry.v3`는 마이그레이션 및 내부 회귀 검증 전용이다.
 
 LLM 경계는 `metadata.authoring.proposal.v1`로 닫는다. `complete` variant만 exact source hash와 `metadata.authoring.draft.v1`을 가지고 compile 단계로 이동한다. `needs_clarification` variant는 exact source hash, 1~3개 질문과 bounded `missing_fields`만 가지며 candidate/writer 단계로 이동하지 않는다.
 
@@ -33,7 +37,7 @@ LLM 경계는 `metadata.authoring.proposal.v1`로 닫는다. `complete` variant�
 
 최초 bootstrap은 세 입력 파일을 기계적으로 정형화하라는 뜻이 아니다. 기존 Domain/Dataset/Main Filter TXT를 그대로 합친 bundle이나, 동일 정보를 충분히 담은 자연어 문서를 받는다. 비전문 작업자는 평소 업무 표현, 불규칙한 문장 순서와 줄바꿈으로 입력할 수 있다. 필수 업무 정보가 없으면 `status=needs_clarification`의 `clarification.missing_fields`와 짧은 질문으로 빠진 내용을 설명하며 특정 구문, JSON, ID, 타입, 컬럼 또는 DSL로 다시 쓰라고 요구하지 않는다. 이 상태에는 draft/candidate/persist 산출물이 없어야 한다.
 
-현재 live authoring profile은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` bundle과 exact `gemini-3.5-flash-lite`, temperature 0, fallback 0, repair 0을 사용한다. Provider 응답이 closed schema를 통과하지 못하면 자동 보정이나 재호출을 하지 않는다.
+현재 live authoring profile은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt`와 exact `gemini-3.5-flash-lite`, temperature 0, fallback 0, repair 0을 사용한다. v5식 자연어에 실행 필수 정보가 명시되어 있으면 원문을 작은 item IR로 결정론적으로 투영하므로 provider JSON이 잘리거나 schema가 흔들려도 그 값을 추측·복구하지 않고 원문 사실만으로 계속할 수 있다. 필수 정보가 없거나 충돌하면 이 경로는 열리지 않으며 clarification 또는 검증 오류로 저장을 차단한다. 구 export가 완성형 `datasets` 또는 `alias_additions`를 보내는 경우에는 명시된 값만 새 item IR로 옮기는 결정론적 하위 호환 adapter를 한 번 적용한다.
 
 ## 2. 운영 Metadata 3컬렉션 계약
 
@@ -49,7 +53,7 @@ v5 데이터를 보호하면서 운영자가 관리할 metadata collection은 �
 
 운영 database 기본값은 `datagov`다. 자동/라이브 검증은 기본적으로 `MONGODB_VALIDATION_DATABASE=datagov_v6_validation`을 사용해 운영 metadata를 오염시키지 않는다. Data Analysis의 `01 사용 가능 메타데이터 불러오기`에는 MongoDB URI·database·세 metadata collection 이름·timeout이 보이며, domain ID·environment·source mode는 입력으로 노출하지 않는다. Loader는 입력받은 안전하고 서로 다른 3컬렉션의 모든 항목을 결합하고 전체 typed catalog를 다시 컴파일한다. 누락·중복·잘못된 payload는 fail-closed한다. Oracle·SQL·Datalake dataset의 실제 read-only query는 테이블 카탈로그 항목의 `payload.source_config.query_template`에 저장하며, `db_key`와 `required_params`도 같은 항목이 소유한다. credential·접속 문자열은 저장하지 않는다.
 
-초기 등록 순서는 `main_filter → table_catalog → domain`을 포함해 section별로 독립적이다. 빈 DB의 Main Filter 등록은 완성 package의 patch가 아니라 정상적인 첫 항목 저장이며, 응답은 `activation_status=waiting_for_sections`와 아직 비어 있는 collection role을 표시한다. 부분 item set은 같은 세 collection에 저장하지만 Data Analysis loader에는 노출하지 않는다. 세 role이 모두 채워지는 마지막 write에서 전체 schema·semantic lint·dependency closure·runtime compile을 통과해야 `activation_status=ready`가 된다. 별도 pending collection이나 active pointer는 사용하지 않는다.
+초기 등록 순서는 `main_filter → table_catalog → domain`을 포함해 section별로 독립적이다. 빈 DB의 Main Filter 등록은 완성 package의 patch가 아니라 정상적인 첫 항목 저장이며, 응답은 `activation_status=waiting_for_sections`와 아직 비어 있는 collection role을 표시한다. 저장 검증은 이번 입력 항목의 닫힌 구조·typed identity·중복·명시 참조를 중심으로 수행한다. 세 role이 채워지면 전체 runtime compile을 별도로 시도하되, 기존의 다른 항목이 아직 실행 준비가 되지 않았다는 이유로 이번 정상 항목을 거부하지 않는다. 대응 dataset field가 없는 Main Filter alias는 MongoDB에 보존하고 runtime projection에서만 대기시키며, 해당 field의 dataset이 등록되면 자동 활성화한다. 별도 pending collection이나 active pointer는 사용하지 않는다.
 
 ## 3. 공통 envelope
 
@@ -190,11 +194,11 @@ Dataset은 filter/group/join/output에서 사용할 canonical field binding의 �
 
 ## 5. Source registry와 resolver 경계
 
-`config_ref`와 `query_ref`는 자유 문자열이나 실행 가능한 payload가 아니다. 일반 작업자 TXT의 입력 항목도 아니다. 작업자는 데이터셋과 원천 시스템을 자유로운 자연어로 설명하고, authoring의 별도 **승인 업무 어휘·Source 참조 레지스트리** 노드가 업무 표현을 승인 semantic ID에 연결할 작은 어휘와 dataset별 운영 참조를 분리해 제공한다. LLM에는 작은 어휘만 전달되며, 결정론적 compiler가 exact dataset ID를 운영 참조와 결합한다. LLM이 누락하거나 다르게 쓴 binding 필드는 저장 전에 폐기·교체한다.
+`config_ref`와 `query_ref`는 작업자가 별도 JSON 입력란에서 관리하지 않는다. 작업자는 데이터셋·원천 시스템·필요한 조회문을 자유로운 자연어로 설명하고, 테이블 카탈로그 변환기가 항목 payload로 구조화한다. 누락된 내부 참조 ID와 source adapter ID는 데이터셋 key와 source type으로 결정론적으로 생성하며, compiler가 read-only query·필수 변수·field binding·adapter 지원 범위를 검증한다.
 
 ### 5.1 Source Registry v3와 `semantic_templates`
 
-승인 레지스트리의 root 계약은 `metadata.authoring.source-registry.v3`다. Root에는 dataset별 실행 binding/descriptor, `semantic_vocabulary`, `semantic_templates`와 template provenance hash가 닫힌 키셋으로 존재한다.
+`metadata.authoring.source-registry.v3`는 과거 registry-backed bootstrap과 마이그레이션 검증 도구에만 남긴다. import-ready 도메인·테이블 카탈로그·메인 필터 Flow에는 해당 JSON이나 입력 포트를 직렬화하지 않는다. 운영 기준정보는 세 MongoDB 컬렉션의 정상 항목을 메모리에서 결합해 만든다.
 
 - `semantic_vocabulary`: Domain/Dataset/Main Filter LLM에 제공 가능한 최소 `id/family/labels` projection이다. 실행 참조, 물리 컬럼, 타입, coercion, metric binding과 template 본문은 없다.
 - `semantic_templates`: compiler 전용 `metadata.authoring.semantic-templates.v1`이다. `metrics`, `relations`, `grains`, `orderings`, `predicates`, `recipes`, `entity_groups`, `aliases`, locale/timezone과 `planner_policy`를 가진다. 이 object는 prompt/runtime context와 LLM raw output에 넣지 않는다.
@@ -640,7 +644,7 @@ Dynamic import, `eval`/`exec`, metadata code 실행, arbitrary network/file/subp
 Langflow 등록 Flow는 자연어 해석과 결정론적 검증이 성공한 한 번의 실행에서 current metadata를 저장한다. 별도 active pointer, bundle archive, pending write collection은 runtime 필수 계약이 아니다.
 
 1. Full-domain 등록은 자유형 Domain·Dataset·Main Filter 원문을 작업별 공통·특화 Prompt pair로 각각 해석해 LLM 정확히 3개의 branch 결과를 만든다. Domain은 표시명/설명 annotation only, Dataset은 compact Dataset IR, Main Filter는 `target_type` 필수 typed alias IR이다. 후속 Dataset/Main Filter는 최대 1회, Domain Policy는 0회다.
-2. Compiler가 `source-registry.v3`의 hash-pinned template/descriptor를 결합하고 전체 package schema, semantic lint, dependency/security closure, section ownership을 검증한다. 실패 또는 clarification이면 MongoDB write는 0건이다.
+2. Compiler는 먼저 이번 후보 항목의 package-owned schema, semantic lint, 중복, section ownership과 명시 참조를 검증한다. 이 검증에 성공한 항목은 다른 기존 항목의 runtime dependency 상태와 무관하게 저장한다. 그 뒤 현재 세 컬렉션을 결합해 실행 projection을 시도하며, 대응 dataset field가 없는 alias는 저장된 원문 항목을 삭제하지 않고 runtime에서만 대기시킨다. 전체 실행 projection에 다른 문제가 남으면 `stored_runtime_pending`으로 보고하되 이번 write를 되돌리지 않는다.
 3. 검증된 runtime catalog를 도메인 규칙, 데이터셋, alias 등 실제 등록 항목 단위로 분할한다.
 4. 각 MongoDB 문서는 `_id`, `section`, `key`, `natural_text`, `payload`, `updated_at`만 가진다. 작업자가 새 원문을 주지 않은 기존 항목은 저장된 `natural_text`를 보존한다.
 5. MongoDB transaction을 시작한 뒤 중복 판정에 사용한 current item snapshot과 실제 transaction snapshot이 같은지 먼저 비교한다. 다르면 동시 변경 충돌로 중단하고 재실행을 요구한다. 일치하면 실제 변경 항목만 `_id` 단위 `replace_one(upsert=true)`로 반영하되, 유일한 domain profile 문서는 모든 등록 transaction이 함께 쓰는 serialization boundary로 갱신한다. 서로 다른 key를 동시에 바꾸는 두 transaction도 이 공통 profile write에서 MongoDB WriteConflict가 발생하며 retryable `state_conflict`로 변환된다. 언급되지 않은 문서나 중복 검사 뒤 추가된 문서를 `delete_many`로 제거하지 않는다. 같은 transaction 안에서 모든 항목을 다시 읽고 Domain Package를 메모리에서 컴파일해 저장 전 runtime catalog와 동치인지 확인한다.
@@ -655,9 +659,9 @@ Langflow 등록 Flow는 자연어 해석과 결정론적 검증이 성공한 한
 - alias card는 세 컬렉션을 합친 전역 namespace를 사용하며 `(target_type, target_key)`가 canonical identity다. 같은 alias key가 provenance 변경으로 다른 컬렉션에도 남으면 자동 이동·덮어쓰지 않고 migration-required 충돌로 차단한다. 같은 target type에서 동일 표현이 다른 target을 가리키면 모호성 오류다. 서로 다른 target type에서 `UPH`, `3DS`, `생산달성률` 같은 표현을 의도적으로 재사용하는 것은 허용한다.
 - 결과는 신규·교체·동일 건수와 bounded `operation_by_key`, 안전한 `duplicate_candidates`만 반환한다. SQL, URL, source configuration, credential은 충돌 응답에 포함하지 않는다.
 
-Runtime loader는 selector나 active pointer 없이 세 collection의 항목 전체를 읽는다. 도메인 프로필은 `section=profile` 문서 하나여야 하고 데이터셋 collection은 비어 있으면 안 된다. 중복 key, 지원하지 않는 section, 잘못된 typed payload, dependency 불일치가 있으면 package를 제공하지 않는다. `domain_id`, environment, revision, contract, package hash는 MongoDB 필드가 아니라 실행 시 생성되는 내부 값이다. 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 change stream·백업 또는 별도 운영 감사 시스템을 사용한다.
+Runtime loader는 selector나 active pointer 없이 세 collection의 항목 전체를 읽는다. 도메인 프로필은 선택 사항이며 없으면 저장 문서를 추가하지 않고 결합 시 `default`/`ko-KR`/`Asia/Seoul` 내부 프로필을 사용한다. 명시적 프로필은 최대 하나이고 데이터셋 collection은 비어 있으면 안 된다. 중복 key, 지원하지 않는 section, 잘못된 typed payload, dependency 불일치가 있으면 package를 제공하지 않는다. `domain_id`, environment, revision, contract, package hash는 MongoDB 필드가 아니라 실행 시 생성되는 내부 값이다. 자동 revision history/rollback은 제공하지 않으며, 이력이 필요하면 change stream·백업 또는 별도 운영 감사 시스템을 사용한다.
 
-세 등록 Flow의 유형은 Flow별 standalone 컴포넌트에 고정되어 작업자 입력으로 노출하지 않는다. `domain_id`는 Flow에 봉인된 승인 레지스트리에서 읽고 environment는 내부 `production`으로 고정한다.
+세 등록 Flow의 유형은 Flow별 standalone 컴포넌트에 고정되어 작업자 입력으로 노출하지 않는다. `registry_json` 입력은 존재하지 않으며, 내부 `domain_id`는 명시적 프로필이 있으면 그 항목에서 결정하고 없으면 `default`를 사용한다. environment는 `production`으로 고정한다.
 
 ## 14. v5 migration 원칙
 

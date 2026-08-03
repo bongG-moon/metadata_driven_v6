@@ -86,7 +86,7 @@ Source Registry v3 semantic_templates + dataset descriptors
 validated metadata.authoring.draft.v1
 ```
 
-세 분기는 동일 hash의 `semantic_vocabulary`만 공유하고 물리 binding, descriptor 또는 `semantic_templates`는 받지 않는다. `metadata.authoring.source-registry.v3`의 `semantic_templates`는 compiler 전용 실행 의미 구조다. Compiler가 Domain annotation에 metric/relation/grain/ordering/predicate/recipe/entity-group/alias를 결합하고, Dataset IR에 승인 field/source descriptor를, Main Filter IR에 typed alias card를 확장한다. `semantic_templates.planner_policy`는 봉인돼 Domain Policy의 output profile도 바꿀 수 없다. 후속 Dataset/Main Filter Flow도 같은 compact/typed IR과 section-owned expander를 사용한다. 모든 공통·특화 Template은 변수 없이 렌더링되고 source context는 Context Builder에서 Composer의 `runtime_context`로 정확히 한 번 전달된다. Domain Policy는 Prompt Bundle Composer와 provider를 호출하지 않으며, Main Filter의 zero-LLM 경로는 optional `source_grounding_mode=explicit_inventory` proof가 완전할 때만 사용한다. Blueprint/pin 고신뢰 lane은 Domain annotation 계약을 넓히지 않고 executable external pin 검증만 추가한다.
+현재 import-ready 등록 Flow 세 개는 작업자 입력이나 LLM context에 승인 레지스트리를 전달하지 않는다. 각 분기는 자연어 원문과 자기 section만 표현할 수 있는 폐쇄형 schema, 공통 Prompt Template, 선택형 특화 Prompt Template만 사용한다. 도메인 프로필·테이블 카탈로그·메인 필터의 검증된 항목은 각 MongoDB 컬렉션에 저장되고, compiler가 세 컬렉션을 메모리에서 결합해 field binding, source/query 참조, alias 대상, join/cardinality와 read-only 정책을 결정론적으로 검증한다. 모든 공통·특화 Template은 변수 없이 렌더링되고 source context는 Context Builder에서 Composer의 `runtime_context`로 정확히 한 번 전달된다. 과거 `metadata.authoring.source-registry.v3` 기반 bootstrap과 Blueprint/pin lane은 마이그레이션 및 내부 회귀 검증용으로만 유지하며 import-ready Flow의 작업자 입력 계약에는 포함하지 않는다.
 
 ### 1.2 Registered function topology
 
@@ -205,6 +205,8 @@ Answer LLM은 선택 사항이다. 실패하거나 claim validator를 통과하�
 Node 수 자체보다 책임의 중복 여부가 우선이다. 두 node가 같은 mapping, result schema 또는 state를 각자 재해석하면 합치거나 계약 소유자를 하나로 정한다.
 
 Message/API/GaiA는 서로 다른 소비자 계약이므로 Message 문자열 하나로 합치지 않는다. 세 terminal은 같은 immutable `response.v1`을 소비하며, 표시 옵션이나 adapter가 plan/result를 다시 해석하지 않는다. 채팅 표시는 schema만 검사하고, 외부 전송 경계인 API와 GaiA가 응답 hash를 검증한다.
+
+메타데이터 등록 Flow에서는 `04 검증 및 저장`이 등록 응답 계약의 유일한 검증 소유자다. `05 결과 메시지 구성`은 일반 JSON을 받아 표시만 하며 schema·`response_sha256`을 다시 검사하지 않는다. Langflow 운반 계층이 추가할 수 있는 `default_value` 같은 UI/runtime 필드는 표시 전에 제거한다. 이 필드가 추가되더라도 이미 완료된 MongoDB 저장을 실패로 오인하거나 채팅 출력을 중단해서는 안 된다.
 
 Pandas-backed executor가 한 operation을 계산하는 동안 input/output frame을 일시적으로 함께 메모리에 두는 것은 허용한다. 다만 peak memory를 측정하고, chunk/stream 가능 operator는 budget을 적용하며, result validation/store가 끝나면 source frame reference를 해제한다. source와 result의 full copy를 payload/state/trace에 동시에 남기는 것은 허용하지 않는다.
 

@@ -54,6 +54,33 @@ def test_recursive_filter_and_projection_are_typed_and_ordered():
     assert result == [{"B": 3, "A": "x"}]
 
 
+def test_in_filter_accepts_canonical_value_array() -> None:
+    result = execute(
+        [
+            {
+                "id": "filtered",
+                "op": "filter",
+                "input": "source:s",
+                "where": {
+                    "field": "OPER_NAME",
+                    "operator": "in",
+                    "value": ["D/A1", "D/A2"],
+                    "semantic_type": "string",
+                },
+            }
+        ],
+        {
+            "s": [
+                {"OPER_NAME": "D/A1", "WIP": 300},
+                {"OPER_NAME": "D/A2", "WIP": 0},
+                {"OPER_NAME": "W/B1", "WIP": 100},
+            ]
+        },
+    )
+
+    assert [row["OPER_NAME"] for row in result] == ["D/A1", "D/A2"]
+
+
 def test_global_and_per_group_rank_have_stable_exact_n_and_ties():
     rows = [
         {"G": "A", "ITEM": "b", "VALUE": 10},
@@ -228,4 +255,3 @@ def test_unregistered_operation_never_falls_back_to_code():
     with pytest.raises(ContractError) as error:
         execute([{"id": "x", "op": "run_python", "input": "source:s", "code": "..."}], {"s": []})
     assert error.value.code == "unsupported_operation"
-

@@ -20,10 +20,10 @@ Standalone은 업무 prompt까지 source에 내장한다는 뜻이 아니다. co
 | --- | --- | --- | --- |
 | `intent_selection` | `공통 의도 선택 프롬프트` | `도메인 특화 의도 해석 프롬프트` **필수** | route=`intent_llm` |
 | `answer_narrative` | `공통 답변 생성 프롬프트` | `도메인 특화 답변 생성 프롬프트` **필수** | narrative enabled |
-| `domain_authoring` | `도메인 등록 공통 프롬프트` | `도메인 등록 특화 프롬프트` **필수** | 자유형 자연어를 `display_name`/`description` annotation으로 변환; 실행 section은 Source Registry v3 template가 확장 |
+| `domain_authoring` | `도메인 등록 공통 프롬프트` | `도메인 등록 특화 프롬프트` **필수** | 자유형 자연어를 작은 `section/key/payload` items로 변환 |
 | `domain_blueprint_annotation` | `도메인 등록 공통 프롬프트` | `도메인 등록 특화 프롬프트` **필수** | 같은 annotation 계약에 Blueprint/external pin 불변성 검증을 추가한 고신뢰 lane |
-| `dataset_authoring` | `데이터셋 등록 공통 프롬프트` | `데이터셋 등록 특화 프롬프트` **필수** | 자유형 dataset 설명을 내부 compact `metadata.bootstrap.dataset-ir.v1`로 변환 |
-| `main_filter_authoring` | `기본 필터 등록 공통 프롬프트` | `기본 필터 등록 특화 프롬프트` **필수** | 자유형 표현을 `target_type` 필수 `metadata.bootstrap.main-filter-ir.v1`로 변환 |
+| `dataset_authoring` | `데이터셋 등록 공통 프롬프트` | `데이터셋 등록 특화 프롬프트` **필수** | 자유형 dataset 설명을 작은 `dataset_cards` 목록으로 변환; SQL은 원문 추출 |
+| `main_filter_authoring` | `기본 필터 등록 공통 프롬프트` | `기본 필터 등록 특화 프롬프트` **필수** | 자유형 표현을 `filter_key/payload` items로 변환; compiler가 field alias card로 확장 |
 | `domain_policy` | 없음 | 없음 | LLM 0회 |
 | `main_filter_explicit_inventory` | 없음 | 없음 | optional explicit-inventory proof가 완전할 때 LLM 0회 |
 
@@ -33,7 +33,7 @@ Authoring 공통 Prompt는 해당 작업의 출력 경계와 closed output schem
 
 세 branch의 외부 envelope는 `metadata-authoring-proposal.schema.json` 하나다. `status=complete`이면 exact `source_sha256`와 branch별 closed `draft`가 있고, 그 `draft`는 Domain annotation, compact Dataset IR 또는 typed Main Filter IR 중 purpose가 pin한 하나와 일치해야 한다. `status=needs_clarification`이면 exact source hash와 `clarification.questions` 1~3개 및 `missing_fields`만 있다. 두 variant를 섞거나 clarification에 draft/candidate/persist를 넣을 수 없다.
 
-`metadata.authoring.source-registry.v3`의 `semantic_vocabulary`만 LLM context에 들어간다. 같은 registry의 `semantic_templates`와 dataset 실행 descriptor는 compiler-owned이며 Prompt Template, composed Message, envelope 또는 provider request에 넣지 않는다. Domain annotation은 호출 뒤 검증된 `semantic_templates`로 결정론적으로 확장되고, Dataset/Main Filter IR도 각각 승인 descriptor/vocabulary membership으로 확장된다. `semantic_templates.planner_policy`는 봉인되며 Domain Policy output profile로도 바꿀 수 없다.
+현재 import-ready 등록 Flow에서는 source registry나 그 안의 `semantic_vocabulary`를 LLM context에 넣지 않는다. LLM에는 작업자의 자연어 원문, 해당 등록 종류에만 닫힌 출력 schema, 공통 Prompt Template, 선택형 특화 Prompt Template만 전달한다. 테이블의 물리 컬럼·원천 종류·조회문과 메인 필터 대상은 자연어 원문에서 구조화하되, 저장 전 compiler가 schema·참조·read-only 정책을 검증하고 세 MongoDB 컬렉션이 완성된 뒤 전체 실행 계약을 다시 컴파일한다. 과거 registry 기반 template 확장 경로는 마이그레이션 및 내부 회귀 검증 전용이다.
 
 ## 3. 필수 node 경계
 
@@ -142,7 +142,7 @@ Intent, Answer와 authoring LLM은 허용 경로마다 최대 1회 호출한다.
 - source/result raw row, full catalog, SQL/query body, endpoint, credential, token, header는 어느 Prompt Template variable에도 넣지 않는다.
 - Intent runtime context에는 bounded candidate card projection만 제공한다.
 - Answer runtime context에는 검증된 fact projection과 필요한 최대 preview만 제공한다.
-- Authoring runtime context에는 Domain bootstrap의 bounded 자연어 source block, 해당 branch의 annotation/compact-IR schema projection, 같은 hash로 봉인된 승인 축약 의미 어휘만 제공한다. `source-registry.v3.semantic_templates`와 실행 descriptor는 provider 밖 compiler 경계에만 둔다. 작업자 형식이 달라져도 context builder가 inventory 문법을 요구하지 않으며, 모호한 경우 확인 질문은 등록 ID나 스키마 용어가 아니라 업무 선택지로 표현한다.
+- Authoring runtime context에는 bounded 자연어 source block과 해당 branch가 소유한 폐쇄형 schema projection만 제공한다. 승인 어휘·원천 레지스트리·기존 MongoDB 문서 전체는 provider request에 넣지 않는다. 작업자 형식이 달라져도 context builder가 inventory 문법을 요구하지 않으며, 모호한 경우 확인 질문은 등록 ID나 스키마 용어가 아니라 업무 선택지로 표현한다.
 - Runtime·Authoring 특화 Prompt에는 전체 payload를 넣지 않고 배포 대상 업무의 안정된 용어·해석 규칙만 직접 작성한다.
 - 사용자·metadata text는 typed variable로 escape/render하고 출력은 closed decoder가 검증한다.
 - Runtime과 Authoring은 공통·특화 segment별 budget을 composed 전체 budget과 함께 prompt registry에 pin한다.

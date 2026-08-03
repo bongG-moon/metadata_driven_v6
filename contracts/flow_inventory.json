@@ -595,7 +595,7 @@
         {
           "id": "note_analysis_overview",
           "title": "분석 Flow 사용 안내",
-          "markdown": "## 분석 Flow 사용 안내\n\n- 노드 이름의 `00`~`27` 번호가 기본 실행 순서입니다. `A/B`는 같은 단계의 독립 분기입니다.\n- **01 사용 가능 메타데이터 불러오기**는 MongoDB의 도메인·테이블 카탈로그·메인필터 중 가장 최근의 완전한 동일 release를 자동 선택합니다.\n- 기준 시간대는 코드에서 `Asia/Seoul`로 고정됩니다.\n- Chat/API/GaiA는 같은 canonical response를 서로 다른 채널로 전달합니다.\n\n업무 영역을 바꿀 때는 등록 메타데이터, 승인 레지스트리, 특화 Prompt Template 본문을 변경합니다.",
+          "markdown": "## 분석 Flow 사용 안내\n\n- 노드 이름의 `00`~`27` 번호가 기본 실행 순서입니다. `A/B`는 같은 단계의 독립 분기입니다.\n- **01 사용 가능 메타데이터 불러오기**는 MongoDB의 도메인·테이블 카탈로그·메인필터를 결합하고 완전한 실행 메타데이터만 사용합니다.\n- 기준 시간대는 코드에서 `Asia/Seoul`로 고정됩니다.\n- Chat/API/GaiA는 같은 canonical response를 서로 다른 채널로 전달합니다.\n\n업무 영역을 바꿀 때는 세 등록 Flow의 자연어 메타데이터와 특화 Prompt Template 본문을 변경합니다. 별도 승인 레지스트리 입력은 필요하지 않습니다.",
           "position": {
             "x": 0,
             "y": -380
@@ -1079,16 +1079,13 @@
             "x": 780,
             "y": 80
           },
-          "settings": {
-            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json"
-          },
           "metadata": {
             "logical_stage": "simple_metadata_draft",
             "automatic_retry_count": 0
           },
           "ui": {
             "display_name": "03 도메인 자연어 변환",
-            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "description": "자연어와 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출하며 별도 레지스트리 입력을 요구하지 않습니다.",
             "input_labels": {
               "input_message": "자연어 입력",
               "common_prompt_message": "공통 프롬프트",
@@ -1359,16 +1356,13 @@
             "x": 780,
             "y": 80
           },
-          "settings": {
-            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json"
-          },
           "metadata": {
             "logical_stage": "simple_metadata_draft",
             "automatic_retry_count": 0
           },
           "ui": {
             "display_name": "03 테이블 카탈로그 자연어 변환",
-            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "description": "자연어와 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출하며 별도 레지스트리 입력을 요구하지 않습니다.",
             "input_labels": {
               "input_message": "자연어 입력",
               "common_prompt_message": "공통 프롬프트",
@@ -1639,16 +1633,13 @@
             "x": 780,
             "y": 80
           },
-          "settings": {
-            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json"
-          },
           "metadata": {
             "logical_stage": "simple_metadata_draft",
             "automatic_retry_count": 0
           },
           "ui": {
             "display_name": "03 메인 필터 자연어 변환",
-            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "description": "자연어와 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출하며 별도 레지스트리 입력을 요구하지 않습니다.",
             "input_labels": {
               "input_message": "자연어 입력",
               "common_prompt_message": "공통 프롬프트",

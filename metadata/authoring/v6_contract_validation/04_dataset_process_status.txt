@@ -1,0 +1,6 @@
+process_status 데이터셋을 등록해줘.
+표시 이름은 공정 현황이고 family는 process_status야.
+이번 저장 계약 검증에서는 실제 외부 시스템을 조회하지 않고 앞 단계 결과를 사용하는 previous_result source를 사용해.
+OPER_NAME 필드가 있고 실제 컬럼명도 OPER_NAME이야.
+OPER_NAME은 문자열이며 필터, 그룹, 출력에 사용할 수 있어.
+기본 표시 필드는 OPER_NAME이야.

@@ -187,6 +187,26 @@
           "type": "string",
           "maxLength": 64
         },
+        "selection_criteria": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "time_scope": {"type": "string", "minLength": 1, "maxLength": 64},
+            "use_when": {
+              "type": "array",
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            },
+            "exclude_when": {
+              "type": "array",
+              "maxItems": 64,
+              "uniqueItems": true,
+              "items": {"type": "string", "minLength": 1, "maxLength": 256}
+            }
+          },
+          "default": {}
+        },
         "config_ref": {
           "type": "string",
           "maxLength": 256

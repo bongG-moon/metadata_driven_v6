@@ -383,15 +383,11 @@ def _authoring_tweaks(
     environment: str,
     mongo_uri: str,
     mongo_database: str,
-    registry_json: str,
     sources: dict[str, str],
 ) -> dict[str, Any]:
     if mode not in {"save", "replace", "validate_only"}:
         raise ValueError("authoring_mode_invalid")
     tweaks: dict[str, Any] = {
-        "simple_metadata_draft_generator": {
-            "registry_json": registry_json,
-        },
         "simple_metadata_authoring_engine": {
             "mode": mode,
             "mongo_uri": mongo_uri,
@@ -591,7 +587,6 @@ def _run_authoring_case(
     environment: str,
     mongo_uri: str,
     mongo_database: str,
-    registry_json: str,
     sources: dict[str, str],
     timeout_seconds: int,
 ) -> dict[str, Any]:
@@ -609,7 +604,6 @@ def _run_authoring_case(
             environment=environment,
             mongo_uri=mongo_uri,
             mongo_database=mongo_database,
-            registry_json=registry_json,
             sources=sources,
         ),
         timeout_seconds=timeout_seconds,
@@ -694,17 +688,16 @@ def run(
     if DEFAULT_GEMINI_MODEL != AUTHORING_GEMINI_MODEL:
         raise BuildContractError("authoring_gemini_model_constant_drift")
 
-    effective_environment = _fresh_environment(environment, uuid.uuid4().hex)
+    if str(domain_id or "default").strip() != "default" or str(
+        environment or "production"
+    ).strip() != "production":
+        raise BuildContractError("simple_authoring_identity_is_fixed_to_default_production")
+    domain_id = "default"
+    effective_environment = "production"
     sources, source_hashes, source_evidence = _load_v6_authoring_sources(
         worker_input_dir=worker_input_dir,
         source_set_id=source_set_id,
     )
-    registry_path = ROOT / "metadata" / "domain_packs" / domain_id / "approved_source_registry.json"
-    if not registry_path.is_file():
-        raise BuildContractError("approved_source_registry_not_found")
-    registry_json = registry_path.read_text(encoding="utf-8")
-    registry_sha256 = sha256(registry_json.encode("utf-8")).hexdigest()
-
     defaults = [_flow_defaults(path) for path in FLOW_PATHS]
     defaults_ok = [row["authoring_kind"] for row in defaults] == [
         "domain",
@@ -771,7 +764,6 @@ def run(
                 environment=effective_environment,
                 mongo_uri=mongo_uri,
                 mongo_database=mongo_database,
-                registry_json=registry_json,
                 sources=sources,
                 timeout_seconds=timeout_seconds,
             )
@@ -808,7 +800,6 @@ def run(
             environment=effective_environment,
             mongo_uri=mongo_uri,
             mongo_database=mongo_database,
-            registry_json=registry_json,
             sources=sources,
             timeout_seconds=timeout_seconds,
         )
@@ -868,7 +859,7 @@ def run(
         "database_sha256": sha256(mongo_database.encode("utf-8")).hexdigest(),
         "source_set": source_evidence,
         "source_hashes": source_hashes,
-        "approved_registry_sha256": registry_sha256,
+        "metadata_authority": "three_collections",
         "source_text_persisted": False,
         "provider_output_persisted": False,
         "raw_http_responses_persisted": False,
@@ -904,11 +895,6 @@ def run(
             code="raw_source_text_leaked",
             stage="report_redaction",
         )
-    if registry_json in serialized:
-        raise AuthoringValidationError(
-            code="raw_registry_leaked",
-            stage="report_redaction",
-        )
     return report
 
 
@@ -916,8 +902,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--server-url", default="http://127.0.0.1:7873")
     parser.add_argument("--env-file", type=Path, default=ROOT / ".env")
-    parser.add_argument("--environment", default="e2e_validation")
-    parser.add_argument("--domain-id", default="manufacturing")
+    parser.add_argument("--environment", default="production", help=argparse.SUPPRESS)
+    parser.add_argument("--domain-id", default="default", help=argparse.SUPPRESS)
     parser.add_argument("--timeout-seconds", type=int, default=600)
     parser.add_argument("--worker-input-dir", type=Path, default=V6_INPUT_DIR)
     parser.add_argument("--source-set-id", default=DEFAULT_SOURCE_SET_ID)

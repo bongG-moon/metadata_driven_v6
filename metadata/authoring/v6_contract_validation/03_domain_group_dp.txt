@@ -1,0 +1,5 @@
+DP 공정 그룹을 등록해줘.
+display_name은 DP이고 유의어는 DP, D/P, DP공정, D/P공정, DP 공정, D/P 공정이야.
+field는 OPER_NAME이야.
+포함 공정은 OPER_NAME 값 AA, BB, CC이야.
+별칭마다 별도 item을 만들지 말고 공정그룹 하나로 저장해.

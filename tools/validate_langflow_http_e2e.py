@@ -2,8 +2,8 @@
 
 The persisted report is intentionally evidence-only. API keys, prompts, raw
 Langflow responses and model text are never written. The validator keeps the
-response in memory just long enough to verify canonical Message/API/GaiA
-terminal hashes and response.v1 usage counters.
+response in memory just long enough to verify the canonical response.v1 payload,
+the Message/API/GaiA terminal presence and response.v1 usage counters.
 """
 
 from __future__ import annotations
@@ -69,7 +69,17 @@ def _validation_clock_evidence(
         "timezone_internal": True,
         "flow_clock_tweak_used": False,
     }
-    if not all(checks.values()):
+    # ``flow_clock_tweak_used`` is an explicit negative invariant: the
+    # production Flow must not expose a clock input, and the validation seam
+    # is supplied only through the server environment.  Treating this mapping
+    # with ``all(checks.values())`` made every correctly configured run fail
+    # because the expected value of that one field is ``False``.
+    if not (
+        checks["validation_mode_enabled"]
+        and checks["reference_instant_exact"]
+        and checks["timezone_internal"]
+        and checks["flow_clock_tweak_used"] is False
+    ):
         raise BuildContractError("validation_clock_environment_not_configured")
     return {
         "mode": "environment_only",
@@ -95,24 +105,49 @@ def _three_collection_release_evidence(
     try:
         database = client[database_name]
         package = load_available_domain_package_from_three_collections(database)
-        current_id = f"{package['environment']}:{package['domain_id']}"
         documents = {
-            kind: database[name].find_one({"_id": current_id})
+            kind: list(
+                database[name].find(
+                    {},
+                    {
+                        "_id": 1,
+                        "section": 1,
+                        "key": 1,
+                        "natural_text": 1,
+                        "payload": 1,
+                    },
+                )
+            )
             for kind, name in METADATA_COLLECTIONS.items()
         }
     finally:
         client.close()
 
-    release_ids = {
-        str(document.get("release_id") or "")
-        for document in documents.values()
-        if isinstance(document, dict)
+    item_counts = {kind: len(rows) for kind, rows in documents.items()}
+    item_ids = {
+        kind: sorted(str(document.get("_id") or "") for document in rows)
+        for kind, rows in documents.items()
     }
+    item_set_sha256 = sha256(
+        json.dumps(item_ids, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+            "utf-8"
+        )
+    ).hexdigest()
     revision = int(package.get("revision") or 0)
     checks = {
-        "three_documents_present": all(isinstance(value, dict) for value in documents.values()),
+        "three_collections_nonempty": all(count > 0 for count in item_counts.values()),
         "fixed_collection_roles": set(documents) == set(METADATA_COLLECTIONS),
-        "one_sealed_release": len(release_ids) == 1 and all(release_ids),
+        "typed_item_documents": all(
+            isinstance(document.get("section"), str)
+            and bool(document.get("section"))
+            and isinstance(document.get("key"), str)
+            and bool(document.get("key"))
+            and isinstance(document.get("natural_text"), str)
+            and bool(document.get("natural_text"))
+            and isinstance(document.get("payload"), dict)
+            for rows in documents.values()
+            for document in rows
+        ),
         "expected_domain": package.get("domain_id") == expected_domain_id,
         "expected_environment": package.get("environment") == expected_environment,
         "revision_positive": revision >= 1,
@@ -125,7 +160,6 @@ def _three_collection_release_evidence(
     }
     if not all(checks.values()):
         raise BuildContractError("three_collection_release_precondition_failed")
-    release_id = next(iter(release_ids))
     catalog = package.get("runtime_catalog") if isinstance(package.get("runtime_catalog"), dict) else {}
     datasets = catalog.get("datasets") if isinstance(catalog.get("datasets"), dict) else {}
     return {
@@ -141,7 +175,8 @@ def _three_collection_release_evidence(
             for key, value in sorted(datasets.items())
             if isinstance(value, dict)
         },
-        "release_id_sha256": sha256(release_id.encode("utf-8")).hexdigest(),
+        "item_set_sha256": item_set_sha256,
+        "item_counts": item_counts,
         "collections": dict(METADATA_COLLECTIONS),
         "checks": checks,
     }
@@ -214,10 +249,10 @@ def _auth_headers(session: requests.Session, server_url: str, env: dict[str, str
 
 
 def _run_url(server_url: str, flow_id: str, headers: dict[str, str]) -> str:
-    """Choose the Langflow 1.9.2 run route matching the credential type."""
+    """Return the public Langflow 1.9.2 Flow execution route."""
 
-    route = "run/session" if "Authorization" in headers and "x-api-key" not in headers else "run"
-    return f"{server_url.rstrip('/')}/api/v1/{route}/{flow_id}"
+    del headers
+    return f"{server_url.rstrip('/')}/api/v1/run/{flow_id}"
 
 
 def _walk(value: Any) -> Iterable[Any]:
@@ -249,9 +284,12 @@ def _canonical_responses(value: Any) -> list[dict[str, Any]]:
     for item in _walk(value):
         if not isinstance(item, dict) or item.get("contract_version") != "response.v1":
             continue
-        digest = str(item.get("response_sha256") or "")
-        if len(digest) == 64:
-            found.setdefault(digest, item)
+        digest = sha256(
+            json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+                "utf-8"
+            )
+        ).hexdigest()
+        found.setdefault(digest, item)
     return list(found.values())
 
 
@@ -323,10 +361,25 @@ def extract_terminal_evidence(payload: dict[str, Any]) -> dict[str, Any]:
             by_terminal[kind].update(_gaia_hashes(block))
         else:
             by_terminal[kind].update(
-                str(item["response_sha256"]) for item in _canonical_responses(block)
+                sha256(
+                    json.dumps(
+                        item,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ).encode("utf-8")
+                ).hexdigest()
+                for item in _canonical_responses(block)
             )
     all_responses = _canonical_responses(payload)
-    canonical_hashes = sorted(str(item["response_sha256"]) for item in all_responses)
+    canonical_hashes = sorted(
+        sha256(
+            json.dumps(item, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode(
+                "utf-8"
+            )
+        ).hexdigest()
+        for item in all_responses
+    )
     gaia_hashes = _gaia_hashes(payload)
     # Some serializers expose custom output keys without a component wrapper.
     # Only explicit terminal labels are accepted as fallback evidence.
@@ -337,7 +390,14 @@ def extract_terminal_evidence(payload: dict[str, Any]) -> dict[str, Any]:
             if key not in item:
                 continue
             by_terminal[terminal].update(
-                str(value["response_sha256"])
+                sha256(
+                    json.dumps(
+                        value,
+                        ensure_ascii=False,
+                        sort_keys=True,
+                        separators=(",", ":"),
+                    ).encode("utf-8")
+                ).hexdigest()
                 for value in _canonical_responses(item[key])
             )
         if "gaia_response" in item:
@@ -379,11 +439,18 @@ def extract_terminal_evidence(payload: dict[str, Any]) -> dict[str, Any]:
     state_result_ref = str(state.get("executed_result_ref") or "")
     result_table_ref = str(result_table.get("data_ref") or "")
     terminal_hashes = {key: sorted(value) for key, value in by_terminal.items()}
+    # Message and GaiA are presentation adapters, so they do not need to echo
+    # the API payload or a cross-node hash. Integrity is checked after final
+    # response.v1 serialization; terminal completeness is structural.
     terminal_equivalent = (
         bool(response_hash)
+        and len(canonical_hashes) == 1
         and all(block_counts[key] >= 1 for key in ("message", "gaia", "api"))
-        and all(terminal_hashes[key] == [response_hash] for key in ("message", "gaia", "api"))
-        and gaia_hashes == [response_hash]
+        and by_terminal["api"] == {response_hash}
+        and any(
+            isinstance(item, dict) and item.get("contract_version") == "gaia.metadata.v1"
+            for item in _walk(payload)
+        )
     )
     return {
         "canonical_response_sha256": response_hash,

@@ -1409,12 +1409,34 @@ def _select_time_scoped_dataset(
     if len(explicit) > 1:
         return ""
     question = str(request.get("question") or "")
-    current_cues = ("현재", "실시간", "현황", "current", "real-time", "realtime")
+    datasets = catalog.get("datasets") or {}
+    criteria_matches = []
+    for dataset_key in matches:
+        criteria = (datasets.get(dataset_key) or {}).get("selection_criteria") or {}
+        if not isinstance(criteria, dict):
+            continue
+        use_when = [str(value) for value in criteria.get("use_when") or [] if str(value)]
+        exclude_when = [str(value) for value in criteria.get("exclude_when") or [] if str(value)]
+        if (
+            use_when
+            and any(_contains(question, cue) for cue in use_when)
+            and not any(_contains(question, cue) for cue in exclude_when)
+        ):
+            criteria_matches.append(dataset_key)
+    if len(criteria_matches) == 1:
+        return criteria_matches[0]
+    if len(criteria_matches) > 1:
+        return ""
+    current_cues = (
+        "현재", "현시간", "실시간", "현황",
+        "current", "real-time", "realtime",
+    )
     if any(_contains(question, cue) for cue in current_cues):
         preferred = [
             dataset_key
             for dataset_key in matches
-            if str(((catalog.get("datasets") or {}).get(dataset_key) or {}).get("time_scope") or "") == "current"
+            if str((datasets.get(dataset_key) or {}).get("time_scope") or "").casefold()
+            in {"current", "current_day", "today"}
         ]
         return preferred[0] if len(preferred) == 1 else ""
     requested_date, _explicit = _date_semantics(request)
@@ -1428,7 +1450,8 @@ def _select_time_scoped_dataset(
     preferred = [
         dataset_key
         for dataset_key in matches
-        if str(((catalog.get("datasets") or {}).get(dataset_key) or {}).get("time_scope") or "") == "history"
+        if str((datasets.get(dataset_key) or {}).get("time_scope") or "").casefold()
+        in {"history", "historical", "past"}
     ]
     return preferred[0] if len(preferred) == 1 else ""
 

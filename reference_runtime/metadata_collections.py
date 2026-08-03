@@ -41,6 +41,14 @@ _DOMAIN_MAP_SECTIONS = (
     "predicates",
     "recipes",
 )
+_DOMAIN_ALIAS_TARGET_TYPES = {
+    "metrics": "metric",
+    "entity_groups": "entity_group",
+    "grains": "grain",
+    "relations": "relation",
+    "predicates": "predicate",
+    "recipes": "recipe",
+}
 _ALIAS_PROVENANCE_TO_COLLECTION = {
     "domain": "domain",
     "table_catalog": "table_catalog",
@@ -460,15 +468,15 @@ def make_partial_metadata_item_documents(
 ) -> dict[str, list[dict[str, Any]]]:
     """Convert one independently authored section into normal item documents.
 
-    Initial authoring is intentionally order-independent.  Main-filter and
-    dataset items may therefore be stored before a domain profile exists.  The
+    Initial authoring is intentionally order-independent.  Domain, main-filter,
+    and dataset items may therefore be stored before the other sections exist.  The
     documents use the exact same six-field shape as fully compiled metadata;
     once all three collections are populated the normal package assembler is
     the only activation gate.
     """
 
     kind = str(authoring_kind or "").strip().casefold()
-    if kind not in {"dataset", "main_filter"}:
+    if kind not in {"domain", "dataset", "main_filter"}:
         _fail("부분 메타데이터 항목으로 저장할 수 없는 등록 유형입니다.", {"authoring_kind": kind})
     if not isinstance(patch, Mapping):
         _fail("부분 메타데이터 patch는 object여야 합니다.", {"authoring_kind": kind})
@@ -479,7 +487,115 @@ def make_partial_metadata_item_documents(
         "table_catalog": [],
         "main_filter": [],
     }
-    if kind == "dataset":
+    if kind == "domain":
+        profile_keys = {"domain_id", "display_name", "description", "locale", "timezone"}
+        allowed = {*profile_keys, *_DOMAIN_MAP_SECTIONS}
+        if not set(patch) <= allowed or not patch:
+            _fail("도메인 등록 patch에 허용되지 않은 section이 있습니다.")
+        section_keys = set(patch) & set(_DOMAIN_MAP_SECTIONS)
+        if section_keys:
+            if set(patch) != section_keys:
+                _fail("도메인 프로필과 업무 항목 section은 한 번에 섞어 저장할 수 없습니다.")
+            for section in sorted(section_keys):
+                entries = patch.get(section)
+                if not isinstance(entries, Mapping) or not entries:
+                    _fail("도메인 section은 비어 있지 않은 항목 object여야 합니다.", {"section": section})
+                for key in sorted(entries):
+                    raw_payload = entries[key]
+                    if not isinstance(raw_payload, Mapping):
+                        _fail("도메인 항목 payload는 object여야 합니다.", {"section": section, "key": str(key)})
+                    payload = deepcopy(dict(raw_payload))
+                    if section == "entity_groups":
+                        required = {"group_id", "display_name", "target_field", "members", "aliases"}
+                        if set(payload) != required:
+                            _fail(
+                                "공정 그룹에는 group_id, display_name, target_field, members, aliases만 필요합니다.",
+                                {"key": str(key), "missing": sorted(required - set(payload)), "unknown": sorted(set(payload) - required)},
+                            )
+                        group_id = str(payload.get("group_id") or "").strip()
+                        target_field = str(payload.get("target_field") or "").strip()
+                        display_name = str(payload.get("display_name") or "").strip()
+                        members = [str(value).strip() for value in payload.get("members") or []]
+                        aliases = [str(value).strip() for value in payload.get("aliases") or []]
+                        safe_id = r"[A-Za-z][A-Za-z0-9_.-]{0,127}"
+                        if (
+                            re.fullmatch(safe_id, str(key)) is None
+                            or group_id != str(key)
+                            or re.fullmatch(safe_id, group_id) is None
+                            or re.fullmatch(safe_id, target_field) is None
+                            or not display_name or not members or not aliases
+                            or any(not value for value in members + aliases)
+                            or len(members) != len(set(members))
+                            or len(aliases) != len(set(aliases))
+                        ):
+                            _fail("공정 그룹 식별자, 대상 필드, 구성원 또는 별칭이 올바르지 않습니다.", {"key": str(key)})
+                        payload = {
+                            "group_id": group_id,
+                            "display_name": display_name,
+                            "target_field": target_field,
+                            "expansion": "closed_set",
+                            "members": members,
+                            "selection": {"operator": "in", "value": members},
+                            "aliases": aliases,
+                            "alias_policy": {"match": "bounded_longest", "conflict": "fail_ambiguous"},
+                            "legacy_identity": f"process_group.{group_id}",
+                        }
+                    documents["domain"].append(
+                        _item_document(
+                            "domain", section, str(key), payload,
+                            source_text=str(source_text or ""), legacy_natural_texts=None,
+                            updated_at=timestamp,
+                        )
+                    )
+                    alias_target_type = _DOMAIN_ALIAS_TARGET_TYPES.get(section)
+                    alias_values = (
+                        payload.get("aliases")
+                        if isinstance(payload.get("aliases"), list)
+                        else []
+                    )
+                    alias_values = list(dict.fromkeys(
+                        str(value).strip()
+                        for value in alias_values
+                        if str(value).strip()
+                    ))
+                    if alias_target_type and alias_values:
+                        alias_key = f"{alias_target_type}:{key}"
+                        alias_payload = {
+                            "target_type": alias_target_type,
+                            "target_key": str(key),
+                            "values": [{"text": value, "priority": 100} for value in alias_values],
+                            "normalization": ["unicode_nfkc", "trim", "collapse_space", "latin_casefold"],
+                            "match": "bounded_longest",
+                            "conflict": "fail_ambiguous",
+                            "provenance_source": "domain",
+                        }
+                        documents["domain"].append(
+                            _item_document(
+                                "domain", "aliases", alias_key, alias_payload,
+                                source_text=str(source_text or ""), legacy_natural_texts=None,
+                                updated_at=timestamp,
+                            )
+                        )
+        else:
+            if not set(patch) <= profile_keys or not str(patch.get("display_name") or "").strip():
+                _fail("도메인 프로필에는 표시 이름과 선택적인 설명·언어·시간대만 허용합니다.")
+            domain_id = str(patch.get("domain_id") or "default").strip()
+            if re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]{0,127}", domain_id) is None:
+                _fail("자동 생성된 도메인 식별자가 올바르지 않습니다.")
+            payload = {
+                "display_name": str(patch.get("display_name") or domain_id).strip(),
+                "description": str(patch.get("description") or "").strip(),
+                "locale": str(patch.get("locale") or "ko-KR").strip(),
+                "timezone": str(patch.get("timezone") or "Asia/Seoul").strip(),
+            }
+            documents["domain"].append(
+                _item_document(
+                    "domain", "profile", domain_id, payload,
+                    source_text=str(source_text or ""), legacy_natural_texts=None,
+                    updated_at=timestamp,
+                )
+            )
+    elif kind == "dataset":
         if set(patch) != {"datasets"} or not isinstance(patch.get("datasets"), Mapping) or not patch["datasets"]:
             _fail("최초 데이터셋 등록 patch에는 비어 있지 않은 datasets만 있어야 합니다.")
         for key in sorted(patch["datasets"]):
@@ -559,6 +675,8 @@ def _validated_item(document: Mapping[str, Any], expected_prefix: str) -> dict[s
 
 def assemble_domain_package_from_items(
     documents: Mapping[str, Sequence[Mapping[str, Any]]],
+    *,
+    alias_activation_out: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Compile three simple item collections into the typed runtime package."""
 
@@ -567,9 +685,20 @@ def assemble_domain_package_from_items(
         for kind in ("domain", "table_catalog", "main_filter")
     }
     profiles = [item for item in values["domain"] if item["section"] == "profile"]
-    if len(profiles) != 1:
-        _fail("도메인 프로필 항목은 정확히 하나여야 합니다.", {"profile_count": len(profiles)})
-    profile = profiles[0]
+    if len(profiles) > 1:
+        _fail("도메인 프로필 항목은 최대 하나여야 합니다.", {"profile_count": len(profiles)})
+    # 작업자는 공정 그룹 같은 업무 항목부터 자유롭게 등록할 수 있다.
+    # 별도 프로필이 없으면 저장 문서를 늘리지 않고 실행 번들 결합 시에만
+    # 서울 시간대의 기본 프로필을 적용한다.
+    profile = profiles[0] if profiles else {
+        "key": "default",
+        "payload": {
+            "display_name": "Default Domain",
+            "description": "",
+            "locale": "ko-KR",
+            "timezone": "Asia/Seoul",
+        },
+    }
     domain_id = str(profile["key"])
     profile_payload = deepcopy(profile["payload"])
 
@@ -683,6 +812,54 @@ def assemble_domain_package_from_items(
 
     if not draft["datasets"]:
         _fail("등록된 데이터셋 항목이 없습니다.")
+
+    # Main Filter는 대응 데이터셋보다 먼저 등록할 수 있다. 현재 dataset
+    # catalog에 target이 없는 alias를 잘못된 값으로 간주해 버리면, 전혀
+    # 관계없는 Domain 항목을 추가하는 순간 전체 저장이 막힌다. 저장된
+    # alias card는 보존하되 현재 runtime에서 실제 target이 존재하는
+    # card만 활성화하고, 나머지는 향후 dataset 등록까지 대기시킨다.
+    registered_fields = {
+        _duplicate_text(field_id)
+        for dataset in draft["datasets"].values()
+        if isinstance(dataset, Mapping)
+        for field_id in (dataset.get("fields") or {})
+    }
+    registries = {
+        "dataset": {_duplicate_text(value) for value in draft["datasets"]},
+        "field": registered_fields,
+        "metric": {_duplicate_text(value) for value in draft["metrics"]},
+        "relation": {_duplicate_text(value) for value in draft["relations"]},
+        "grain": {_duplicate_text(value) for value in draft["grains"]},
+        "predicate": {_duplicate_text(value) for value in draft["predicates"]},
+        "recipe": {_duplicate_text(value) for value in draft["recipes"]},
+        "entity_group": {_duplicate_text(value) for value in draft["entity_groups"]},
+    }
+    active_aliases: dict[str, Any] = {}
+    deferred_aliases: list[dict[str, str]] = []
+    for alias_id, payload in draft["aliases"].items():
+        target_type, target_key = _alias_payload_target(payload)
+        registered = registries.get(target_type)
+        if registered is not None and target_key not in registered:
+            deferred_aliases.append(
+                {
+                    "alias_id": str(alias_id),
+                    "target_type": str(payload.get("target_type") or "").strip(),
+                    "target_key": str(payload.get("target_key") or "").strip(),
+                }
+            )
+            continue
+        active_aliases[str(alias_id)] = payload
+    draft["aliases"] = active_aliases
+    if isinstance(alias_activation_out, dict):
+        alias_activation_out.clear()
+        alias_activation_out.update(
+            {
+                "contract_version": "metadata.alias-activation.v1",
+                "active_count": len(active_aliases),
+                "deferred_count": len(deferred_aliases),
+                "deferred": deferred_aliases,
+            }
+        )
     return compile_domain_package(
         draft,
         domain_id,

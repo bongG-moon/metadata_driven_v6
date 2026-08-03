@@ -1,6 +1,6 @@
-[현재 배포의 데이터셋 등록 특화 규칙]
+[현재 배포의 제조 데이터셋 등록 특화 규칙]
 
-- 제조 데이터셋 설명에서 공정, 제품, LOT, 장비, 날짜, 생산량, 재공수량에 해당하는 업무 필드의 소유 관계만 제안합니다.
-- 작업자가 사용한 자연어 별칭을 보존하되 승인 업무 어휘의 dataset/field ID 중 하나에만 연결합니다.
-- 물리 컬럼명, 타입, adapter, query/config reference는 추측하지 않습니다. 결정론적 컴파일러가 승인 원천 레지스트리에서 주입합니다.
-- 공유 Flow를 다른 업무에 적용할 때는 이 Prompt Template 본문과 승인 업무 어휘 레지스트리를 함께 교체합니다.
+- OPER_NAME 같은 대문자 식별자는 원문이 canonical field로 명시한 경우 그대로 사용합니다.
+- 공정명 문자열 필드는 일반적으로 `semantic_type=string`, 역할은 원문 범위 안에서 `filter`, `group`, `join`, `sort`, `output` 중 필요한 것만 사용합니다.
+- source type이 previous_result이면 앞 단계 결과를 사용하는 데이터셋으로 해석하고 외부 쿼리나 fixture 경로를 만들지 않습니다.
+- Oracle/Datalake/Goodocs/H-API 원천은 원문에 적힌 source type과 조회 정보를 그대로 구조화하며 credential은 출력하지 않습니다.
