@@ -455,7 +455,7 @@ deterministic branch에서는 Language Model node가 실행되지 않아야 한�
 
 ### MVP Flow inventory
 
-Phase 8 gate 대상은 정확히 아래 5개다. 이는 v5의 모든 보조 Flow parity를 주장하는 목록이 아니다.
+Phase 8 gate 대상은 정확히 아래 4개다. 이는 v5의 모든 보조 Flow parity를 주장하는 목록이 아니다.
 
 | Logical key / `endpoint_name` | 용도 | 필수 smoke |
 | --- | --- | --- |
@@ -463,7 +463,8 @@ Phase 8 gate 대상은 정확히 아래 5개다. 이는 v5의 모든 보조 Flow
 | `metadata_v6_domain_authoring` | Domain/metric/recipe TXT 등록 | compile + 3컬렉션 save |
 | `metadata_v6_dataset_catalog_authoring` | Dataset Catalog TXT 등록 | section patch + 3컬렉션 save |
 | `metadata_v6_main_filter_authoring` | filter/group/alias TXT 등록 | section patch + 3컬렉션 save |
-| `metadata_v6_domain_policy_authoring` | explicit 관리자 prompt extension/function descriptor/output profile 등록; Prompt/LLM 0회 | deterministic patch + 3컬렉션 save + zero-provider 계측 |
+
+세 등록 Flow는 모두 `Chat Input → 공통 Prompt Template + 특화 Prompt Template + Language Model → 자연어 메타데이터 변환 → 결정론적 검증 및 저장 → Chat Output` 구조다. 별도 Domain Policy Authoring Flow는 제거했으며 업무별 해석 규칙은 각 등록 Flow의 특화 Prompt Template에서 관리한다.
 
 위 문자열은 Langflow top-level UUID `id`가 아니라 project logical key이자 stable `endpoint_name`이다. `contracts/flow_inventory.json`은 fixed UUID namespace와 각 logical key를 저장하고, builder는 `UUIDv5(namespace, logical_key)`로 top-level Flow `id`를 결정론적으로 만든다. Gate는 logical key, endpoint_name, expected UUIDv5, display name을 모두 검사한다.
 
@@ -503,7 +504,7 @@ uv run --frozen python -m pytest --junitxml validation_outputs\pytest_v6_final.x
 
 Future exploration schema는 parse/hash 검증만 한다. worker나 endpoint를 시작하지 않으며 Flow inventory, bundle, trusted state/output compatibility gate에 포함하지 않는다.
 
-기존 command surface와 4개 Flow/export/import-ready bundle은 migration baseline으로 구현되어 있다. 최종 gate는 위 명령의 expected count 5를 만족하는 재생성 산출물만 통과시키며, 5번째 Domain Policy Flow가 없으면 의도적으로 실패한다. 실제 Langflow HTTP 검증은 별도 isolated 1.9.2 server에서 Data Analysis와 네 authoring Flow를 실행한다. 현재 실행 결과와 evidence 파일은 README와 `docs/V6_FINAL_VALIDATION.md`에 기록하되, 과거 4-Flow report는 최종 5-Flow 승인을 대신하지 않는다.
+현재 command surface와 4개 Flow/export/import-ready bundle이 목표 계약이다. 최종 gate는 Data Analysis와 세 authoring Flow의 expected count 4, exact 1.9.2 parse, source parity를 확인한다. 실제 Langflow HTTP 검증은 별도 isolated 1.9.2 server에서 Data Analysis와 세 authoring Flow를 실행한다.
 
 ## 12. v5 재사용 정책
 

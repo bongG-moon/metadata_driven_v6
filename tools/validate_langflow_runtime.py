@@ -212,7 +212,7 @@ def main() -> int:
     parser.add_argument("--flow-dir", type=Path, default=DEFAULT_FLOW_DIR)
     parser.add_argument("--flow", type=Path, action="append", default=[])
     parser.add_argument("--all-flows", action="store_true")
-    parser.add_argument("--expected-flow-count", type=int, default=5)
+    parser.add_argument("--expected-flow-count", type=int, default=len(EXPECTED_FLOW_KEYS))
     parser.add_argument("--strict-versions", action="store_true")
     parser.add_argument("--server-url", default="")
     parser.add_argument("--partial-build", action="store_true")

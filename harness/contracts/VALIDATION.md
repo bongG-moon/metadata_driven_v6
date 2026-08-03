@@ -343,25 +343,24 @@ live 배포 여부와 관계없이 Oracle, H-API, Datalake, Goodocs, Dummy 5개 
 
 - Python `3.12.x`와 exact `langflow==1.9.2`, `langflow-base==0.9.2`, `lfx==0.4.2`가 아니면 실패
 - lockfile과 installed distribution inventory hash 기록
-- MVP Flow inventory logical key/`endpoint_name`은 정확히 다음 5개이며 누락, 중복, 예상 밖 여섯 번째 Flow가 있으면 실패
+- MVP Flow inventory logical key/`endpoint_name`은 정확히 다음 4개이며 누락, 중복, 예상 밖 다섯 번째 Flow가 있으면 실패
   - `metadata_v6_data_analysis`
   - `metadata_v6_domain_authoring`
   - `metadata_v6_dataset_catalog_authoring`
   - `metadata_v6_main_filter_authoring`
-  - `metadata_v6_domain_policy_authoring`
 - exploration flow/endpoint/worker는 초기 bundle에 없어야 하며 Data Analysis가 `exploration.*`를 자동 호출하는 edge/source가 있으면 실패
 - 모든 Flow의 `last_tested_version=1.9.2`
 - 모든 node의 `lf_version=1.9.2`
 - 각 top-level Flow `id`가 `flow_inventory.json` fixed namespace와 logical key의 expected UUIDv5와 일치
 - 모든 node template parse
 - 모든 사용자 표시 Flow/node/input/output의 이름·description·input info·output 설명이 한국어 localization inventory와 일치하고 internal ID/port/schema key는 변경되지 않음
-- Data Analysis와 네 authoring Flow의 필수 Sticky Note ID/content revision이 존재하고 `noteNode`/`data.type=note`, edge 0, execution node count 제외, secret/query/raw row/prompt 원문 0을 만족
+- Data Analysis와 세 authoring Flow의 필수 Sticky Note ID/content revision이 존재하고 `noteNode`/`data.type=note`, edge 0, execution node count 제외, secret/query/raw row/prompt 원문 0을 만족
 - source/prompt/schema/export/import-ready parity
 - isolated Langflow import
 - imported `metadata_v6_data_analysis` dummy profile에서 30 single + 6 date + MT-1~MT-5 전체 corpus의 boundary output/exact oracle 실행
 - imported Data Analysis에서 operator flexibility matrix와 Message/API/GaiA compatibility matrix 실행
 - primary/secondary profile의 전체 route corpus와 `intent_llm` subset model conformance도 reference-runtime 직접 호출이 아니라 imported Data Analysis endpoint를 통해 각 3회 실행
-- 네 authoring Flow 각각 immutable prepare와 승인 후 second-run atomic execute smoke. Domain Policy와 optional explicit-inventory Main Filter는 provider/envelope 0회
+- 세 authoring Flow 각각 Chat Input부터 Chat Output까지 direct save 및 validate-only smoke. 각 Flow의 LLM 호출은 최대 1회이고 repair/fallback 호출은 0회
 - full pytest suite exit code 0
 - pytest의 JUnit XML 또는 동등한 machine-readable report와 console log를 evidence manifest에 연결
 - unexpected skip/xfail, collection error, deselected mandatory case 0
@@ -386,7 +385,7 @@ live 배포 여부와 관계없이 Oracle, H-API, Datalake, Goodocs, Dummy 5개 
 - Python과 exact package tuple, lock/inventory hash
 - pytest command, exit code, collected/passed/skipped/failed counts
 - pytest machine-readable report와 console log의 path/hash
-- 5개 MVP Flow inventory와 각 Flow hash
+- 4개 MVP Flow inventory와 각 Flow hash
 - Korean localization inventory hash와 Sticky Note inventory/content hash
 - registered function registry/build manifest hash와 `registered_call` positive/negative matrix summary
 

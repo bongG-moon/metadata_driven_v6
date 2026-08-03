@@ -1,7 +1,7 @@
 """Validate the current v6 metadata-authoring Flows through Langflow HTTP.
 
 The validator exercises the direct ``save`` contract for domain, dataset,
-main-filter, and domain-policy authoring, plus one write-free
+and main-filter authoring, plus one write-free
 ``validate_only`` probe.  Runtime metadata is verified through the fixed
 domain/table-catalog/main-filter collections and through the selector-free
 Domain Bundle Loader.  Persisted evidence contains hashes and counts only;
@@ -61,7 +61,6 @@ WORKER_INPUT_FILENAMES = {
     "domain": "domain_v6.txt",
     "dataset": "dataset_v6.txt",
     "main_filter": "main_filter_v6.txt",
-    "domain_policy": "domain_policy_v6.txt",
 }
 AUTHORING_INPUT_PATHS = {
     kind: V6_INPUT_DIR / filename for kind, filename in WORKER_INPUT_FILENAMES.items()
@@ -71,7 +70,6 @@ FLOW_PATHS = (
     ROOT / "flow_exports" / "metadata_v6_domain_authoring_flow_v6_standalone.json",
     ROOT / "flow_exports" / "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
     ROOT / "flow_exports" / "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-    ROOT / "flow_exports" / "metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
 )
 DEFAULT_OUTPUT = ROOT / "validation_outputs" / "langflow_http_authoring_e2e.json"
 _SOURCE_SET_ID_PATTERN = re.compile(r"^[a-z0-9][a-z0-9._-]{0,63}$")
@@ -258,12 +256,10 @@ def _flow_defaults(path: Path) -> dict[str, Any]:
         for node in flow.get("data", {}).get("nodes", [])
         if isinstance(node, dict)
     }
-    engine = nodes.get("metadata_authoring_engine", {})
+    engine = nodes.get("simple_metadata_authoring_engine", {})
     template = (((engine.get("data") or {}).get("node") or {}).get("template") or {})
     kind = str(_field_value(template, "authoring_kind") or "")
-    model_contract = langflow_gemini_contract_evidence(
-        flow, require_model=kind != "domain_policy"
-    )
+    model_contract = langflow_gemini_contract_evidence(flow, require_model=True)
     model_node = nodes.get("draft_language_model", {})
     model_template = (((model_node.get("data") or {}).get("node") or {}).get("template") or {})
     model_rows = _field_value(model_template, "model") or []
@@ -280,8 +276,6 @@ def _flow_defaults(path: Path) -> dict[str, Any]:
     checks = {
         "mode_save": _field_value(template, "mode") == "save",
         "dry_run_false": _field_value(template, "dry_run") is False,
-        "contract_mode_v2": _field_value(template, "metadata_contract_mode")
-        == "domain_package_v2",
         "fixed_three_collections": collection_defaults
         == {
             "domain_collection": METADATA_COLLECTIONS["domain"],
@@ -289,8 +283,7 @@ def _flow_defaults(path: Path) -> dict[str, Any]:
             "main_filter_collection": METADATA_COLLECTIONS["main_filter"],
         },
         "model_contract": model_contract.get("passed") is True,
-        "model_exact": model_names
-        == ([] if kind == "domain_policy" else [AUTHORING_GEMINI_MODEL]),
+        "model_exact": model_names == [AUTHORING_GEMINI_MODEL],
     }
     return {
         "file": path.name,
@@ -325,8 +318,6 @@ def _load_v6_authoring_sources(
     resolved_paths: dict[str, Path] = {}
     for kind, filename in WORKER_INPUT_FILENAMES.items():
         candidate = worker_input_dir / filename
-        if kind == "domain_policy" and not candidate.is_file():
-            candidate = AUTHORING_INPUT_PATHS[kind]
         if not candidate.is_file():
             raise BuildContractError(f"authoring_source_missing:{kind}")
         text = candidate.read_text(encoding="utf-8").strip()
@@ -342,7 +333,6 @@ def _load_v6_authoring_sources(
         "source_set_id": normalized_source_set_id,
         "source_set_id_sha256": sha256(normalized_source_set_id.encode("utf-8")).hexdigest(),
         "worker_input_dir_sha256": sha256(str(worker_input_dir).encode("utf-8")).hexdigest(),
-        "policy_fallback_used": resolved_paths["domain_policy"] != worker_input_dir / WORKER_INPUT_FILENAMES["domain_policy"],
         "raw_source_text_persisted": False,
     }
     return sources, hashes, evidence
@@ -393,48 +383,23 @@ def _authoring_tweaks(
     if mode not in {"save", "validate_only"}:
         raise ValueError("authoring_mode_invalid")
     tweaks: dict[str, Any] = {
-        "authoring_reference_registry": {
-            "domain_id": domain_id,
-            "registry_json": registry_json,
-        },
-        "metadata_authoring_engine": {
+        "simple_metadata_draft_generator": {
             "authoring_kind": kind,
-            "metadata_contract_mode": "domain_package_v2",
             "domain_id": domain_id,
             "environment": environment,
-            "revision_policy": "auto_next",
+            "registry_json": registry_json,
+        },
+        "simple_metadata_authoring_engine": {
+            "authoring_kind": kind,
+            "domain_id": domain_id,
+            "environment": environment,
             "mode": mode,
             "mongo_uri": mongo_uri,
             "mongo_database": mongo_database,
             "mongo_timeout_ms": 10000,
         },
     }
-    if kind != "domain_policy":
-        tweaks["draft_language_model"] = {"temperature": 0.0, "stream": False}
-        tweaks["authoring_prompt_context_builder"] = {
-            "authoring_kind": kind,
-            "domain_id": domain_id,
-            "environment": environment,
-            "mode": mode,
-            "source_grounding_mode": "freeform_llm",
-        }
-    if kind == "domain":
-        tweaks["metadata_authoring_engine"]["split_bootstrap"] = True
-        tweaks["dataset_source_input"] = {"input_value": sources["dataset"]}
-        tweaks["main_filter_source_input"] = {"input_value": sources["main_filter"]}
-        for node_id, branch in (
-            ("bootstrap_dataset_prompt_context_builder", "dataset"),
-            ("bootstrap_main_filter_prompt_context_builder", "main_filter"),
-        ):
-            tweaks[node_id] = {
-                "authoring_kind": branch,
-                "domain_id": domain_id,
-                "environment": environment,
-                "mode": mode,
-                "source_grounding_mode": "freeform_llm",
-                "bootstrap_fragment": True,
-            }
-        tweaks["authoring_prompt_context_builder"]["bootstrap_fragment"] = True
+    tweaks["draft_language_model"] = {"temperature": 0.0, "stream": False}
     return tweaks
 
 
@@ -744,7 +709,6 @@ def run(
         "domain",
         "dataset",
         "main_filter",
-        "domain_policy",
     ] and all(row["passed"] for row in defaults)
     model_contract = gemini_model_contract_evidence()
     exact_gemini_no_fallback = (
@@ -785,7 +749,7 @@ def run(
             )
 
         specs = (
-            ("domain", 0, 1, 3),
+            ("domain", 0, 1, 1),
             ("dataset", 1, 2, 1),
             ("main_filter", 2, 3, 1),
         )
@@ -833,12 +797,12 @@ def run(
             client=http,
             headers=headers,
             server_url=server_url,
-            flow_id=str(uploaded[3]["id"]),
-            kind="domain_policy",
+            flow_id=str(uploaded[2]["id"]),
+            kind="main_filter",
             mode="validate_only",
-            input_value=sources["domain_policy"],
+            input_value=sources["main_filter"],
             expected_revision=4,
-            expected_draft_calls=0,
+            expected_draft_calls=1,
             domain_id=domain_id,
             environment=effective_environment,
             mongo_uri=mongo_uri,
@@ -862,47 +826,15 @@ def run(
             validate_only_checks.values()
         )
 
-        policy_save = _run_authoring_case(
-            client=http,
-            headers=headers,
-            server_url=server_url,
-            flow_id=str(uploaded[3]["id"]),
-            kind="domain_policy",
-            mode="save",
-            input_value=sources["domain_policy"],
-            expected_revision=4,
-            expected_draft_calls=0,
-            domain_id=domain_id,
-            environment=effective_environment,
-            mongo_uri=mongo_uri,
-            mongo_database=mongo_database,
-            registry_json=registry_json,
-            sources=sources,
-            timeout_seconds=timeout_seconds,
-        )
         latest_package, latest_release = _release_evidence(
             database, domain_id=domain_id, environment=effective_environment
         )
-        policy_save["release_checks"] = {
-            "revision_exact": latest_release["revision"] == 4,
-            "package_hash_exact": latest_release["package_sha256"]
-            == policy_save["evidence"]["package_sha256"],
-            "bundle_hash_exact": latest_release["bundle_sha256"]
-            == policy_save["evidence"]["bundle_sha256"],
-            "catalog_hash_exact": latest_release["catalog_sha256"]
-            == policy_save["evidence"]["catalog_sha256"],
-        }
-        policy_save["passed"] = policy_save["passed"] and all(
-            policy_save["release_checks"].values()
-        )
-        save_rows.append(policy_save)
-        releases.append(latest_release)
 
         auto_selected = load_available_domain_package_from_three_collections(database)
         auto_selection_checks = {
             "identity_exact": auto_selected.get("domain_id") == domain_id
             and auto_selected.get("environment") == effective_environment,
-            "revision_exact": int(auto_selected.get("revision") or 0) == 4,
+            "revision_exact": int(auto_selected.get("revision") or 0) == 3,
             "package_hash_exact": auto_selected.get("package_sha256")
             == latest_package.get("package_sha256"),
         }
@@ -919,12 +851,12 @@ def run(
         "loader_ok": loader["ok"] is True,
         "identity_exact": loader["domain_id"] == domain_id
         and loader["environment"] == effective_environment,
-        "revision_exact": int(loader["revision"] or 0) == 4,
+        "revision_exact": int(loader["revision"] or 0) == 3,
         "package_hash_exact": loader["package_sha256"] == latest_release["package_sha256"],
         "bundle_hash_exact": loader["bundle_sha256"] == latest_release["bundle_sha256"],
         "catalog_hash_exact": loader["catalog_sha256"] == latest_release["catalog_sha256"],
     }
-    revision_chain_exact = [row["revision"] for row in releases] == [1, 2, 3, 4]
+    revision_chain_exact = [row["revision"] for row in releases] == [1, 2, 3]
     report = {
         "contract_version": "langflow.http.authoring-e2e.validation.v4",
         "model": AUTHORING_GEMINI_MODEL,

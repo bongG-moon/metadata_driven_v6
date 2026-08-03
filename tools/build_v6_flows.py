@@ -76,7 +76,7 @@ def build_all_flows(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Build exactly five manifest-driven metadata_driven_v6 Langflow 1.9.2 source exports."
+        description="Build exactly four manifest-driven metadata_driven_v6 Langflow 1.9.2 source exports."
     )
     parser.add_argument("--inventory", type=Path, default=DEFAULT_INVENTORY)
     parser.add_argument("--asset-manifest", type=Path, default=DEFAULT_ASSET_MANIFEST)

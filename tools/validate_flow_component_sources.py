@@ -27,6 +27,12 @@ from flow_builder_support import (
 DEFAULT_SOURCE_DIR = PROJECT_ROOT / "flow_exports"
 DEFAULT_IMPORT_DIR = PROJECT_ROOT / "import_ready_flows"
 COMBINED_FILENAME = "00_metadata_driven_v6_complete_ALL_FLOWS.json"
+EMBEDDED_ONLY_COMPONENT_SOURCES = {
+    "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
+    "langflow_components/metadata_authoring/authoring_prompt_context_builder.py",
+    "langflow_components/metadata_authoring/authoring_reference_registry.py",
+    "langflow_components/metadata_authoring/natural_metadata_source_bundle.py",
+}
 
 
 def _artifact_flows(
@@ -56,7 +62,7 @@ def _artifact_flows(
     }
     if set(combined) != set(EXPECTED_FLOW_KEYS) or len(combined_values) != len(EXPECTED_FLOW_KEYS):
         raise BuildContractError(
-            f"combined import-ready bundle must contain exactly the five v6 flows; got {sorted(combined)!r}"
+            f"combined import-ready bundle must contain exactly the four v6 flows; got {sorted(combined)!r}"
         )
     return {"source_exports": source, "individual_imports": individual, "combined_bundle": combined}
 
@@ -171,12 +177,15 @@ def audit_repository(
         for path in component_root.rglob("*.py")
         if path.name != "__init__.py" and "__pycache__" not in path.parts
     } if component_root.exists() else set()
-    inactive = sorted(actual_sources - expected_sources)
+    inactive = sorted(actual_sources - expected_sources - EMBEDDED_ONLY_COMPONENT_SOURCES)
+    missing_embedded = sorted(EMBEDDED_ONLY_COMPONENT_SOURCES - actual_sources)
     missing = sorted(expected_sources - actual_sources)
     if inactive:
         errors.append({"type": "unreferenced_component_sources", "paths": inactive})
     if missing:
         errors.append({"type": "inventory_sources_outside_component_set", "paths": missing})
+    if missing_embedded:
+        errors.append({"type": "missing_embedded_only_component_sources", "paths": missing_embedded})
 
     source_manifest_path = source_dir / "manifest.json"
     bundle_manifest_path = import_dir / "manifest.json"
@@ -194,6 +203,7 @@ def audit_repository(
         "artifact_layers": list(layers),
         "custom_node_instances_checked": custom_instances,
         "active_unique_component_sources": len(expected_sources),
+        "embedded_only_component_sources": sorted(EMBEDDED_ONLY_COMPONENT_SOURCES),
         "all_component_sources": len(actual_sources),
         "runtime_asset_hashes": {
             "language_model": assets.language_model_sha256,

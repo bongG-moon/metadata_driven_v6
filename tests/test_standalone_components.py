@@ -67,6 +67,8 @@ EXPECTED_COMPONENTS = {
     "metadata_authoring/natural_metadata_source_bundle.py": "NaturalMetadataSourceBundle",
     "metadata_authoring/authoring_reference_registry.py": "AuthoringReferenceRegistry",
     "metadata_authoring/authoring_prompt_context_builder.py": "AuthoringPromptContextBuilder",
+    "metadata_authoring/simple_metadata_draft_generator.py": "SimpleMetadataDraftGenerator",
+    "metadata_authoring/02_simple_metadata_authoring_engine.py": "SimpleMetadataAuthoringEngine",
     "metadata_authoring/01_authoring_message_presentation.py": "AuthoringMessagePresentation",
     "shared/00_api_response_terminal.py": "APIResponseTerminal",
 }
@@ -596,7 +598,7 @@ def _embedded_json(relative: str, assignment_name: str) -> dict:
 
 
 def test_generated_sources_are_current_and_monolith_is_gone() -> None:
-    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 25
+    assert len(build_components(check=True)) == len(EXPECTED_COMPONENTS) == 27
     assert not (COMPONENT_ROOT / "data_analysis" / "00_trusted_analysis_engine.py").exists()
 
 
@@ -1233,29 +1235,16 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
         if key == "metadata_v6_data_analysis":
             assert node_count == 31
             assert len(flow["edges"]) == 46
-        elif key == "metadata_v6_domain_policy_authoring":
-            assert node_count == 6
-            assert len(flow["edges"]) == 5
-        elif key == "metadata_v6_domain_authoring":
-            assert node_count == 25
-            assert len(flow["edges"]) == 35
         else:
-            assert node_count == 12
-            assert len(flow["edges"]) == 13
+            assert node_count == 8
+            assert len(flow["edges"]) == 7
         native_types = {node["type"] for node in flow["native_nodes"]}
-        if key == "metadata_v6_domain_policy_authoring":
-            assert native_types == {"ChatInput", "ChatOutput"}
-            assert not [node for node in flow["native_nodes"] if node["type"] in {"LanguageModel", "PromptTemplate"}]
-        elif key == "metadata_v6_domain_authoring":
-            assert native_types == {"ChatInput", "TextInput", "LanguageModel", "PromptTemplate", "ChatOutput"}
-            model_node = next(node for node in flow["native_nodes"] if node["type"] == "LanguageModel")
-            assert model_node["settings"]["model"][0]["name"] == "gemini-3.5-flash-lite"
-            assert model_node["settings"]["temperature"] == 0.0
-        else:
+        if key != "metadata_v6_data_analysis":
             assert native_types == {"ChatInput", "LanguageModel", "PromptTemplate", "ChatOutput"}
             model_node = next(node for node in flow["native_nodes"] if node["type"] == "LanguageModel")
             assert model_node["settings"]["model"][0]["name"] == "gemini-3.5-flash-lite"
             assert model_node["settings"]["temperature"] == 0.0
+            assert model_node["settings"]["max_tokens"] == 8192
         assert flow["notes"]
         sources = {node["source"] for node in flow["custom_nodes"]}
         assert "langflow_components/data_analysis/00_trusted_analysis_engine.py" not in sources
@@ -1282,190 +1271,39 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
             assert ("answer_prompt_context_builder", "answer_prompt_context", "answer_prompt_bundle_composer", "runtime_context") not in edges
             assert ("answer_facts_context_builder", "answer_prompt_context", "answer_prompt_bundle_composer", "runtime_context") in edges
         else:
-            authoring = next(node for node in flow["custom_nodes"] if node["id"] == "metadata_authoring_engine")
+            authoring = next(node for node in flow["custom_nodes"] if node["id"] == "simple_metadata_authoring_engine")
+            generator = next(node for node in flow["custom_nodes"] if node["id"] == "simple_metadata_draft_generator")
             expected_kind = {
                 "metadata_v6_domain_authoring": "domain",
                 "metadata_v6_dataset_catalog_authoring": "dataset",
                 "metadata_v6_main_filter_authoring": "main_filter",
-                "metadata_v6_domain_policy_authoring": "domain_policy",
             }[key]
             assert authoring["settings"]["authoring_kind"] == expected_kind
-            assert authoring["settings"]["metadata_contract_mode"] == "domain_package_v2"
             assert authoring["settings"]["mode"] == "save"
-            if expected_kind == "domain_policy":
-                assert set(authoring["settings"]) >= {
-                    "intent_prompt_extension",
-                    "answer_prompt_extension",
-                    "specialized_functions_json",
-                    "output_profile_json",
-                }
-                assert "raw Python" in flow["notes"][0]["markdown"]
-            else:
-                assert authoring["settings"]["source_grounding_mode"] == "freeform_llm"
-                prompt_nodes = [node for node in flow["native_nodes"] if node["type"] == "PromptTemplate"]
-                expected_prompt_count = 6 if expected_kind == "domain" else 2
-                assert len(prompt_nodes) == expected_prompt_count
-                assert all(node["expected_prompt_variables"] == [] for node in prompt_nodes)
-                specialized_nodes = [node for node in prompt_nodes if "specialized" in node["id"]]
-                assert len(specialized_nodes) == (3 if expected_kind == "domain" else 1)
-                assert all("specialized_ko.md" in node["settings"]["prompt_source"] for node in specialized_nodes)
-                composer_nodes = [
-                    node
-                    for node in flow["custom_nodes"]
-                    if node["source"]
-                    == "langflow_components/shared/01_prompt_bundle_composer.py"
-                ]
-                invoker_nodes = [
-                    node
-                    for node in flow["custom_nodes"]
-                    if node["source"]
-                    == "langflow_components/shared/02_conditional_llm_invoker.py"
-                ]
-                expected_branch_count = 3 if expected_kind == "domain" else 1
-                assert len(composer_nodes) == expected_branch_count
-                assert len(invoker_nodes) == expected_branch_count
-                edges = {
-                    (edge["source"], edge["source_output"], edge["target"], edge["target_input"])
-                    for edge in flow["edges"]
-                }
-                assert (
-                    "authoring_prompt_context_builder",
-                    "authoring_prompt_context",
-                    "metadata_authoring_engine",
-                    "authoring_source_context",
-                ) in edges
-                if expected_kind == "domain":
-                    assert "langflow_components/metadata_authoring/natural_metadata_source_bundle.py" in sources
-                    assert authoring["settings"]["split_bootstrap"] is True
-                    custom_by_id = {node["id"]: node for node in flow["custom_nodes"]}
-                    native_by_id = {node["id"]: node for node in flow["native_nodes"]}
-                    assert {
-                        node_id: native_by_id[node_id]["settings"]["prompt_source"]
-                        for node_id in (
-                            "authoring_common_prompt",
-                            "bootstrap_dataset_common_prompt",
-                            "bootstrap_main_filter_common_prompt",
-                        )
-                    } == {
-                        "authoring_common_prompt": "prompts/metadata_authoring/domain_common_ko.md",
-                        "bootstrap_dataset_common_prompt": "prompts/metadata_authoring/dataset_common_ko.md",
-                        "bootstrap_main_filter_common_prompt": "prompts/metadata_authoring/main_filter_common_ko.md",
-                    }
-                    assert len(
-                        [node for node in flow["native_nodes"] if node["type"] == "LanguageModel"]
-                    ) == 1
-                    for builder_id, kind in {
-                        "authoring_prompt_context_builder": "domain",
-                        "bootstrap_dataset_prompt_context_builder": "dataset",
-                        "bootstrap_main_filter_prompt_context_builder": "main_filter",
-                    }.items():
-                        settings = custom_by_id[builder_id]["settings"]
-                        assert settings["authoring_kind"] == kind
-                        assert settings["bootstrap_fragment"] is True
-                        assert settings["source_grounding_mode"] == "freeform_llm"
-                    assert (
-                        "natural_metadata_source_bundle",
-                        "bundled_source",
-                        "metadata_authoring_engine",
-                        "input_message",
-                    ) in edges
-                    assert not [
-                        edge
-                        for edge in flow["edges"]
-                        if edge["source"] == "natural_metadata_source_bundle"
-                        and edge["target"] != "metadata_authoring_engine"
-                    ]
-                    branches = (
-                        (
-                            "chat_input",
-                            "message",
-                            "authoring_prompt_context_builder",
-                            "authoring_common_prompt",
-                            "authoring_prompt_bundle_composer",
-                            "authoring_conditional_llm_invoker",
-                            "authoring_source_context",
-                            "authoring_invocation_result",
-                        ),
-                        (
-                            "dataset_source_input",
-                            "text",
-                            "bootstrap_dataset_prompt_context_builder",
-                            "bootstrap_dataset_common_prompt",
-                            "bootstrap_dataset_prompt_bundle_composer",
-                            "bootstrap_dataset_conditional_llm_invoker",
-                            "bootstrap_dataset_source_context",
-                            "bootstrap_dataset_invocation_result",
-                        ),
-                        (
-                            "main_filter_source_input",
-                            "text",
-                            "bootstrap_main_filter_prompt_context_builder",
-                            "bootstrap_main_filter_common_prompt",
-                            "bootstrap_main_filter_prompt_bundle_composer",
-                            "bootstrap_main_filter_conditional_llm_invoker",
-                            "bootstrap_main_filter_source_context",
-                            "bootstrap_main_filter_invocation_result",
-                        ),
-                    )
-                    for (
-                        source,
-                        source_output,
-                        context,
-                        prompt,
-                        composer,
-                        invoker,
-                        context_input,
-                        invocation_input,
-                    ) in branches:
-                        assert (source, source_output, context, "input_message") in edges
-                        registry_edge = (
-                            "authoring_reference_registry",
-                            "reference_context",
-                            context,
-                            "approved_reference_context",
-                        )
-                        assert registry_edge in edges
-                        assert (
-                            context,
-                            "authoring_prompt_context",
-                            composer,
-                            "runtime_context",
-                        ) in edges
-                        assert (
-                            context,
-                            "authoring_prompt_context",
-                            "metadata_authoring_engine",
-                            context_input,
-                        ) in edges
-                        assert (prompt, "prompt", composer, "common_prompt_message") in edges
-                        assert (composer, "prompt_bundle", invoker, "prompt_bundle") in edges
-                        assert (
-                            "draft_language_model",
-                            "model_output",
-                            invoker,
-                            "language_model",
-                        ) in edges
-                        assert (
-                            invoker,
-                            "invocation_result",
-                            "metadata_authoring_engine",
-                            invocation_input,
-                        ) in edges
-                        assert custom_by_id[invoker]["metadata"]["automatic_retry_count"] == 0
-                    assert not [
-                        node["id"]
-                        for node in (*flow["native_nodes"], *flow["custom_nodes"])
-                        if "repair" in node["id"].casefold()
-                        or "fallback" in node["id"].casefold()
-                    ]
-                else:
-                    assert authoring["settings"].get("split_bootstrap", False) is False
-                    assert not [
-                        edge
-                        for edge in flow["edges"]
-                        if edge["target"] == "metadata_authoring_engine"
-                        and edge["target_input"] == "input_message"
-                    ]
+            assert generator["settings"]["authoring_kind"] == expected_kind
+            assert generator["settings"]["registry_source"].endswith("approved_source_registry.json")
+            prompt_nodes = [node for node in flow["native_nodes"] if node["type"] == "PromptTemplate"]
+            assert len(prompt_nodes) == 2
+            assert all(node["expected_prompt_variables"] == [] for node in prompt_nodes)
+            assert len([node for node in prompt_nodes if "specialized" in node["id"]]) == 1
+            assert {
+                "langflow_components/metadata_authoring/simple_metadata_draft_generator.py",
+                "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
+                "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
+            } == sources
+            edges = {
+                (edge["source"], edge["source_output"], edge["target"], edge["target_input"])
+                for edge in flow["edges"]
+            }
+            assert ("chat_input", "message", "simple_metadata_draft_generator", "input_message") in edges
+            assert ("simple_metadata_draft_generator", "authoring_context", "simple_metadata_authoring_engine", "authoring_context") in edges
+            assert ("simple_metadata_authoring_engine", "response", "message_presentation", "response") in edges
+            assert ("message_presentation", "message", "chat_output", "input_value") in edges
+            assert not [
+                node["id"]
+                for node in (*flow["native_nodes"], *flow["custom_nodes"])
+                if "repair" in node["id"].casefold() or "fallback" in node["id"].casefold()
+            ]
 
 
 def test_flow_json_component_sources_match_canonical_files() -> None:

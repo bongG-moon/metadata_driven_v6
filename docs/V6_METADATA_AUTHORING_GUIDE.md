@@ -41,15 +41,14 @@ Compiler는 구조적 일관성과 실행 안전성을 보장하지만 작업자
 | Domain/Semantic | 도메인의 업무 이름과 설명, 승인된 용어를 작업자가 쓰는 맥락 | LLM은 표시명·설명 annotation only; 실행 semantics는 Source Registry v3 `semantic_templates`가 deterministic expansion |
 | Dataset Catalog | 자료의 업무 이름과 용도, 포함된 업무 항목, 날짜 기준과 기본 표시 항목처럼 작업자가 아는 사실 | 내부 compact Dataset IR + v3 dataset descriptor/Source binding expansion + exact active package `datasets` patch |
 | Main Filter | 날짜·제품·공정 등 조회 기준의 업무 의미와 사용자가 실제로 쓰는 표현 | 내부 `target_type` 필수 typed IR + 승인 vocabulary membership + alias-card expansion |
-| Domain Policy | intent/answer prompt extension, registered function descriptor, output profile | 별도 Domain Policy Authoring Flow의 explicit 관리자 node input; Prompt/LLM 0회, sealed planner policy 변경 금지 |
 
 연결 비밀번호나 token은 어떤 TXT에도 쓰지 않는다. 일반 작업자는 `config_ref`/`query_ref` 문법을 알 필요가 없다. Oracle/Datalake 운영 조회가 필요한 항목에는 `db_key는 PNT_RPT야` 같은 설명과 `query_template:` 아래의 여러 줄 SQL, `{DATE}`·`{LOT_ID}` 같은 변수를 함께 적을 수 있다. Flow는 SQL 본문을 LLM에 보내지 않고 원본 TXT에서 직접 추출해 read-only 여부와 필수 변수를 검증한다.
 
-네 authoring 입력 화면은 분리되어 있지만 저장 결과는 하나의 versioned Domain Package다. Domain/Dataset/Main Filter는 자연어 TXT UX를 유지하고, Domain Policy만 별도 explicit 관리자 입력을 사용한다. Dataset Catalog와 Main Filter 입력은 active package의 해당 section만 삭제 없이 upsert하고, 다른 dataset·metric·relation·prompt·output 설정을 보존한 상태에서 전체 package를 다시 컴파일한다. 운영자가 일부 입력을 등록했는데 Data Analysis Flow가 읽지 못하는 별도 legacy pointer만 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
+세 authoring 입력 화면은 분리되어 있지만 저장 결과는 하나의 versioned Domain Package다. Domain/Dataset/Main Filter는 모두 자연어 TXT UX를 유지한다. Dataset Catalog와 Main Filter 입력은 active package의 해당 section만 삭제 없이 upsert하고, 다른 dataset·metric·relation·prompt·output 설정을 보존한 상태에서 전체 package를 다시 컴파일한다. 운영자가 일부 입력을 등록했는데 Data Analysis Flow가 읽지 못하는 별도 legacy pointer만 갱신하는 방식은 v6 기본 경로에서 사용하지 않는다.
 
-최초 Domain bootstrap의 Flow canvas에는 Domain·Dataset·Main Filter용 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 각 pair는 한 템플릿의 section으로 합치지 않으며 각각 별도 Runtime Context Builder, Prompt Bundle Composer, Conditional LLM Invoker와 연결된다. 모든 Template은 변수 없이 렌더링되고 자연어 source context는 Composer의 `runtime_context`에 정확히 한 번 연결된다. 세 Invoker는 같은 승인 Language Model node를 재사용할 수 있지만 proposal과 source hash는 분기별로 봉인한다.
+각 등록 Flow canvas에는 해당 항목의 **공통 Prompt Template node와 특화 Prompt Template node가 각각 하나씩** 있다. 두 Prompt는 한 템플릿으로 합치지 않으며 `자연어 메타데이터 변환` 노드가 승인 레지스트리, bounded context, 권한 분리 묶음, Gemini 1회 호출을 내부에서 처리한다. Domain Flow가 Dataset/Main Filter 입력까지 동시에 받지 않으며, 각 항목은 자기 Flow에서 한 번씩 등록한다.
 
-Runtime Intent/Answer와 Authoring은 모두 공통·특화 Prompt Template을 별도 필수 pair로 유지한다. 특화 authoring 지시는 공통 Prompt나 custom component가 아니라 각 특화 Prompt Template 본문에 직접 작성하며 사용자 TXT나 metadata로 동적 교체하지 않는다. Domain Policy와 `source_grounding_mode=explicit_inventory`의 완전한 inventory compile은 Prompt Template, Composer, `prompt.envelope.v1`, provider 호출이 모두 0회다.
+Runtime Intent/Answer와 Authoring은 모두 공통·특화 Prompt Template을 별도 pair로 유지한다. 특화 authoring 지시는 공통 Prompt나 custom component가 아니라 각 특화 Prompt Template 본문에 직접 작성하며 사용자 TXT나 metadata로 동적 교체하지 않는다. 별도 Domain Policy 등록 Flow는 제공하지 않고 실행 함수 descriptor와 planner policy는 compiler 소유 경계로 유지한다.
 
 ## 3. Domain 입력 예시
 
@@ -224,36 +223,11 @@ eq, in, starts_with, null_or_blank, is_not_blank 외의 연산자는 허용하�
 
 Compiled product-group contract는 canonical field만 쓰는 typed predicate와 `grain_id`를 가진다. physical column이나 자유 expression을 넣지 않는다. 후속 질문에서 Mobile을 POP으로 교체하면 기존 Mobile predicate를 제거한 뒤 POP predicate를 추가한다.
 
-## 6. Domain Policy 관리자 입력
+## 6. 특화 규칙과 실행 정책 관리
 
-Domain Policy Authoring Flow는 자연어를 LLM으로 변환하는 화면이 아니다. 관리자 ACL이 있는 사용자가 다음 closed JSON/텍스트 입력을 명시적으로 제출하고 deterministic validator가 검증한다.
+업무별 용어·해석 지침은 각 등록 Flow의 `특화 프롬프트` 노드 본문에서 관리한다. 별도 Domain Policy 등록 Flow와 자연어 정책 저장 경로는 제공하지 않는다.
 
-| 입력 | 허용 범위 | 금지 |
-| --- | --- | --- |
-| `intent_prompt_extension` | Runtime specialized Intent Prompt의 domain terminology·해석 우선순위 | 공통 안전/출력 계약 변경, 질문별 답 고정 |
-| `answer_prompt_extension` | Runtime specialized Answer Prompt의 domain 표현·용어 정책 | fact 없는 주장, API/result 변형 |
-| `specialized_functions_json` | 사전 등록된 function descriptor와 exact registry/schema/resource pin | Python source/module/callable/query/endpoint/secret |
-| `output_profile_json` | label, unit, currency, date/null 표시 규칙 | canonical API field/value/result 변경 |
-
-이 Flow에는 자연어 source 입력, Prompt Template, Runtime Context Builder, Prompt Bundle Composer, Language Model 또는 `prompt.envelope.v1` 생성 edge가 없다. prepare와 execute 모두 provider call counter가 0이어야 한다.
-
-`specialized_functions_json`의 각 card는 최소한 `function_id`, `version`, `implementation_sha256`, `registry_entry_sha256`, `input_schema_ref/sha256`, `output_schema_ref/sha256`, selection evidence/ambiguity policy, required field/role, argument binding, output contract, timeout/row limit과 network/filesystem/subprocess deny policy를 가진다. 저장 전에 build-time standalone registry의 exact entry와 모두 일치해야 하며, 일치하지 않으면 candidate를 만들지 않는다.
-
-활성화된 descriptor의 실제 실행 chain은 다음과 같다.
-
-```text
-Domain Policy 관리자 입력
-→ function card closed validation
-→ build-time registry exact attestation
-→ active Domain Package
-→ bounded Candidate Selector
-→ Intent operation_refs의 candidate ID
-→ exact pin의 registered_call Typed IR
-→ Registered Function Gateway
-→ output schema·lineage validation
-```
-
-이 chain의 consumer와 positive/negative E2E가 존재하지 않으면 descriptor를 실행 가능 기능처럼 UI에 노출하거나 active package에 저장하지 않는다. Runtime은 metadata의 code/module path를 import하지 않고 build-time allowlist 구현만 호출한다. dynamic import, `eval`/`exec`, arbitrary network/file/subprocess와 미등록 함수 fallback은 금지한다.
+기존 Domain Package에 저장된 prompt extension, registered function descriptor, output profile은 runtime 호환을 위해 읽을 수 있지만 세 자연어 등록 Flow가 이 영역을 변경할 수는 없다. 등록 함수와 planner policy를 바꾸려면 코드·계약 검토가 포함된 별도 배포 절차로 갱신해야 하며, dynamic import, `eval`/`exec`, arbitrary network/file/subprocess와 미등록 함수 fallback은 계속 금지한다.
 
 ## 7. 저장 결과의 세 층
 

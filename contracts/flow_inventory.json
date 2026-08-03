@@ -9,25 +9,48 @@
       "expected_uuid": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
       "display_name": "메타데이터 v6 - 신뢰형 데이터 분석",
       "purpose": "컴파일된 메타데이터와 typed Execution IR로 결정론적 분석을 수행하고, 필요한 경우에만 권한 분리 프롬프트로 LLM을 한 번 호출한 뒤 Chat, API, GaiA 출력을 생성합니다.",
-      "tags": ["data-analysis", "conditional-intent-llm", "external-prompts", "no-code-generation"],
-      "viewport": {"x": 10, "y": 280, "zoom": 0.25},
+      "tags": [
+        "data-analysis",
+        "conditional-intent-llm",
+        "external-prompts",
+        "no-code-generation"
+      ],
+      "viewport": {
+        "x": 10,
+        "y": 280,
+        "zoom": 0.25
+      },
       "native_nodes": [
         {
           "id": "chat_input",
           "type": "ChatInput",
-          "position": {"x": 0, "y": 120},
-          "settings": {"sender": "User", "sender_name": "사용자", "should_store_message": true},
+          "position": {
+            "x": 0,
+            "y": 120
+          },
+          "settings": {
+            "sender": "User",
+            "sender_name": "사용자",
+            "should_store_message": true
+          },
           "ui": {
             "display_name": "00 분석 질문 입력",
             "description": "분석할 자연어 질문과 멀티턴 세션 정보를 입력합니다.",
-            "input_labels": {"input_value": "질문 텍스트"},
-            "output_labels": {"message": "질문 메시지"}
+            "input_labels": {
+              "input_value": "질문 텍스트"
+            },
+            "output_labels": {
+              "message": "질문 메시지"
+            }
           }
         },
         {
           "id": "intent_language_model",
           "type": "LanguageModel",
-          "position": {"x": 1840, "y": 720},
+          "position": {
+            "x": 1840,
+            "y": 720
+          },
           "settings": {
             "model": [
               {
@@ -46,13 +69,18 @@
           "ui": {
             "display_name": "05C·19C 의도·응답 공유 언어 모델",
             "description": "의도 후보가 모호하거나 응답 서술이 활성화된 경우에만 Invoker가 호출합니다.",
-            "output_labels": {"model_output": "언어 모델"}
+            "output_labels": {
+              "model_output": "언어 모델"
+            }
           }
         },
         {
           "id": "intent_common_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 1120, "y": 380},
+          "position": {
+            "x": 1120,
+            "y": 380
+          },
           "settings": {
             "prompt_source": "prompts/data_analysis/intent_common_ko.md",
             "use_double_brackets": true
@@ -61,14 +89,22 @@
           "ui": {
             "display_name": "05A 의도 분석 공통 프롬프트",
             "description": "모든 도메인에 공통으로 적용되는 상위 권한 의도 선택 규칙입니다.",
-            "input_labels": {"template": "공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"},
-            "output_labels": {"prompt": "의도 공통 프롬프트 메시지"}
+            "input_labels": {
+              "template": "공통 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "의도 공통 프롬프트 메시지"
+            }
           }
         },
         {
           "id": "intent_specialized_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 1120, "y": 700},
+          "position": {
+            "x": 1120,
+            "y": 700
+          },
           "settings": {
             "prompt_source": "prompts/data_analysis/intent_specialized_ko.md",
             "use_double_brackets": true
@@ -81,13 +117,18 @@
               "template": "특화 프롬프트 원문",
               "use_double_brackets": "이중 중괄호 변수 사용"
             },
-            "output_labels": {"prompt": "의도 특화 프롬프트 메시지"}
+            "output_labels": {
+              "prompt": "의도 특화 프롬프트 메시지"
+            }
           }
         },
         {
           "id": "answer_common_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 4740, "y": 380},
+          "position": {
+            "x": 4740,
+            "y": 380
+          },
           "settings": {
             "prompt_source": "prompts/data_analysis/answer_common_ko.md",
             "use_double_brackets": true
@@ -96,14 +137,22 @@
           "ui": {
             "display_name": "19A 결과 응답 공통 프롬프트",
             "description": "검증된 사실만 설명하도록 제한하는 상위 권한 응답 규칙입니다.",
-            "input_labels": {"template": "공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"},
-            "output_labels": {"prompt": "응답 공통 프롬프트 메시지"}
+            "input_labels": {
+              "template": "공통 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "응답 공통 프롬프트 메시지"
+            }
           }
         },
         {
           "id": "answer_specialized_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 4740, "y": 700},
+          "position": {
+            "x": 4740,
+            "y": 700
+          },
           "settings": {
             "prompt_source": "prompts/data_analysis/answer_specialized_ko.md",
             "use_double_brackets": true
@@ -116,19 +165,32 @@
               "template": "특화 프롬프트 원문",
               "use_double_brackets": "이중 중괄호 변수 사용"
             },
-            "output_labels": {"prompt": "응답 특화 프롬프트 메시지"}
+            "output_labels": {
+              "prompt": "응답 특화 프롬프트 메시지"
+            }
           }
         },
         {
           "id": "chat_output",
           "type": "ChatOutput",
-          "position": {"x": 7260, "y": -80},
-          "settings": {"sender": "Machine", "sender_name": "메타데이터 분석", "should_store_message": true},
+          "position": {
+            "x": 7260,
+            "y": -80
+          },
+          "settings": {
+            "sender": "Machine",
+            "sender_name": "메타데이터 분석",
+            "should_store_message": true
+          },
           "ui": {
             "display_name": "27 분석 답변 출력",
             "description": "표시 설정이 적용된 최종 Message를 채팅에 출력합니다.",
-            "input_labels": {"input_value": "최종 답변 메시지"},
-            "output_labels": {"message": "출력 메시지"}
+            "input_labels": {
+              "input_value": "최종 답변 메시지"
+            },
+            "output_labels": {
+              "message": "출력 메시지"
+            }
           }
         }
       ],
@@ -136,175 +198,335 @@
         {
           "id": "request_state_capsule",
           "source": "langflow_components/data_analysis/request_state_capsule.py",
-          "position": {"x": 360, "y": 80},
-          "settings": {"allow_anonymous_multiturn": false},
-          "metadata": {"logical_stage": "request_state"},
-          "ui": {"display_name": "02 요청 및 세션 상태 고정"}
+          "position": {
+            "x": 360,
+            "y": 80
+          },
+          "settings": {
+            "allow_anonymous_multiturn": false
+          },
+          "metadata": {
+            "logical_stage": "request_state"
+          },
+          "ui": {
+            "display_name": "02 요청 및 세션 상태 고정"
+          }
         },
         {
           "id": "domain_bundle_loader",
           "source": "langflow_components/data_analysis/domain_bundle_loader.py",
-          "position": {"x": 360, "y": 520},
+          "position": {
+            "x": 360,
+            "y": 520
+          },
           "settings": {},
-          "metadata": {"logical_stage": "domain_bundle"},
-          "ui": {"display_name": "01 사용 가능 메타데이터 불러오기"}
+          "metadata": {
+            "logical_stage": "domain_bundle"
+          },
+          "ui": {
+            "display_name": "01 사용 가능 메타데이터 불러오기"
+          }
         },
         {
           "id": "candidate_route_gate",
           "source": "langflow_components/data_analysis/candidate_route_gate.py",
-          "position": {"x": 760, "y": 80},
+          "position": {
+            "x": 760,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "candidate_route"},
-          "ui": {"display_name": "03 의도 후보 및 분기 판정"}
+          "metadata": {
+            "logical_stage": "candidate_route"
+          },
+          "ui": {
+            "display_name": "03 의도 후보 및 분기 판정"
+          }
         },
         {
           "id": "intent_prompt_context_builder",
           "source": "langflow_components/data_analysis/intent_prompt_context_builder.py",
-          "position": {"x": 1120, "y": 80},
+          "position": {
+            "x": 1120,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "intent_prompt_context"},
-          "ui": {"display_name": "04 의도 분석 런타임 컨텍스트 구성"}
+          "metadata": {
+            "logical_stage": "intent_prompt_context"
+          },
+          "ui": {
+            "display_name": "04 의도 분석 런타임 컨텍스트 구성"
+          }
         },
         {
           "id": "intent_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "position": {"x": 1480, "y": 80},
+          "position": {
+            "x": 1480,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "intent_prompt_composition"},
-          "ui": {"display_name": "06 의도 분석 프롬프트 묶음 구성"}
+          "metadata": {
+            "logical_stage": "intent_prompt_composition"
+          },
+          "ui": {
+            "display_name": "06 의도 분석 프롬프트 묶음 구성"
+          }
         },
         {
           "id": "intent_conditional_llm_invoker",
           "source": "langflow_components/shared/02_conditional_llm_invoker.py",
-          "position": {"x": 1840, "y": 80},
+          "position": {
+            "x": 1840,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "intent_llm_invocation", "automatic_retry_count": 0},
-          "ui": {"display_name": "07 의도 LLM 조건부 호출"}
+          "metadata": {
+            "logical_stage": "intent_llm_invocation",
+            "automatic_retry_count": 0
+          },
+          "ui": {
+            "display_name": "07 의도 LLM 조건부 호출"
+          }
         },
         {
           "id": "common_intent_resolver",
           "source": "langflow_components/data_analysis/common_intent_resolver.py",
-          "position": {"x": 2200, "y": 80},
+          "position": {
+            "x": 2200,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "intent_resolution"},
-          "ui": {"display_name": "08 공통 의도 결과 검증"}
+          "metadata": {
+            "logical_stage": "intent_resolution"
+          },
+          "ui": {
+            "display_name": "08 공통 의도 결과 검증"
+          }
         },
         {
           "id": "plan_compiler_validator",
           "source": "langflow_components/data_analysis/plan_compiler_validator.py",
-          "position": {"x": 2560, "y": 80},
+          "position": {
+            "x": 2560,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "plan_compilation"},
-          "ui": {"display_name": "09 실행 계획 컴파일 및 검증"}
+          "metadata": {
+            "logical_stage": "plan_compilation"
+          },
+          "ui": {
+            "display_name": "09 실행 계획 컴파일 및 검증"
+          }
         },
         {
           "id": "retrieval_job_router",
           "source": "langflow_components/data_analysis/retrieval_job_router.py",
-          "position": {"x": 2920, "y": 80},
-          "settings": {"data_mode": "dummy"},
-          "metadata": {"logical_stage": "job_routing"},
-          "ui": {"display_name": "10 데이터 조회 작업 라우터"}
+          "position": {
+            "x": 2920,
+            "y": 80
+          },
+          "settings": {
+            "data_mode": "dummy"
+          },
+          "metadata": {
+            "logical_stage": "job_routing"
+          },
+          "ui": {
+            "display_name": "10 데이터 조회 작업 라우터"
+          }
         },
         {
           "id": "dummy_source_retriever",
           "source": "langflow_components/data_analysis/dummy_source_retriever.py",
-          "position": {"x": 3280, "y": -120},
+          "position": {
+            "x": 3280,
+            "y": -120
+          },
           "settings": {},
-          "metadata": {"logical_stage": "dummy_retrieval"},
-          "ui": {"display_name": "11 검증용 더미 데이터 조회"}
+          "metadata": {
+            "logical_stage": "dummy_retrieval"
+          },
+          "ui": {
+            "display_name": "11 검증용 더미 데이터 조회"
+          }
         },
         {
           "id": "oracle_source_retriever",
           "source": "langflow_components/data_analysis/12_oracle_source_retriever.py",
-          "position": {"x": 3280, "y": -40},
+          "position": {
+            "x": 3280,
+            "y": -40
+          },
           "settings": {},
-          "metadata": {"logical_stage": "oracle_retrieval"},
-          "ui": {"display_name": "12 Oracle 데이터 조회"}
+          "metadata": {
+            "logical_stage": "oracle_retrieval"
+          },
+          "ui": {
+            "display_name": "12 Oracle 데이터 조회"
+          }
         },
         {
           "id": "h_api_source_retriever",
           "source": "langflow_components/data_analysis/13_h_api_source_retriever.py",
-          "position": {"x": 3280, "y": 240},
+          "position": {
+            "x": 3280,
+            "y": 240
+          },
           "settings": {},
-          "metadata": {"logical_stage": "h_api_retrieval"},
-          "ui": {"display_name": "13 H-API 데이터 조회"}
+          "metadata": {
+            "logical_stage": "h_api_retrieval"
+          },
+          "ui": {
+            "display_name": "13 H-API 데이터 조회"
+          }
         },
         {
           "id": "datalake_source_retriever",
           "source": "langflow_components/data_analysis/14_datalake_source_retriever.py",
-          "position": {"x": 3280, "y": 520},
+          "position": {
+            "x": 3280,
+            "y": 520
+          },
           "settings": {},
-          "metadata": {"logical_stage": "datalake_retrieval"},
-          "ui": {"display_name": "14 Datalake 데이터 조회"}
+          "metadata": {
+            "logical_stage": "datalake_retrieval"
+          },
+          "ui": {
+            "display_name": "14 Datalake 데이터 조회"
+          }
         },
         {
           "id": "goodocs_source_retriever",
           "source": "langflow_components/data_analysis/15_goodocs_source_retriever.py",
-          "position": {"x": 3280, "y": 800},
+          "position": {
+            "x": 3280,
+            "y": 800
+          },
           "settings": {},
-          "metadata": {"logical_stage": "goodocs_retrieval"},
-          "ui": {"display_name": "15 Goodocs 데이터 조회"}
+          "metadata": {
+            "logical_stage": "goodocs_retrieval"
+          },
+          "ui": {
+            "display_name": "15 Goodocs 데이터 조회"
+          }
         },
         {
           "id": "source_merger",
           "source": "langflow_components/data_analysis/source_contract_merger.py",
-          "position": {"x": 3640, "y": 80},
+          "position": {
+            "x": 3640,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "source_merge"},
-          "ui": {"display_name": "16 원천 결과 계약 병합"}
+          "metadata": {
+            "logical_stage": "source_merge"
+          },
+          "ui": {
+            "display_name": "16 원천 결과 계약 병합"
+          }
         },
         {
           "id": "typed_executor_publisher",
           "source": "langflow_components/data_analysis/typed_executor_publisher.py",
-          "position": {"x": 4000, "y": 80},
+          "position": {
+            "x": 4000,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "typed_execution"},
-          "ui": {"display_name": "17 Typed IR 실행 및 결과 발행"}
+          "metadata": {
+            "logical_stage": "typed_execution"
+          },
+          "ui": {
+            "display_name": "17 Typed IR 실행 및 결과 발행"
+          }
         },
         {
           "id": "answer_facts_context_builder",
           "source": "langflow_components/data_analysis/answer_facts_context_builder.py",
-          "position": {"x": 4380, "y": 80},
-          "settings": {"narrative_enabled": false},
-          "metadata": {"logical_stage": "answer_facts_context"},
-          "ui": {"display_name": "18 답변 사실 및 런타임 컨텍스트 구성"}
+          "position": {
+            "x": 4380,
+            "y": 80
+          },
+          "settings": {
+            "narrative_enabled": false
+          },
+          "metadata": {
+            "logical_stage": "answer_facts_context"
+          },
+          "ui": {
+            "display_name": "18 답변 사실 및 런타임 컨텍스트 구성"
+          }
         },
         {
           "id": "answer_prompt_bundle_composer",
           "source": "langflow_components/shared/01_prompt_bundle_composer.py",
-          "position": {"x": 5100, "y": 80},
+          "position": {
+            "x": 5100,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "answer_prompt_composition"},
-          "ui": {"display_name": "20 결과 응답 프롬프트 묶음 구성"}
+          "metadata": {
+            "logical_stage": "answer_prompt_composition"
+          },
+          "ui": {
+            "display_name": "20 결과 응답 프롬프트 묶음 구성"
+          }
         },
         {
           "id": "answer_conditional_llm_invoker",
           "source": "langflow_components/shared/02_conditional_llm_invoker.py",
-          "position": {"x": 5460, "y": 80},
+          "position": {
+            "x": 5460,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "answer_llm_invocation", "automatic_retry_count": 0},
-          "ui": {"display_name": "21 응답 LLM 조건부 호출"}
+          "metadata": {
+            "logical_stage": "answer_llm_invocation",
+            "automatic_retry_count": 0
+          },
+          "ui": {
+            "display_name": "21 응답 LLM 조건부 호출"
+          }
         },
         {
           "id": "answer_claim_validator",
           "source": "langflow_components/data_analysis/answer_claim_validator.py",
-          "position": {"x": 5820, "y": 80},
+          "position": {
+            "x": 5820,
+            "y": 80
+          },
           "settings": {},
-          "metadata": {"logical_stage": "answer_claim_validation"},
-          "ui": {"display_name": "22 답변 문장 주장 검증"}
+          "metadata": {
+            "logical_stage": "answer_claim_validation"
+          },
+          "ui": {
+            "display_name": "22 답변 문장 주장 검증"
+          }
         },
         {
           "id": "response_state_commit",
           "source": "langflow_components/data_analysis/response_state_commit.py",
-          "position": {"x": 6180, "y": 80},
-          "settings": {"allow_anonymous_multiturn": false},
-          "metadata": {"logical_stage": "state_commit"},
-          "ui": {"display_name": "23 응답 조립 및 세션 상태 저장"}
+          "position": {
+            "x": 6180,
+            "y": 80
+          },
+          "settings": {
+            "allow_anonymous_multiturn": false
+          },
+          "metadata": {
+            "logical_stage": "state_commit"
+          },
+          "ui": {
+            "display_name": "23 응답 조립 및 세션 상태 저장"
+          }
         },
         {
           "id": "message_presentation",
           "source": "langflow_components/data_analysis/01_message_presentation.py",
-          "position": {"x": 6540, "y": -80},
+          "position": {
+            "x": 6540,
+            "y": -80
+          },
           "settings": {
             "include_diagnostics": false,
             "show_result_table": true,
@@ -319,21 +541,33 @@
             "show_pandas_code": false,
             "show_execution_plan": false
           },
-          "ui": {"display_name": "24 채팅 메시지 표시 설정"}
+          "ui": {
+            "display_name": "24 채팅 메시지 표시 설정"
+          }
         },
         {
           "id": "gaia_output",
           "source": "langflow_components/data_analysis/02_gaia_output.py",
-          "position": {"x": 6540, "y": 280},
+          "position": {
+            "x": 6540,
+            "y": 280
+          },
           "settings": {},
-          "ui": {"display_name": "26 GaiA 형식 출력"}
+          "ui": {
+            "display_name": "26 GaiA 형식 출력"
+          }
         },
         {
           "id": "api_response",
           "source": "langflow_components/shared/00_api_response_terminal.py",
-          "position": {"x": 6540, "y": 520},
+          "position": {
+            "x": 6540,
+            "y": 520
+          },
           "settings": {},
-          "ui": {"display_name": "25 API 표준 응답 출력"}
+          "ui": {
+            "display_name": "25 API 표준 응답 출력"
+          }
         }
       ],
       "notes": [
@@ -341,7 +575,10 @@
           "id": "note_analysis_overview",
           "title": "분석 Flow 사용 안내",
           "markdown": "## 분석 Flow 사용 안내\n\n- 노드 이름의 `00`~`27` 번호가 기본 실행 순서입니다. `A/B`는 같은 단계의 독립 분기입니다.\n- **01 사용 가능 메타데이터 불러오기**는 MongoDB의 도메인·테이블 카탈로그·메인필터 중 가장 최근의 완전한 동일 release를 자동 선택합니다.\n- 기준 시간대는 코드에서 `Asia/Seoul`로 고정됩니다.\n- Chat/API/GaiA는 같은 canonical response를 서로 다른 채널로 전달합니다.\n\n업무 영역을 바꿀 때는 등록 메타데이터, 승인 레지스트리, 특화 Prompt Template 본문을 변경합니다.",
-          "position": {"x": 0, "y": -380},
+          "position": {
+            "x": 0,
+            "y": -380
+          },
           "width": 700,
           "height": 300,
           "color": "blue"
@@ -350,7 +587,10 @@
           "id": "note_prompt_authority",
           "title": "프롬프트 권한과 호출 규칙",
           "markdown": "## 프롬프트 권한과 호출 규칙\n\n1. 공통 Prompt Template은 **system 권한**입니다.\n2. 특화 Prompt Template은 별도 노드의 **본문을 직접 편집**하며 domain policy 권한으로 전달됩니다.\n3. runtime_context는 **신뢰하지 않는 data**로 Composer에 정확히 한 번 연결됩니다.\n\nComposer는 공통·특화·runtime context를 서로 다른 메시지로 유지합니다. Invoker는 `invoke=true`일 때만 1회 호출하며 자동 repair/retry는 0회입니다.",
-          "position": {"x": 1080, "y": -460},
+          "position": {
+            "x": 1080,
+            "y": -460
+          },
           "width": 1120,
           "height": 360,
           "color": "purple"
@@ -359,7 +599,10 @@
           "id": "note_data_tools",
           "title": "데이터 도구 분리",
           "markdown": "## 데이터 도구 분리\n\n`11 Dummy`, `12 Oracle`, `13 H-API`, `14 Datalake`, `15 Goodocs`를 독립 노드로 구성합니다. Router는 query_ref/config_ref가 포함된 최소 작업만 원천별로 전달하고, 각 노드는 검토된 연동 결과 행을 행 수 제한과 메타데이터 계약으로 검증합니다. 연결 문자열·credential·원본 행은 프롬프트 경로로 보내지 않습니다.",
-          "position": {"x": 2880, "y": -420},
+          "position": {
+            "x": 2880,
+            "y": -420
+          },
           "width": 760,
           "height": 260,
           "color": "green"
@@ -368,59 +611,292 @@
           "id": "note_answer_outputs",
           "title": "응답 검증과 표시 항목",
           "markdown": "## 응답 검증과 표시 항목\n\nAnswer Claim Validator가 LLM 문장을 facts 범위 안에서 검증합니다. 채팅 표시 노드는 응답 schema와 표시 옵션만 확인하므로 내부 전송용 hash 불일치가 사용자 답변 표시를 막지 않습니다. API/GaiA 외부 경계는 canonical hash 검증을 유지합니다. 멀티턴 상태는 검증 후 별도 commit됩니다.",
-          "position": {"x": 5780, "y": -420},
+          "position": {
+            "x": 5780,
+            "y": -420
+          },
           "width": 980,
           "height": 300,
           "color": "orange"
         }
       ],
       "edges": [
-        {"source": "chat_input", "source_output": "message", "target": "request_state_capsule", "target_input": "input_message"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "request_state_capsule", "target_input": "domain_bundle"},
-        {"source": "request_state_capsule", "source_output": "request_context", "target": "candidate_route_gate", "target_input": "request_context"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "candidate_route_gate", "target_input": "domain_bundle"},
-        {"source": "candidate_route_gate", "source_output": "selection_context", "target": "intent_prompt_context_builder", "target_input": "selection_context"},
-        {"source": "candidate_route_gate", "source_output": "selection_context", "target": "common_intent_resolver", "target_input": "selection_context"},
-        {"source": "intent_prompt_context_builder", "source_output": "intent_prompt_context", "target": "intent_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "intent_common_prompt", "source_output": "prompt", "target": "intent_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "intent_specialized_prompt", "source_output": "prompt", "target": "intent_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "intent_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "intent_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "intent_language_model", "source_output": "model_output", "target": "intent_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "intent_conditional_llm_invoker", "source_output": "invocation_result", "target": "common_intent_resolver", "target_input": "intent_invocation_result"},
-        {"source": "common_intent_resolver", "source_output": "intent_context", "target": "plan_compiler_validator", "target_input": "intent_context"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "plan_compiler_validator", "target_input": "domain_bundle"},
-        {"source": "plan_compiler_validator", "source_output": "plan_context", "target": "retrieval_job_router", "target_input": "plan_context"},
-        {"source": "retrieval_job_router", "source_output": "dummy_jobs", "target": "dummy_source_retriever", "target_input": "job_bundle"},
-        {"source": "retrieval_job_router", "source_output": "oracle_jobs", "target": "oracle_source_retriever", "target_input": "job_bundle"},
-        {"source": "retrieval_job_router", "source_output": "h_api_jobs", "target": "h_api_source_retriever", "target_input": "job_bundle"},
-        {"source": "retrieval_job_router", "source_output": "datalake_jobs", "target": "datalake_source_retriever", "target_input": "job_bundle"},
-        {"source": "retrieval_job_router", "source_output": "goodocs_jobs", "target": "goodocs_source_retriever", "target_input": "job_bundle"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "dummy_source_retriever", "target_input": "domain_bundle"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "oracle_source_retriever", "target_input": "domain_bundle"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "h_api_source_retriever", "target_input": "domain_bundle"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "datalake_source_retriever", "target_input": "domain_bundle"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "goodocs_source_retriever", "target_input": "domain_bundle"},
-        {"source": "plan_compiler_validator", "source_output": "plan_context", "target": "source_merger", "target_input": "plan_context"},
-        {"source": "domain_bundle_loader", "source_output": "domain_bundle", "target": "source_merger", "target_input": "domain_bundle"},
-        {"source": "dummy_source_retriever", "source_output": "dummy_results", "target": "source_merger", "target_input": "dummy_results"},
-        {"source": "oracle_source_retriever", "source_output": "oracle_results", "target": "source_merger", "target_input": "oracle_results"},
-        {"source": "h_api_source_retriever", "source_output": "h_api_results", "target": "source_merger", "target_input": "h_api_results"},
-        {"source": "datalake_source_retriever", "source_output": "datalake_results", "target": "source_merger", "target_input": "datalake_results"},
-        {"source": "goodocs_source_retriever", "source_output": "goodocs_results", "target": "source_merger", "target_input": "goodocs_results"},
-        {"source": "source_merger", "source_output": "execution_context", "target": "typed_executor_publisher", "target_input": "execution_context"},
-        {"source": "typed_executor_publisher", "source_output": "result_context", "target": "answer_facts_context_builder", "target_input": "result_context"},
-        {"source": "answer_facts_context_builder", "source_output": "answer_facts_context", "target": "answer_claim_validator", "target_input": "answer_facts_context"},
-        {"source": "answer_facts_context_builder", "source_output": "answer_prompt_context", "target": "answer_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "answer_common_prompt", "source_output": "prompt", "target": "answer_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "answer_specialized_prompt", "source_output": "prompt", "target": "answer_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "answer_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "answer_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "intent_language_model", "source_output": "model_output", "target": "answer_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "answer_conditional_llm_invoker", "source_output": "invocation_result", "target": "answer_claim_validator", "target_input": "answer_invocation_result"},
-        {"source": "answer_claim_validator", "source_output": "answer_context", "target": "response_state_commit", "target_input": "answer_context"},
-        {"source": "response_state_commit", "source_output": "response", "target": "message_presentation", "target_input": "response"},
-        {"source": "message_presentation", "source_output": "message", "target": "chat_output", "target_input": "input_value"},
-        {"source": "response_state_commit", "source_output": "response", "target": "api_response", "target_input": "response"},
-        {"source": "response_state_commit", "source_output": "response", "target": "gaia_output", "target_input": "response"}
+        {
+          "source": "chat_input",
+          "source_output": "message",
+          "target": "request_state_capsule",
+          "target_input": "input_message"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "request_state_capsule",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "request_state_capsule",
+          "source_output": "request_context",
+          "target": "candidate_route_gate",
+          "target_input": "request_context"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "candidate_route_gate",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "candidate_route_gate",
+          "source_output": "selection_context",
+          "target": "intent_prompt_context_builder",
+          "target_input": "selection_context"
+        },
+        {
+          "source": "candidate_route_gate",
+          "source_output": "selection_context",
+          "target": "common_intent_resolver",
+          "target_input": "selection_context"
+        },
+        {
+          "source": "intent_prompt_context_builder",
+          "source_output": "intent_prompt_context",
+          "target": "intent_prompt_bundle_composer",
+          "target_input": "runtime_context"
+        },
+        {
+          "source": "intent_common_prompt",
+          "source_output": "prompt",
+          "target": "intent_prompt_bundle_composer",
+          "target_input": "common_prompt_message"
+        },
+        {
+          "source": "intent_specialized_prompt",
+          "source_output": "prompt",
+          "target": "intent_prompt_bundle_composer",
+          "target_input": "specialized_prompt_message"
+        },
+        {
+          "source": "intent_prompt_bundle_composer",
+          "source_output": "prompt_bundle",
+          "target": "intent_conditional_llm_invoker",
+          "target_input": "prompt_bundle"
+        },
+        {
+          "source": "intent_language_model",
+          "source_output": "model_output",
+          "target": "intent_conditional_llm_invoker",
+          "target_input": "language_model"
+        },
+        {
+          "source": "intent_conditional_llm_invoker",
+          "source_output": "invocation_result",
+          "target": "common_intent_resolver",
+          "target_input": "intent_invocation_result"
+        },
+        {
+          "source": "common_intent_resolver",
+          "source_output": "intent_context",
+          "target": "plan_compiler_validator",
+          "target_input": "intent_context"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "plan_compiler_validator",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "plan_compiler_validator",
+          "source_output": "plan_context",
+          "target": "retrieval_job_router",
+          "target_input": "plan_context"
+        },
+        {
+          "source": "retrieval_job_router",
+          "source_output": "dummy_jobs",
+          "target": "dummy_source_retriever",
+          "target_input": "job_bundle"
+        },
+        {
+          "source": "retrieval_job_router",
+          "source_output": "oracle_jobs",
+          "target": "oracle_source_retriever",
+          "target_input": "job_bundle"
+        },
+        {
+          "source": "retrieval_job_router",
+          "source_output": "h_api_jobs",
+          "target": "h_api_source_retriever",
+          "target_input": "job_bundle"
+        },
+        {
+          "source": "retrieval_job_router",
+          "source_output": "datalake_jobs",
+          "target": "datalake_source_retriever",
+          "target_input": "job_bundle"
+        },
+        {
+          "source": "retrieval_job_router",
+          "source_output": "goodocs_jobs",
+          "target": "goodocs_source_retriever",
+          "target_input": "job_bundle"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "dummy_source_retriever",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "oracle_source_retriever",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "h_api_source_retriever",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "datalake_source_retriever",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "goodocs_source_retriever",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "plan_compiler_validator",
+          "source_output": "plan_context",
+          "target": "source_merger",
+          "target_input": "plan_context"
+        },
+        {
+          "source": "domain_bundle_loader",
+          "source_output": "domain_bundle",
+          "target": "source_merger",
+          "target_input": "domain_bundle"
+        },
+        {
+          "source": "dummy_source_retriever",
+          "source_output": "dummy_results",
+          "target": "source_merger",
+          "target_input": "dummy_results"
+        },
+        {
+          "source": "oracle_source_retriever",
+          "source_output": "oracle_results",
+          "target": "source_merger",
+          "target_input": "oracle_results"
+        },
+        {
+          "source": "h_api_source_retriever",
+          "source_output": "h_api_results",
+          "target": "source_merger",
+          "target_input": "h_api_results"
+        },
+        {
+          "source": "datalake_source_retriever",
+          "source_output": "datalake_results",
+          "target": "source_merger",
+          "target_input": "datalake_results"
+        },
+        {
+          "source": "goodocs_source_retriever",
+          "source_output": "goodocs_results",
+          "target": "source_merger",
+          "target_input": "goodocs_results"
+        },
+        {
+          "source": "source_merger",
+          "source_output": "execution_context",
+          "target": "typed_executor_publisher",
+          "target_input": "execution_context"
+        },
+        {
+          "source": "typed_executor_publisher",
+          "source_output": "result_context",
+          "target": "answer_facts_context_builder",
+          "target_input": "result_context"
+        },
+        {
+          "source": "answer_facts_context_builder",
+          "source_output": "answer_facts_context",
+          "target": "answer_claim_validator",
+          "target_input": "answer_facts_context"
+        },
+        {
+          "source": "answer_facts_context_builder",
+          "source_output": "answer_prompt_context",
+          "target": "answer_prompt_bundle_composer",
+          "target_input": "runtime_context"
+        },
+        {
+          "source": "answer_common_prompt",
+          "source_output": "prompt",
+          "target": "answer_prompt_bundle_composer",
+          "target_input": "common_prompt_message"
+        },
+        {
+          "source": "answer_specialized_prompt",
+          "source_output": "prompt",
+          "target": "answer_prompt_bundle_composer",
+          "target_input": "specialized_prompt_message"
+        },
+        {
+          "source": "answer_prompt_bundle_composer",
+          "source_output": "prompt_bundle",
+          "target": "answer_conditional_llm_invoker",
+          "target_input": "prompt_bundle"
+        },
+        {
+          "source": "intent_language_model",
+          "source_output": "model_output",
+          "target": "answer_conditional_llm_invoker",
+          "target_input": "language_model"
+        },
+        {
+          "source": "answer_conditional_llm_invoker",
+          "source_output": "invocation_result",
+          "target": "answer_claim_validator",
+          "target_input": "answer_invocation_result"
+        },
+        {
+          "source": "answer_claim_validator",
+          "source_output": "answer_context",
+          "target": "response_state_commit",
+          "target_input": "answer_context"
+        },
+        {
+          "source": "response_state_commit",
+          "source_output": "response",
+          "target": "message_presentation",
+          "target_input": "response"
+        },
+        {
+          "source": "message_presentation",
+          "source_output": "message",
+          "target": "chat_output",
+          "target_input": "input_value"
+        },
+        {
+          "source": "response_state_commit",
+          "source_output": "response",
+          "target": "api_response",
+          "target_input": "response"
+        },
+        {
+          "source": "response_state_commit",
+          "source_output": "response",
+          "target": "gaia_output",
+          "target_input": "response"
+        }
       ]
     },
     {
@@ -428,302 +904,860 @@
       "endpoint_name": "metadata_v6_domain_authoring",
       "expected_uuid": "18ba3690-6b5e-522a-9ed7-3795161d1f11",
       "display_name": "메타데이터 v6 - 도메인 등록",
-      "purpose": "작업자의 자유형 Domain·Dataset·Main Filter TXT를 세 개의 외부 공통 프롬프트 분기로 작은 폐쇄형 조각으로 변환하고 결정론적으로 병합·검증·컴파일한 뒤 도메인·테이블 카탈로그·메인필터 컬렉션에 한 release로 저장합니다.",
-      "tags": ["metadata-authoring", "domain", "external-prompts", "three-collection-save"],
-      "viewport": {"x": 60, "y": 260, "zoom": 0.45},
+      "purpose": "작업자가 입력한 자유형 자연어를 외부 공통·특화 프롬프트와 Gemini 1회 호출로 도메인 초안으로 변환하고, 결정론적으로 검증해 MongoDB 3개 운영 컬렉션에 항목 단위로 저장합니다.",
+      "tags": [
+        "metadata-authoring",
+        "domain",
+        "chat-first",
+        "single-llm",
+        "three-collection-save"
+      ],
+      "viewport": {
+        "x": 40,
+        "y": 220,
+        "zoom": 0.55
+      },
       "native_nodes": [
         {
           "id": "chat_input",
           "type": "ChatInput",
-          "position": {"x": 0, "y": 80},
-          "settings": {"sender": "User", "sender_name": "메타데이터 작성자", "should_store_message": true},
-          "ui": {"display_name": "00A 도메인 TXT 입력", "description": "비전문 작업자가 자유롭게 작성한 자연어 도메인 설명을 입력합니다.", "input_labels": {"input_value": "자연어 도메인 TXT"}, "output_labels": {"message": "도메인 입력 메시지"}}
-        },
-        {
-          "id": "dataset_source_input",
-          "type": "TextInput",
-          "position": {"x": 0, "y": 330},
-          "settings": {"input_value": "", "use_global_variable": false},
-          "ui": {"display_name": "00B 초기 데이터셋 TXT 입력", "description": "초기 도메인 bootstrap에 함께 사용할 작업자의 자유형 데이터셋·컬럼 설명입니다. JSON이나 고정 문법은 필요하지 않습니다.", "input_labels": {"input_value": "자유형 데이터셋 TXT", "use_global_variable": "Global Variable 사용"}, "output_labels": {"text": "데이터셋 자연어 메시지"}}
-        },
-        {
-          "id": "main_filter_source_input",
-          "type": "TextInput",
-          "position": {"x": 0, "y": 600},
-          "settings": {"input_value": "", "use_global_variable": false},
-          "ui": {"display_name": "00C 초기 주요 필터 TXT 입력", "description": "초기 도메인 bootstrap에 함께 사용할 작업자의 자유형 필터·별칭 설명입니다. JSON이나 고정 문법은 필요하지 않습니다.", "input_labels": {"input_value": "자유형 주요 필터 TXT", "use_global_variable": "Global Variable 사용"}, "output_labels": {"text": "주요 필터 자연어 메시지"}}
-        },
-        {
-          "id": "draft_language_model",
-          "type": "LanguageModel",
-          "position": {"x": 1120, "y": 1400},
-          "settings": {"model": [{"name": "gemini-3.5-flash-lite", "provider": "Google Generative AI", "metadata": {"context_length": 128000, "model_class": "ChatGoogleGenerativeAIFixed", "model_name_param": "model"}}], "stream": false, "temperature": 0.0, "max_tokens": 65536},
-          "ui": {"display_name": "10 도메인·초기 데이터셋·초기 주요 필터 공유 언어 모델", "description": "최초 등록에서 세 자연어 분기가 동일한 모델을 공유해 각각 한 번씩 작은 폐쇄형 조각을 제안합니다.", "output_labels": {"model_output": "언어 모델"}}
+          "position": {
+            "x": 0,
+            "y": 80
+          },
+          "settings": {
+            "sender": "User",
+            "sender_name": "메타데이터 작성자",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "01 도메인 자연어 입력",
+            "description": "비전문 작업자가 형식을 맞추지 않고 도메인 자연어 설명을 입력합니다.",
+            "input_labels": {
+              "input_value": "도메인 자연어 설명"
+            },
+            "output_labels": {
+              "message": "자연어 입력 메시지"
+            }
+          }
         },
         {
           "id": "authoring_common_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 760, "y": 300},
-          "settings": {"prompt_source": "prompts/metadata_authoring/domain_common_ko.md", "use_double_brackets": true},
+          "position": {
+            "x": 380,
+            "y": -180
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/domain_common_ko.md",
+            "use_double_brackets": true
+          },
           "expected_prompt_variables": [],
-          "ui": {"display_name": "04A 도메인 등록 공통 프롬프트", "description": "비정형 도메인 자연어를 의미·관계·지표 소유 조각으로 변환하되 추측과 실행 코드를 금지합니다.", "input_labels": {"template": "공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "도메인 공통 프롬프트 메시지"}}
+          "ui": {
+            "display_name": "02A 도메인 등록 공통 프롬프트",
+            "description": "모든 업무에 공통으로 적용할 안전·출력 계약을 관리합니다.",
+            "input_labels": {
+              "template": "공통 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "공통 프롬프트 메시지"
+            }
+          }
         },
         {
           "id": "authoring_specialized_prompt",
           "type": "PromptTemplate",
-          "position": {"x": 760, "y": 480},
-          "settings": {"prompt_source": "prompts/metadata_authoring/domain_specialized_ko.md", "use_double_brackets": true},
+          "position": {
+            "x": 380,
+            "y": 160
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/domain_specialized_ko.md",
+            "use_double_brackets": true
+          },
           "expected_prompt_variables": [],
-          "ui": {"display_name": "04B 도메인 등록 특화 프롬프트", "description": "현재 업무의 도메인 용어·의미 구분 규칙을 이 Prompt Template 본문에서 직접 편집합니다.", "input_labels": {"template": "특화 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "도메인 특화 프롬프트 메시지"}}
+          "ui": {
+            "display_name": "02B 도메인 등록 특화 프롬프트",
+            "description": "현재 공정·업무에서만 사용하는 용어와 해석 규칙을 이 노드 본문에서 편집합니다.",
+            "input_labels": {
+              "template": "특화 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "특화 프롬프트 메시지"
+            }
+          }
         },
         {
-          "id": "bootstrap_dataset_common_prompt",
-          "type": "PromptTemplate",
-          "position": {"x": 760, "y": 740},
-          "settings": {"prompt_source": "prompts/metadata_authoring/dataset_common_ko.md", "use_double_brackets": true},
-          "expected_prompt_variables": [],
-          "ui": {"display_name": "05A 초기 데이터셋 등록 공통 프롬프트", "description": "데이터셋 원문에서 데이터셋·필드 결합 소유 조각만 폐쇄형으로 제안하도록 제한합니다.", "input_labels": {"template": "데이터셋 공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "데이터셋 공통 프롬프트 메시지"}}
-        },
-        {
-          "id": "bootstrap_dataset_specialized_prompt",
-          "type": "PromptTemplate",
-          "position": {"x": 760, "y": 920},
-          "settings": {"prompt_source": "prompts/metadata_authoring/dataset_specialized_ko.md", "use_double_brackets": true},
-          "expected_prompt_variables": [],
-          "ui": {"display_name": "05B 초기 데이터셋 등록 특화 프롬프트", "description": "현재 업무의 데이터셋·필드 해석 규칙을 이 Prompt Template 본문에서 직접 편집합니다.", "input_labels": {"template": "특화 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "데이터셋 특화 프롬프트 메시지"}}
-        },
-        {
-          "id": "bootstrap_main_filter_common_prompt",
-          "type": "PromptTemplate",
-          "position": {"x": 760, "y": 1180},
-          "settings": {"prompt_source": "prompts/metadata_authoring/main_filter_common_ko.md", "use_double_brackets": true},
-          "expected_prompt_variables": [],
-          "ui": {"display_name": "06A 초기 주요 필터 등록 공통 프롬프트", "description": "주요 필터 원문에서 등록된 필드·연산자 경계 안의 별칭 소유 조각만 폐쇄형으로 제안합니다.", "input_labels": {"template": "주요 필터 공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "주요 필터 공통 프롬프트 메시지"}}
-        },
-        {
-          "id": "bootstrap_main_filter_specialized_prompt",
-          "type": "PromptTemplate",
-          "position": {"x": 760, "y": 1360},
-          "settings": {"prompt_source": "prompts/metadata_authoring/main_filter_specialized_ko.md", "use_double_brackets": true},
-          "expected_prompt_variables": [],
-          "ui": {"display_name": "06B 초기 주요 필터 등록 특화 프롬프트", "description": "현재 업무의 필터·별칭 해석 규칙을 이 Prompt Template 본문에서 직접 편집합니다.", "input_labels": {"template": "특화 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "주요 필터 특화 프롬프트 메시지"}}
+          "id": "draft_language_model",
+          "type": "LanguageModel",
+          "position": {
+            "x": 380,
+            "y": 500
+          },
+          "settings": {
+            "model": [
+              {
+                "name": "gemini-3.5-flash-lite",
+                "provider": "Google Generative AI",
+                "metadata": {
+                  "context_length": 128000,
+                  "model_class": "ChatGoogleGenerativeAIFixed",
+                  "model_name_param": "model"
+                }
+              }
+            ],
+            "stream": false,
+            "temperature": 0.0,
+            "max_tokens": 8192
+          },
+          "ui": {
+            "display_name": "02C 도메인 자연어 변환 모델",
+            "description": "자연어를 폐쇄형 메타데이터 초안으로 한 번만 변환하며 repair 호출은 하지 않습니다.",
+            "output_labels": {
+              "model_output": "언어 모델"
+            }
+          }
         },
         {
           "id": "chat_output",
           "type": "ChatOutput",
-          "position": {"x": 2660, "y": 160},
-          "settings": {"sender": "Machine", "sender_name": "메타데이터 등록", "should_store_message": true},
-          "ui": {"display_name": "17 도메인 패키지 등록 결과 채팅 출력", "description": "저장 또는 저장 없는 검증 결과를 채팅 Message로 출력합니다.", "input_labels": {"input_value": "등록 결과 메시지"}, "output_labels": {"message": "출력 메시지"}}
+          "position": {
+            "x": 1900,
+            "y": 80
+          },
+          "settings": {
+            "sender": "Machine",
+            "sender_name": "메타데이터 등록",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "06 도메인 등록 결과 출력",
+            "description": "검증·저장 결과 또는 추가 확인이 필요한 내용을 채팅 메시지로 출력합니다.",
+            "input_labels": {
+              "input_value": "등록 결과 메시지"
+            },
+            "output_labels": {
+              "message": "출력 메시지"
+            }
+          }
         }
       ],
       "custom_nodes": [
-        {"id": "natural_metadata_source_bundle", "source": "langflow_components/metadata_authoring/natural_metadata_source_bundle.py", "position": {"x": 1120, "y": -300}, "settings": {}, "metadata": {"logical_stage": "natural_metadata_source_bundle"}, "ui": {"display_name": "02 세 자연어 메타데이터 원문 묶음 구성"}},
-        {"id": "authoring_reference_registry", "source": "langflow_components/metadata_authoring/authoring_reference_registry.py", "position": {"x": 420, "y": -300}, "settings": {"registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json", "domain_id": "manufacturing"}, "metadata": {"logical_stage": "authoring_reference_registry"}, "ui": {"display_name": "01 세 등록 분기 공용 승인 업무 어휘·원천 레지스트리", "description": "세 LLM 분기에는 ID·family·업무용 표현만 담은 축약 의미 어휘를 제공하고, 물리 컬럼·타입·adapter/config/query 정보는 결정론적 컴파일러에만 봉인합니다.", "input_labels": {"registry_json": "승인 업무 어휘·원천 레지스트리 JSON", "domain_id": "도메인 ID"}, "output_labels": {"reference_context": "검증된 업무 어휘·원천 컨텍스트"}}},
-        {"id": "authoring_prompt_context_builder", "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py", "position": {"x": 420, "y": 80}, "settings": {"authoring_kind": "domain", "mode": "save", "source_grounding_mode": "freeform_llm", "bootstrap_fragment": true, "domain_id": "manufacturing", "environment": "production", "trusted_blueprint_json": "", "trusted_blueprint_sha256": ""}, "metadata": {"logical_stage": "authoring_prompt_context"}, "ui": {"display_name": "03A 도메인 등록 컨텍스트 구성"}},
-        {"id": "authoring_prompt_bundle_composer", "source": "langflow_components/shared/01_prompt_bundle_composer.py", "position": {"x": 1120, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_prompt_composition"}, "ui": {"display_name": "07 도메인 등록 프롬프트 묶음 구성"}},
-        {"id": "authoring_conditional_llm_invoker", "source": "langflow_components/shared/02_conditional_llm_invoker.py", "position": {"x": 1500, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_llm_invocation", "automatic_retry_count": 0}, "ui": {"display_name": "11 도메인 등록 LLM 조건부 호출"}},
-        {"id": "bootstrap_dataset_prompt_context_builder", "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py", "position": {"x": 420, "y": 520}, "settings": {"authoring_kind": "dataset", "mode": "save", "source_grounding_mode": "freeform_llm", "bootstrap_fragment": true, "domain_id": "manufacturing", "environment": "production"}, "metadata": {"logical_stage": "bootstrap_dataset_prompt_context"}, "ui": {"display_name": "03B 초기 데이터셋 등록 컨텍스트 구성"}},
-        {"id": "bootstrap_dataset_prompt_bundle_composer", "source": "langflow_components/shared/01_prompt_bundle_composer.py", "position": {"x": 1120, "y": 520}, "settings": {}, "metadata": {"logical_stage": "bootstrap_dataset_prompt_composition"}, "ui": {"display_name": "08 초기 데이터셋 등록 프롬프트 묶음 구성"}},
-        {"id": "bootstrap_dataset_conditional_llm_invoker", "source": "langflow_components/shared/02_conditional_llm_invoker.py", "position": {"x": 1500, "y": 520}, "settings": {}, "metadata": {"logical_stage": "bootstrap_dataset_llm_invocation", "automatic_retry_count": 0}, "ui": {"display_name": "12 초기 데이터셋 등록 LLM 조건부 호출"}},
-        {"id": "bootstrap_main_filter_prompt_context_builder", "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py", "position": {"x": 420, "y": 960}, "settings": {"authoring_kind": "main_filter", "mode": "save", "source_grounding_mode": "freeform_llm", "bootstrap_fragment": true, "domain_id": "manufacturing", "environment": "production"}, "metadata": {"logical_stage": "bootstrap_main_filter_prompt_context"}, "ui": {"display_name": "03C 초기 주요 필터 등록 컨텍스트 구성"}},
-        {"id": "bootstrap_main_filter_prompt_bundle_composer", "source": "langflow_components/shared/01_prompt_bundle_composer.py", "position": {"x": 1120, "y": 960}, "settings": {}, "metadata": {"logical_stage": "bootstrap_main_filter_prompt_composition"}, "ui": {"display_name": "09 초기 주요 필터 등록 프롬프트 묶음 구성"}},
-        {"id": "bootstrap_main_filter_conditional_llm_invoker", "source": "langflow_components/shared/02_conditional_llm_invoker.py", "position": {"x": 1500, "y": 960}, "settings": {}, "metadata": {"logical_stage": "bootstrap_main_filter_llm_invocation", "automatic_retry_count": 0}, "ui": {"display_name": "13 초기 주요 필터 등록 LLM 조건부 호출"}},
         {
-          "id": "metadata_authoring_engine",
-          "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "position": {"x": 1900, "y": 520},
-          "settings": {"authoring_kind": "domain", "source_grounding_mode": "freeform_llm", "split_bootstrap": true, "metadata_contract_mode": "domain_package_v2", "domain_id": "manufacturing", "environment": "production", "revision_policy": "auto_next", "revision": 1, "mode": "save", "domain_collection": "agent_v6_domain_metadata", "table_collection": "agent_v6_table_catalog", "main_filter_collection": "agent_v6_main_filter", "trusted_blueprint_json": "", "trusted_blueprint_sha256": "", "dry_run": false},
-          "ui": {"display_name": "14 도메인 패키지 검증 및 통합 저장"}
+          "id": "simple_metadata_draft_generator",
+          "source": "langflow_components/metadata_authoring/simple_metadata_draft_generator.py",
+          "position": {
+            "x": 780,
+            "y": 80
+          },
+          "settings": {
+            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
+            "authoring_kind": "domain",
+            "domain_id": "manufacturing",
+            "environment": "production"
+          },
+          "metadata": {
+            "logical_stage": "simple_metadata_draft",
+            "automatic_retry_count": 0
+          },
+          "ui": {
+            "display_name": "03 도메인 자연어 변환",
+            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "input_labels": {
+              "input_message": "자연어 입력",
+              "common_prompt_message": "공통 프롬프트",
+              "specialized_prompt_message": "특화 프롬프트",
+              "language_model": "Gemini 모델"
+            },
+            "output_labels": {
+              "authoring_context": "검증 대기 등록 컨텍스트"
+            }
+          }
         },
-        {"id": "message_presentation", "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py", "position": {"x": 2280, "y": 160}, "settings": {}, "ui": {"display_name": "15 도메인 패키지 등록 결과 메시지 구성"}},
-        {"id": "api_response", "source": "langflow_components/shared/00_api_response_terminal.py", "position": {"x": 2280, "y": 760}, "settings": {}, "ui": {"display_name": "16 도메인 패키지 등록 결과 API 출력"}}
+        {
+          "id": "simple_metadata_authoring_engine",
+          "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
+          "position": {
+            "x": 1180,
+            "y": 80
+          },
+          "settings": {
+            "authoring_kind": "domain",
+            "domain_id": "manufacturing",
+            "environment": "production",
+            "mode": "save",
+            "domain_collection": "agent_v6_domain_metadata",
+            "table_collection": "agent_v6_table_catalog",
+            "main_filter_collection": "agent_v6_main_filter",
+            "dry_run": false
+          },
+          "metadata": {
+            "logical_stage": "simple_metadata_validation_and_save"
+          },
+          "ui": {
+            "display_name": "04 도메인 검증 및 저장",
+            "description": "LLM 초안을 typed 계약으로 컴파일·검증한 뒤 세 운영 컬렉션에 항목 단위로 저장합니다.",
+            "input_labels": {
+              "authoring_context": "검증 대기 등록 컨텍스트"
+            },
+            "output_labels": {
+              "response": "등록 결과 데이터"
+            }
+          }
+        },
+        {
+          "id": "message_presentation",
+          "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
+          "position": {
+            "x": 1540,
+            "y": 80
+          },
+          "settings": {},
+          "ui": {
+            "display_name": "05 도메인 결과 메시지 구성",
+            "description": "내부 계약·해시를 노출하지 않고 작업자가 확인할 결과만 간결한 한글 메시지로 만듭니다.",
+            "input_labels": {
+              "response": "등록 결과 데이터"
+            },
+            "output_labels": {
+              "message": "등록 결과 메시지"
+            }
+          }
+        }
       ],
       "notes": [
-        {"id": "note_domain_authoring", "title": "도메인 등록 안내", "markdown": "## 도메인 등록 안내\n\n작업자는 Domain·Dataset·Main Filter 정보를 기존처럼 **자유로운 업무 문장**으로 입력합니다. JSON, 등록 ID, 물리 컬럼, 타입, DSL을 알 필요가 없습니다. 최초 등록은 원문별 작은 내부 조각을 만드는 LLM 호출이 정확히 3회이며, 세 분기는 같은 승인 업무 어휘(ID·family·업무용 표현만)를 사용합니다. 물리 컬럼·adapter/config/query는 LLM에 전달하지 않고 결정론적 컴파일러가 승인 레지스트리와 결합합니다. 의미가 모호하면 저장하지 않고 쉬운 업무 선택 질문을 반환합니다. 검증이 끝난 결과는 도메인·테이블 카탈로그·메인필터 세 컬렉션에 같은 release로 저장합니다. 자동 재시도·repair·코드 생성 fallback은 없습니다.", "position": {"x": 0, "y": -420}, "width": 1200, "height": 380, "color": "blue"}
+        {
+          "id": "note_domain_authoring",
+          "title": "도메인 등록 사용법",
+          "markdown": "## 도메인 등록 사용법\n\n1. **01 입력**에 작업자가 아는 내용을 자연어로 작성합니다. JSON이나 등록 문법을 맞출 필요가 없습니다.\n2. **02A 공통 프롬프트**는 공통 계약, **02B 특화 프롬프트**는 업무별 용어만 관리합니다.\n3. **03 변환**은 Gemini를 최대 1회 호출하며 pandas 코드를 만들지 않습니다.\n4. **04 검증 및 저장**이 타입·참조·소유 범위를 결정론적으로 검사하고 MongoDB 3개 컬렉션을 갱신합니다.\n5. **06 출력**에서 저장 성공, 추가 확인 항목 또는 오류를 확인합니다.",
+          "position": {
+            "x": 0,
+            "y": -460
+          },
+          "width": 1180,
+          "height": 320,
+          "color": "blue"
+        }
       ],
       "edges": [
-        {"source": "chat_input", "source_output": "message", "target": "natural_metadata_source_bundle", "target_input": "domain_source"},
-        {"source": "dataset_source_input", "source_output": "text", "target": "natural_metadata_source_bundle", "target_input": "dataset_source"},
-        {"source": "main_filter_source_input", "source_output": "text", "target": "natural_metadata_source_bundle", "target_input": "main_filter_source"},
-        {"source": "natural_metadata_source_bundle", "source_output": "bundled_source", "target": "metadata_authoring_engine", "target_input": "input_message"},
-        {"source": "chat_input", "source_output": "message", "target": "authoring_prompt_context_builder", "target_input": "input_message"},
-        {"source": "dataset_source_input", "source_output": "text", "target": "bootstrap_dataset_prompt_context_builder", "target_input": "input_message"},
-        {"source": "main_filter_source_input", "source_output": "text", "target": "bootstrap_main_filter_prompt_context_builder", "target_input": "input_message"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "authoring_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "metadata_authoring_engine", "target_input": "authoring_source_context"},
-        {"source": "bootstrap_dataset_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "bootstrap_dataset_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "bootstrap_dataset_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "metadata_authoring_engine", "target_input": "bootstrap_dataset_source_context"},
-        {"source": "bootstrap_main_filter_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "bootstrap_main_filter_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "bootstrap_main_filter_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "metadata_authoring_engine", "target_input": "bootstrap_main_filter_source_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "authoring_prompt_context_builder", "target_input": "approved_reference_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "bootstrap_dataset_prompt_context_builder", "target_input": "approved_reference_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "bootstrap_main_filter_prompt_context_builder", "target_input": "approved_reference_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "metadata_authoring_engine", "target_input": "approved_reference_context"},
-        {"source": "authoring_common_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "authoring_specialized_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "bootstrap_dataset_common_prompt", "source_output": "prompt", "target": "bootstrap_dataset_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "bootstrap_dataset_specialized_prompt", "source_output": "prompt", "target": "bootstrap_dataset_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "bootstrap_main_filter_common_prompt", "source_output": "prompt", "target": "bootstrap_main_filter_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "bootstrap_main_filter_specialized_prompt", "source_output": "prompt", "target": "bootstrap_main_filter_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "authoring_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "authoring_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "bootstrap_dataset_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "bootstrap_dataset_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "bootstrap_main_filter_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "bootstrap_main_filter_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "draft_language_model", "source_output": "model_output", "target": "authoring_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "draft_language_model", "source_output": "model_output", "target": "bootstrap_dataset_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "draft_language_model", "source_output": "model_output", "target": "bootstrap_main_filter_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "authoring_conditional_llm_invoker", "source_output": "invocation_result", "target": "metadata_authoring_engine", "target_input": "authoring_invocation_result"},
-        {"source": "bootstrap_dataset_conditional_llm_invoker", "source_output": "invocation_result", "target": "metadata_authoring_engine", "target_input": "bootstrap_dataset_invocation_result"},
-        {"source": "bootstrap_main_filter_conditional_llm_invoker", "source_output": "invocation_result", "target": "metadata_authoring_engine", "target_input": "bootstrap_main_filter_invocation_result"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "message_presentation", "target_input": "response"},
-        {"source": "message_presentation", "source_output": "message", "target": "chat_output", "target_input": "input_value"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "api_response", "target_input": "response"}
+        {
+          "source": "chat_input",
+          "source_output": "message",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "input_message"
+        },
+        {
+          "source": "authoring_common_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "common_prompt_message"
+        },
+        {
+          "source": "authoring_specialized_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "specialized_prompt_message"
+        },
+        {
+          "source": "draft_language_model",
+          "source_output": "model_output",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "language_model"
+        },
+        {
+          "source": "simple_metadata_draft_generator",
+          "source_output": "authoring_context",
+          "target": "simple_metadata_authoring_engine",
+          "target_input": "authoring_context"
+        },
+        {
+          "source": "simple_metadata_authoring_engine",
+          "source_output": "response",
+          "target": "message_presentation",
+          "target_input": "response"
+        },
+        {
+          "source": "message_presentation",
+          "source_output": "message",
+          "target": "chat_output",
+          "target_input": "input_value"
+        }
       ]
     },
     {
       "logical_key": "metadata_v6_dataset_catalog_authoring",
       "endpoint_name": "metadata_v6_dataset_catalog_authoring",
       "expected_uuid": "c207326f-3edf-5900-ae1f-40fb1062f1e1",
-      "display_name": "메타데이터 v6 - 데이터셋 카탈로그 등록",
-      "purpose": "자연어 Dataset/field binding TXT를 외부 공통 프롬프트와 bounded context로 변환하고 결정론적으로 검증해 테이블 카탈로그를 갱신합니다.",
-      "tags": ["metadata-authoring", "dataset-catalog", "external-prompts", "three-collection-save"],
-      "viewport": {"x": 60, "y": 260, "zoom": 0.45},
+      "display_name": "메타데이터 v6 - 테이블 카탈로그 등록",
+      "purpose": "작업자가 입력한 자유형 자연어를 외부 공통·특화 프롬프트와 Gemini 1회 호출로 테이블 카탈로그 초안으로 변환하고, 결정론적으로 검증해 MongoDB 3개 운영 컬렉션에 항목 단위로 저장합니다.",
+      "tags": [
+        "metadata-authoring",
+        "dataset",
+        "chat-first",
+        "single-llm",
+        "three-collection-save"
+      ],
+      "viewport": {
+        "x": 40,
+        "y": 220,
+        "zoom": 0.55
+      },
       "native_nodes": [
-        {"id": "chat_input", "type": "ChatInput", "position": {"x": 0, "y": 80}, "settings": {"sender": "User", "sender_name": "메타데이터 작성자", "should_store_message": true}, "ui": {"display_name": "00A 데이터셋 TXT 입력", "description": "비전문 작업자가 자유롭게 작성한 자연어 데이터셋/필드 설명을 입력합니다.", "input_labels": {"input_value": "자연어 데이터셋 TXT"}, "output_labels": {"message": "데이터셋 입력 메시지"}}},
-        {"id": "draft_language_model", "type": "LanguageModel", "position": {"x": 760, "y": 600}, "settings": {"model": [{"name": "gemini-3.5-flash-lite", "provider": "Google Generative AI", "metadata": {"context_length": 128000, "model_class": "ChatGoogleGenerativeAIFixed", "model_name_param": "model"}}], "stream": false, "temperature": 0.0, "max_tokens": 65536}, "ui": {"display_name": "00C 데이터셋 작성 언어 모델", "description": "자연어에서 데이터셋 소유 patch를 최대 1회 작성하며 repair 호출은 하지 않습니다.", "output_labels": {"model_output": "언어 모델"}}},
-        {"id": "authoring_common_prompt", "type": "PromptTemplate", "position": {"x": 380, "y": 400}, "settings": {"prompt_source": "prompts/metadata_authoring/dataset_common_ko.md", "use_double_brackets": true}, "expected_prompt_variables": [], "ui": {"display_name": "02A 데이터셋 등록 공통 프롬프트", "description": "대상 데이터셋 소유 필드만 작성하도록 제한합니다.", "input_labels": {"template": "공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "데이터셋 공통 프롬프트 메시지"}}},
-        {"id": "authoring_specialized_prompt", "type": "PromptTemplate", "position": {"x": 760, "y": 400}, "settings": {"prompt_source": "prompts/metadata_authoring/dataset_specialized_ko.md", "use_double_brackets": true}, "expected_prompt_variables": [], "ui": {"display_name": "02B 데이터셋 등록 특화 프롬프트", "description": "현재 업무의 데이터셋·필드 해석 규칙을 이 Prompt Template 본문에서 직접 편집합니다.", "input_labels": {"template": "특화 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "데이터셋 특화 프롬프트 메시지"}}},
-        {"id": "chat_output", "type": "ChatOutput", "position": {"x": 2280, "y": 40}, "settings": {"sender": "Machine", "sender_name": "메타데이터 등록", "should_store_message": true}, "ui": {"display_name": "07A 데이터셋 등록 결과 채팅 출력", "description": "저장 또는 저장 없는 검증 결과를 채팅 Message로 출력합니다.", "input_labels": {"input_value": "등록 결과 메시지"}, "output_labels": {"message": "출력 메시지"}}}
+        {
+          "id": "chat_input",
+          "type": "ChatInput",
+          "position": {
+            "x": 0,
+            "y": 80
+          },
+          "settings": {
+            "sender": "User",
+            "sender_name": "메타데이터 작성자",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "01 테이블 카탈로그 자연어 입력",
+            "description": "비전문 작업자가 형식을 맞추지 않고 테이블·컬럼·조회 방법 자연어 설명을 입력합니다.",
+            "input_labels": {
+              "input_value": "테이블·컬럼·조회 방법 자연어 설명"
+            },
+            "output_labels": {
+              "message": "자연어 입력 메시지"
+            }
+          }
+        },
+        {
+          "id": "authoring_common_prompt",
+          "type": "PromptTemplate",
+          "position": {
+            "x": 380,
+            "y": -180
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/dataset_common_ko.md",
+            "use_double_brackets": true
+          },
+          "expected_prompt_variables": [],
+          "ui": {
+            "display_name": "02A 테이블 카탈로그 등록 공통 프롬프트",
+            "description": "모든 업무에 공통으로 적용할 안전·출력 계약을 관리합니다.",
+            "input_labels": {
+              "template": "공통 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "공통 프롬프트 메시지"
+            }
+          }
+        },
+        {
+          "id": "authoring_specialized_prompt",
+          "type": "PromptTemplate",
+          "position": {
+            "x": 380,
+            "y": 160
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/dataset_specialized_ko.md",
+            "use_double_brackets": true
+          },
+          "expected_prompt_variables": [],
+          "ui": {
+            "display_name": "02B 테이블 카탈로그 등록 특화 프롬프트",
+            "description": "현재 공정·업무에서만 사용하는 용어와 해석 규칙을 이 노드 본문에서 편집합니다.",
+            "input_labels": {
+              "template": "특화 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "특화 프롬프트 메시지"
+            }
+          }
+        },
+        {
+          "id": "draft_language_model",
+          "type": "LanguageModel",
+          "position": {
+            "x": 380,
+            "y": 500
+          },
+          "settings": {
+            "model": [
+              {
+                "name": "gemini-3.5-flash-lite",
+                "provider": "Google Generative AI",
+                "metadata": {
+                  "context_length": 128000,
+                  "model_class": "ChatGoogleGenerativeAIFixed",
+                  "model_name_param": "model"
+                }
+              }
+            ],
+            "stream": false,
+            "temperature": 0.0,
+            "max_tokens": 8192
+          },
+          "ui": {
+            "display_name": "02C 테이블 카탈로그 자연어 변환 모델",
+            "description": "자연어를 폐쇄형 메타데이터 초안으로 한 번만 변환하며 repair 호출은 하지 않습니다.",
+            "output_labels": {
+              "model_output": "언어 모델"
+            }
+          }
+        },
+        {
+          "id": "chat_output",
+          "type": "ChatOutput",
+          "position": {
+            "x": 1900,
+            "y": 80
+          },
+          "settings": {
+            "sender": "Machine",
+            "sender_name": "메타데이터 등록",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "06 테이블 카탈로그 등록 결과 출력",
+            "description": "검증·저장 결과 또는 추가 확인이 필요한 내용을 채팅 메시지로 출력합니다.",
+            "input_labels": {
+              "input_value": "등록 결과 메시지"
+            },
+            "output_labels": {
+              "message": "출력 메시지"
+            }
+          }
+        }
       ],
       "custom_nodes": [
-        {"id": "authoring_prompt_context_builder", "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py", "position": {"x": 380, "y": 80}, "settings": {"authoring_kind": "dataset", "mode": "save", "source_grounding_mode": "freeform_llm", "domain_id": "manufacturing", "environment": "production"}, "metadata": {"logical_stage": "authoring_prompt_context"}, "ui": {"display_name": "01 데이터셋 등록 컨텍스트 구성"}},
-        {"id": "authoring_reference_registry", "source": "langflow_components/metadata_authoring/authoring_reference_registry.py", "position": {"x": 760, "y": -220}, "settings": {"registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json", "domain_id": "manufacturing"}, "metadata": {"logical_stage": "authoring_reference_registry"}, "ui": {"display_name": "00B 데이터셋 등록용 승인 업무 어휘·원천 레지스트리"}},
-        {"id": "authoring_prompt_bundle_composer", "source": "langflow_components/shared/01_prompt_bundle_composer.py", "position": {"x": 760, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_prompt_composition"}, "ui": {"display_name": "03 데이터셋 등록 프롬프트 묶음 구성"}},
-        {"id": "authoring_conditional_llm_invoker", "source": "langflow_components/shared/02_conditional_llm_invoker.py", "position": {"x": 1140, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_llm_invocation", "automatic_retry_count": 0}, "ui": {"display_name": "04 데이터셋 등록 LLM 조건부 호출"}},
-        {"id": "metadata_authoring_engine", "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py", "position": {"x": 1520, "y": 80}, "settings": {"authoring_kind": "dataset", "source_grounding_mode": "freeform_llm", "metadata_contract_mode": "domain_package_v2", "domain_id": "manufacturing", "environment": "production", "revision_policy": "auto_next", "mode": "save", "domain_collection": "agent_v6_domain_metadata", "table_collection": "agent_v6_table_catalog", "main_filter_collection": "agent_v6_main_filter", "dry_run": false}, "ui": {"display_name": "05 데이터셋 메타데이터 검증 및 저장"}},
-        {"id": "message_presentation", "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py", "position": {"x": 1900, "y": 20}, "settings": {}, "ui": {"display_name": "06 데이터셋 등록 결과 메시지 구성"}},
-        {"id": "api_response", "source": "langflow_components/shared/00_api_response_terminal.py", "position": {"x": 1900, "y": 420}, "settings": {}, "ui": {"display_name": "07B 데이터셋 등록 결과 API 출력"}}
+        {
+          "id": "simple_metadata_draft_generator",
+          "source": "langflow_components/metadata_authoring/simple_metadata_draft_generator.py",
+          "position": {
+            "x": 780,
+            "y": 80
+          },
+          "settings": {
+            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
+            "authoring_kind": "dataset",
+            "domain_id": "manufacturing",
+            "environment": "production"
+          },
+          "metadata": {
+            "logical_stage": "simple_metadata_draft",
+            "automatic_retry_count": 0
+          },
+          "ui": {
+            "display_name": "03 테이블 카탈로그 자연어 변환",
+            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "input_labels": {
+              "input_message": "자연어 입력",
+              "common_prompt_message": "공통 프롬프트",
+              "specialized_prompt_message": "특화 프롬프트",
+              "language_model": "Gemini 모델"
+            },
+            "output_labels": {
+              "authoring_context": "검증 대기 등록 컨텍스트"
+            }
+          }
+        },
+        {
+          "id": "simple_metadata_authoring_engine",
+          "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
+          "position": {
+            "x": 1180,
+            "y": 80
+          },
+          "settings": {
+            "authoring_kind": "dataset",
+            "domain_id": "manufacturing",
+            "environment": "production",
+            "mode": "save",
+            "domain_collection": "agent_v6_domain_metadata",
+            "table_collection": "agent_v6_table_catalog",
+            "main_filter_collection": "agent_v6_main_filter",
+            "dry_run": false
+          },
+          "metadata": {
+            "logical_stage": "simple_metadata_validation_and_save"
+          },
+          "ui": {
+            "display_name": "04 테이블 카탈로그 검증 및 저장",
+            "description": "LLM 초안을 typed 계약으로 컴파일·검증한 뒤 세 운영 컬렉션에 항목 단위로 저장합니다.",
+            "input_labels": {
+              "authoring_context": "검증 대기 등록 컨텍스트"
+            },
+            "output_labels": {
+              "response": "등록 결과 데이터"
+            }
+          }
+        },
+        {
+          "id": "message_presentation",
+          "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
+          "position": {
+            "x": 1540,
+            "y": 80
+          },
+          "settings": {},
+          "ui": {
+            "display_name": "05 테이블 카탈로그 결과 메시지 구성",
+            "description": "내부 계약·해시를 노출하지 않고 작업자가 확인할 결과만 간결한 한글 메시지로 만듭니다.",
+            "input_labels": {
+              "response": "등록 결과 데이터"
+            },
+            "output_labels": {
+              "message": "등록 결과 메시지"
+            }
+          }
+        }
       ],
       "notes": [
-        {"id": "note_dataset_authoring", "title": "데이터셋 등록 안내", "markdown": "## 데이터셋 등록 안내\n\n작업자는 형식을 맞추지 않고 자연어 Dataset/field binding TXT를 입력합니다. 외부 공통 Prompt와 LLM이 데이터셋 소유 patch를 최대 1회 제안하고, 결정론적 검증기가 타입·참조·소유 경계를 확인합니다. 검증된 결과는 기존 도메인과 메인필터를 보존하면서 세 컬렉션을 같은 release로 갱신합니다. 다른 데이터셋이나 정책 영역은 변경할 수 없습니다.", "position": {"x": 0, "y": -340}, "width": 1120, "height": 280, "color": "green"}
+        {
+          "id": "note_dataset_authoring",
+          "title": "테이블 카탈로그 등록 사용법",
+          "markdown": "## 테이블 카탈로그 등록 사용법\n\n1. **01 입력**에 작업자가 아는 내용을 자연어로 작성합니다. JSON이나 등록 문법을 맞출 필요가 없습니다.\n2. **02A 공통 프롬프트**는 공통 계약, **02B 특화 프롬프트**는 업무별 용어만 관리합니다.\n3. **03 변환**은 Gemini를 최대 1회 호출하며 pandas 코드를 만들지 않습니다.\n4. **04 검증 및 저장**이 타입·참조·소유 범위를 결정론적으로 검사하고 MongoDB 3개 컬렉션을 갱신합니다.\n5. **06 출력**에서 저장 성공, 추가 확인 항목 또는 오류를 확인합니다.",
+          "position": {
+            "x": 0,
+            "y": -460
+          },
+          "width": 1180,
+          "height": 320,
+          "color": "green"
+        }
       ],
       "edges": [
-        {"source": "chat_input", "source_output": "message", "target": "authoring_prompt_context_builder", "target_input": "input_message"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "authoring_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "metadata_authoring_engine", "target_input": "authoring_source_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "authoring_prompt_context_builder", "target_input": "approved_reference_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "metadata_authoring_engine", "target_input": "approved_reference_context"},
-        {"source": "authoring_common_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "authoring_specialized_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "authoring_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "authoring_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "draft_language_model", "source_output": "model_output", "target": "authoring_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "authoring_conditional_llm_invoker", "source_output": "invocation_result", "target": "metadata_authoring_engine", "target_input": "authoring_invocation_result"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "message_presentation", "target_input": "response"},
-        {"source": "message_presentation", "source_output": "message", "target": "chat_output", "target_input": "input_value"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "api_response", "target_input": "response"}
+        {
+          "source": "chat_input",
+          "source_output": "message",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "input_message"
+        },
+        {
+          "source": "authoring_common_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "common_prompt_message"
+        },
+        {
+          "source": "authoring_specialized_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "specialized_prompt_message"
+        },
+        {
+          "source": "draft_language_model",
+          "source_output": "model_output",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "language_model"
+        },
+        {
+          "source": "simple_metadata_draft_generator",
+          "source_output": "authoring_context",
+          "target": "simple_metadata_authoring_engine",
+          "target_input": "authoring_context"
+        },
+        {
+          "source": "simple_metadata_authoring_engine",
+          "source_output": "response",
+          "target": "message_presentation",
+          "target_input": "response"
+        },
+        {
+          "source": "message_presentation",
+          "source_output": "message",
+          "target": "chat_output",
+          "target_input": "input_value"
+        }
       ]
     },
     {
       "logical_key": "metadata_v6_main_filter_authoring",
       "endpoint_name": "metadata_v6_main_filter_authoring",
       "expected_uuid": "3c2dea0c-d508-5fed-95ad-b74aa3e8dca6",
-      "display_name": "메타데이터 v6 - 기본 필터 등록",
-      "purpose": "자연어 filter/group/alias TXT를 외부 공통 프롬프트와 bounded context로 변환하고 결정론적으로 검증해 메인필터를 갱신합니다.",
-      "tags": ["metadata-authoring", "main-filter", "external-prompts", "three-collection-save"],
-      "viewport": {"x": 60, "y": 260, "zoom": 0.45},
+      "display_name": "메타데이터 v6 - 메인 필터 등록",
+      "purpose": "작업자가 입력한 자유형 자연어를 외부 공통·특화 프롬프트와 Gemini 1회 호출로 메인 필터 초안으로 변환하고, 결정론적으로 검증해 MongoDB 3개 운영 컬렉션에 항목 단위로 저장합니다.",
+      "tags": [
+        "metadata-authoring",
+        "main_filter",
+        "chat-first",
+        "single-llm",
+        "three-collection-save"
+      ],
+      "viewport": {
+        "x": 40,
+        "y": 220,
+        "zoom": 0.55
+      },
       "native_nodes": [
-        {"id": "chat_input", "type": "ChatInput", "position": {"x": 0, "y": 80}, "settings": {"sender": "User", "sender_name": "메타데이터 작성자", "should_store_message": true}, "ui": {"display_name": "00A 주요 필터 TXT 입력", "description": "비전문 작업자가 자유롭게 작성한 자연어 필터/그룹/별칭 설명을 입력합니다.", "input_labels": {"input_value": "자연어 필터 TXT"}, "output_labels": {"message": "필터 입력 메시지"}}},
-        {"id": "draft_language_model", "type": "LanguageModel", "position": {"x": 760, "y": 600}, "settings": {"model": [{"name": "gemini-3.5-flash-lite", "provider": "Google Generative AI", "metadata": {"context_length": 128000, "model_class": "ChatGoogleGenerativeAIFixed", "model_name_param": "model"}}], "stream": false, "temperature": 0.0, "max_tokens": 65536}, "ui": {"display_name": "00C 주요 필터 작성 언어 모델", "description": "자연어에서 필터 소유 patch를 최대 1회 작성하며 repair 호출은 하지 않습니다.", "output_labels": {"model_output": "언어 모델"}}},
-        {"id": "authoring_common_prompt", "type": "PromptTemplate", "position": {"x": 380, "y": 400}, "settings": {"prompt_source": "prompts/metadata_authoring/main_filter_common_ko.md", "use_double_brackets": true}, "expected_prompt_variables": [], "ui": {"display_name": "02A 주요 필터 등록 공통 프롬프트", "description": "등록된 필드/연산자 안에서 필터 소유 patch만 작성하도록 제한합니다.", "input_labels": {"template": "공통 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "필터 공통 프롬프트 메시지"}}},
-        {"id": "authoring_specialized_prompt", "type": "PromptTemplate", "position": {"x": 760, "y": 400}, "settings": {"prompt_source": "prompts/metadata_authoring/main_filter_specialized_ko.md", "use_double_brackets": true}, "expected_prompt_variables": [], "ui": {"display_name": "02B 주요 필터 등록 특화 프롬프트", "description": "현재 업무의 필터·별칭 해석 규칙을 이 Prompt Template 본문에서 직접 편집합니다.", "input_labels": {"template": "특화 프롬프트 원문", "use_double_brackets": "이중 중괄호 변수 사용"}, "output_labels": {"prompt": "필터 특화 프롬프트 메시지"}}},
-        {"id": "chat_output", "type": "ChatOutput", "position": {"x": 2280, "y": 40}, "settings": {"sender": "Machine", "sender_name": "메타데이터 등록", "should_store_message": true}, "ui": {"display_name": "07A 주요 필터 등록 결과 채팅 출력", "description": "저장 또는 저장 없는 검증 결과를 채팅 Message로 출력합니다.", "input_labels": {"input_value": "등록 결과 메시지"}, "output_labels": {"message": "출력 메시지"}}}
-      ],
-      "custom_nodes": [
-        {"id": "authoring_prompt_context_builder", "source": "langflow_components/metadata_authoring/authoring_prompt_context_builder.py", "position": {"x": 380, "y": 80}, "settings": {"authoring_kind": "main_filter", "mode": "save", "source_grounding_mode": "freeform_llm", "domain_id": "manufacturing", "environment": "production"}, "metadata": {"logical_stage": "authoring_prompt_context"}, "ui": {"display_name": "01 주요 필터 등록 컨텍스트 구성"}},
-        {"id": "authoring_reference_registry", "source": "langflow_components/metadata_authoring/authoring_reference_registry.py", "position": {"x": 760, "y": -220}, "settings": {"registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json", "domain_id": "manufacturing"}, "metadata": {"logical_stage": "authoring_reference_registry"}, "ui": {"display_name": "00B 주요 필터 등록용 승인 업무 어휘·원천 레지스트리"}},
-        {"id": "authoring_prompt_bundle_composer", "source": "langflow_components/shared/01_prompt_bundle_composer.py", "position": {"x": 760, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_prompt_composition"}, "ui": {"display_name": "03 주요 필터 등록 프롬프트 묶음 구성"}},
-        {"id": "authoring_conditional_llm_invoker", "source": "langflow_components/shared/02_conditional_llm_invoker.py", "position": {"x": 1140, "y": 80}, "settings": {}, "metadata": {"logical_stage": "authoring_llm_invocation", "automatic_retry_count": 0}, "ui": {"display_name": "04 주요 필터 등록 LLM 조건부 호출"}},
-        {"id": "metadata_authoring_engine", "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py", "position": {"x": 1520, "y": 80}, "settings": {"authoring_kind": "main_filter", "source_grounding_mode": "freeform_llm", "metadata_contract_mode": "domain_package_v2", "domain_id": "manufacturing", "environment": "production", "revision_policy": "auto_next", "mode": "save", "domain_collection": "agent_v6_domain_metadata", "table_collection": "agent_v6_table_catalog", "main_filter_collection": "agent_v6_main_filter", "dry_run": false}, "ui": {"display_name": "05 주요 필터 메타데이터 검증 및 저장"}},
-        {"id": "message_presentation", "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py", "position": {"x": 1900, "y": 20}, "settings": {}, "ui": {"display_name": "06 주요 필터 등록 결과 메시지 구성"}},
-        {"id": "api_response", "source": "langflow_components/shared/00_api_response_terminal.py", "position": {"x": 1900, "y": 420}, "settings": {}, "ui": {"display_name": "07B 주요 필터 등록 결과 API 출력"}}
-      ],
-      "notes": [
-        {"id": "note_filter_authoring", "title": "기본 필터 등록 안내", "markdown": "## 기본 필터 등록 안내\n\n작업자는 자유형 자연어 filter/group/alias TXT를 입력합니다. 외부 공통 Prompt와 LLM이 필터 소유 patch를 최대 1회 제안하고 결정론적 검증기가 등록 필드·연산자·값 경계를 확인합니다. 검증된 결과는 기존 도메인과 테이블 카탈로그를 보존하면서 세 컬렉션을 같은 release로 갱신합니다. explicit_inventory 모드의 유일한 봉인 별칭 입력은 LLM 없이 처리됩니다.", "position": {"x": 0, "y": -340}, "width": 1120, "height": 280, "color": "orange"}
-      ],
-      "edges": [
-        {"source": "chat_input", "source_output": "message", "target": "authoring_prompt_context_builder", "target_input": "input_message"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "authoring_prompt_bundle_composer", "target_input": "runtime_context"},
-        {"source": "authoring_prompt_context_builder", "source_output": "authoring_prompt_context", "target": "metadata_authoring_engine", "target_input": "authoring_source_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "authoring_prompt_context_builder", "target_input": "approved_reference_context"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "metadata_authoring_engine", "target_input": "approved_reference_context"},
-        {"source": "authoring_common_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "common_prompt_message"},
-        {"source": "authoring_specialized_prompt", "source_output": "prompt", "target": "authoring_prompt_bundle_composer", "target_input": "specialized_prompt_message"},
-        {"source": "authoring_prompt_bundle_composer", "source_output": "prompt_bundle", "target": "authoring_conditional_llm_invoker", "target_input": "prompt_bundle"},
-        {"source": "draft_language_model", "source_output": "model_output", "target": "authoring_conditional_llm_invoker", "target_input": "language_model"},
-        {"source": "authoring_conditional_llm_invoker", "source_output": "invocation_result", "target": "metadata_authoring_engine", "target_input": "authoring_invocation_result"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "message_presentation", "target_input": "response"},
-        {"source": "message_presentation", "source_output": "message", "target": "chat_output", "target_input": "input_value"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "api_response", "target_input": "response"}
-      ]
-    },
-    {
-      "logical_key": "metadata_v6_domain_policy_authoring",
-      "endpoint_name": "metadata_v6_domain_policy_authoring",
-      "expected_uuid": "d702b8c1-4d2d-5f6c-b59f-ffd826caf694",
-      "display_name": "메타데이터 v6 - 도메인 정책 등록",
-      "purpose": "운영자가 자연어 변경 사유와 명시적 정책 필드로 intent/answer prompt extension, registered specialized function descriptor, output profile을 LLM 없이 검증하고 세 컬렉션 release로 저장합니다.",
-      "tags": ["metadata-authoring", "domain-policy", "zero-llm", "three-collection-save"],
-      "viewport": {"x": 120, "y": 220, "zoom": 0.6},
-      "native_nodes": [
-        {"id": "chat_input", "type": "ChatInput", "position": {"x": 0, "y": 80}, "settings": {"sender": "User", "sender_name": "정책 운영자", "should_store_message": true}, "ui": {"display_name": "00 도메인 정책 변경 사유 입력", "description": "정책 등록 사유를 비어 있지 않은 자연어 v6 TXT로 입력합니다.", "input_labels": {"input_value": "정책 변경 사유 TXT"}, "output_labels": {"message": "정책 변경 메시지"}}},
-        {"id": "chat_output", "type": "ChatOutput", "position": {"x": 1330, "y": 40}, "settings": {"sender": "Machine", "sender_name": "도메인 정책 등록", "should_store_message": true}, "ui": {"display_name": "04A 도메인 정책 등록 결과 채팅 출력", "description": "정책 저장 또는 저장 없는 검증 결과를 채팅 Message로 출력합니다.", "input_labels": {"input_value": "정책 등록 결과 메시지"}, "output_labels": {"message": "출력 메시지"}}}
+        {
+          "id": "chat_input",
+          "type": "ChatInput",
+          "position": {
+            "x": 0,
+            "y": 80
+          },
+          "settings": {
+            "sender": "User",
+            "sender_name": "메타데이터 작성자",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "01 메인 필터 자연어 입력",
+            "description": "비전문 작업자가 형식을 맞추지 않고 필터·그룹·별칭 자연어 설명을 입력합니다.",
+            "input_labels": {
+              "input_value": "필터·그룹·별칭 자연어 설명"
+            },
+            "output_labels": {
+              "message": "자연어 입력 메시지"
+            }
+          }
+        },
+        {
+          "id": "authoring_common_prompt",
+          "type": "PromptTemplate",
+          "position": {
+            "x": 380,
+            "y": -180
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/main_filter_common_ko.md",
+            "use_double_brackets": true
+          },
+          "expected_prompt_variables": [],
+          "ui": {
+            "display_name": "02A 메인 필터 등록 공통 프롬프트",
+            "description": "모든 업무에 공통으로 적용할 안전·출력 계약을 관리합니다.",
+            "input_labels": {
+              "template": "공통 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "공통 프롬프트 메시지"
+            }
+          }
+        },
+        {
+          "id": "authoring_specialized_prompt",
+          "type": "PromptTemplate",
+          "position": {
+            "x": 380,
+            "y": 160
+          },
+          "settings": {
+            "prompt_source": "prompts/metadata_authoring/main_filter_specialized_ko.md",
+            "use_double_brackets": true
+          },
+          "expected_prompt_variables": [],
+          "ui": {
+            "display_name": "02B 메인 필터 등록 특화 프롬프트",
+            "description": "현재 공정·업무에서만 사용하는 용어와 해석 규칙을 이 노드 본문에서 편집합니다.",
+            "input_labels": {
+              "template": "특화 프롬프트 원문",
+              "use_double_brackets": "이중 중괄호 변수 사용"
+            },
+            "output_labels": {
+              "prompt": "특화 프롬프트 메시지"
+            }
+          }
+        },
+        {
+          "id": "draft_language_model",
+          "type": "LanguageModel",
+          "position": {
+            "x": 380,
+            "y": 500
+          },
+          "settings": {
+            "model": [
+              {
+                "name": "gemini-3.5-flash-lite",
+                "provider": "Google Generative AI",
+                "metadata": {
+                  "context_length": 128000,
+                  "model_class": "ChatGoogleGenerativeAIFixed",
+                  "model_name_param": "model"
+                }
+              }
+            ],
+            "stream": false,
+            "temperature": 0.0,
+            "max_tokens": 8192
+          },
+          "ui": {
+            "display_name": "02C 메인 필터 자연어 변환 모델",
+            "description": "자연어를 폐쇄형 메타데이터 초안으로 한 번만 변환하며 repair 호출은 하지 않습니다.",
+            "output_labels": {
+              "model_output": "언어 모델"
+            }
+          }
+        },
+        {
+          "id": "chat_output",
+          "type": "ChatOutput",
+          "position": {
+            "x": 1900,
+            "y": 80
+          },
+          "settings": {
+            "sender": "Machine",
+            "sender_name": "메타데이터 등록",
+            "should_store_message": true
+          },
+          "ui": {
+            "display_name": "06 메인 필터 등록 결과 출력",
+            "description": "검증·저장 결과 또는 추가 확인이 필요한 내용을 채팅 메시지로 출력합니다.",
+            "input_labels": {
+              "input_value": "등록 결과 메시지"
+            },
+            "output_labels": {
+              "message": "출력 메시지"
+            }
+          }
+        }
       ],
       "custom_nodes": [
         {
-          "id": "metadata_authoring_engine",
-          "source": "langflow_components/metadata_authoring/00_metadata_authoring_engine.py",
-          "position": {"x": 380, "y": 80},
+          "id": "simple_metadata_draft_generator",
+          "source": "langflow_components/metadata_authoring/simple_metadata_draft_generator.py",
+          "position": {
+            "x": 780,
+            "y": 80
+          },
           "settings": {
-            "authoring_kind": "domain_policy",
-            "metadata_contract_mode": "domain_package_v2",
+            "registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json",
+            "authoring_kind": "main_filter",
+            "domain_id": "manufacturing",
+            "environment": "production"
+          },
+          "metadata": {
+            "logical_stage": "simple_metadata_draft",
+            "automatic_retry_count": 0
+          },
+          "ui": {
+            "display_name": "03 메인 필터 자연어 변환",
+            "description": "승인 업무 어휘를 내부에서 결합하고 외부 공통·특화 프롬프트로 LLM을 정확히 한 번 호출합니다.",
+            "input_labels": {
+              "input_message": "자연어 입력",
+              "common_prompt_message": "공통 프롬프트",
+              "specialized_prompt_message": "특화 프롬프트",
+              "language_model": "Gemini 모델"
+            },
+            "output_labels": {
+              "authoring_context": "검증 대기 등록 컨텍스트"
+            }
+          }
+        },
+        {
+          "id": "simple_metadata_authoring_engine",
+          "source": "langflow_components/metadata_authoring/02_simple_metadata_authoring_engine.py",
+          "position": {
+            "x": 1180,
+            "y": 80
+          },
+          "settings": {
+            "authoring_kind": "main_filter",
             "domain_id": "manufacturing",
             "environment": "production",
-            "revision_policy": "auto_next",
             "mode": "save",
             "domain_collection": "agent_v6_domain_metadata",
             "table_collection": "agent_v6_table_catalog",
             "main_filter_collection": "agent_v6_main_filter",
-            "intent_prompt_extension": "",
-            "answer_prompt_extension": "",
-            "specialized_functions_json": "",
-            "output_profile_json": "",
             "dry_run": false
           },
+          "metadata": {
+            "logical_stage": "simple_metadata_validation_and_save"
+          },
           "ui": {
-            "display_name": "02 도메인 정책 결정론적 등록",
-            "description": "운영자가 입력한 등록 descriptor와 표현 정책만 LLM 없이 검증해 세 컬렉션 release로 저장합니다.",
+            "display_name": "04 메인 필터 검증 및 저장",
+            "description": "LLM 초안을 typed 계약으로 컴파일·검증한 뒤 세 운영 컬렉션에 항목 단위로 저장합니다.",
             "input_labels": {
-              "input_message": "정책 변경 사유 TXT",
-              "intent_prompt_extension": "의도 분석 특화 정책",
-              "answer_prompt_extension": "결과 응답 특화 정책",
-              "specialized_functions_json": "등록 함수 Descriptor JSON",
-              "output_profile_json": "출력 프로필 JSON"
+              "authoring_context": "검증 대기 등록 컨텍스트"
             },
-            "output_labels": {"response": "정책 등록 응답"}
+            "output_labels": {
+              "response": "등록 결과 데이터"
+            }
           }
         },
-        {"id": "authoring_reference_registry", "source": "langflow_components/metadata_authoring/authoring_reference_registry.py", "position": {"x": 450, "y": -220}, "settings": {"registry_source": "metadata/domain_packs/manufacturing/approved_source_registry.json", "domain_id": "manufacturing"}, "metadata": {"logical_stage": "authoring_reference_registry"}, "ui": {"display_name": "01 도메인 정책용 승인 업무 어휘·원천 레지스트리"}},
-        {"id": "message_presentation", "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py", "position": {"x": 850, "y": 20}, "settings": {}, "ui": {"display_name": "03 도메인 정책 등록 메시지 구성", "description": "canonical 정책 등록 응답을 간결한 채팅 Message로 구성합니다.", "input_labels": {"response": "정책 등록 응답"}, "output_labels": {"message": "정책 등록 메시지"}}},
-        {"id": "api_response", "source": "langflow_components/shared/00_api_response_terminal.py", "position": {"x": 850, "y": 420}, "settings": {}, "ui": {"display_name": "04B 도메인 정책 등록 API 출력", "description": "검증된 canonical 정책 등록 응답을 API Data로 출력합니다.", "input_labels": {"response": "정책 등록 응답"}, "output_labels": {"api_response": "정책 등록 API 응답"}}}
+        {
+          "id": "message_presentation",
+          "source": "langflow_components/metadata_authoring/01_authoring_message_presentation.py",
+          "position": {
+            "x": 1540,
+            "y": 80
+          },
+          "settings": {},
+          "ui": {
+            "display_name": "05 메인 필터 결과 메시지 구성",
+            "description": "내부 계약·해시를 노출하지 않고 작업자가 확인할 결과만 간결한 한글 메시지로 만듭니다.",
+            "input_labels": {
+              "response": "등록 결과 데이터"
+            },
+            "output_labels": {
+              "message": "등록 결과 메시지"
+            }
+          }
+        }
       ],
       "notes": [
-        {"id": "note_domain_policy_admin", "title": "운영자 전용 정책 입력", "markdown": "## 운영자 전용 정책 입력\n\n- 이 Flow에는 Prompt Template과 Language Model 노드가 **0개**입니다.\n- 자연어 입력은 변경 사유/정책 등록 기록으로 유지합니다.\n- 네 관리자 필드는 검토된 운영자만 입력합니다.\n- `specialized_functions_json`에는 **raw Python 코드를 넣을 수 없고**, 등록된 function descriptor만 허용합니다.\n- intent/answer 특화 정책은 공통 system 규칙을 덮어쓸 수 없습니다.\n- 검증이 끝난 정책은 기존 테이블·필터 metadata와 같은 release로 저장합니다.", "position": {"x": 0, "y": -420}, "width": 1180, "height": 360, "color": "red"}
+        {
+          "id": "note_main_filter_authoring",
+          "title": "메인 필터 등록 사용법",
+          "markdown": "## 메인 필터 등록 사용법\n\n1. **01 입력**에 작업자가 아는 내용을 자연어로 작성합니다. JSON이나 등록 문법을 맞출 필요가 없습니다.\n2. **02A 공통 프롬프트**는 공통 계약, **02B 특화 프롬프트**는 업무별 용어만 관리합니다.\n3. **03 변환**은 Gemini를 최대 1회 호출하며 pandas 코드를 만들지 않습니다.\n4. **04 검증 및 저장**이 타입·참조·소유 범위를 결정론적으로 검사하고 MongoDB 3개 컬렉션을 갱신합니다.\n5. **06 출력**에서 저장 성공, 추가 확인 항목 또는 오류를 확인합니다.",
+          "position": {
+            "x": 0,
+            "y": -460
+          },
+          "width": 1180,
+          "height": 320,
+          "color": "orange"
+        }
       ],
       "edges": [
-        {"source": "chat_input", "source_output": "message", "target": "metadata_authoring_engine", "target_input": "input_message"},
-        {"source": "authoring_reference_registry", "source_output": "reference_context", "target": "metadata_authoring_engine", "target_input": "approved_reference_context"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "message_presentation", "target_input": "response"},
-        {"source": "message_presentation", "source_output": "message", "target": "chat_output", "target_input": "input_value"},
-        {"source": "metadata_authoring_engine", "source_output": "response", "target": "api_response", "target_input": "response"}
+        {
+          "source": "chat_input",
+          "source_output": "message",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "input_message"
+        },
+        {
+          "source": "authoring_common_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "common_prompt_message"
+        },
+        {
+          "source": "authoring_specialized_prompt",
+          "source_output": "prompt",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "specialized_prompt_message"
+        },
+        {
+          "source": "draft_language_model",
+          "source_output": "model_output",
+          "target": "simple_metadata_draft_generator",
+          "target_input": "language_model"
+        },
+        {
+          "source": "simple_metadata_draft_generator",
+          "source_output": "authoring_context",
+          "target": "simple_metadata_authoring_engine",
+          "target_input": "authoring_context"
+        },
+        {
+          "source": "simple_metadata_authoring_engine",
+          "source_output": "response",
+          "target": "message_presentation",
+          "target_input": "response"
+        },
+        {
+          "source": "message_presentation",
+          "source_output": "message",
+          "target": "chat_output",
+          "target_input": "input_value"
+        }
       ]
     }
   ]

@@ -152,7 +152,7 @@ Specialized function card는 코드를 담지 않고 `function_id`, version, imp
 - Domain Authoring: 자유형 source bundle에서 LLM 최대 1회로 표시명·설명 annotation만 만들고, Source Registry v3 `semantic_templates`를 결정론적으로 결합한 뒤 전체 compiler를 실행한다. Optional Blueprint lane도 같은 두 annotation 필드만 허용한다.
 - Dataset Catalog Authoring: 현재 세 collection package를 exact hash로 읽고 `datasets` section만 upsert한다.
 - Main Filter Authoring: 같은 current package를 읽고 `aliases`, `entity_groups`, `grains`, `orderings`, `predicates`, `recipes` section만 upsert한다.
-- Domain Policy Authoring: 별도 Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 적용한다. Prompt Template/Composer/envelope/LLM은 0회이며 Domain annotation이나 Dataset/Main Filter IR은 이 section을 바꿀 수 없다. `output_profile_json`도 sealed planner policy key를 포함하면 거부한다.
+- Domain Policy Authoring Flow는 공개하지 않는다. 기존 패키지의 prompt extension/function descriptor/output profile은 runtime 호환을 위해 읽을 수 있지만, Domain/Dataset/Main Filter 자연어 등록은 이 section과 sealed planner policy key를 변경할 수 없다.
 
 부분 등록은 세 current collection의 항목에서 결합한 catalog를 `runtime_catalog_v2_to_authoring_draft()`로 완전한 authoring draft로 복원한 뒤 `apply_authoring_section_patch()`를 적용한다. 삭제 지시, 다른 Flow가 소유한 section, 빈 patch는 거부한다. 결과는 항상 전체 `compile_domain_package()`와 schema·semantic lint·dependency closure를 다시 통과하고 항목 단위로 다시 저장된다. `legacy_projection_v1`은 별도 migration tool에서만 처리하며 Langflow authoring runtime은 `domain_package_v2`만 허용한다.
 

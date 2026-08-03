@@ -312,7 +312,7 @@ Registered function card/registry identity·hash·schema가 활성화 전에 맞
 
 ## 8. Future privileged exploration contract
 
-초기 v6 runtime과 다섯 개 MVP Flow에는 자유 pandas 실행이 없다. 미래 수요를 위한 namespace만 예약한다.
+초기 v6 runtime과 네 개 MVP Flow에는 자유 pandas 실행이 없다. 미래 수요를 위한 namespace만 예약한다.
 
 - `exploration.request.v1`: 사용자가 명시적으로 선택한 별도 작업 요청
 - `exploration.job.v1`: immutable, owner/tenant/session-bound `result_ref` snapshot과 policy/image/code hash

@@ -566,6 +566,47 @@ def test_authoring_choice_normalization_only_removes_unselected_null_branch() ->
     assert status == "not_normalized"
 
 
+def test_authoring_choice_normalization_seals_compiler_owned_envelope() -> None:
+    component_cls = _component_class("02_conditional_llm_invoker.py")
+    normalize = component_cls.invoke_once.__globals__["_normalize_authoring_choice_response"]
+    authoritative_source_sha256 = "c" * 64
+    output_schema = {
+        "oneOf": [
+            {
+                "properties": {
+                    "contract_version": {"const": "metadata.authoring.proposal.v1"},
+                    "source_sha256": {"const": authoritative_source_sha256},
+                }
+            },
+            {
+                "properties": {
+                    "contract_version": {"const": "metadata.authoring.proposal.v1"},
+                    "source_sha256": {"const": authoritative_source_sha256},
+                }
+            },
+        ]
+    }
+    provider_response = {
+        "contract_version": "provider-drifted-version",
+        "status": "complete",
+        "source_sha256": "d" * 64,
+        "draft": {"datasets": {}},
+        "clarification": None,
+    }
+
+    normalized, status = normalize(
+        json.dumps(provider_response),
+        "metadata_dataset_draft",
+        output_schema,
+    )
+    payload = json.loads(normalized)
+
+    assert status == "removed_unselected_null_branch+sealed_authoritative_envelope"
+    assert payload["contract_version"] == "metadata.authoring.proposal.v1"
+    assert payload["source_sha256"] == authoritative_source_sha256
+    assert "clarification" not in payload
+
+
 def test_google_schema_projection_breaks_recursive_defs_for_provider_only() -> None:
     component_cls = _component_class("02_conditional_llm_invoker.py")
     namespace = component_cls.invoke_once.__globals__

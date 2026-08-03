@@ -56,7 +56,6 @@ def test_current_authoring_flows_use_save_and_fixed_three_collections() -> None:
         "domain",
         "dataset",
         "main_filter",
-        "domain_policy",
     }
     assert all(item["passed"] for item in defaults)
     assert all(item["mode"] == "save" for item in defaults)
@@ -69,9 +68,7 @@ def test_current_authoring_flows_use_save_and_fixed_three_collections() -> None:
         }
         for item in defaults
     )
-    for item in defaults:
-        expected = [] if item["authoring_kind"] == "domain_policy" else [AUTHORING_GEMINI_MODEL]
-        assert item["model_names"] == expected
+    assert all(item["model_names"] == [AUTHORING_GEMINI_MODEL] for item in defaults)
 
 
 def test_authoring_tweaks_expose_only_save_or_validate_only_contract() -> None:
@@ -97,7 +94,7 @@ def test_authoring_tweaks_expose_only_save_or_validate_only_contract() -> None:
         "reference_timezone",
     }
 
-    for kind in ("domain", "dataset", "main_filter", "domain_policy"):
+    for kind in ("domain", "dataset", "main_filter"):
         for mode in ("save", "validate_only"):
             tweaks = _authoring_tweaks(kind=kind, mode=mode, **common)
             serialized_keys = {
@@ -107,24 +104,20 @@ def test_authoring_tweaks_expose_only_save_or_validate_only_contract() -> None:
                 for key in value
             }
             assert forbidden.isdisjoint(serialized_keys)
-            assert tweaks["metadata_authoring_engine"]["mode"] == mode
-            if kind == "domain_policy":
-                assert "draft_language_model" not in tweaks
-                assert "authoring_prompt_context_builder" not in tweaks
-            else:
-                assert tweaks["draft_language_model"] == {"temperature": 0.0, "stream": False}
+            assert tweaks["simple_metadata_authoring_engine"]["mode"] == mode
+            assert tweaks["draft_language_model"] == {"temperature": 0.0, "stream": False}
 
     with pytest.raises(ValueError, match="authoring_mode_invalid"):
         _authoring_tweaks(kind="domain", mode="prepare", **common)
 
 
-def test_worker_sources_remain_four_freeform_text_inputs() -> None:
+def test_worker_sources_remain_three_freeform_text_inputs() -> None:
     sources, hashes, evidence = _load_v6_authoring_sources(
         worker_input_dir=V6_INPUT_DIR,
         source_set_id=DEFAULT_SOURCE_SET_ID,
     )
 
-    assert set(sources) == {"domain", "dataset", "main_filter", "domain_policy"}
+    assert set(sources) == {"domain", "dataset", "main_filter"}
     assert all(text.strip() for text in sources.values())
     assert all(len(value) == 64 for value in hashes.values())
     assert evidence["raw_source_text_persisted"] is False

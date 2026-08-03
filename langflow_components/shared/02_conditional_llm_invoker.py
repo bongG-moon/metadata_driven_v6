@@ -476,6 +476,7 @@ def _collapse_google_dataset_card_allowlists(value: Any) -> Any:
 def _normalize_authoring_choice_response(
     response_text: str,
     purpose: str,
+    output_schema: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
     """Remove only the provider-required null branch placeholder.
 
@@ -497,6 +498,23 @@ def _normalize_authoring_choice_response(
         return response_text, "not_json"
     if not isinstance(payload, dict):
         return response_text, "not_object"
+    sealed_fields = []
+    branches = output_schema.get("oneOf") if isinstance(output_schema, dict) else None
+    if isinstance(branches, list) and branches:
+        for field_name in ("contract_version", "source_sha256"):
+            values = []
+            for branch in branches:
+                properties = branch.get("properties") if isinstance(branch, dict) else None
+                field_schema = properties.get(field_name) if isinstance(properties, dict) else None
+                constant = field_schema.get("const") if isinstance(field_schema, dict) else None
+                if constant is None:
+                    enum = field_schema.get("enum") if isinstance(field_schema, dict) else None
+                    constant = enum[0] if isinstance(enum, list) and len(enum) == 1 else None
+                values.append(constant)
+            if values and values[0] is not None and all(value == values[0] for value in values):
+                if payload.get(field_name) != values[0]:
+                    payload[field_name] = values[0]
+                    sealed_fields.append(field_name)
     status = payload.get("status")
     if (
         status == "complete"
@@ -514,6 +532,9 @@ def _normalize_authoring_choice_response(
         payload.pop("draft")
     else:
         return response_text, "not_normalized"
+    normalization = "removed_unselected_null_branch"
+    if sealed_fields:
+        normalization += "+sealed_authoritative_envelope"
     return (
         json.dumps(
             payload,
@@ -522,7 +543,7 @@ def _normalize_authoring_choice_response(
             separators=(",", ":"),
             allow_nan=False,
         ),
-        "removed_unselected_null_branch",
+        normalization,
     )
 
 
@@ -725,6 +746,7 @@ class ConditionalLLMInvoker(Component):
             response_text, envelope_normalization = _normalize_authoring_choice_response(
                 response_text,
                 purpose,
+                output_schema,
             )
             response_limit = int(_MAX_RESPONSE_BYTES_BY_PURPOSE.get(purpose, _DEFAULT_MAX_RESPONSE_BYTES))
             if len(response_text.encode("utf-8")) > response_limit:

@@ -1,7 +1,7 @@
 {
   "contract_version": "flow.bundle.manifest.v1",
   "bundle": "metadata_driven_v6_complete",
-  "flow_count": 5,
+  "flow_count": 4,
   "uuid_namespace": "9d1be18e-0f18-52aa-8d0e-b6f8e53f4f6d",
   "langflow_version": "1.9.2",
   "langflow_base_version": "0.9.2",
@@ -25,14 +25,14 @@
   },
   "inventory": {
     "path": "contracts/flow_inventory.json",
-    "sha256": "e5d8d7bf790ccad8c10e491c47beaef7bfb70129cf9361e5db594ef6484274c0"
+    "sha256": "d0da8b9176a2f79421dc3a1a077abff7b786cd1395c4d6490332d49b708c4317"
   },
   "source_build_manifest": {
     "path": "flow_exports/manifest.json",
-    "sha256": "550960c70082f6af578fb7462419300ae97c857df765218805285af292ceaef7"
+    "sha256": "fc5674849b11c545e158db9bdb9e9c4301c6fdf57b4d2619fd61238051b0a512"
   },
   "single_file_ui_import": "00_metadata_driven_v6_complete_ALL_FLOWS.json",
-  "single_file_ui_import_sha256": "1266cd3948d3067552d529cfe8539bd720bd15ba404bef5b2e722e8c5d240c91",
+  "single_file_ui_import_sha256": "e764a8d789a4b639c2d8a47e24b1f3e041e3da4b82ebaecaa74a8ea415959671",
   "flows": [
     {
       "order": 1,
@@ -43,8 +43,8 @@
       "file": "01_metadata_v6_data_analysis_flow_v6_standalone.json",
       "nodes": 35,
       "edges": 46,
-      "source_sha256": "df0f4df749881c9a2285d3602f21ba23852b482d476c202690c9df1c8d0771b6",
-      "sha256": "df0f4df749881c9a2285d3602f21ba23852b482d476c202690c9df1c8d0771b6"
+      "source_sha256": "efd43a9aa29fbbe8dd0db59cd5ae2639f565a36626b34a0531de5cb01f75c038",
+      "sha256": "efd43a9aa29fbbe8dd0db59cd5ae2639f565a36626b34a0531de5cb01f75c038"
     },
     {
       "order": 2,
@@ -53,46 +53,34 @@
       "display_name": "메타데이터 v6 - 도메인 등록",
       "id": "18ba3690-6b5e-522a-9ed7-3795161d1f11",
       "file": "02_metadata_v6_domain_authoring_flow_v6_standalone.json",
-      "nodes": 26,
-      "edges": 35,
-      "source_sha256": "040733b85a5f59c693de9aeec9611d4ece0a536549eda6ed26e06308e2031fb1",
-      "sha256": "040733b85a5f59c693de9aeec9611d4ece0a536549eda6ed26e06308e2031fb1"
+      "nodes": 9,
+      "edges": 7,
+      "source_sha256": "aa4357482ee6bea1923bf303ef6d331ee1ac605c8d27a1d4eb9dbba7eb4bf37d",
+      "sha256": "aa4357482ee6bea1923bf303ef6d331ee1ac605c8d27a1d4eb9dbba7eb4bf37d"
     },
     {
       "order": 3,
       "logical_key": "metadata_v6_dataset_catalog_authoring",
       "endpoint_name": "metadata_v6_dataset_catalog_authoring",
-      "display_name": "메타데이터 v6 - 데이터셋 카탈로그 등록",
+      "display_name": "메타데이터 v6 - 테이블 카탈로그 등록",
       "id": "c207326f-3edf-5900-ae1f-40fb1062f1e1",
       "file": "03_metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
-      "nodes": 13,
-      "edges": 13,
-      "source_sha256": "77dae376c32291acaee79a7ea6df7fe1c5ed5929d2a49c5211b48d060b208503",
-      "sha256": "77dae376c32291acaee79a7ea6df7fe1c5ed5929d2a49c5211b48d060b208503"
+      "nodes": 9,
+      "edges": 7,
+      "source_sha256": "97b90b410e14fa0b1e724ce4e14dfd6c4cd4502f75b1b4c998dd78a74a1a8a53",
+      "sha256": "97b90b410e14fa0b1e724ce4e14dfd6c4cd4502f75b1b4c998dd78a74a1a8a53"
     },
     {
       "order": 4,
       "logical_key": "metadata_v6_main_filter_authoring",
       "endpoint_name": "metadata_v6_main_filter_authoring",
-      "display_name": "메타데이터 v6 - 기본 필터 등록",
+      "display_name": "메타데이터 v6 - 메인 필터 등록",
       "id": "3c2dea0c-d508-5fed-95ad-b74aa3e8dca6",
       "file": "04_metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-      "nodes": 13,
-      "edges": 13,
-      "source_sha256": "f8131b72ae586469f0b66efba2b565c2ed31d832c9b01fd1e835ce48def244bd",
-      "sha256": "f8131b72ae586469f0b66efba2b565c2ed31d832c9b01fd1e835ce48def244bd"
-    },
-    {
-      "order": 5,
-      "logical_key": "metadata_v6_domain_policy_authoring",
-      "endpoint_name": "metadata_v6_domain_policy_authoring",
-      "display_name": "메타데이터 v6 - 도메인 정책 등록",
-      "id": "d702b8c1-4d2d-5f6c-b59f-ffd826caf694",
-      "file": "05_metadata_v6_domain_policy_authoring_flow_v6_standalone.json",
-      "nodes": 7,
-      "edges": 5,
-      "source_sha256": "3983139cdfda6b1a12e50c49cc0fcb2bcdacabe9b68b368a5f405fc772c21f37",
-      "sha256": "3983139cdfda6b1a12e50c49cc0fcb2bcdacabe9b68b368a5f405fc772c21f37"
+      "nodes": 9,
+      "edges": 7,
+      "source_sha256": "0b7cf687a13ad61702c9a468436164711a66937ceed264202f273c3a0e7b3bb1",
+      "sha256": "0b7cf687a13ad61702c9a468436164711a66937ceed264202f273c3a0e7b3bb1"
     }
   ]
 }

@@ -23,6 +23,11 @@ CATALOG_PATH = PROJECT_ROOT / "metadata" / "fixtures" / "compiled" / "runtime_ca
 SCHEMA_ROOT = PROJECT_ROOT / "contracts" / "schemas"
 OUTPUT_ROOT = PROJECT_ROOT / "langflow_components"
 SOURCE_ADAPTER_ASSET_ROOT = PROJECT_ROOT / "tools" / "assets" / "v5_source_adapters"
+APPROVED_SOURCE_REGISTRY_PATH = (
+    PROJECT_ROOT / "metadata" / "domain_packs" / "manufacturing" / "approved_source_registry.json"
+)
+PROMPT_BUNDLE_SOURCE_PATH = OUTPUT_ROOT / "shared" / "01_prompt_bundle_composer.py"
+CONDITIONAL_LLM_SOURCE_PATH = OUTPUT_ROOT / "shared" / "02_conditional_llm_invoker.py"
 
 CORE_MODULES = (
     "canonical.py",
@@ -5228,6 +5233,78 @@ def _expand_bootstrap_domain_annotation(
     return fragment, evidence
 
 
+def _deterministic_registry_bootstrap_fragments(registry_context):
+    """Build initial Dataset/Main Filter fragments only from the approved registry.
+
+    The compact cards contain no model-owned physical semantics.  They merely
+    enumerate the already approved IDs so the existing deterministic expanders
+    can create the complete initial package after the one domain annotation call.
+    """
+
+    registry = registry_context if isinstance(registry_context, dict) else {}
+    descriptors = registry.get("dataset_descriptors")
+    vocabulary = registry.get("semantic_vocabulary")
+    if not isinstance(descriptors, dict) or not isinstance(vocabulary, dict):
+        raise ContractError(
+            "metadata_dependency_error",
+            "metadata_registry_bootstrap",
+            "승인 레지스트리에서 초기 Dataset/Main Filter 조각을 만들 수 없습니다.",
+        )
+    dataset_cards = []
+    for dataset_id in sorted(descriptors):
+        descriptor = _validated_dataset_descriptor(dataset_id, descriptors[dataset_id])
+        dataset_cards.append(
+            {
+                "dataset_id": dataset_id,
+                "fields": [
+                    {"id": field_id, "col": str(descriptor["fields"][field_id]["physical_column"])}
+                    for field_id in sorted(descriptor["fields"])
+                ],
+            }
+        )
+    target_types = {
+        "datasets": "dataset",
+        "fields": "field",
+        "metrics": "metric",
+        "relations": "relation",
+        "grains": "grain",
+        "predicates": "predicate",
+        "recipes": "recipe",
+        "entity_groups": "entity_group",
+    }
+    alias_additions = []
+    for section, target_type in target_types.items():
+        for card in vocabulary.get(section) or []:
+            if not isinstance(card, dict):
+                continue
+            target_id = str(card.get("id") or "").strip()
+            expressions = sorted(
+                {
+                    str(value).strip()
+                    for value in (card.get("labels") or [])
+                    if str(value).strip()
+                }
+            )
+            if target_id and expressions:
+                alias_additions.append(
+                    {
+                        "target_type": target_type,
+                        "target_id": target_id,
+                        "expressions": expressions,
+                    }
+                )
+    if not dataset_cards or not alias_additions:
+        raise ContractError(
+            "metadata_dependency_error",
+            "metadata_registry_bootstrap",
+            "승인 레지스트리의 초기 Dataset 또는 Main Filter 목록이 비어 있습니다.",
+        )
+    return (
+        {"dataset_cards": dataset_cards},
+        {"alias_additions": alias_additions},
+    )
+
+
 def _authoring_invocation_draft(
     component,
     *,
@@ -6678,6 +6755,47 @@ def _freeform_dataset_patch_authorization_manifest(source_manifest, base_draft):
     return authorization
 
 
+_AUTHORING_QUERY_MARKER = re.compile(
+    r"(?im)^[ \t]*(?:query_template|sql_template|oracle_sql|datalake_sql)[ \t]*:[ \t]*(?:\n|$)"
+)
+_AUTHORING_QUERY_BLOCK_END = re.compile(
+    r"(?im)^[ \t]*(?:filter_mappings|required_params|required_param_mappings|"
+    r"standard_column_aliases|default_detail_columns|metric_semantics|selection_criteria)"
+    r"[ \t]*(?:[:=]|(?:은|는)\b)"
+)
+
+
+def _authoring_prompt_projected_source_text(value):
+    text = str(value or "").replace("\r\n", "\n").replace("\r", "\n")
+    markers = list(_AUTHORING_QUERY_MARKER.finditer(text))
+    if not markers:
+        return text
+    pieces = []
+    cursor = 0
+    for index, marker in enumerate(markers):
+        next_start = markers[index + 1].start() if index + 1 < len(markers) else len(text)
+        boundary = _AUTHORING_QUERY_BLOCK_END.search(text, marker.end(), next_start)
+        query_end = boundary.start() if boundary else next_start
+        pieces.append(text[cursor:marker.end()])
+        pieces.append("[SQL 원문은 결정론적 등록 컴파일러에서 별도 보존 및 검증됨]\n\n")
+        cursor = query_end
+    pieces.append(text[cursor:])
+    return "".join(pieces)
+
+
+def _authoring_prompt_runtime_context_sha256(purpose, variables):
+    projected = deepcopy(variables)
+    if purpose == "metadata_dataset_draft" and isinstance(projected.get("source_text"), str):
+        projected["source_text"] = _authoring_prompt_projected_source_text(projected["source_text"])
+    return sha256_json(
+        {
+            "authority": "untrusted_data",
+            "purpose": purpose,
+            "variables": projected,
+        }
+    )
+
+
 def _bootstrap_context_payload(
     component,
     *,
@@ -6915,12 +7033,8 @@ def _bootstrap_context_payload(
             if context_invoke is True
             else ""
         ),
-        "runtime_context_sha256": sha256_json(
-            {
-                "authority": "untrusted_data",
-                "purpose": purpose,
-                "variables": variables,
-            }
+        "runtime_context_sha256": _authoring_prompt_runtime_context_sha256(
+            purpose, variables
         ),
     }
 
@@ -7810,6 +7924,7 @@ class MetadataAuthoringEngine(Component):
             )
         bootstrap_branches = None
         section_context = None
+        single_domain_bootstrap = False
         expected_purpose = {
             "domain": "metadata_domain_annotation" if annotation_only else "metadata_domain_draft",
             "dataset": "metadata_dataset_draft",
@@ -7828,6 +7943,12 @@ class MetadataAuthoringEngine(Component):
                 raw_section_context, "data", raw_section_context
             )
             if isinstance(section_context_payload, dict) and section_context_payload:
+                raw_variables = section_context_payload.get("variables")
+                single_domain_bootstrap = bool(
+                    kind == "domain"
+                    and isinstance(raw_variables, dict)
+                    and raw_variables.get("bootstrap_fragment") is True
+                )
                 section_context = _bootstrap_context_payload(
                     self,
                     input_name="authoring_source_context",
@@ -7835,7 +7956,7 @@ class MetadataAuthoringEngine(Component):
                     purpose=expected_purpose,
                     domain_id=domain_id,
                     environment=environment,
-                    bootstrap_fragment=False,
+                    bootstrap_fragment=single_domain_bootstrap,
                     grounding_mode=grounding_mode,
                     annotation_only=annotation_only,
                     expected_invoke=None,
@@ -8107,6 +8228,52 @@ class MetadataAuthoringEngine(Component):
                     invocation_draft,
                     source_sha256=str(source_manifest.get("source_sha256") or ""),
                 )
+            if model_required and single_domain_bootstrap:
+                raw_reference = getattr(self, "approved_reference_context", None)
+                registry_context = getattr(raw_reference, "data", raw_reference)
+                registry_context = registry_context if isinstance(registry_context, dict) else {}
+                approved_planner_policy = deepcopy(
+                    (registry_context.get("semantic_templates") or {}).get("planner_policy") or {}
+                )
+                domain_fragment, domain_template_expansion = _expand_bootstrap_domain_annotation(
+                    invocation_draft,
+                    semantic_templates=registry_context.get("semantic_templates"),
+                    semantic_vocabulary=registry_context.get("semantic_vocabulary"),
+                )
+                dataset_fragment, main_filter_fragment = _deterministic_registry_bootstrap_fragments(
+                    registry_context
+                )
+                dataset_reconciliation = {}
+                main_filter_reconciliation = {}
+                invocation_draft = _merge_bootstrap_fragments(
+                    {
+                        "domain": domain_fragment,
+                        "dataset": dataset_fragment,
+                        "main_filter": main_filter_fragment,
+                    },
+                    dataset_descriptors=registry_context.get("dataset_descriptors"),
+                    semantic_vocabulary=registry_context.get("semantic_vocabulary"),
+                    reconciliation_out=dataset_reconciliation,
+                    main_filter_reconciliation_out=main_filter_reconciliation,
+                    domain_already_expanded=True,
+                )
+                invocation_draft, metric_binding_completion = _complete_unambiguous_metric_bindings(
+                    invocation_draft,
+                    registry_context.get("semantic_vocabulary"),
+                )
+                invocation_draft, semantic_alias_normalization = _normalize_bootstrap_alias_shorthand(
+                    invocation_draft,
+                    registry_context.get("semantic_vocabulary"),
+                )
+                if authoring_proposal_validation is not None:
+                    authoring_proposal_validation = {
+                        **authoring_proposal_validation,
+                        "expanded_draft_sha256": sha256_json(invocation_draft),
+                        "domain_template_expansion": deepcopy(domain_template_expansion),
+                        "dataset_registry_reconciliation": dataset_reconciliation,
+                        "main_filter_registry_reconciliation": main_filter_reconciliation,
+                        "single_llm_registry_bootstrap": True,
+                    }
             if model_required and kind in {"dataset", "main_filter"}:
                 raw_reference = getattr(self, "approved_reference_context", None)
                 registry_context = getattr(raw_reference, "data", raw_reference)
@@ -8154,7 +8321,7 @@ class MetadataAuthoringEngine(Component):
                 grounding_mode=grounding_mode,
                 approved_planner_policy=approved_planner_policy,
             )
-            if split_bootstrap:
+            if split_bootstrap or single_domain_bootstrap:
                 # Fragment schemas intentionally permit omitted execution refs.
                 # Seal every dataset with the operator registry before the final
                 # full-draft schema and compiler gates; model-supplied refs never
@@ -8212,7 +8379,9 @@ class MetadataAuthoringEngine(Component):
         # Read the three current documents as one release. Section patches use
         # that exact package as their base; a full-domain save uses it only for
         # monotonic revisioning and source preservation.
-        if not dry_run:
+        # Section validate-only runs still need the current three-collection
+        # package as their immutable base. They read it but never write.
+        if not dry_run or (kind != "domain" and active_package is None):
             client, db = self._mongo()
             try:
                 current_documents = {
@@ -9286,6 +9455,224 @@ def _presenter_source(
     return "\n\n".join(blocks).strip() + "\n"
 
 
+SIMPLE_AUTHORING_PIPELINE_COMPONENT = r'''
+class SimpleMetadataDraftGenerator(Component):
+    display_name = "자연어 메타데이터 변환"
+    description = "자유형 자연어와 외부 공통·특화 프롬프트를 묶어 Gemini를 정확히 한 번 호출하고 검증용 등록 컨텍스트를 만듭니다."
+    icon = "wand-sparkles"
+    metadata = {"logical_stage": "simple_metadata_draft", "automatic_retry_count": 0}
+
+    inputs = [
+        MessageInput(name="input_message", display_name="자연어 메타데이터 입력", required=True, info="작업자가 형식 제약 없이 작성한 자연어 설명입니다."),
+        MessageInput(name="common_prompt_message", display_name="공통 등록 프롬프트", required=True, info="모든 업무에 적용되는 공통 등록 규칙입니다."),
+        MessageInput(name="specialized_prompt_message", display_name="업무 특화 등록 프롬프트", required=False, info="현재 업무에서만 사용하는 용어와 해석 규칙입니다."),
+        HandleInput(name="language_model", display_name="등록 변환 언어 모델", input_types=["LanguageModel"], required=True),
+        MultilineInput(name="registry_json", display_name="승인 업무 어휘·원천 레지스트리", value="", required=True, advanced=True, info="Flow 생성 시 검토된 레지스트리가 자동 주입됩니다."),
+        DropdownInput(name="authoring_kind", display_name="등록 항목", options=["domain", "dataset", "main_filter"], value="domain", advanced=True),
+        StrInput(name="domain_id", display_name="도메인 ID", value="manufacturing", advanced=True),
+        StrInput(name="environment", display_name="운영 환경", value="production", advanced=True),
+    ]
+    outputs = [
+        Output(name="authoring_context", display_name="검증 대기 등록 컨텍스트", method="build_authoring_context", types=["Data"])
+    ]
+
+    def build_authoring_context(self) -> Data:
+        kind = str(getattr(self, "authoring_kind", "domain") or "domain").strip()
+        if kind not in {"domain", "dataset", "main_filter"}:
+            raise ValueError("등록 항목은 domain, dataset, main_filter 중 하나여야 합니다.")
+        domain_id = str(getattr(self, "domain_id", "") or "").strip()
+        environment = str(getattr(self, "environment", "") or "").strip()
+        source_text = str(
+            getattr(getattr(self, "input_message", None), "text", getattr(self, "input_message", "")) or ""
+        ).strip()
+
+        registry = AuthoringReferenceRegistry()
+        registry.registry_json = str(getattr(self, "registry_json", "") or "")
+        registry.domain_id = domain_id
+        reference_context = registry.load_registry()
+
+        context_builder = AuthoringPromptContextBuilder()
+        context_builder.input_message = getattr(self, "input_message", None)
+        context_builder.approved_reference_context = reference_context
+        # Domain registration asks the model only for display annotations.
+        # Dataset and Main Filter bootstrap material is then expanded from the
+        # approved registry without additional model calls.
+        context_builder.bootstrap_fragment = kind == "domain"
+        context_builder.authoring_kind = kind
+        context_builder.mode = "save"
+        context_builder.source_grounding_mode = "freeform_llm"
+        context_builder.domain_id = domain_id
+        context_builder.environment = environment
+        context_builder.trusted_blueprint_json = ""
+        context_builder.trusted_blueprint_sha256 = ""
+        source_context = context_builder.build_context()
+
+        composer = PromptBundleComposer()
+        composer.common_prompt_message = getattr(self, "common_prompt_message", None)
+        composer.specialized_prompt_message = getattr(self, "specialized_prompt_message", None)
+        composer.runtime_context = source_context
+        prompt_bundle = composer.build_prompt_bundle()
+
+        invoker = ConditionalLLMInvoker()
+        invoker.prompt_bundle = prompt_bundle
+        invoker.language_model = getattr(self, "language_model", None)
+        invocation_result = invoker.invoke_once()
+        self.status = str(getattr(invoker, "status", "등록 초안 변환 완료") or "등록 초안 변환 완료")
+
+        return Data(
+            data={
+                "contract_version": "metadata.simple-authoring-context.v1",
+                "authoring_kind": kind,
+                "domain_id": domain_id,
+                "environment": environment,
+                "source_text": source_text,
+                "authoring_source_context": deepcopy(getattr(source_context, "data", source_context)),
+                "approved_reference_context": deepcopy(getattr(reference_context, "data", reference_context)),
+                "authoring_invocation_result": deepcopy(getattr(invocation_result, "data", invocation_result)),
+            }
+        )
+'''
+
+
+SIMPLE_AUTHORING_ENGINE_COMPONENT = r'''
+class SimpleMetadataAuthoringEngine(Component):
+    display_name = "메타데이터 검증 및 저장"
+    description = "LLM 초안을 결정론적으로 컴파일·검증하고 도메인·테이블 카탈로그·메인 필터 3개 MongoDB 컬렉션에 항목 단위로 저장합니다."
+    icon = "database-backup"
+    metadata = {"logical_stage": "simple_metadata_validation_and_save", "automatic_retry_count": 0}
+
+    inputs = [
+        DataInput(name="authoring_context", display_name="검증 대기 등록 컨텍스트", required=True),
+        DropdownInput(name="authoring_kind", display_name="등록 항목", options=["domain", "dataset", "main_filter"], value="domain", advanced=True),
+        StrInput(name="domain_id", display_name="도메인 ID", value="manufacturing", advanced=True),
+        StrInput(name="environment", display_name="운영 환경", value="production", advanced=True),
+        DropdownInput(name="mode", display_name="저장 모드", options=["save", "validate_only"], value="save", advanced=True),
+        SecretStrInput(name="mongo_uri", display_name="MongoDB 연결 URI", value="", required=False, advanced=True, info="빈 값이면 MONGODB_URI 환경변수를 사용합니다."),
+        StrInput(name="mongo_database", display_name="MongoDB 데이터베이스", value="", required=False, advanced=True, info="빈 값이면 MONGODB_DATABASE 환경변수를 사용합니다."),
+        StrInput(name="domain_collection", display_name="도메인 메타데이터 컬렉션", value="agent_v6_domain_metadata", advanced=True),
+        StrInput(name="table_collection", display_name="테이블 카탈로그 컬렉션", value="agent_v6_table_catalog", advanced=True),
+        StrInput(name="main_filter_collection", display_name="메인 필터 컬렉션", value="agent_v6_main_filter", advanced=True),
+        IntInput(name="mongo_timeout_ms", display_name="MongoDB 제한 시간(ms)", value=5000, advanced=True),
+        BoolInput(name="dry_run", display_name="저장 없는 검증", value=False, advanced=True),
+    ]
+    outputs = [Output(name="response", display_name="메타데이터 등록 결과", method="run_authoring", types=["Data"])]
+
+    def run_authoring(self) -> Data:
+        raw = getattr(getattr(self, "authoring_context", None), "data", getattr(self, "authoring_context", None))
+        if not isinstance(raw, dict) or raw.get("contract_version") != "metadata.simple-authoring-context.v1":
+            raise ValueError("자연어 메타데이터 변환 노드의 등록 컨텍스트가 필요합니다.")
+        kind = str(getattr(self, "authoring_kind", "domain") or "domain").strip()
+        domain_id = str(getattr(self, "domain_id", "") or "").strip()
+        environment = str(getattr(self, "environment", "") or "").strip()
+        if (
+            kind not in {"domain", "dataset", "main_filter"}
+            or raw.get("authoring_kind") != kind
+            or raw.get("domain_id") != domain_id
+            or raw.get("environment") != environment
+        ):
+            raise ValueError("변환 노드와 저장 노드의 등록 항목·도메인·운영 환경 설정이 일치하지 않습니다.")
+
+        engine = MetadataAuthoringEngine()
+        engine.input_message = str(raw.get("source_text") or "")
+        engine.authoring_source_context = Data(data=deepcopy(raw.get("authoring_source_context") or {}))
+        engine.approved_reference_context = Data(data=deepcopy(raw.get("approved_reference_context") or {}))
+        engine.authoring_invocation_result = Data(data=deepcopy(raw.get("authoring_invocation_result") or {}))
+        engine.split_bootstrap = False
+        engine.authoring_kind = kind
+        engine.source_grounding_mode = "freeform_llm"
+        engine.metadata_contract_mode = "domain_package_v2"
+        engine.domain_id = domain_id
+        engine.environment = environment
+        engine.revision_policy = "auto_next"
+        engine.mode = str(getattr(self, "mode", "save") or "save")
+        engine.mongo_uri = getattr(self, "mongo_uri", "")
+        engine.mongo_database = str(getattr(self, "mongo_database", "") or "")
+        engine.domain_collection = str(getattr(self, "domain_collection", "") or "")
+        engine.table_collection = str(getattr(self, "table_collection", "") or "")
+        engine.main_filter_collection = str(getattr(self, "main_filter_collection", "") or "")
+        engine.mongo_timeout_ms = int(getattr(self, "mongo_timeout_ms", 5000) or 5000)
+        engine.dry_run = bool(getattr(self, "dry_run", False))
+        result = engine.run_authoring()
+        self.status = str(getattr(engine, "status", "메타데이터 검증 완료") or "메타데이터 검증 완료")
+        return result
+'''
+
+
+def _embedded_module_imports(*sources: str) -> str:
+    """Collect imports once so helper component bodies can follow the public wrapper."""
+
+    rendered: list[str] = []
+    seen: set[str] = set()
+    for source in sources:
+        for node in ast.parse(source).body:
+            if not isinstance(node, (ast.Import, ast.ImportFrom)):
+                continue
+            if isinstance(node, ast.ImportFrom) and node.module == "__future__":
+                continue
+            value = ast.unparse(node).strip()
+            if value and value not in seen:
+                seen.add(value)
+                rendered.append(value)
+    return "\n".join(rendered)
+
+
+def _embedded_module_body(source: str) -> str:
+    """Strip module headers/imports while retaining helper functions and classes."""
+
+    body: list[ast.stmt] = []
+    for node in ast.parse(source).body:
+        if isinstance(node, (ast.Import, ast.ImportFrom)):
+            continue
+        if isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and isinstance(node.value.value, str):
+            continue
+        if isinstance(node, ast.Assign) and any(
+            isinstance(target, ast.Name) and target.id == "EMBEDDED_SOURCE_MANIFEST"
+            for target in node.targets
+        ):
+            continue
+        body.append(node)
+    return "\n\n".join(ast.unparse(node).strip() for node in body if ast.unparse(node).strip())
+
+
+def _simple_authoring_pipeline_source(
+    catalog: dict[str, Any], schemas: dict[str, dict[str, Any]], manifest: dict[str, Any]
+) -> str:
+    context_source = _authoring_prompt_context_source(catalog, schemas, manifest)
+    registry_source = _analysis_phase_source(
+        "AuthoringReferenceRegistry",
+        (),
+        AUTHORING_REFERENCE_REGISTRY_COMPONENT,
+        catalog=None,
+        schemas=schemas,
+        manifest=manifest,
+        extra_blocks=(SEMANTIC_VOCABULARY_HELPERS,),
+    )
+    composer_source = PROMPT_BUNDLE_SOURCE_PATH.read_text(encoding="utf-8")
+    invoker_source = CONDITIONAL_LLM_SOURCE_PATH.read_text(encoding="utf-8")
+    sources = (context_source, registry_source, composer_source, invoker_source)
+    blocks = [
+        _header(manifest, "SimpleMetadataDraftGenerator"),
+        _embedded_module_imports(*sources),
+        SIMPLE_AUTHORING_PIPELINE_COMPONENT,
+        *(_embedded_module_body(source) for source in sources),
+    ]
+    return "\n\n".join(block.strip() for block in blocks if block.strip()) + "\n"
+
+
+def _simple_authoring_engine_source(
+    catalog: dict[str, Any], schemas: dict[str, dict[str, Any]], manifest: dict[str, Any]
+) -> str:
+    engine_source = _authoring_source(catalog, schemas, manifest)
+    return "\n\n".join(
+        (
+            _header(manifest, "SimpleMetadataAuthoringEngine").strip(),
+            _embedded_module_imports(engine_source).strip(),
+            SIMPLE_AUTHORING_ENGINE_COMPONENT.strip(),
+            _embedded_module_body(engine_source).strip(),
+        )
+    ) + "\n"
+
+
 def _authoring_prompt_context_source(
     catalog: dict[str, Any], schemas: dict[str, dict[str, Any]], manifest: dict[str, Any]
 ) -> str:
@@ -9549,7 +9936,11 @@ def build_components(*, check: bool = False) -> list[Path]:
             "registered_functions.py",
             "generic_v2_planner.py",
         )
-    ] + schema_paths
+    ] + schema_paths + [
+        APPROVED_SOURCE_REGISTRY_PATH,
+        PROMPT_BUNDLE_SOURCE_PATH,
+        CONDITIONAL_LLM_SOURCE_PATH,
+    ]
     for path in paths:
         if not path.is_file():
             raise GenerationError(f"required reference source is missing: {path}")
@@ -9824,7 +10215,13 @@ def build_components(*, check: bool = False) -> list[Path]:
         OUTPUT_ROOT / "metadata_authoring" / "authoring_prompt_context_builder.py": _authoring_prompt_context_source(
             catalog, schemas, manifest
         ),
+        OUTPUT_ROOT / "metadata_authoring" / "simple_metadata_draft_generator.py": _simple_authoring_pipeline_source(
+            catalog, schemas, manifest
+        ),
         OUTPUT_ROOT / "metadata_authoring" / "00_metadata_authoring_engine.py": _authoring_source(
+            catalog, schemas, manifest
+        ),
+        OUTPUT_ROOT / "metadata_authoring" / "02_simple_metadata_authoring_engine.py": _simple_authoring_engine_source(
             catalog, schemas, manifest
         ),
         OUTPUT_ROOT / "metadata_authoring" / "01_authoring_message_presentation.py": _authoring_message_source(

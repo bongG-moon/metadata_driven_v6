@@ -38,13 +38,12 @@ $DataAnalysisFlowName = "metadata_v6_data_analysis_flow_v6_standalone.json"
 $AuthoringFlowNames = @(
     "metadata_v6_domain_authoring_flow_v6_standalone.json",
     "metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
-    "metadata_v6_main_filter_authoring_flow_v6_standalone.json",
-    "metadata_v6_domain_policy_authoring_flow_v6_standalone.json"
+    "metadata_v6_main_filter_authoring_flow_v6_standalone.json"
 )
 $flowDirectory = Join-Path $Source "flow_exports"
 $currentFlowFiles = @(Get-ChildItem -LiteralPath $flowDirectory -File -Filter "*_standalone.json")
-if ($currentFlowFiles.Count -ne 5) {
-    throw "Expected 5 current standalone Flow exports, found $($currentFlowFiles.Count)"
+if ($currentFlowFiles.Count -ne 4) {
+    throw "Expected 4 current standalone Flow exports, found $($currentFlowFiles.Count)"
 }
 $currentFlowHashes = @{}
 foreach ($flowFile in $currentFlowFiles) {

@@ -157,14 +157,14 @@ isolated exact 1.9.2 environment에 generated Flow를 import하고 Chat/API/GaiA
 - pytest full suite exit code 0
 - JUnit XML 또는 동등한 machine-readable pytest report와 console log의 path/hash
 - unexpected skip/xfail, collection error, mandatory case deselection 0
-- MVP logical key/`endpoint_name`이 정확히 `metadata_v6_data_analysis`, `metadata_v6_domain_authoring`, `metadata_v6_dataset_catalog_authoring`, `metadata_v6_main_filter_authoring`, `metadata_v6_domain_policy_authoring` 5개
+- MVP logical key/`endpoint_name`이 정확히 `metadata_v6_data_analysis`, `metadata_v6_domain_authoring`, `metadata_v6_dataset_catalog_authoring`, `metadata_v6_main_filter_authoring` 4개
 - 다섯 Flow 모두 version/schema/source hash, parse, isolated import 통과
 - top-level UUID는 fixed namespace + logical key의 expected UUIDv5와 일치
 - physical standalone source/node/edge 수는 재생성 manifest와 일치하며 Flow source/export/import-ready projection의 모든 custom-node instance가 같은 embedded source hash와 일치. 기존 18개 source/75개 instance 수치는 4-Flow migration baseline일 뿐 final oracle이 아님
 - imported Data Analysis endpoint는 dummy profile 30 single + 6 date + MT-1~MT-5 + 모든 `OP-*` 전체 route corpus와, 그중 `expected_route=intent_llm` subset의 primary/secondary 각 3회 model conformance를 통과
 - 모든 imported run에서 route/reason/call-count와 no-fallback oracle 통과
 - imported Data Analysis endpoint는 typed flexibility matrix와 v5 Message 표시/API/GaiA compatibility matrix를 통과
-- 네 authoring Flow는 각각 immutable prepare와 fake/contract approval 후 second-run atomic execute smoke 통과
+- 세 authoring Flow는 각각 자연어 변환, 결정론적 검증, `save|validate_only`, 항목 단위 저장 smoke를 통과
 - Domain Flow의 기본 free-form full-draft lane은 빈 Blueprint/pin으로도 실행하고, optional explicit-inventory profile에서만 missing/tampered Blueprint pin zero-model fail-closed와 annotation allowlist를 통과
 - Domain Policy와 optional explicit-inventory Main Filter는 prompt node/Composer/envelope/provider 호출 0을 정적 graph와 runtime counter 양쪽에서 통과
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter는 공통·특화 Prompt Template의 node ID/prompt ID/revision/source/hash/edge가 물리적으로 분리되고, 모든 Template의 변수 집합이 비어 있으며 runtime context는 Composer에 한 번만 전달
@@ -366,13 +366,13 @@ MongoDB SRV `_resolve_uri`가 장시간 실행 프로세스에서 반복되지�
 - live source 9 dataset smoke
 - Oracle/H-API/Datalake/Goodocs/Dummy adapter contract/security fixture
 - Python 3.12.x와 exact package tuple
-- 정확히 5개 MVP Flow import와 Data Analysis Chat/API/GaiA gate
+- 정확히 4개 MVP Flow import와 Data Analysis Chat/API/GaiA gate
 - 재생성 manifest의 physical standalone source/node/edge count와 모든 Flow custom-node source instance parity
 - Full-domain 자유형 TXT→closed full draft→deterministic compile gate, Dataset/Main Filter section ownership, Domain Policy prompt/envelope/provider 0회, optional explicit-inventory/Blueprint annotation-only profile
 - 제목·bullet 없는 수동 재작성 자유형 corpus까지 실제 Langflow authoring HTTP에서 성공하고, 모호한 입력은 repair나 임의 저장 없이 `needs_clarification`으로 종료
 - Runtime과 authoring의 고정 공통·특화 Prompt pair, 직접 작성된 특화 본문, 빈 변수 집합과 단일 runtime-context edge
 - registered function descriptor→registry→candidate→Intent→`registered_call`→Gateway→output/lineage positive·negative E2E
-- 5개 Flow의 사용자 가시 한글 이름/설명/input `info`/output 설명과 역할별 Sticky Note 정적·import 검증
+- 4개 Flow의 사용자 가시 한글 이름/설명/input `info`/output 설명과 역할별 Sticky Note 정적·import 검증
 - exploration runtime/Flow/edge 0; future schema는 disabled namespace로만 존재
 - full pytest exit 0과 machine-readable evidence
 - authoritative evidence manifest 생성

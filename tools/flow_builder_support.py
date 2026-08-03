@@ -25,7 +25,6 @@ EXPECTED_FLOW_KEYS = (
     "metadata_v6_domain_authoring",
     "metadata_v6_dataset_catalog_authoring",
     "metadata_v6_main_filter_authoring",
-    "metadata_v6_domain_policy_authoring",
 )
 DEFAULT_INVENTORY = PROJECT_ROOT / "contracts" / "flow_inventory.json"
 DEFAULT_ASSET_MANIFEST = PROJECT_ROOT / "tools" / "assets" / "runtime_asset_manifest.json"

@@ -1,5 +1,7 @@
 # metadata_driven_v6 최종 수정 계획
 
+> 역사 문서: 이 문서는 별도 Domain Policy 등록 Flow를 포함하던 5-Flow 계획을 보존한다. 현재 구현 계약은 Data Analysis 1개와 Domain/Table Catalog/Main Filter 등록 3개를 합한 4-Flow이며, 최신 결과는 `V6_FINAL_VALIDATION_CURRENT.md`를 따른다.
+
 ## 1. 최종 목표
 
 하나의 공유 Data Analysis Flow가 제조·주문/매출·고객지원 등 서로 다른 업무에서 같은 실행 구조를 사용한다. 사용자는 자연어 metadata, domain policy와 Flow의 외부 prompt node만 교체하며, 정확성은 compiled metadata, closed semantic intent, typed Execution IR와 deterministic executor가 책임진다.

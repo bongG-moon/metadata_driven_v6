@@ -2,7 +2,7 @@
 
 검증 기준일은 2026-08-01이며 기준 runtime은 Python 3.12.8, Langflow 1.9.2, langflow-base 0.9.2, LFX 0.4.2다.
 
-> 이 문서는 2026-08-01의 **기존 4-Flow 구현 증적**을 보존하는 historical baseline이다. 당시 Blueprint mandatory/annotation-only authoring 수치도 현재 기본 계약의 증적이 아니다. 현재 기본 authoring은 자유형 자연어→LLM 최대 1회 closed full draft/section patch→결정론적 compile이며, Blueprint/pin annotation-only는 optional `source_grounding_mode=explicit_inventory` profile이다. 현재 목표 계약은 Data Analysis와 Domain/Dataset/Main Filter/Domain Policy Authoring을 합한 정확히 5개 MVP Flow다. 이 보고서의 4-Flow·18-source·75-instance 수치는 새 5-Flow 승인이나 현재 구현 완료를 증명하지 않으며, 재구현 후 새 evidence manifest와 보고서로 대체해야 한다.
+> 역사 문서: 이 문서는 2026-08-01 당시 구현 증적을 보존한다. 현재 계약은 별도 Domain Policy 등록 Flow를 제거한 4-Flow 구조이며 최신 결과는 `V6_FINAL_VALIDATION_CURRENT.md`를 따른다.
 
 ## 1. 구현 결론
 

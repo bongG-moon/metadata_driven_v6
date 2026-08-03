@@ -3,7 +3,7 @@
 - 작성일: 2026-07-31
 - 설계 기준: v5 `bb6df1a` tracked source, 내용상 `f5a2a79`
 - 런타임 기준: Langflow 1.9.2 / Langflow Base 0.9.2 / LFX 0.4.2 / Python 3.12
-- 상태: 5개 MVP Flow 목표 계약 확정. 기존 4-Flow 구현 증적은 migration baseline이며 최종 승인 기준이 아님
+- 상태: 4개 MVP Flow 목표 계약 확정. Data Analysis 1개와 Chat-first metadata authoring 3개를 제공함
 
 ## 1. 설계 결론
 
@@ -225,7 +225,7 @@ v5 호환 surface는 다음과 같이 이전한다.
 - Main Filter는 기본적으로 `metadata.bootstrap.main-filter-ir.v1`의 `target_type`·`target_id`·`expressions`만 LLM 최대 1회로 만들고 compiler가 alias card로 확장한다. `source_grounding_mode=explicit_inventory`가 완전한 alias→canonical binding을 증명한 경우에만 선택적으로 LLM 0회 결정론적 patch를 사용한다.
 - optional 고신뢰 lane은 reviewed `metadata.executable-blueprint.v1`과 별도 SHA-256 pin으로 기본 Domain annotation 계약에 executable 불변성 증명을 추가할 수 있으나 일반 작업자 입력의 전제 조건이 아니다.
 - Domain/Dataset/Main Filter의 LLM 경로는 작업별 공통·특화 Prompt Template node가 각각 하나씩이며 서로 다른 node/source/hash/edge를 유지한다. 모든 Template은 변수 없이 렌더링하고 사용자 입력이나 metadata가 특화 본문을 동적으로 바꾸지 못한다.
-- Domain Policy는 별도 Domain Policy Authoring Flow의 전용 관리자 입력 `intent_prompt_extension`, `answer_prompt_extension`, `specialized_functions_json`, `output_profile_json`만 사용하고 Prompt Template/Composer/envelope/LLM은 0회다. `semantic_templates.planner_policy`의 `planner_profile`/legacy hash는 이 Flow도 변경할 수 없다.
+- 별도 Domain Policy Authoring Flow는 노출하지 않는다. 등록 해석의 업무별 차이는 세 등록 Flow의 특화 Prompt Template에서 관리하며, 실행 함수 descriptor와 planner policy는 자연어 Chat 등록으로 변경할 수 없는 compiler 소유 경계로 유지한다.
 - optional explicit-inventory Main Filter도 Prompt Template/Composer/envelope/LLM은 0회
 - JSON Schema와 semantic·dependency·security lint가 실행 가능성을 검증한다. 누락·모호한 정보는 포맷 재작성 요구가 아니라 draft/candidate 없는 `status=needs_clarification`으로 반환하며, 질문은 내부 ID나 타입 대신 작업자가 고를 수 있는 쉬운 업무 label을 사용한다.
 - dependency closure 후 전체 runtime catalog를 검증하고 MongoDB 저장용 항목 문서로 분할
@@ -319,7 +319,7 @@ Turn 2:
 
 ## 6. Metadata saving flow
 
-네 authoring Flow를 분리해 유지한다.
+세 authoring Flow를 분리해 유지한다.
 
 1. Domain/semantic authoring
 2. Dataset catalog authoring
@@ -441,7 +441,7 @@ Oracle/H-API/Datalake/Goodocs/Dummy 5개 adapter contract/security fixture와 �
 
 ### Layer E: Langflow
 
-exact package tuple에서 정확히 5개 MVP Flow(Data Analysis, Domain Authoring, Dataset Authoring, Main Filter Authoring, Domain Policy Authoring)의 parse/import를 수행한다. Data Analysis는 Chat/API/GaiA, 네 authoring Flow는 prepare와 별도 execute run을 smoke한다. Domain Policy와 optional explicit-inventory Main Filter에서는 prompt node/Composer/envelope/provider 호출 0을 계측한다. 기본 제조 bootstrap은 v6 전용 `domain_v6.txt`+`dataset_v6.txt`+`main_filter_v6.txt` bundle, exact `gemini-3.5-flash-lite`, temperature 0, fallback/repair 0으로 실행한다.
+exact package tuple에서 정확히 4개 MVP Flow(Data Analysis, Domain Authoring, Dataset Authoring, Main Filter Authoring)의 parse/import를 수행한다. Data Analysis는 Chat/API/GaiA를, 세 authoring Flow는 Chat Input부터 Chat Output까지 direct save와 validate-only를 smoke한다. 기본 제조 등록은 v6 전용 `domain_v6.txt`, `dataset_v6.txt`, `main_filter_v6.txt`를 각각 해당 Flow에 입력하고 exact `gemini-3.5-flash-lite`, temperature 0, fallback/repair 0으로 실행한다.
 
 Exploration Flow/endpoint/worker가 초기 bundle에 없고 Data Analysis에서 이를 호출하는 edge가 0인지도 확인한다.
 
@@ -458,7 +458,7 @@ Exploration Flow/endpoint/worker가 초기 bundle에 없고 Data Analysis에서 
 - Runtime Intent/Answer와 Domain/Dataset/Main Filter는 물리적으로 분리된 공통·특화 Prompt pair를 사용하고 특화 규칙을 Template 본문에 직접 작성하며 runtime context를 Composer에 한 번만 연결
 - Domain Policy와 optional explicit-inventory Main Filter의 prompt/envelope/provider 호출 0
 - registered function descriptor→registry attestation→candidate→Intent→`registered_call`→Gateway→output schema/lineage positive/negative E2E 통과
-- 5개 MVP Flow의 사용자 가시 Flow/node/input/output 이름·설명 한글화와 역할별 Sticky Note 정적·import 검증 통과
+- 4개 MVP Flow의 사용자 가시 Flow/node/input/output 이름·설명 한글화와 역할별 Sticky Note 정적·import 검증 통과
 - exact 1.9.2 export/import parity 통과
 
 ## 10. 구현 원칙 요약
