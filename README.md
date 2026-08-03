@@ -29,6 +29,7 @@
 - Prompt topology: Runtime Intent/Answer와 Domain/Dataset/Main Filter authoring 모두 공통·특화 Prompt Template을 별도 node/source/hash/edge로 유지한다. 특화 규칙은 각 특화 Template 본문에 직접 작성하고, runtime context는 Composer에만 한 번 연결한다. 동적 특화 본문 포트는 사용하지 않는다.
 - Domain Policy Authoring: 별도 Flow를 노출하지 않는다. 업무별 등록 해석 규칙은 각 등록 Flow의 특화 Prompt Template에서 관리하고, 기존 저장 정책 필드는 runtime 호환을 위해 읽기만 유지한다.
 - 특화 함수: descriptor→build-time standalone registry attestation→candidate→Intent→`registered_call` Typed IR→Registered Function Gateway→output schema/lineage 검증의 닫힌 실행 chain을 사용하며 metadata code/dynamic import/fallback은 금지
+- Data Analysis의 `08B 특화 함수 계약 입력` Text Input에서 공정 순서 범위와 제품 토큰 매핑을 일반 IR·prompt와 분리해 선언하며, 등록된 standalone allowlist 구현만 `registered_call`로 실행
 - v5 사용자 출력 기능: 결과표/근거/다운로드/알림/적용 기준/후속 질문/의도·조회·실행 진단 표시 선택, 구조화 API output, GaiA metadata, CSV ref, 멀티턴을 호환 계약으로 유지
 - Langflow UI: Data Analysis node는 `00`~`27`, 네 등록 Flow는 각 Flow의 `00` 입력부터 최종 출력까지 실행 순서가 드러나는 한국어 표시명을 사용한다. 병렬 입력·Prompt·출력만 `A/B/C` 접미사로 구분한다. Metadata loader에는 MongoDB URI·database·세 컬렉션명·timeout을 노출하고, 실제 source node에는 v5 호환 연결 설정과 조회 행 제한을 노출한다.
 - metadata read: `01 사용 가능 메타데이터 불러오기`가 입력받은 도메인·테이블 카탈로그·메인필터 3컬렉션의 자연어 기반 항목을 결합해 typed runtime catalog를 메모리에서 컴파일한다. 컬렉션 입력 기본값은 v6 운영명이며 domain/environment/source mode 선택은 UI에 없다.

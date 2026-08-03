@@ -570,7 +570,11 @@ def build_schemas() -> dict[str, dict[str, Any]]:
                 "input": {"type": "string", "minLength": 1, "maxLength": 256},
                 "function_ref": closed_object(
                     {
-                        "function_id": {"const": "core.trim_and_match_tokens"},
+                        "function_id": {"enum": [
+                            "core.trim_and_match_tokens",
+                            "manufacturing.match_product_tokens",
+                            "manufacturing.filter_ordered_range",
+                        ]},
                         "version": {"const": 1},
                         "implementation_sha256": SHA256,
                         "input_schema_sha256": SHA256,
@@ -590,13 +594,56 @@ def build_schemas() -> dict[str, dict[str, Any]]:
                     max_items=16,
                     unique=True,
                 ),
-                "arguments": closed_object(
-                    {
-                        "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
-                        **registered_parameters["properties"],
-                    },
-                    ["field_ref", "tokens", "operator", "match_mode", "case_sensitive"],
-                ),
+                "arguments": {
+                    "oneOf": [
+                        closed_object(
+                            {
+                                "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+                                **registered_parameters["properties"],
+                            },
+                            ["field_ref", "tokens", "operator", "match_mode", "case_sensitive"],
+                        ),
+                        closed_object(
+                            {
+                                "rules": array(
+                                    closed_object(
+                                        {
+                                            "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+                                            "operator": string(enum=("equals", "starts_with", "contains", "ends_with")),
+                                            "value": {"type": "string", "minLength": 1, "maxLength": 256},
+                                        },
+                                        ["field_ref", "operator", "value"],
+                                    ),
+                                    min_items=1,
+                                    max_items=32,
+                                ),
+                                "match_mode": {"const": "all"},
+                                "case_sensitive": {"type": "boolean"},
+                            },
+                            ["rules", "match_mode", "case_sensitive"],
+                        ),
+                        closed_object(
+                            {
+                                "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+                                "start": {"type": "string", "minLength": 1, "maxLength": 128},
+                                "end": {"type": "string", "minLength": 1, "maxLength": 128},
+                                "ordering_items": array(
+                                    closed_object(
+                                        {
+                                            "label": {"type": "string", "minLength": 1, "maxLength": 128},
+                                            "aliases": array({"type": "string", "minLength": 1, "maxLength": 128}, max_items=32),
+                                            "sequence": {"type": "number"},
+                                        },
+                                        ["label", "aliases", "sequence"],
+                                    ),
+                                    min_items=1,
+                                    max_items=512,
+                                ),
+                            },
+                            ["field_ref", "start", "end", "ordering_items"],
+                        ),
+                    ]
+                },
                 "limits": registered_limits,
                 "failure_policy": {"const": "fail_closed"},
             },
@@ -1132,21 +1179,21 @@ def make_case(
 
 def build_single_cases() -> list[dict[str, Any]]:
     specs: list[dict[str, Any]] = [
-        dict(id="Q01", q="오늘 투입된 제품중 MCP NO가 L-267로 시작하는 제품의 INPUT 수량 알려줘", cap="prefix filter + input sum", m=["input_qty"], d=["device"], f=["date.today", "mcp_no.starts_with:L-267"], o=["filter", "product_token_match", "aggregate", "sort"], out=["device", "input_qty"], inv=["prefix_not_contains", "today_kst", "sum_by_device"]),
+        dict(id="Q01", q="오늘 투입된 제품중 MCP NO가 L-267로 시작하는 제품의 INPUT 수량 알려줘", cap="prefix filter + input sum", m=["input_qty"], d=["device"], f=["date.today", "mcp_no.starts_with:L-267"], o=["registered_call", "filter", "aggregate", "sort"], out=["device", "input_qty"], inv=["prefix_not_contains", "today_kst", "sum_by_device"]),
         dict(id="Q02", q="어제 DA공정 차수별 생산량 알려줘", cap="relative date + process aliases + generation aggregate", m=["production_qty"], d=["generation"], f=["date.yesterday", "process.da"], out=["generation", "production_qty"], inv=["yesterday_kst", "da_alias_closed_set", "sum_by_generation"]),
         dict(id="Q03", q="어제 Mobile제품의 PKG OUT실적을 제품별로 알려줘", cap="product category + package-out aggregate", m=["pkg_out_qty"], d=["device"], f=["date.yesterday", "product.mobile"], out=["device", "pkg_out_qty"], inv=["mobile_metadata_filter", "sum_by_device"]),
         dict(id="Q04", q="HBM제품의 WB공정에서 오늘 아침재공 제품별로 알려줘", cap="snapshot WIP aggregate", m=["morning_wip_qty"], d=["device"], f=["date.today", "product.hbm", "process.wb", "snapshot.morning"], ds=["wip_snapshot"], out=["device", "morning_wip_qty"], inv=["morning_snapshot", "hbm_metadata_filter"]),
         dict(id="Q05", q="6/27일 W/B공정에서 세부 공정별 생산실적과 아침재공 수량 알려줘", cap="two-source metric selection and join", route="deterministic", kind="multi_source_compare", m=["production_qty", "morning_wip_qty"], d=["operation_name"], f=["date.2026-06-27", "process.wb"], o=["filter", "aggregate", "join", "project"], ds=["production", "wip_snapshot"], out=["operation_name", "production_qty", "morning_wip_qty"], inv=["left_join_policy", "metric_specific_time_semantics"], retrieval_calls=2),
         dict(id="Q06", q="HBM제품 FCB공정에서 오늘 아침재공 제품별로 알려줘", cap="HBM FCB snapshot WIP", m=["morning_wip_qty"], d=["device"], f=["date.today", "product.hbm", "process.fcb", "snapshot.morning"], ds=["wip_snapshot"], out=["device", "morning_wip_qty"], inv=["morning_snapshot", "fcb_alias_closed_set"]),
         dict(id="Q07", q="6월 30일 FCB/H 공정 실적이 있는 Device 알려줘", cap="existence filter and projection", kind="metric_presence_detail", m=["production_qty"], d=["device"], f=["date.2026-06-30", "process.fcb_h", "production_qty.gt:0"], o=["filter", "project", "dedupe", "sort"], out=["device"], inv=["positive_production_only", "distinct_device"]),
-        dict(id="Q08", q="RG 32G DDR4 FBGA 96 DDP 제품 BG공정에서 생산량과 재공수량 알려줘", cap="product token resolution + two-source join", route="deterministic", kind="multi_source_compare", m=["production_qty", "wip_qty"], d=["device"], f=["product.tokens:RG-32G-DDR4-FBGA-96-DDP", "process.bg"], o=["product_token_match", "filter", "aggregate", "join", "project"], ds=["production", "wip_snapshot"], out=["device", "production_qty", "wip_qty"], inv=["all_product_tokens_match", "registered_join_only"], retrieval_calls=2),
-        dict(id="Q09", q="FCB 공정에서 SP 16G DDR5 2ND X4 78 FCBGA SDP 제품의 전일 생산량 알려줘", cap="long product-token match + yesterday", m=["production_qty"], d=["device"], f=["date.yesterday", "process.fcb", "product.tokens:SP-16G-DDR5-2ND-X4-78-FCBGA-SDP"], o=["product_token_match", "filter", "aggregate"], out=["device", "production_qty"], inv=["all_product_tokens_match", "yesterday_kst"]),
+        dict(id="Q08", q="RG 32G DDR4 FBGA 96 DDP 제품 BG공정에서 생산량과 재공수량 알려줘", cap="product token resolution + two-source join", route="deterministic", kind="multi_source_compare", m=["production_qty", "wip_qty"], d=["device"], f=["product.tokens:RG-32G-DDR4-FBGA-96-DDP", "process.bg"], o=["registered_call", "filter", "aggregate", "join", "project"], ds=["production", "wip_snapshot"], out=["device", "production_qty", "wip_qty"], inv=["all_product_tokens_match", "registered_join_only"], retrieval_calls=2),
+        dict(id="Q09", q="FCB 공정에서 SP 16G DDR5 2ND X4 78 FCBGA SDP 제품의 전일 생산량 알려줘", cap="long product-token match + yesterday", m=["production_qty"], d=["device"], f=["date.yesterday", "process.fcb", "product.tokens:SP-16G-DDR5-2ND-X4-78-FCBGA-SDP"], o=["registered_call", "filter", "aggregate"], out=["device", "production_qty"], inv=["all_product_tokens_match", "yesterday_kst"]),
         dict(id="Q10", q="6/24일 투입 실적 대비 D/S1, DA1공정에서 WIP 많은 제품 알려줘", cap="input versus WIP multi-source comparison", route="deterministic", kind="multi_source_compare", m=["input_qty", "wip_qty"], d=["device"], f=["date.2026-06-24", "process.ds1_or_da1"], o=["filter", "aggregate", "join", "sort"], ds=["input", "wip_snapshot"], out=["device", "input_qty", "wip_qty"], inv=["metric_source_dates", "sort_wip_desc"], retrieval_calls=2),
         dict(id="Q11", q="오늘 현시간 기준 INPUT실적은 있으나 D/A공정 WIP 없는 제품 확인해줘", cap="positive-left missing-or-zero-right presence anti-join", route="deterministic", kind="presence_compare", m=["input_qty", "wip_qty"], d=["device"], f=["date.today", "process.da"], o=["filter", "aggregate", "presence_filter", "project"], ds=["input", "wip_snapshot"], out=["device", "input_qty", "wip_qty"], inv=["positive_left", "missing_or_zero_right", "no_plain_anti_join"], retrieval_calls=2),
         dict(id="Q12", q="FCB 공정 생산 실적과 W/B2 공정 재공수량을 제품별로 비교해줘", cap="cross-process multi-source compare", route="deterministic", kind="multi_source_compare", m=["production_qty", "wip_qty"], d=["device"], f=["process.fcb:production", "process.wb2:wip"], o=["filter", "aggregate", "join", "project"], ds=["production", "wip_snapshot"], out=["device", "production_qty", "wip_qty"], inv=["metric_specific_process_filters", "registered_join_only"], retrieval_calls=2),
         dict(id="Q13", q="W/B공정 IN TAT 10시간이상 된 LOT 알려줘", cap="duration threshold detail", kind="detail", m=["in_tat_hours"], d=["lot_id"], f=["process.wb", "in_tat_hours.gte:10"], o=["filter", "detail", "sort"], ds=["lot_status"], out=["lot_id", "operation_name", "in_tat_hours"], inv=["duration_unit_hours", "gte_inclusive"]),
-        dict(id="Q14", q="D/S1~D/A4 공정 Hold 된 Lot ID 알려줘", cap="ordered operation range + hold filter", kind="detail", d=["lot_id"], f=["process.range:ds1-da4", "hold.true"], o=["ordered_range", "filter", "project", "dedupe", "sort"], ds=["lot_status"], out=["lot_id"], inv=["registered_process_order", "range_inclusive"]),
-        dict(id="Q15", q="7월 1일 D/A1~W/B6 공정 구간의 공정별 생산량을 OPER_SEQ 순서로 알려줘", cap="ordered process range aggregate", m=["production_qty"], d=["operation_name", "oper_seq"], f=["date.2026-07-01", "process.range:da1-wb6"], o=["filter", "ordered_range", "aggregate", "sort"], out=["oper_seq", "operation_name", "production_qty"], inv=["registered_process_order", "sort_oper_seq_asc"]),
+        dict(id="Q14", q="D/S1~D/A4 공정 Hold 된 Lot ID 알려줘", cap="ordered operation range + hold filter", kind="detail", d=["lot_id"], f=["process.range:ds1-da4", "hold.true"], o=["registered_call", "filter", "project", "dedupe", "sort"], ds=["lot_status"], out=["lot_id"], inv=["registered_process_order", "range_inclusive"]),
+        dict(id="Q15", q="7월 1일 D/A1~W/B6 공정 구간의 공정별 생산량을 OPER_SEQ 순서로 알려줘", cap="ordered process range aggregate", m=["production_qty"], d=["operation_name", "oper_seq"], f=["date.2026-07-01", "process.range:da1-wb6"], o=["filter", "registered_call", "aggregate", "sort"], out=["oper_seq", "operation_name", "production_qty"], inv=["registered_process_order", "sort_oper_seq_asc"]),
         dict(id="Q16", q="DA, WB공정 HOLD LOT 알려줘", cap="process union + hold lots", kind="detail", d=["lot_id", "operation_name"], f=["process.da_or_wb", "hold.true"], o=["filter", "detail", "dedupe", "sort"], ds=["lot_status"], out=["operation_name", "lot_id"], inv=["or_across_process_aliases", "hold_only"]),
         dict(id="Q17", q="WB & DA 공정 Hold Lot LIST알려줘", cap="process intersection syntax normalized to union", kind="detail", d=["lot_id", "operation_name"], f=["process.wb_or_da", "hold.true"], o=["filter", "detail", "dedupe", "sort"], ds=["lot_status"], out=["operation_name", "lot_id"], inv=["registered_multi_process_semantics", "hold_only"]),
         dict(id="Q18", q="D/S1&D/A 공정 Hold Lot LIST알려줘", cap="mixed process aliases + hold lots", kind="detail", d=["lot_id", "operation_name"], f=["process.ds1_or_da", "hold.true"], o=["filter", "detail", "dedupe", "sort"], ds=["lot_status"], out=["operation_name", "lot_id"], inv=["registered_multi_process_semantics", "hold_only"]),
@@ -1155,8 +1202,8 @@ def build_single_cases() -> list[dict[str, Any]]:
         dict(id="Q21", q="오늘 WBM 공정의 제품별 생산량을 알려줘. 제품 정보가 비어 있는 행도 제외하지 말고, 비어 있는 제품 정보는 빈칸으로, 생산량이 비어 있으면 0으로 보여줘.", cap="explicit null-preservation and fill policies", m=["production_qty"], d=["device"], f=["date.today", "process.wbm"], o=["filter", "derive", "aggregate", "project"], formulas=["fill_device_blank", "fill_production_zero"], out=["device", "production_qty"], inv=["preserve_blank_device", "fill_blank_metric_zero"]),
         dict(id="Q22", q="현재 제품 중 TECH, DEN, PKG_TYPE2, MCP_NO는 같지만 MODE, PKG_TYPE1 또는 LEAD가 다른 제품들을 찾아서 보여줘.", cap="same-key differing-attribute group comparison", route="deterministic", kind="group_attribute_compare", d=["tech", "den", "pkg_type2", "mcp_no", "mode", "pkg_type1", "lead", "device"], o=["compare_group_attributes", "detail", "sort"], ds=["product_master"], out=["tech", "den", "pkg_type2", "mcp_no", "mode", "pkg_type1", "lead", "device"], inv=["same_group_keys", "any_variant_attribute_differs"]),
         dict(id="Q23", q="FCB2공정 제품별 UPH 알려줘", cap="registered UPH metric by product", kind="uph", m=["uph"], d=["device"], f=["process.fcb2"], ds=["equipment_assignment"], out=["device", "uph"], inv=["uph_formula_metadata", "declared_uph_rollup"]),
-        dict(id="Q24", q="WB공정 L-217제품 차수별, 장비 기종별 UPH 알려줘", cap="prefix product + multidimensional UPH", kind="uph", m=["uph"], d=["generation", "equipment_model"], f=["process.wb", "mcp_no.starts_with:L-217"], o=["filter", "product_token_match", "aggregate", "sort"], ds=["equipment_assignment"], out=["generation", "equipment_model", "uph"], inv=["prefix_not_contains", "declared_uph_rollup"]),
-        dict(id="Q25", q="F315 L-116로 시작하는 제품 WB 공정 차수별 UPH 알려줘", cap="two product tokens + UPH by generation", kind="uph", m=["uph"], d=["generation"], f=["process.wb", "device.contains:F315", "mcp_no.starts_with:L-116"], o=["product_token_match", "filter", "aggregate", "sort"], ds=["equipment_assignment"], out=["generation", "uph"], inv=["all_product_tokens_match", "declared_uph_rollup"]),
+        dict(id="Q24", q="WB공정 L-217제품 차수별, 장비 기종별 UPH 알려줘", cap="prefix product + multidimensional UPH", kind="uph", m=["uph"], d=["generation", "equipment_model"], f=["process.wb", "mcp_no.starts_with:L-217"], o=["registered_call", "filter", "aggregate", "sort"], ds=["equipment_assignment"], out=["generation", "equipment_model", "uph"], inv=["prefix_not_contains", "declared_uph_rollup"]),
+        dict(id="Q25", q="F315 L-116로 시작하는 제품 WB 공정 차수별 UPH 알려줘", cap="two product tokens + UPH by generation", kind="uph", m=["uph"], d=["generation"], f=["process.wb", "device.contains:F315", "mcp_no.starts_with:L-116"], o=["registered_call", "filter", "aggregate", "sort"], ds=["equipment_assignment"], out=["generation", "uph"], inv=["all_product_tokens_match", "declared_uph_rollup"]),
         dict(id="Q26", q="현재 D/A1 공정의 장비 모델, Recipe, 공정, UPH를 보여줘", cap="equipment detail projection", kind="uph_detail", m=["uph"], d=["equipment_model", "recipe", "operation_name"], f=["snapshot.current", "process.da1"], o=["filter", "project", "sort"], ds=["equipment_assignment"], out=["equipment_model", "recipe", "operation_name", "uph"], inv=["current_snapshot", "exact_projection_order"]),
         dict(id="Q27", q="현재 D/A1 공정에 배정된 장비를 장비 모델과 Recipe 조합별로 보여줘", cap="equipment assignment grouped detail", kind="equipment_grouped", m=["equipment_count"], d=["equipment_model", "recipe"], f=["snapshot.current", "process.da1"], o=["filter", "aggregate", "sort", "project"], ds=["equipment_assignment"], out=["equipment_model", "recipe", "equipment_count", "equipment_list"], inv=["current_snapshot", "equipment_count_matches_list"]),
         dict(id="Q28", q="W/B공정 현재 HOLD LOT와 HOLD사유 알려줘", cap="current hold lot detail", kind="detail", d=["lot_id", "hold_reason"], f=["snapshot.current", "process.wb", "hold.true"], o=["filter", "detail", "sort"], ds=["lot_status"], out=["lot_id", "hold_reason"], inv=["current_snapshot", "hold_only"]),

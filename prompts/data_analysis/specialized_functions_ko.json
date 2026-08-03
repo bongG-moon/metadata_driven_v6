@@ -1,0 +1,33 @@
+{
+  "contract_version": "specialized-function-input.v1",
+  "functions": [
+    {
+      "function_id": "manufacturing.filter_ordered_range",
+      "version": 1,
+      "enabled": true,
+      "trigger_literal": "ordered_range",
+      "bindings": {
+        "label_field": "OPER_NAME",
+        "order_field": "OPER_SEQ",
+        "ordering_id": "process"
+      }
+    },
+    {
+      "function_id": "manufacturing.match_product_tokens",
+      "version": 1,
+      "enabled": true,
+      "trigger_literal": "product_token",
+      "bindings": {
+        "allowed_fields": [
+          "TECH",
+          "DEN",
+          "MODE",
+          "PKG_TYPE1",
+          "PKG_TYPE2",
+          "LEAD",
+          "MCP_NO"
+        ]
+      }
+    }
+  ]
+}

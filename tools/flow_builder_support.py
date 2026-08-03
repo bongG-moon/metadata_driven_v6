@@ -412,6 +412,14 @@ def _apply_settings(config: dict[str, Any], settings: dict[str, Any], *, node_id
         raise BuildContractError(f"{node_id}: component template is missing")
     prompt_sources: list[Path] = []
     for field_name, raw_setting in settings.items():
+        if field_name == "text_source":
+            text_path = resolve_project_path(str(raw_setting), label=f"{node_id} text source")
+            prompt_sources.append(text_path)
+            input_field = template.get("input_value")
+            if not isinstance(input_field, dict):
+                raise BuildContractError(f"{node_id}: text_source is only valid for a Text Input node")
+            input_field["value"] = text_path.read_text(encoding="utf-8")
+            continue
         if field_name in {"prompt_source", "_prompt_source"}:
             prompt_path = resolve_project_path(str(raw_setting), label=f"{node_id} prompt source")
             prompt_sources.append(prompt_path)

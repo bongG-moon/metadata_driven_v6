@@ -433,10 +433,31 @@ def _registered_invariant(invariant: str, context: dict[str, Any]) -> tuple[bool
     elif invariant == "reference_timezone_asia_seoul":
         ok = (response.get("request") or {}).get("timezone") == "Asia/Seoul"
     elif invariant == "prefix_not_contains":
-        ok = any(item.get("operator") == "starts_with" and item.get("field") == "MCP_NO" for item in context["clauses"])
+        calls = [
+            item for item in _find_ops(context, "registered_call")
+            if (item.get("function_ref") or {}).get("function_id") == "manufacturing.match_product_tokens"
+        ]
+        ok = any(
+            rule.get("operator") == "starts_with" and rule.get("field_ref") == "MCP_NO"
+            for call in calls
+            for rule in (call.get("arguments") or {}).get("rules", [])
+        )
     elif invariant == "all_product_tokens_match":
         tokens = semantic.get("product_tokens") or []
-        ok = bool(tokens) and all(_has_clause(context, str(item.get("field")), {str(item.get("operator"))}, item.get("value")) for item in tokens)
+        calls = [
+            item for item in _find_ops(context, "registered_call")
+            if (item.get("function_ref") or {}).get("function_id") == "manufacturing.match_product_tokens"
+        ]
+        compiled = {
+            (str(rule.get("field_ref")), str(rule.get("operator")), rule.get("value"))
+            for call in calls
+            for rule in (call.get("arguments") or {}).get("rules", [])
+        }
+        operator_map = {"eq": "equals", "starts_with": "starts_with", "contains": "contains", "ends_with": "ends_with"}
+        ok = bool(tokens) and all(
+            (str(item.get("field")), operator_map.get(str(item.get("operator"))), item.get("value")) in compiled
+            for item in tokens
+        )
     elif invariant in {"sum_by_device", "generation_grain", "sum_by_generation", "sum_by_operation"}:
         required = {
             "sum_by_device": {"DEVICE"},
@@ -492,8 +513,16 @@ def _registered_invariant(invariant: str, context: dict[str, Any]) -> tuple[bool
     elif invariant in {"duration_unit_hours", "gte_inclusive"}:
         ok = _has_clause(context, "IN_TAT", {"gte"})
     elif invariant in {"registered_process_order", "range_inclusive"}:
-        ranges = _find_ops(context, "ordered_range")
-        ok = bool(ranges) and all(item.get("start") is not None and item.get("end") is not None and item.get("start") <= item.get("end") for item in ranges)
+        ranges = [
+            item for item in _find_ops(context, "registered_call")
+            if (item.get("function_ref") or {}).get("function_id") == "manufacturing.filter_ordered_range"
+        ]
+        ok = bool(ranges) and all(
+            (item.get("arguments") or {}).get("start")
+            and (item.get("arguments") or {}).get("end")
+            and (item.get("arguments") or {}).get("ordering_items")
+            for item in ranges
+        )
     elif invariant == "sort_oper_seq_asc":
         ok = any(any(key.get("field") == "OPER_SEQ" and key.get("direction") == "asc" for key in item.get("keys", [])) for item in _find_ops(context, "sort"))
     elif invariant == "sort_out_plan_desc":

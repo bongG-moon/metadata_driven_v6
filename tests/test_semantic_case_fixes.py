@@ -63,7 +63,10 @@ def test_generic_lot_labels_are_not_parsed_as_identifiers() -> None:
 def test_ordered_range_filter_consumes_the_range_result() -> None:
     _, plan, rows = _compile_and_execute("D/S1~D/A4 공정 Hold 된 Lot ID 알려줘")
     operations = {operation["id"]: operation for operation in plan["operations"]}
-    assert operations["op_filter_1"]["input"] == "op_ordered_range"
+    specialized = operations["op_specialized_process_range"]
+    assert specialized["op"] == "registered_call"
+    assert specialized["function_ref"]["function_id"] == "manufacturing.filter_ordered_range"
+    assert operations["op_filter_1"]["input"] == "op_specialized_process_range"
     assert {row["LOT_ID"] for row in rows} == {"HOLD-B", "HOLD-C"}
 
 
@@ -98,6 +101,12 @@ def test_plain_process_metric_uses_process_grain_and_rg_join_is_nonempty() -> No
     _, plan, rows = _compile_and_execute(
         "RG 32G DDR4 FBGA 96 DDP 제품 BG공정에서 생산량과 재공수량 알려줘"
     )
+    product_calls = [
+        operation for operation in plan["operations"]
+        if operation.get("op") == "registered_call"
+        and operation.get("function_ref", {}).get("function_id") == "manufacturing.match_product_tokens"
+    ]
+    assert len(product_calls) == 2
     assert {job["dataset_key"] for job in plan["retrieval_jobs"]} == {"production_today", "wip_today"}
     assert rows
     assert rows[0]["PRODUCTION_QTY"] == 423

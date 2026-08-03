@@ -53,7 +53,9 @@ _FUNCTION_REF_KEYS = {
     "output_schema_sha256",
 }
 _CALL_TEMPLATE_KEYS = {"dataset_ref", "field_ref", "parameters", "output_fields"}
-_ARGUMENT_KEYS = {"field_ref", "tokens", "operator", "match_mode", "case_sensitive"}
+_TRIM_ARGUMENT_KEYS = {"field_ref", "tokens", "operator", "match_mode", "case_sensitive"}
+_PRODUCT_ARGUMENT_KEYS = {"rules", "match_mode", "case_sensitive"}
+_RANGE_ARGUMENT_KEYS = {"field_ref", "start", "end", "ordering_items"}
 
 _TRIM_AND_MATCH_INPUT_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -91,6 +93,60 @@ _TRIM_AND_MATCH_OUTPUT_SCHEMA: dict[str, Any] = {
             "uniqueItems": True,
             "items": {"type": "integer", "minimum": 0},
         }
+    },
+}
+
+_PRODUCT_TOKEN_INPUT_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["records", "rules", "match_mode", "case_sensitive"],
+    "properties": {
+        "records": {"type": "array", "maxItems": 100_000, "items": {"type": "object"}},
+        "rules": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["field_ref", "operator", "value"],
+                "properties": {
+                    "field_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+                    "operator": {"enum": ["equals", "starts_with", "contains", "ends_with"]},
+                    "value": {"type": "string", "minLength": 1, "maxLength": 256},
+                },
+            },
+        },
+        "match_mode": {"const": "all"},
+        "case_sensitive": {"type": "boolean"},
+    },
+}
+
+_ORDERED_RANGE_INPUT_SCHEMA: dict[str, Any] = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "additionalProperties": False,
+    "required": ["values", "start", "end", "ordering_items"],
+    "properties": {
+        "values": {"type": "array", "maxItems": 100_000, "items": {"type": ["number", "null"]}},
+        "start": {"type": "string", "minLength": 1, "maxLength": 128},
+        "end": {"type": "string", "minLength": 1, "maxLength": 128},
+        "ordering_items": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 512,
+            "items": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["label", "aliases", "sequence"],
+                "properties": {
+                    "label": {"type": "string", "minLength": 1, "maxLength": 128},
+                    "aliases": {"type": "array", "maxItems": 32, "items": {"type": "string", "minLength": 1, "maxLength": 128}},
+                    "sequence": {"type": "number"},
+                },
+            },
+        },
     },
 }
 
@@ -155,6 +211,62 @@ def _trim_and_match_tokens(payload: Mapping[str, Any], deadline: float) -> dict[
     return {"selected_indices": selected}
 
 
+def _normalize_scalar(value: Any, *, case_sensitive: bool) -> str:
+    normalized = str(value).strip()
+    return normalized if case_sensitive else normalized.casefold()
+
+
+def _match_product_tokens(payload: Mapping[str, Any], deadline: float) -> dict[str, Any]:
+    rules = list(payload["rules"])
+    case_sensitive = bool(payload["case_sensitive"])
+    selected: list[int] = []
+    for index, row in enumerate(payload["records"]):
+        if index % 128 == 0 and time.monotonic() > deadline:
+            _limit_error("registered function exceeded its timeout.", {"timeout": True})
+        decisions: list[bool] = []
+        for rule in rules:
+            raw = row.get(str(rule["field_ref"]))
+            if raw is None:
+                decisions.append(False)
+                continue
+            value = _normalize_scalar(raw, case_sensitive=case_sensitive)
+            token = _normalize_scalar(rule["value"], case_sensitive=case_sensitive)
+            operator = str(rule["operator"])
+            if operator == "equals":
+                decisions.append(value == token)
+            elif operator == "starts_with":
+                decisions.append(value.startswith(token))
+            elif operator == "contains":
+                decisions.append(token in value)
+            elif operator == "ends_with":
+                decisions.append(value.endswith(token))
+            else:
+                raise AssertionError(operator)
+        if decisions and all(decisions):
+            selected.append(index)
+    return {"selected_indices": selected}
+
+
+def _filter_ordered_range(payload: Mapping[str, Any], deadline: float) -> dict[str, Any]:
+    lookup: dict[str, float] = {}
+    for item in payload["ordering_items"]:
+        sequence = float(item["sequence"])
+        for label in [item["label"], *item["aliases"]]:
+            lookup[_normalize_scalar(label, case_sensitive=False).replace(" ", "")] = sequence
+    start_key = _normalize_scalar(payload["start"], case_sensitive=False).replace(" ", "")
+    end_key = _normalize_scalar(payload["end"], case_sensitive=False).replace(" ", "")
+    if start_key not in lookup or end_key not in lookup:
+        _contract_error("registered ordered range endpoint is absent from ordering metadata.")
+    low, high = sorted((lookup[start_key], lookup[end_key]))
+    selected: list[int] = []
+    for index, value in enumerate(payload["values"]):
+        if index % 128 == 0 and time.monotonic() > deadline:
+            _limit_error("registered function exceeded its timeout.", {"timeout": True})
+        if value is not None and low <= float(value) <= high:
+            selected.append(index)
+    return {"selected_indices": selected}
+
+
 @dataclass(frozen=True, slots=True)
 class _Registration:
     function_id: str
@@ -176,6 +288,26 @@ _TRIM_AND_MATCH_SHA256 = _implementation_pin(
     _TRIM_AND_MATCH_OUTPUT_SCHEMA,
 )
 
+_PRODUCT_TOKEN_ID = "manufacturing.match_product_tokens"
+_PRODUCT_TOKEN_VERSION = 1
+_PRODUCT_TOKEN_SHA256 = _implementation_pin(
+    _PRODUCT_TOKEN_ID,
+    _PRODUCT_TOKEN_VERSION,
+    "multi-field-trimmed-all-token-match.v1",
+    _PRODUCT_TOKEN_INPUT_SCHEMA,
+    _TRIM_AND_MATCH_OUTPUT_SCHEMA,
+)
+
+_ORDERED_RANGE_ID = "manufacturing.filter_ordered_range"
+_ORDERED_RANGE_VERSION = 1
+_ORDERED_RANGE_SHA256 = _implementation_pin(
+    _ORDERED_RANGE_ID,
+    _ORDERED_RANGE_VERSION,
+    "metadata-ordering-inclusive-range.v1",
+    _ORDERED_RANGE_INPUT_SCHEMA,
+    _TRIM_AND_MATCH_OUTPUT_SCHEMA,
+)
+
 _REGISTRY: dict[tuple[str, int], _Registration] = {
     (_TRIM_AND_MATCH_ID, _TRIM_AND_MATCH_VERSION): _Registration(
         function_id=_TRIM_AND_MATCH_ID,
@@ -190,7 +322,25 @@ _REGISTRY: dict[tuple[str, int], _Registration] = {
             "max_output_bytes": 8 * 1024 * 1024,
         },
         handler=_trim_and_match_tokens,
-    )
+    ),
+    (_PRODUCT_TOKEN_ID, _PRODUCT_TOKEN_VERSION): _Registration(
+        function_id=_PRODUCT_TOKEN_ID,
+        version=_PRODUCT_TOKEN_VERSION,
+        implementation_sha256=_PRODUCT_TOKEN_SHA256,
+        input_schema=_PRODUCT_TOKEN_INPUT_SCHEMA,
+        output_schema=_TRIM_AND_MATCH_OUTPUT_SCHEMA,
+        limit_ceiling={"timeout_ms": 5_000, "max_input_rows": 100_000, "max_output_rows": 100_000, "max_output_bytes": 8 * 1024 * 1024},
+        handler=_match_product_tokens,
+    ),
+    (_ORDERED_RANGE_ID, _ORDERED_RANGE_VERSION): _Registration(
+        function_id=_ORDERED_RANGE_ID,
+        version=_ORDERED_RANGE_VERSION,
+        implementation_sha256=_ORDERED_RANGE_SHA256,
+        input_schema=_ORDERED_RANGE_INPUT_SCHEMA,
+        output_schema=_TRIM_AND_MATCH_OUTPUT_SCHEMA,
+        limit_ceiling={"timeout_ms": 5_000, "max_input_rows": 100_000, "max_output_rows": 100_000, "max_output_bytes": 8 * 1024 * 1024},
+        handler=_filter_ordered_range,
+    ),
 }
 
 
@@ -312,6 +462,41 @@ def build_registered_call_operation(
     return validate_registered_call_operation(operation, catalog_card=normalized)
 
 
+def build_specialized_call_operation(
+    function_id: str,
+    version: int,
+    *,
+    operation_id: str,
+    input_ref: str,
+    required_fields: list[str],
+    arguments: Mapping[str, Any],
+    limits: Mapping[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Build a dynamic-argument call to a statically allowlisted function."""
+
+    descriptor = registered_function_descriptor(function_id, version)
+    ceiling = descriptor["limit_ceiling"]
+    selected_limits = dict(limits or ceiling)
+    operation = {
+        "contract_version": REGISTERED_CALL_VERSION,
+        "id": str(operation_id),
+        "op": "registered_call",
+        "input": str(input_ref),
+        "function_ref": {
+            "function_id": descriptor["function_id"],
+            "version": descriptor["version"],
+            "implementation_sha256": descriptor["implementation_sha256"],
+            "input_schema_sha256": sha256_json(descriptor["input_schema"]),
+            "output_schema_sha256": sha256_json(descriptor["output_schema"]),
+        },
+        "required_fields": list(required_fields),
+        "arguments": deepcopy(dict(arguments)),
+        "limits": selected_limits,
+        "failure_policy": FAILURE_POLICY,
+    }
+    return validate_registered_call_operation(operation)
+
+
 def validate_registered_call_operation(
     operation: Mapping[str, Any],
     *,
@@ -355,9 +540,14 @@ def validate_registered_call_operation(
     ):
         _contract_error("registered call required_fields are invalid.")
     arguments = operation.get("arguments")
-    _validate_arguments(arguments)
-    if str(arguments["field_ref"]) not in set(required_fields):
-        _contract_error("registered call field_ref is absent from required_fields.")
+    _validate_arguments(arguments, function_id=function_id)
+    if function_id in {_TRIM_AND_MATCH_ID, _ORDERED_RANGE_ID}:
+        if str(arguments["field_ref"]) not in set(required_fields):
+            _contract_error("registered call field_ref is absent from required_fields.")
+    elif function_id == _PRODUCT_TOKEN_ID:
+        rule_fields = {str(rule["field_ref"]) for rule in arguments["rules"]}
+        if not rule_fields <= set(required_fields):
+            _contract_error("registered product token fields are absent from required_fields.")
     limits = _validate_limits(operation.get("limits"), registration.limit_ceiling)
     if operation.get("failure_policy") != FAILURE_POLICY:
         _contract_error("registered call failure policy must be fail_closed.")
@@ -387,24 +577,53 @@ def dispatch_registered_call(operation: Mapping[str, Any], rows: list[dict[str, 
             "registered function input row limit was exceeded.",
             {"actual_rows": len(rows), "max_input_rows": limits["max_input_rows"]},
         )
-    field_ref = str(normalized["arguments"]["field_ref"])
-    missing = [index for index, row in enumerate(rows) if field_ref not in row]
-    if missing:
+    function_ref = normalized["function_ref"]
+    registration = _registration(str(function_ref["function_id"]), int(function_ref["version"]))
+    function_id = registration.function_id
+    arguments = normalized["arguments"]
+    missing_fields = [
+        (index, field)
+        for index, row in enumerate(rows)
+        for field in normalized["required_fields"]
+        if field not in row
+    ]
+    if missing_fields:
+        index, field = missing_fields[0]
         raise ContractError(
             "source_schema_mismatch",
             "registered_function_dispatch",
             "registered function required field is missing.",
-            {"field": field_ref, "first_missing_row": missing[0]},
+            {"field": field, "first_missing_row": index},
         )
-    payload = {
-        "values": [json_value(row[field_ref]) for row in rows],
-        "tokens": deepcopy(normalized["arguments"]["tokens"]),
-        "operator": normalized["arguments"]["operator"],
-        "match_mode": normalized["arguments"]["match_mode"],
-        "case_sensitive": normalized["arguments"]["case_sensitive"],
-    }
-    function_ref = normalized["function_ref"]
-    registration = _registration(str(function_ref["function_id"]), int(function_ref["version"]))
+    if function_id == _TRIM_AND_MATCH_ID:
+        field_ref = str(arguments["field_ref"])
+        payload = {
+            "values": [json_value(row[field_ref]) for row in rows],
+            "tokens": deepcopy(arguments["tokens"]),
+            "operator": arguments["operator"],
+            "match_mode": arguments["match_mode"],
+            "case_sensitive": arguments["case_sensitive"],
+        }
+    elif function_id == _PRODUCT_TOKEN_ID:
+        payload = {
+            "records": [
+                {field: json_value(row.get(field)) for field in normalized["required_fields"]}
+                for row in rows
+            ],
+            "rules": deepcopy(arguments["rules"]),
+            "match_mode": arguments["match_mode"],
+            "case_sensitive": arguments["case_sensitive"],
+        }
+    elif function_id == _ORDERED_RANGE_ID:
+        field_ref = str(arguments["field_ref"])
+        payload = {
+            "values": [json_value(row[field_ref]) for row in rows],
+            "start": arguments["start"],
+            "end": arguments["end"],
+            "ordering_items": deepcopy(arguments["ordering_items"]),
+        }
+    else:
+        raise AssertionError(function_id)
     _validate_payload(registration.input_schema, payload, "input")
     deadline = time.monotonic() + (int(limits["timeout_ms"]) / 1000.0)
     result = registration.handler(payload, deadline)
@@ -437,12 +656,55 @@ def _registration(function_id: str, version: int) -> _Registration:
     return registration
 
 
-def _validate_arguments(value: Any) -> dict[str, Any]:
-    if not isinstance(value, Mapping) or set(value) != _ARGUMENT_KEYS:
+def _validate_arguments(value: Any, *, function_id: str = _TRIM_AND_MATCH_ID) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        _contract_error("registered function arguments must be an object.")
+    expected_keys = {
+        _TRIM_AND_MATCH_ID: _TRIM_ARGUMENT_KEYS,
+        _PRODUCT_TOKEN_ID: _PRODUCT_ARGUMENT_KEYS,
+        _ORDERED_RANGE_ID: _RANGE_ARGUMENT_KEYS,
+    }.get(function_id)
+    if expected_keys is None or set(value) != expected_keys:
         _contract_error(
             "registered function arguments do not match the closed contract.",
             {"actual_keys": sorted(value) if isinstance(value, Mapping) else []},
         )
+    if function_id == _PRODUCT_TOKEN_ID:
+        rules = value.get("rules")
+        if not isinstance(rules, list) or not 1 <= len(rules) <= 32:
+            _contract_error("registered product token rules are invalid.")
+        for rule in rules:
+            if not isinstance(rule, Mapping) or set(rule) != {"field_ref", "operator", "value"}:
+                _contract_error("registered product token rule does not match the closed contract.")
+            if not isinstance(rule.get("field_ref"), str) or not rule.get("field_ref"):
+                _contract_error("registered product token field_ref is required.")
+            if rule.get("operator") not in {"equals", "starts_with", "contains", "ends_with"}:
+                _contract_error("registered product token operator is invalid.")
+            if not isinstance(rule.get("value"), str) or not rule.get("value").strip():
+                _contract_error("registered product token value is invalid.")
+        if value.get("match_mode") != "all" or not isinstance(value.get("case_sensitive"), bool):
+            _contract_error("registered product token match settings are invalid.")
+        return deepcopy(dict(value))
+    if function_id == _ORDERED_RANGE_ID:
+        if not isinstance(value.get("field_ref"), str) or not value.get("field_ref"):
+            _contract_error("registered ordered range field_ref is required.")
+        if not isinstance(value.get("start"), str) or not value.get("start").strip():
+            _contract_error("registered ordered range start is required.")
+        if not isinstance(value.get("end"), str) or not value.get("end").strip():
+            _contract_error("registered ordered range end is required.")
+        items = value.get("ordering_items")
+        if not isinstance(items, list) or not 1 <= len(items) <= 512:
+            _contract_error("registered ordered range items are invalid.")
+        for item in items:
+            if not isinstance(item, Mapping) or set(item) != {"label", "aliases", "sequence"}:
+                _contract_error("registered ordered range item does not match the closed contract.")
+            if not isinstance(item.get("label"), str) or not item.get("label").strip():
+                _contract_error("registered ordered range item label is required.")
+            if not isinstance(item.get("aliases"), list) or any(not isinstance(alias, str) or not alias for alias in item["aliases"]):
+                _contract_error("registered ordered range aliases are invalid.")
+            if isinstance(item.get("sequence"), bool) or not isinstance(item.get("sequence"), (int, float)):
+                _contract_error("registered ordered range sequence is invalid.")
+        return deepcopy(dict(value))
     if not isinstance(value.get("field_ref"), str) or not value.get("field_ref"):
         _contract_error("registered function field_ref is required.")
     tokens = value.get("tokens")
@@ -528,6 +790,7 @@ __all__ = [
     "FAILURE_POLICY",
     "REGISTERED_CALL_VERSION",
     "build_registered_call_operation",
+    "build_specialized_call_operation",
     "dispatch_registered_call",
     "registered_function_descriptor",
     "validate_registered_call_operation",

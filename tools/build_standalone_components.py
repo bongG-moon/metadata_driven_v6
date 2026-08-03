@@ -1058,7 +1058,7 @@ class CommonIntentResolver(Component):
 
 PLAN_COMPILER_COMPONENT = r'''
 from lfx.custom.custom_component.component import Component
-from lfx.io import DataInput, Output
+from lfx.io import DataInput, MessageInput, Output
 from lfx.schema.data import Data
 
 
@@ -1070,6 +1070,7 @@ class PlanCompilerValidator(Component):
     inputs = [
         DataInput(name="intent_context", display_name="검증된 의도 컨텍스트", required=True, info="허용된 후보 중 하나로 확정되고 계약 검증을 통과한 의미 의도입니다."),
         DataInput(name="domain_bundle", display_name="도메인 실행 번들", required=True, info="계획 컴파일 시 사용할 승인된 데이터셋·필드·지표 및 연산 규칙입니다."),
+        MessageInput(name="specialized_function_text", display_name="특화 함수 계약 Text Input", required=True, info="일반 IR과 분리해 실행할 등록 특화 함수의 트리거와 필드 바인딩 JSON입니다. 임의 코드는 실행하지 않습니다."),
     ]
     outputs = [Output(name="plan_context", display_name="검증된 실행 계획 컨텍스트", method="compile", types=["Data"])]
 
@@ -1083,6 +1084,12 @@ class PlanCompilerValidator(Component):
             if not domain.get("ok"):
                 raise ContractError("metadata_dependency_error", "plan_compilation", "domain bundle을 사용할 수 없습니다.")
             catalog = (domain.get("domain_bundle") or {}).get("runtime_catalog")
+            specialized_value = getattr(self, "specialized_function_text", None)
+            specialized_text = getattr(specialized_value, "text", specialized_value)
+            try:
+                specialized_contract = json.loads(str(specialized_text or ""))
+            except Exception as exc:
+                raise ContractError("plan_contract_error", "specialized_function_contract", "특화 함수 Text Input JSON이 올바르지 않습니다.") from exc
             planner_profile = str(current.get("candidate_lane") or _planner_profile(catalog))
             if planner_profile == "generic_v2":
                 plan = validate_generic_v2_plan(
@@ -1098,7 +1105,13 @@ class PlanCompilerValidator(Component):
             else:
                 planning_catalog = EMBEDDED_RUNTIME_CATALOG if planner_profile == "legacy_v1_compat" else catalog
                 plan = validate_plan(
-                    compile_plan(current["intent"], current["candidate_bundle"], planning_catalog, prior_result=current.get("prior_result") or {}),
+                    compile_plan(
+                        current["intent"],
+                        current["candidate_bundle"],
+                        planning_catalog,
+                        prior_result=current.get("prior_result") or {},
+                        specialized_contract=specialized_contract,
+                    ),
                     planning_catalog,
                 )
             validate_contract(plan, "analysis-plan.schema.json", stage="plan_contract")
@@ -9412,6 +9425,7 @@ def _analysis_phase_source(
                     "FAILURE_POLICY",
                     "REGISTERED_CALL_VERSION",
                     "build_registered_call_operation",
+                    "build_specialized_call_operation",
                     "dispatch_registered_call",
                     "registered_function_descriptor",
                     "validate_registered_call_operation",

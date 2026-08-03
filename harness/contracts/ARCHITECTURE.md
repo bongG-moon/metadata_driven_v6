@@ -109,6 +109,7 @@ flowchart LR
 - Candidate Selector는 registry attestation이 끝난 function만 `registered_function_application` candidate로 만든다. Intent LLM은 그 candidate ID만 선택하며 function name, argument, code를 생성하지 않는다.
 - Plan Compiler는 typed literal/metadata candidate에서 닫힌 argument binding을 만들고 `op=registered_call`에 exact function/registry pin을 포함한다.
 - Typed Executor의 Registered Function Gateway는 dynamic import, `eval`/`exec`, arbitrary network/file/subprocess를 사용하지 않고 build-time allowlist 구현만 호출한다. Timeout, memory, row count, input/output schema와 lineage를 검증하며 실패 후 pandas/LLM fallback은 없다.
+- Data Analysis 캔버스의 `08B 특화 함수 계약 입력` Text Input은 일반 metadata와 prompt 노드에서 분리되어 Plan Compiler에 직접 연결된다. 이 입력은 실행 소스가 아니라 allowlist binding 선언이며, 공정 순서 범위와 제품 토큰 매핑 같은 특화 literal만 `registered_call`로 전환한다.
 
 ## 2. Route와 LLM 호출 계약
 

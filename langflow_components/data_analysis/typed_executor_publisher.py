@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 
-EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"0b035cefd556b3c37b166e73270dee3e7070a2adf2dd56750b8e1015516bfcce","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"15dbb187f458d03ad4d55063eef898b862529dc68e9f64840d08ab20df9cfb76","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"219a775c3a514501c66e077ef03a107a71f4d45af15aab2117c3cb1ab8f75811","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"a24b7d2fc3798f1dd69e1af94a7071eae8fb56d93a4191258953fd63b4211568","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"3f7f6c5154c9e7922dd65490e9166ba0038c6a242258ec30d409d8a553948fed","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"c02824f9ddba81496d99a4b58bda8e6bedf0ce464d47abca682071ab24cae57d","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"95f5821b05d7d70f70ebd0339a316bcc1367b5499553319b8d8995df251a4c56","reference_runtime/generic_v2_planner.py":"142665c8050c9302830cedf45928a25b73cd34e80bec66de9ba77003209176d3","reference_runtime/metadata_collections.py":"c10d21cab4fdb54e95f1e23b262842be51d1b74f85aedda7b99a7d48f1a84857","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"6dc3bef703732a6cba6734f63970b22ecd599139067fa78a16bf5b3be003e735","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"03f2ed1e2cb158eee5dd23cd99a408f14fdf3abea7fb630cfb31044cfe8f4d8e","reference_runtime/request_literals.py":"00493f9e342ab3065215805ae32f3068cb594209434bf280f2bb4f23c4be62ff","reference_runtime/source_contracts.py":"c43d8865ff045f4c26c5194262620a50961be5b56552c5cc6e7d580b2c11d7b0","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"0c1fc3bbb055cd32d1da3446afab0aca5351e844536624ae9ab953c78c5dfe3b"}}')
+EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"0b035cefd556b3c37b166e73270dee3e7070a2adf2dd56750b8e1015516bfcce","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"15dbb187f458d03ad4d55063eef898b862529dc68e9f64840d08ab20df9cfb76","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"035c081be6a0fa719b3dcd589d9090071342b695fa61f80f6781441a4b14aee2","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"41c4152f45577f05c925d5d782a48f8db45f67f8e48aac8805b822269516bd58","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"a24b7d2fc3798f1dd69e1af94a7071eae8fb56d93a4191258953fd63b4211568","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"3f7f6c5154c9e7922dd65490e9166ba0038c6a242258ec30d409d8a553948fed","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"c02824f9ddba81496d99a4b58bda8e6bedf0ce464d47abca682071ab24cae57d","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"95f5821b05d7d70f70ebd0339a316bcc1367b5499553319b8d8995df251a4c56","reference_runtime/generic_v2_planner.py":"142665c8050c9302830cedf45928a25b73cd34e80bec66de9ba77003209176d3","reference_runtime/metadata_collections.py":"c10d21cab4fdb54e95f1e23b262842be51d1b74f85aedda7b99a7d48f1a84857","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"e3782e6e86e41968a7bab1be4056ac2e9459c28188efa92f6532d2898d12abee","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"d2125d6902ca246b2239e8569959ac37f45847bf17dafaf93b857e088c750e42","reference_runtime/request_literals.py":"00493f9e342ab3065215805ae32f3068cb594209434bf280f2bb4f23c4be62ff","reference_runtime/source_contracts.py":"c43d8865ff045f4c26c5194262620a50961be5b56552c5cc6e7d580b2c11d7b0","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"0c1fc3bbb055cd32d1da3446afab0aca5351e844536624ae9ab953c78c5dfe3b"}}')
 
 
 import hashlib
@@ -129,9 +129,13 @@ _v6rf_LIMIT_KEYS = {'timeout_ms', 'max_input_rows', 'max_output_rows', 'max_outp
 _v6rf_CALL_KEYS = {'contract_version', 'id', 'op', 'input', 'function_ref', 'required_fields', 'arguments', 'limits', 'failure_policy'}
 _v6rf_FUNCTION_REF_KEYS = {'function_id', 'version', 'implementation_sha256', 'input_schema_sha256', 'output_schema_sha256'}
 _v6rf_CALL_TEMPLATE_KEYS = {'dataset_ref', 'field_ref', 'parameters', 'output_fields'}
-_v6rf_ARGUMENT_KEYS = {'field_ref', 'tokens', 'operator', 'match_mode', 'case_sensitive'}
+_v6rf_TRIM_ARGUMENT_KEYS = {'field_ref', 'tokens', 'operator', 'match_mode', 'case_sensitive'}
+_v6rf_PRODUCT_ARGUMENT_KEYS = {'rules', 'match_mode', 'case_sensitive'}
+_v6rf_RANGE_ARGUMENT_KEYS = {'field_ref', 'start', 'end', 'ordering_items'}
 _v6rf_TRIM_AND_MATCH_INPUT_SCHEMA: dict[str, Any] = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'object', 'additionalProperties': False, 'required': ['values', 'tokens', 'operator', 'match_mode', 'case_sensitive'], 'properties': {'values': {'type': 'array', 'maxItems': 100000, 'items': {'type': ['string', 'null']}}, 'tokens': {'type': 'array', 'minItems': 1, 'maxItems': 64, 'uniqueItems': True, 'items': {'type': 'string', 'minLength': 1, 'maxLength': 256}}, 'operator': {'enum': ['equals', 'contains', 'starts_with', 'ends_with']}, 'match_mode': {'enum': ['any', 'all']}, 'case_sensitive': {'type': 'boolean'}}}
 _v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA: dict[str, Any] = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'object', 'additionalProperties': False, 'required': ['selected_indices'], 'properties': {'selected_indices': {'type': 'array', 'maxItems': 100000, 'uniqueItems': True, 'items': {'type': 'integer', 'minimum': 0}}}}
+_v6rf_PRODUCT_TOKEN_INPUT_SCHEMA: dict[str, Any] = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'object', 'additionalProperties': False, 'required': ['records', 'rules', 'match_mode', 'case_sensitive'], 'properties': {'records': {'type': 'array', 'maxItems': 100000, 'items': {'type': 'object'}}, 'rules': {'type': 'array', 'minItems': 1, 'maxItems': 32, 'items': {'type': 'object', 'additionalProperties': False, 'required': ['field_ref', 'operator', 'value'], 'properties': {'field_ref': {'type': 'string', 'minLength': 1, 'maxLength': 128}, 'operator': {'enum': ['equals', 'starts_with', 'contains', 'ends_with']}, 'value': {'type': 'string', 'minLength': 1, 'maxLength': 256}}}}, 'match_mode': {'const': 'all'}, 'case_sensitive': {'type': 'boolean'}}}
+_v6rf_ORDERED_RANGE_INPUT_SCHEMA: dict[str, Any] = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'type': 'object', 'additionalProperties': False, 'required': ['values', 'start', 'end', 'ordering_items'], 'properties': {'values': {'type': 'array', 'maxItems': 100000, 'items': {'type': ['number', 'null']}}, 'start': {'type': 'string', 'minLength': 1, 'maxLength': 128}, 'end': {'type': 'string', 'minLength': 1, 'maxLength': 128}, 'ordering_items': {'type': 'array', 'minItems': 1, 'maxItems': 512, 'items': {'type': 'object', 'additionalProperties': False, 'required': ['label', 'aliases', 'sequence'], 'properties': {'label': {'type': 'string', 'minLength': 1, 'maxLength': 128}, 'aliases': {'type': 'array', 'maxItems': 32, 'items': {'type': 'string', 'minLength': 1, 'maxLength': 128}}, 'sequence': {'type': 'number'}}}}}}
 
 def _v6rf_implementation_pin(function_id: str, version: int, behavior_revision: str, input_schema: Mapping[str, Any], output_schema: Mapping[str, Any]) -> str:
     """Hash the reviewed behavior contract used by the local allowlist."""
@@ -174,6 +178,59 @@ def _v6rf_trim_and_match_tokens(payload: Mapping[str, Any], deadline: float) -> 
         _v6rf_limit_error('registered function exceeded its timeout.', {'timeout': True})
     return {'selected_indices': selected}
 
+def _v6rf_normalize_scalar(value: Any, *, case_sensitive: bool) -> str:
+    normalized = str(value).strip()
+    return normalized if case_sensitive else normalized.casefold()
+
+def _v6rf_match_product_tokens(payload: Mapping[str, Any], deadline: float) -> dict[str, Any]:
+    rules = list(payload['rules'])
+    case_sensitive = bool(payload['case_sensitive'])
+    selected: list[int] = []
+    for index, row in enumerate(payload['records']):
+        if index % 128 == 0 and time.monotonic() > deadline:
+            _v6rf_limit_error('registered function exceeded its timeout.', {'timeout': True})
+        decisions: list[bool] = []
+        for rule in rules:
+            raw = row.get(str(rule['field_ref']))
+            if raw is None:
+                decisions.append(False)
+                continue
+            value = _v6rf_normalize_scalar(raw, case_sensitive=case_sensitive)
+            token = _v6rf_normalize_scalar(rule['value'], case_sensitive=case_sensitive)
+            operator = str(rule['operator'])
+            if operator == 'equals':
+                decisions.append(value == token)
+            elif operator == 'starts_with':
+                decisions.append(value.startswith(token))
+            elif operator == 'contains':
+                decisions.append(token in value)
+            elif operator == 'ends_with':
+                decisions.append(value.endswith(token))
+            else:
+                raise AssertionError(operator)
+        if decisions and all(decisions):
+            selected.append(index)
+    return {'selected_indices': selected}
+
+def _v6rf_filter_ordered_range(payload: Mapping[str, Any], deadline: float) -> dict[str, Any]:
+    lookup: dict[str, float] = {}
+    for item in payload['ordering_items']:
+        sequence = float(item['sequence'])
+        for label in [item['label'], *item['aliases']]:
+            lookup[_v6rf_normalize_scalar(label, case_sensitive=False).replace(' ', '')] = sequence
+    start_key = _v6rf_normalize_scalar(payload['start'], case_sensitive=False).replace(' ', '')
+    end_key = _v6rf_normalize_scalar(payload['end'], case_sensitive=False).replace(' ', '')
+    if start_key not in lookup or end_key not in lookup:
+        _v6rf_contract_error('registered ordered range endpoint is absent from ordering metadata.')
+    low, high = sorted((lookup[start_key], lookup[end_key]))
+    selected: list[int] = []
+    for index, value in enumerate(payload['values']):
+        if index % 128 == 0 and time.monotonic() > deadline:
+            _v6rf_limit_error('registered function exceeded its timeout.', {'timeout': True})
+        if value is not None and low <= float(value) <= high:
+            selected.append(index)
+    return {'selected_indices': selected}
+
 @dataclass(frozen=True, slots=True)
 class _v6rf_Registration:
     function_id: str
@@ -186,7 +243,13 @@ class _v6rf_Registration:
 _v6rf_TRIM_AND_MATCH_ID = 'core.trim_and_match_tokens'
 _v6rf_TRIM_AND_MATCH_VERSION = 1
 _v6rf_TRIM_AND_MATCH_SHA256 = _v6rf_implementation_pin(_v6rf_TRIM_AND_MATCH_ID, _v6rf_TRIM_AND_MATCH_VERSION, 'trim-strip-casefold-match.v1', _v6rf_TRIM_AND_MATCH_INPUT_SCHEMA, _v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA)
-_v6rf_REGISTRY: dict[tuple[str, int], _v6rf_Registration] = {(_v6rf_TRIM_AND_MATCH_ID, _v6rf_TRIM_AND_MATCH_VERSION): _v6rf_Registration(function_id=_v6rf_TRIM_AND_MATCH_ID, version=_v6rf_TRIM_AND_MATCH_VERSION, implementation_sha256=_v6rf_TRIM_AND_MATCH_SHA256, input_schema=_v6rf_TRIM_AND_MATCH_INPUT_SCHEMA, output_schema=_v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA, limit_ceiling={'timeout_ms': 5000, 'max_input_rows': 100000, 'max_output_rows': 100000, 'max_output_bytes': 8 * 1024 * 1024}, handler=_v6rf_trim_and_match_tokens)}
+_v6rf_PRODUCT_TOKEN_ID = 'manufacturing.match_product_tokens'
+_v6rf_PRODUCT_TOKEN_VERSION = 1
+_v6rf_PRODUCT_TOKEN_SHA256 = _v6rf_implementation_pin(_v6rf_PRODUCT_TOKEN_ID, _v6rf_PRODUCT_TOKEN_VERSION, 'multi-field-trimmed-all-token-match.v1', _v6rf_PRODUCT_TOKEN_INPUT_SCHEMA, _v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA)
+_v6rf_ORDERED_RANGE_ID = 'manufacturing.filter_ordered_range'
+_v6rf_ORDERED_RANGE_VERSION = 1
+_v6rf_ORDERED_RANGE_SHA256 = _v6rf_implementation_pin(_v6rf_ORDERED_RANGE_ID, _v6rf_ORDERED_RANGE_VERSION, 'metadata-ordering-inclusive-range.v1', _v6rf_ORDERED_RANGE_INPUT_SCHEMA, _v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA)
+_v6rf_REGISTRY: dict[tuple[str, int], _v6rf_Registration] = {(_v6rf_TRIM_AND_MATCH_ID, _v6rf_TRIM_AND_MATCH_VERSION): _v6rf_Registration(function_id=_v6rf_TRIM_AND_MATCH_ID, version=_v6rf_TRIM_AND_MATCH_VERSION, implementation_sha256=_v6rf_TRIM_AND_MATCH_SHA256, input_schema=_v6rf_TRIM_AND_MATCH_INPUT_SCHEMA, output_schema=_v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA, limit_ceiling={'timeout_ms': 5000, 'max_input_rows': 100000, 'max_output_rows': 100000, 'max_output_bytes': 8 * 1024 * 1024}, handler=_v6rf_trim_and_match_tokens), (_v6rf_PRODUCT_TOKEN_ID, _v6rf_PRODUCT_TOKEN_VERSION): _v6rf_Registration(function_id=_v6rf_PRODUCT_TOKEN_ID, version=_v6rf_PRODUCT_TOKEN_VERSION, implementation_sha256=_v6rf_PRODUCT_TOKEN_SHA256, input_schema=_v6rf_PRODUCT_TOKEN_INPUT_SCHEMA, output_schema=_v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA, limit_ceiling={'timeout_ms': 5000, 'max_input_rows': 100000, 'max_output_rows': 100000, 'max_output_bytes': 8 * 1024 * 1024}, handler=_v6rf_match_product_tokens), (_v6rf_ORDERED_RANGE_ID, _v6rf_ORDERED_RANGE_VERSION): _v6rf_Registration(function_id=_v6rf_ORDERED_RANGE_ID, version=_v6rf_ORDERED_RANGE_VERSION, implementation_sha256=_v6rf_ORDERED_RANGE_SHA256, input_schema=_v6rf_ORDERED_RANGE_INPUT_SCHEMA, output_schema=_v6rf_TRIM_AND_MATCH_OUTPUT_SCHEMA, limit_ceiling={'timeout_ms': 5000, 'max_input_rows': 100000, 'max_output_rows': 100000, 'max_output_bytes': 8 * 1024 * 1024}, handler=_v6rf_filter_ordered_range)}
 
 def registered_function_descriptor(function_id: str, version: int) -> dict[str, Any]:
     """Return public immutable metadata for one locally allowed implementation."""
@@ -243,6 +306,14 @@ def build_registered_call_operation(card: Mapping[str, Any], *, operation_id: st
     operation = {'contract_version': REGISTERED_CALL_VERSION, 'id': str(operation_id), 'op': 'registered_call', 'input': str(input_ref), 'function_ref': {'function_id': descriptor['function_id'], 'version': descriptor['version'], 'implementation_sha256': descriptor['implementation_sha256'], 'input_schema_sha256': sha256_json(descriptor['input_schema']), 'output_schema_sha256': sha256_json(descriptor['output_schema'])}, 'required_fields': list(normalized['required_fields']), 'arguments': arguments, 'limits': deepcopy(normalized['limits']), 'failure_policy': FAILURE_POLICY}
     return validate_registered_call_operation(operation, catalog_card=normalized)
 
+def build_specialized_call_operation(function_id: str, version: int, *, operation_id: str, input_ref: str, required_fields: list[str], arguments: Mapping[str, Any], limits: Mapping[str, Any] | None=None) -> dict[str, Any]:
+    """Build a dynamic-argument call to a statically allowlisted function."""
+    descriptor = registered_function_descriptor(function_id, version)
+    ceiling = descriptor['limit_ceiling']
+    selected_limits = dict(limits or ceiling)
+    operation = {'contract_version': REGISTERED_CALL_VERSION, 'id': str(operation_id), 'op': 'registered_call', 'input': str(input_ref), 'function_ref': {'function_id': descriptor['function_id'], 'version': descriptor['version'], 'implementation_sha256': descriptor['implementation_sha256'], 'input_schema_sha256': sha256_json(descriptor['input_schema']), 'output_schema_sha256': sha256_json(descriptor['output_schema'])}, 'required_fields': list(required_fields), 'arguments': deepcopy(dict(arguments)), 'limits': selected_limits, 'failure_policy': FAILURE_POLICY}
+    return validate_registered_call_operation(operation)
+
 def validate_registered_call_operation(operation: Mapping[str, Any], *, catalog_card: Mapping[str, Any] | None=None) -> dict[str, Any]:
     """Validate operation shape, implementation pin, schemas, and limits."""
     if not isinstance(operation, Mapping) or set(operation) != _v6rf_CALL_KEYS:
@@ -264,9 +335,14 @@ def validate_registered_call_operation(operation: Mapping[str, Any], *, catalog_
     if not isinstance(required_fields, list) or not required_fields or len(required_fields) != len(set(map(str, required_fields))) or any((not isinstance(field, str) or not field for field in required_fields)):
         _v6rf_contract_error('registered call required_fields are invalid.')
     arguments = operation.get('arguments')
-    _v6rf_validate_arguments(arguments)
-    if str(arguments['field_ref']) not in set(required_fields):
-        _v6rf_contract_error('registered call field_ref is absent from required_fields.')
+    _v6rf_validate_arguments(arguments, function_id=function_id)
+    if function_id in {_v6rf_TRIM_AND_MATCH_ID, _v6rf_ORDERED_RANGE_ID}:
+        if str(arguments['field_ref']) not in set(required_fields):
+            _v6rf_contract_error('registered call field_ref is absent from required_fields.')
+    elif function_id == _v6rf_PRODUCT_TOKEN_ID:
+        rule_fields = {str(rule['field_ref']) for rule in arguments['rules']}
+        if not rule_fields <= set(required_fields):
+            _v6rf_contract_error('registered product token fields are absent from required_fields.')
     limits = _v6rf_validate_limits(operation.get('limits'), registration.limit_ceiling)
     if operation.get('failure_policy') != FAILURE_POLICY:
         _v6rf_contract_error('registered call failure policy must be fail_closed.')
@@ -282,13 +358,24 @@ def dispatch_registered_call(operation: Mapping[str, Any], rows: list[dict[str, 
     limits = dict(normalized['limits'])
     if len(rows) > int(limits['max_input_rows']):
         _v6rf_limit_error('registered function input row limit was exceeded.', {'actual_rows': len(rows), 'max_input_rows': limits['max_input_rows']})
-    field_ref = str(normalized['arguments']['field_ref'])
-    missing = [index for index, row in enumerate(rows) if field_ref not in row]
-    if missing:
-        raise ContractError('source_schema_mismatch', 'registered_function_dispatch', 'registered function required field is missing.', {'field': field_ref, 'first_missing_row': missing[0]})
-    payload = {'values': [json_value(row[field_ref]) for row in rows], 'tokens': deepcopy(normalized['arguments']['tokens']), 'operator': normalized['arguments']['operator'], 'match_mode': normalized['arguments']['match_mode'], 'case_sensitive': normalized['arguments']['case_sensitive']}
     function_ref = normalized['function_ref']
     registration = _v6rf_registration(str(function_ref['function_id']), int(function_ref['version']))
+    function_id = registration.function_id
+    arguments = normalized['arguments']
+    missing_fields = [(index, field) for index, row in enumerate(rows) for field in normalized['required_fields'] if field not in row]
+    if missing_fields:
+        index, field = missing_fields[0]
+        raise ContractError('source_schema_mismatch', 'registered_function_dispatch', 'registered function required field is missing.', {'field': field, 'first_missing_row': index})
+    if function_id == _v6rf_TRIM_AND_MATCH_ID:
+        field_ref = str(arguments['field_ref'])
+        payload = {'values': [json_value(row[field_ref]) for row in rows], 'tokens': deepcopy(arguments['tokens']), 'operator': arguments['operator'], 'match_mode': arguments['match_mode'], 'case_sensitive': arguments['case_sensitive']}
+    elif function_id == _v6rf_PRODUCT_TOKEN_ID:
+        payload = {'records': [{field: json_value(row.get(field)) for field in normalized['required_fields']} for row in rows], 'rules': deepcopy(arguments['rules']), 'match_mode': arguments['match_mode'], 'case_sensitive': arguments['case_sensitive']}
+    elif function_id == _v6rf_ORDERED_RANGE_ID:
+        field_ref = str(arguments['field_ref'])
+        payload = {'values': [json_value(row[field_ref]) for row in rows], 'start': arguments['start'], 'end': arguments['end'], 'ordering_items': deepcopy(arguments['ordering_items'])}
+    else:
+        raise AssertionError(function_id)
     _v6rf_validate_payload(registration.input_schema, payload, 'input')
     deadline = time.monotonic() + int(limits['timeout_ms']) / 1000.0
     result = registration.handler(payload, deadline)
@@ -310,9 +397,48 @@ def _v6rf_registration(function_id: str, version: int) -> _v6rf_Registration:
         _v6rf_unsupported('registered function identity is absent from the local allowlist.', {'function_id': str(function_id), 'version': int(version)})
     return registration
 
-def _v6rf_validate_arguments(value: Any) -> dict[str, Any]:
-    if not isinstance(value, Mapping) or set(value) != _v6rf_ARGUMENT_KEYS:
+def _v6rf_validate_arguments(value: Any, *, function_id: str=_v6rf_TRIM_AND_MATCH_ID) -> dict[str, Any]:
+    if not isinstance(value, Mapping):
+        _v6rf_contract_error('registered function arguments must be an object.')
+    expected_keys = {_v6rf_TRIM_AND_MATCH_ID: _v6rf_TRIM_ARGUMENT_KEYS, _v6rf_PRODUCT_TOKEN_ID: _v6rf_PRODUCT_ARGUMENT_KEYS, _v6rf_ORDERED_RANGE_ID: _v6rf_RANGE_ARGUMENT_KEYS}.get(function_id)
+    if expected_keys is None or set(value) != expected_keys:
         _v6rf_contract_error('registered function arguments do not match the closed contract.', {'actual_keys': sorted(value) if isinstance(value, Mapping) else []})
+    if function_id == _v6rf_PRODUCT_TOKEN_ID:
+        rules = value.get('rules')
+        if not isinstance(rules, list) or not 1 <= len(rules) <= 32:
+            _v6rf_contract_error('registered product token rules are invalid.')
+        for rule in rules:
+            if not isinstance(rule, Mapping) or set(rule) != {'field_ref', 'operator', 'value'}:
+                _v6rf_contract_error('registered product token rule does not match the closed contract.')
+            if not isinstance(rule.get('field_ref'), str) or not rule.get('field_ref'):
+                _v6rf_contract_error('registered product token field_ref is required.')
+            if rule.get('operator') not in {'equals', 'starts_with', 'contains', 'ends_with'}:
+                _v6rf_contract_error('registered product token operator is invalid.')
+            if not isinstance(rule.get('value'), str) or not rule.get('value').strip():
+                _v6rf_contract_error('registered product token value is invalid.')
+        if value.get('match_mode') != 'all' or not isinstance(value.get('case_sensitive'), bool):
+            _v6rf_contract_error('registered product token match settings are invalid.')
+        return deepcopy(dict(value))
+    if function_id == _v6rf_ORDERED_RANGE_ID:
+        if not isinstance(value.get('field_ref'), str) or not value.get('field_ref'):
+            _v6rf_contract_error('registered ordered range field_ref is required.')
+        if not isinstance(value.get('start'), str) or not value.get('start').strip():
+            _v6rf_contract_error('registered ordered range start is required.')
+        if not isinstance(value.get('end'), str) or not value.get('end').strip():
+            _v6rf_contract_error('registered ordered range end is required.')
+        items = value.get('ordering_items')
+        if not isinstance(items, list) or not 1 <= len(items) <= 512:
+            _v6rf_contract_error('registered ordered range items are invalid.')
+        for item in items:
+            if not isinstance(item, Mapping) or set(item) != {'label', 'aliases', 'sequence'}:
+                _v6rf_contract_error('registered ordered range item does not match the closed contract.')
+            if not isinstance(item.get('label'), str) or not item.get('label').strip():
+                _v6rf_contract_error('registered ordered range item label is required.')
+            if not isinstance(item.get('aliases'), list) or any((not isinstance(alias, str) or not alias for alias in item['aliases'])):
+                _v6rf_contract_error('registered ordered range aliases are invalid.')
+            if isinstance(item.get('sequence'), bool) or not isinstance(item.get('sequence'), (int, float)):
+                _v6rf_contract_error('registered ordered range sequence is invalid.')
+        return deepcopy(dict(value))
     if not isinstance(value.get('field_ref'), str) or not value.get('field_ref'):
         _v6rf_contract_error('registered function field_ref is required.')
     tokens = value.get('tokens')
@@ -357,7 +483,7 @@ def _v6rf_unsupported(message: str, details: dict[str, Any] | None=None) -> None
 
 def _v6rf_limit_error(message: str, details: dict[str, Any] | None=None) -> None:
     raise ContractError('execution_memory_limit_exceeded', 'registered_function_dispatch', message, details or {})
-__all__ = ['FAILURE_POLICY', 'REGISTERED_CALL_VERSION', 'build_registered_call_operation', 'dispatch_registered_call', 'registered_function_descriptor', 'validate_registered_call_operation', 'validate_registered_function_card']
+__all__ = ['FAILURE_POLICY', 'REGISTERED_CALL_VERSION', 'build_registered_call_operation', 'build_specialized_call_operation', 'dispatch_registered_call', 'registered_function_descriptor', 'validate_registered_call_operation', 'validate_registered_function_card']
 
 
 import math

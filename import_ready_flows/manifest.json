@@ -25,14 +25,14 @@
   },
   "inventory": {
     "path": "contracts/flow_inventory.json",
-    "sha256": "d0da8b9176a2f79421dc3a1a077abff7b786cd1395c4d6490332d49b708c4317"
+    "sha256": "855dbd2ff4d894d932c65074c2b6ba86c1d473210e7b0fd96b3748cdf39e8f08"
   },
   "source_build_manifest": {
     "path": "flow_exports/manifest.json",
-    "sha256": "fc5674849b11c545e158db9bdb9e9c4301c6fdf57b4d2619fd61238051b0a512"
+    "sha256": "c9f8dbc3238c5bece7f9c487d49eaeb23755f4572b105678d8ebf7c1ad4fe0e7"
   },
   "single_file_ui_import": "00_metadata_driven_v6_complete_ALL_FLOWS.json",
-  "single_file_ui_import_sha256": "e764a8d789a4b639c2d8a47e24b1f3e041e3da4b82ebaecaa74a8ea415959671",
+  "single_file_ui_import_sha256": "54c1155fc679255d9abe49246da57d4c65a7725bf3870968aa592cba3e48b71f",
   "flows": [
     {
       "order": 1,
@@ -41,10 +41,10 @@
       "display_name": "메타데이터 v6 - 신뢰형 데이터 분석",
       "id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
       "file": "01_metadata_v6_data_analysis_flow_v6_standalone.json",
-      "nodes": 35,
-      "edges": 46,
-      "source_sha256": "efd43a9aa29fbbe8dd0db59cd5ae2639f565a36626b34a0531de5cb01f75c038",
-      "sha256": "efd43a9aa29fbbe8dd0db59cd5ae2639f565a36626b34a0531de5cb01f75c038"
+      "nodes": 36,
+      "edges": 47,
+      "source_sha256": "e74fb9ef162689597b258026966c33daaefc9636e1cda517169a9eb9ec7d2c5b",
+      "sha256": "e74fb9ef162689597b258026966c33daaefc9636e1cda517169a9eb9ec7d2c5b"
     },
     {
       "order": 2,
@@ -55,8 +55,8 @@
       "file": "02_metadata_v6_domain_authoring_flow_v6_standalone.json",
       "nodes": 9,
       "edges": 7,
-      "source_sha256": "aa4357482ee6bea1923bf303ef6d331ee1ac605c8d27a1d4eb9dbba7eb4bf37d",
-      "sha256": "aa4357482ee6bea1923bf303ef6d331ee1ac605c8d27a1d4eb9dbba7eb4bf37d"
+      "source_sha256": "25823e792f7182999f253b546e288e9033a910c44f9a9cdcab39a678d4e3c8fa",
+      "sha256": "25823e792f7182999f253b546e288e9033a910c44f9a9cdcab39a678d4e3c8fa"
     },
     {
       "order": 3,
@@ -67,8 +67,8 @@
       "file": "03_metadata_v6_dataset_catalog_authoring_flow_v6_standalone.json",
       "nodes": 9,
       "edges": 7,
-      "source_sha256": "97b90b410e14fa0b1e724ce4e14dfd6c4cd4502f75b1b4c998dd78a74a1a8a53",
-      "sha256": "97b90b410e14fa0b1e724ce4e14dfd6c4cd4502f75b1b4c998dd78a74a1a8a53"
+      "source_sha256": "c6edcbfca100d1272f723e0aa9222684117142a5161ac057b84078e5e5ea1410",
+      "sha256": "c6edcbfca100d1272f723e0aa9222684117142a5161ac057b84078e5e5ea1410"
     },
     {
       "order": 4,
@@ -79,8 +79,8 @@
       "file": "04_metadata_v6_main_filter_authoring_flow_v6_standalone.json",
       "nodes": 9,
       "edges": 7,
-      "source_sha256": "0b7cf687a13ad61702c9a468436164711a66937ceed264202f273c3a0e7b3bb1",
-      "sha256": "0b7cf687a13ad61702c9a468436164711a66937ceed264202f273c3a0e7b3bb1"
+      "source_sha256": "5a0e89e791fe89fca4a356fa503f42891b837f718acd6410a07554d0a2f03225",
+      "sha256": "5a0e89e791fe89fca4a356fa503f42891b837f718acd6410a07554d0a2f03225"
     }
   ]
 }

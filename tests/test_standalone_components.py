@@ -1233,8 +1233,8 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
         assert flow["expected_uuid"] == str(uuid.uuid5(namespace, key))
         node_count = len(flow["native_nodes"]) + len(flow["custom_nodes"])
         if key == "metadata_v6_data_analysis":
-            assert node_count == 31
-            assert len(flow["edges"]) == 46
+            assert node_count == 32
+            assert len(flow["edges"]) == 47
         else:
             assert node_count == 8
             assert len(flow["edges"]) == 7
@@ -1249,6 +1249,8 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
         sources = {node["source"] for node in flow["custom_nodes"]}
         assert "langflow_components/data_analysis/00_trusted_analysis_engine.py" not in sources
         if key == "metadata_v6_data_analysis":
+            specialized_input = next(node for node in flow["native_nodes"] if node["id"] == "specialized_function_text")
+            assert specialized_input["type"] == "TextInput"
             assert "langflow_components/data_analysis/answer_facts_narrative.py" not in sources
             assert {
                 "langflow_components/data_analysis/intent_prompt_context_builder.py",
@@ -1270,6 +1272,7 @@ def test_flow_inventory_is_exact_decomposed_architecture() -> None:
             assert ("intent_prompt_context_builder", "intent_prompt_context", "intent_prompt_bundle_composer", "runtime_context") in edges
             assert ("answer_prompt_context_builder", "answer_prompt_context", "answer_prompt_bundle_composer", "runtime_context") not in edges
             assert ("answer_facts_context_builder", "answer_prompt_context", "answer_prompt_bundle_composer", "runtime_context") in edges
+            assert ("specialized_function_text", "text", "plan_compiler_validator", "specialized_function_text") in edges
         else:
             authoring = next(node for node in flow["custom_nodes"] if node["id"] == "simple_metadata_authoring_engine")
             generator = next(node for node in flow["custom_nodes"] if node["id"] == "simple_metadata_draft_generator")

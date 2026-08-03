@@ -519,6 +519,11 @@ ordered temporal field가 `aggregate` role과 `min|max` rollup을 선언하면 g
 
 `registered_call`은 built-in typed primitive와 metadata formula/recipe로 표현할 수 없는 검토된 알고리즘에만 사용한다. 특정 제품/공정 이름을 공통 executor branch에 하드코딩하는 수단이 아니다.
 
+Runtime Flow에서는 등록 함수 계약을 일반 metadata나 LLM prompt 안에 숨기지 않고 별도 Text Input으로 공급한다. 현재 계약은 실행 코드가 아니라 `specialized-function-input.v1` 선언이며, Plan Compiler가 function ID/version, literal trigger, canonical field binding을 allowlist와 대조한다. 선언이 없거나 변조되면 해당 특화 literal만 fail-closed하며, 일반 typed primitive 질의에는 `registered_call`을 삽입하지 않는다.
+
+- `manufacturing.filter_ordered_range@1`: `ordered_range` literal, `OPER_SEQ`, 등록된 process ordering으로 inclusive 범위를 선택한다.
+- `manufacturing.match_product_tokens@1`: 실제 `product_token` literal을 `TECH|DEN|MODE|PKG_TYPE1|PKG_TYPE2|LEAD|MCP_NO`에 닫힌 rule로 적용한다. `MCP_NO` prefix는 contains가 아니라 `starts_with`다.
+
 ```json
 {
   "id": "op_registered_1",

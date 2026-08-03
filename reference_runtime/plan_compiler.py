@@ -10,11 +10,31 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .canonical import ContractError, bounded, sha256_json
+from .registered_functions import build_specialized_call_operation
 from .request_literals import candidate_span_matches, normalize_text
 
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CATALOG = ROOT / "metadata" / "fixtures" / "compiled" / "runtime_catalog.json"
+DEFAULT_SPECIALIZED_FUNCTION_CONTRACT = {
+    "contract_version": "specialized-function-input.v1",
+    "functions": [
+        {
+            "function_id": "manufacturing.filter_ordered_range",
+            "version": 1,
+            "enabled": True,
+            "trigger_literal": "ordered_range",
+            "bindings": {"label_field": "OPER_NAME", "order_field": "OPER_SEQ", "ordering_id": "process"},
+        },
+        {
+            "function_id": "manufacturing.match_product_tokens",
+            "version": 1,
+            "enabled": True,
+            "trigger_literal": "product_token",
+            "bindings": {"allowed_fields": ["TECH", "DEN", "MODE", "PKG_TYPE1", "PKG_TYPE2", "LEAD", "MCP_NO"]},
+        },
+    ],
+}
 
 
 def load_runtime_catalog(path: str | Path | None = None) -> dict[str, Any]:
@@ -939,16 +959,100 @@ def _product_clauses(semantics: dict[str, Any], catalog: dict[str, Any]) -> list
         predicate = groups.get(str(identity), {}).get("predicate")
         if isinstance(predicate, dict):
             clauses.append(deepcopy(predicate))
-    for token in semantics.get("product_tokens", []):
-        clauses.append(
-            {
-                "field": token.get("field"),
-                "operator": token.get("operator"),
-                "value": token.get("value"),
-                "semantic_type": "string",
-            }
-        )
     return clauses
+
+
+def _specialized_binding(contract: dict[str, Any] | None, function_id: str) -> dict[str, Any]:
+    if contract is None:
+        contract = DEFAULT_SPECIALIZED_FUNCTION_CONTRACT
+    if not isinstance(contract, dict) or contract.get("contract_version") != "specialized-function-input.v1":
+        raise ContractError("plan_contract_error", "specialized_function_contract", "특화 함수 입력 계약이 없거나 올바르지 않습니다.")
+    matches = [
+        item for item in contract.get("functions", [])
+        if isinstance(item, dict) and item.get("function_id") == function_id and item.get("version") == 1 and item.get("enabled") is True
+    ]
+    if len(matches) != 1:
+        raise ContractError(
+            "unsupported_operation",
+            "specialized_function_contract",
+            "요청된 특화 함수가 Text Input에 하나로 등록되어 있지 않습니다.",
+            {"function_id": function_id},
+        )
+    return deepcopy(matches[0].get("bindings") or {})
+
+
+def _product_token_rules(
+    semantics: dict[str, Any],
+    specialized_contract: dict[str, Any] | None,
+    available_fields: set[str],
+) -> list[dict[str, str]]:
+    tokens = [item for item in semantics.get("product_tokens", []) if isinstance(item, dict)]
+    if not tokens:
+        return []
+    binding = _specialized_binding(specialized_contract, "manufacturing.match_product_tokens")
+    allowed_fields = {str(field) for field in binding.get("allowed_fields", [])}
+    operator_map = {"eq": "equals", "starts_with": "starts_with", "contains": "contains", "ends_with": "ends_with"}
+    rules: list[dict[str, str]] = []
+    for token in tokens:
+        field = str(token.get("field") or "")
+        operator = operator_map.get(str(token.get("operator") or ""), "")
+        value = str(token.get("value") or "")
+        if field not in allowed_fields or field not in available_fields or not operator or not value:
+            continue
+        rules.append({"field_ref": field, "operator": operator, "value": value})
+    if tokens and not rules:
+        raise ContractError("unsupported_operation", "specialized_function_contract", "제품 토큰을 적용할 등록 필드가 없습니다.")
+    return rules
+
+
+def _product_registered_call(
+    operation_id: str,
+    input_ref: str,
+    rules: list[dict[str, str]],
+) -> dict[str, Any]:
+    return build_specialized_call_operation(
+        "manufacturing.match_product_tokens",
+        1,
+        operation_id=operation_id,
+        input_ref=input_ref,
+        required_fields=sorted({rule["field_ref"] for rule in rules}),
+        arguments={"rules": rules, "match_mode": "all", "case_sensitive": False},
+    )
+
+
+def _range_registered_call(
+    operation_id: str,
+    input_ref: str,
+    ordered_range: dict[str, Any],
+    catalog: dict[str, Any],
+    specialized_contract: dict[str, Any] | None,
+) -> dict[str, Any]:
+    binding = _specialized_binding(specialized_contract, "manufacturing.filter_ordered_range")
+    field_ref = str(binding.get("order_field") or "")
+    if field_ref != "OPER_SEQ":
+        raise ContractError("plan_contract_error", "specialized_function_contract", "공정 범위 order_field는 OPER_SEQ여야 합니다.")
+    items = [
+        {
+            "label": str(item.get("oper_name") or ""),
+            "aliases": [str(alias) for alias in item.get("aliases", []) if str(alias)],
+            "sequence": item.get("oper_seq"),
+        }
+        for item in catalog.get("process_order", [])
+        if isinstance(item, dict) and item.get("oper_name") and isinstance(item.get("oper_seq"), (int, float))
+    ]
+    return build_specialized_call_operation(
+        "manufacturing.filter_ordered_range",
+        1,
+        operation_id=operation_id,
+        input_ref=input_ref,
+        required_fields=[field_ref],
+        arguments={
+            "field_ref": field_ref,
+            "start": str(ordered_range.get("start") or ""),
+            "end": str(ordered_range.get("end") or ""),
+            "ordering_items": items,
+        },
+    )
 
 
 def _filter_fields(nodes: list[dict[str, Any]] | dict[str, Any]) -> list[str]:
@@ -1049,7 +1153,8 @@ def _range_process_values(ordered_range: dict[str, Any] | None, catalog: dict[st
 
 
 def _compile_operator_special_plan(
-    intent: dict[str, Any], bundle: dict[str, Any], catalog: dict[str, Any], semantics: dict[str, Any]
+    intent: dict[str, Any], bundle: dict[str, Any], catalog: dict[str, Any], semantics: dict[str, Any],
+    specialized_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     """Compile closed operator applications that are not plain metric rollups."""
 
@@ -1200,6 +1305,8 @@ def _compile_operator_special_plan(
         process_values = _process_values(semantics, catalog)
         production_clauses = [clause for clause in _product_clauses(semantics, catalog) if set(_filter_fields(clause)).issubset(production_fields)]
         equipment_clauses = [clause for clause in _product_clauses(semantics, catalog) if set(_filter_fields(clause)).issubset(equipment_fields)]
+        production_rules = _product_token_rules(semantics, specialized_contract, production_fields)
+        equipment_rules = _product_token_rules(semantics, specialized_contract, equipment_fields)
         if process_values:
             production_clauses.append({"field": "OPER_NAME", "operator": "in", "values": process_values, "semantic_type": "string"})
             equipment_clauses.append({"field": "OPER_NAME", "operator": "in", "values": process_values, "semantic_type": "string"})
@@ -1209,7 +1316,7 @@ def _compile_operator_special_plan(
                 "dataset_key": production_key,
                 "source_type": str(production.get("source_type") or "dummy"),
                 "parameters": {"DATE": semantics.get("date")} if "DATE" in (production.get("parameters") or {}) else {},
-                "required_fields": sorted(set(product_keys + ["PRODUCTION_QTY"] + _filter_fields(production_clauses))),
+                "required_fields": sorted(set(product_keys + ["PRODUCTION_QTY"] + _filter_fields(production_clauses) + [rule["field_ref"] for rule in production_rules])),
                 "filters": None,
                 "requirement": "required",
             },
@@ -1218,13 +1325,16 @@ def _compile_operator_special_plan(
                 "dataset_key": equipment_key,
                 "source_type": str(equipment.get("source_type") or "dummy"),
                 "parameters": {},
-                "required_fields": sorted(set(product_keys + ["EQP_ID"] + _filter_fields(equipment_clauses))),
+                "required_fields": sorted(set(product_keys + ["EQP_ID"] + _filter_fields(equipment_clauses) + [rule["field_ref"] for rule in equipment_rules])),
                 "filters": None,
                 "requirement": "required",
             },
         ]
         operations: list[dict[str, Any]] = []
         production_input = f"source:{jobs[0]['job_id']}"
+        if production_rules:
+            operations.append(_product_registered_call("op_specialized_product_tokens_production", production_input, production_rules))
+            production_input = "op_specialized_product_tokens_production"
         if production_clauses:
             operations.append({"id": "op_filter_production", "op": "filter", "input": production_input, "where": {"op": "all", "clauses": production_clauses}})
             production_input = "op_filter_production"
@@ -1252,6 +1362,9 @@ def _compile_operator_special_plan(
             })
             left_input = "op_rank_production"
         equipment_input = f"source:{jobs[1]['job_id']}"
+        if equipment_rules:
+            operations.append(_product_registered_call("op_specialized_product_tokens_equipment", equipment_input, equipment_rules))
+            equipment_input = "op_specialized_product_tokens_equipment"
         if equipment_clauses:
             operations.append({"id": "op_filter_equipment", "op": "filter", "input": equipment_input, "where": {"op": "all", "clauses": equipment_clauses}})
             equipment_input = "op_filter_equipment"
@@ -1321,6 +1434,7 @@ def _compile_equipment_view_plan(
     catalog: dict[str, Any],
     semantics: dict[str, Any],
     equipment_view: str,
+    specialized_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Compile the two registered equipment views without inferred code.
 
@@ -1337,6 +1451,7 @@ def _compile_equipment_view_plan(
         for clause in _product_clauses(semantics, catalog)
         if set(_filter_fields(clause)).issubset(available)
     ]
+    product_rules = _product_token_rules(semantics, specialized_contract, available)
     process_values = _process_values(semantics, catalog)
     if process_values and "OPER_NAME" in available:
         clauses.append(
@@ -1372,6 +1487,7 @@ def _compile_equipment_view_plan(
     job_id = f"job_1_{dataset_key}"
     source_id = f"source:{job_id}"
     required = set(_filter_fields(clauses))
+    required.update(rule["field_ref"] for rule in product_rules)
     if equipment_view == "uph_detail":
         required.update(fields)
     else:
@@ -1387,6 +1503,9 @@ def _compile_equipment_view_plan(
     }
     operations: list[dict[str, Any]] = []
     current = source_id
+    if product_rules:
+        operations.append(_product_registered_call("op_specialized_product_tokens", current, product_rules))
+        current = "op_specialized_product_tokens"
     if clauses:
         operations.append(
             {
@@ -1475,13 +1594,14 @@ def _compile_equipment_view_plan(
 
 
 def _compile_special_plan(
-    intent: dict[str, Any], bundle: dict[str, Any], catalog: dict[str, Any], semantics: dict[str, Any]
+    intent: dict[str, Any], bundle: dict[str, Any], catalog: dict[str, Any], semantics: dict[str, Any],
+    specialized_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any] | None:
     kind = str(semantics.get("analysis_kind") or "")
     qualifiers = semantics.get("qualifiers") if isinstance(semantics.get("qualifiers"), dict) else {}
     equipment_view = str(qualifiers.get("equipment_view") or "")
     if kind in {"uph_detail", "equipment_grouped"} and equipment_view in {"uph_detail", "equipment_grouped"}:
-        return _compile_equipment_view_plan(intent, bundle, catalog, semantics, equipment_view)
+        return _compile_equipment_view_plan(intent, bundle, catalog, semantics, equipment_view, specialized_contract)
     if kind not in {"detail", "hold_history", "equipment_detail", "compare_group_attributes"}:
         return None
     if kind == "hold_history":
@@ -1500,6 +1620,7 @@ def _compile_special_plan(
     ordered_range = semantics.get("ordered_range") if isinstance(semantics.get("ordered_range"), dict) else None
     process_values = [] if ordered_range else _process_values(semantics, catalog)
     clauses = [clause for clause in _product_clauses(semantics, catalog) if set(_filter_fields(clause)).issubset(available)]
+    product_rules = _product_token_rules(semantics, specialized_contract, available)
     if process_values and "OPER_NAME" in available:
         clauses.append({"field": "OPER_NAME", "operator": "in", "values": process_values, "semantic_type": "string"})
     if qualifiers.get("current_hold") and "HOLD_STAT" in available:
@@ -1534,6 +1655,7 @@ def _compile_special_plan(
     if kind == "hold_history" and not explicit_lot_ids:
         fields.append("HOLD_DURATION_HOURS")
     required = set([field for field in fields if field in available] + _filter_fields(clauses))
+    required.update(rule["field_ref"] for rule in product_rules)
     if ordered_range and "OPER_SEQ" in available:
         required.add("OPER_SEQ")
     job_id = f"job_1_{dataset_key}"
@@ -1561,15 +1683,17 @@ def _compile_special_plan(
         ]
         if not sequences:
             raise ContractError("plan_contract_error", "plan_compilation", "공정 범위 sequence가 metadata에 없습니다.")
-        operations.append({
-            "id": "op_ordered_range",
-            "op": "ordered_range",
-            "input": source_id,
-            "field": "OPER_SEQ",
-            "start": min(sequences),
-            "end": max(sequences),
-        })
-        current = "op_ordered_range"
+        operations.append(_range_registered_call(
+            "op_specialized_process_range",
+            source_id,
+            ordered_range,
+            catalog,
+            specialized_contract,
+        ))
+        current = "op_specialized_process_range"
+    if product_rules:
+        operations.append(_product_registered_call("op_specialized_product_tokens", current, product_rules))
+        current = "op_specialized_product_tokens"
     if clauses:
         filter_input = current
         current = "op_filter_1"
@@ -1783,6 +1907,7 @@ def compile_plan(
     catalog: dict[str, Any],
     *,
     prior_result: dict[str, Any] | None = None,
+    specialized_contract: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     semantics = intent.get("semantics") if isinstance(intent.get("semantics"), dict) else {}
     if semantics.get("analysis_kind") == "clarification":
@@ -1795,10 +1920,10 @@ def compile_plan(
     previous = _compile_previous_plan(intent, bundle, catalog, semantics, prior_result)
     if previous is not None:
         return previous
-    operator_special = _compile_operator_special_plan(intent, bundle, catalog, semantics)
+    operator_special = _compile_operator_special_plan(intent, bundle, catalog, semantics, specialized_contract)
     if operator_special is not None:
         return operator_special
-    special = _compile_special_plan(intent, bundle, catalog, semantics)
+    special = _compile_special_plan(intent, bundle, catalog, semantics, specialized_contract)
     if special is not None:
         return special
     metric_ids = [str(item) for item in semantics.get("metric_refs", [])]
@@ -1859,6 +1984,7 @@ def compile_plan(
         job_id = str(job["job_id"])
         source_id = f"source:{job_id}"
         dataset_fields = set((dataset.get("fields") or {}).keys())
+        product_rules = _product_token_rules(semantics, specialized_contract, dataset_fields)
         clauses = [clause for clause in deepcopy(product_clauses) if set(_filter_fields(clause)).issubset(dataset_fields)]
         fixed_filters = deepcopy(((group[0][1].get("source_binding") or {}).get("fixed_filters") or []))
         clauses.extend(clause for clause in fixed_filters if isinstance(clause, dict))
@@ -1874,8 +2000,13 @@ def compile_plan(
         if "DATE" not in (dataset.get("parameters") or {}) and isinstance(dataset.get("date_filter_contract"), dict) and "DATE" in dataset_fields:
             clauses.append({"field": "DATE", "operator": "eq", "value": query_date, "semantic_type": "date"})
         required_fields = set(dimensions + [str((metric.get("source_binding") or {}).get("field")) for _, metric in group] + _filter_fields(clauses))
+        required_fields.update(rule["field_ref"] for rule in product_rules)
         job["required_fields"] = sorted(set(job.get("required_fields") or []) | {field for field in required_fields if field})
         current_id = source_id
+        if product_rules:
+            product_call_id = f"op_specialized_product_tokens_{index}"
+            operations.append(_product_registered_call(product_call_id, current_id, product_rules))
+            current_id = product_call_id
         if clauses:
             filtered_id = f"op_filter_{index}"
             operations.append({"id": filtered_id, "op": "filter", "input": current_id, "where": {"op": "all", "clauses": clauses}})
@@ -1920,7 +2051,7 @@ def compile_plan(
             if start is None or end is None:
                 raise ContractError("plan_contract_error", "plan_compilation", "공정 범위 endpoint가 metadata에 없습니다.")
             range_id = f"op_range_{index}"
-            operations.append({"id": range_id, "op": "ordered_range", "input": current_id, "field": "OPER_SEQ", "start": min(start, end), "end": max(start, end)})
+            operations.append(_range_registered_call(range_id, current_id, ordered_range, catalog, specialized_contract))
             current_id = range_id
         aggregate_id = f"op_aggregate_{index}"
         aggregate_metrics: list[dict[str, Any]] = []
@@ -2192,7 +2323,7 @@ def validate_plan(plan: dict[str, Any], catalog: dict[str, Any]) -> dict[str, An
         "filter", "ordered_range", "project", "detail", "aggregate", "sort", "rank",
         "compare_fields", "compare_group_attributes", "find_duplicate_groups", "join",
         "presence_filter", "derive", "dedupe", "row_match_groups", "concat_segments",
-        "transform_previous_result", "enrich_previous_result", "explain_previous",
+        "transform_previous_result", "enrich_previous_result", "explain_previous", "registered_call",
     }
     for operation in operations:
         operation_id = str(operation.get("id") or "")

@@ -75,6 +75,27 @@
           }
         },
         {
+          "id": "specialized_function_text",
+          "type": "TextInput",
+          "position": {
+            "x": 760,
+            "y": 980
+          },
+          "settings": {
+            "text_source": "prompts/data_analysis/specialized_functions_ko.json"
+          },
+          "ui": {
+            "display_name": "08B 특화 함수 계약 입력",
+            "description": "공정 순서 범위와 제품 토큰 매핑처럼 일반 Typed IR로 처리하지 않을 업무 특화 함수를 선언합니다. 임의 Python 코드는 실행하지 않으며 등록된 standalone 구현만 호출합니다.",
+            "input_labels": {
+              "input_value": "특화 함수 선언 JSON"
+            },
+            "output_labels": {
+              "text": "검증 대상 특화 함수 계약"
+            }
+          }
+        },
+        {
           "id": "intent_common_prompt",
           "type": "PromptTemplate",
           "position": {
@@ -704,6 +725,12 @@
           "source_output": "domain_bundle",
           "target": "plan_compiler_validator",
           "target_input": "domain_bundle"
+        },
+        {
+          "source": "specialized_function_text",
+          "source_output": "text",
+          "target": "plan_compiler_validator",
+          "target_input": "specialized_function_text"
         },
         {
           "source": "plan_compiler_validator",

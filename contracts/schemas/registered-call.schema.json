@@ -4,52 +4,168 @@
   "additionalProperties": false,
   "properties": {
     "arguments": {
-      "additionalProperties": false,
-      "properties": {
-        "case_sensitive": {
-          "type": "boolean"
-        },
-        "field_ref": {
-          "maxLength": 128,
-          "minLength": 1,
-          "type": "string"
-        },
-        "match_mode": {
-          "enum": [
-            "any",
-            "all"
-          ],
-          "type": "string"
-        },
-        "operator": {
-          "enum": [
-            "equals",
-            "contains",
-            "starts_with",
-            "ends_with"
-          ],
-          "type": "string"
-        },
-        "tokens": {
-          "items": {
-            "maxLength": 256,
-            "minLength": 1,
-            "type": "string"
+      "oneOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "case_sensitive": {
+              "type": "boolean"
+            },
+            "field_ref": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "match_mode": {
+              "enum": [
+                "any",
+                "all"
+              ],
+              "type": "string"
+            },
+            "operator": {
+              "enum": [
+                "equals",
+                "contains",
+                "starts_with",
+                "ends_with"
+              ],
+              "type": "string"
+            },
+            "tokens": {
+              "items": {
+                "maxLength": 256,
+                "minLength": 1,
+                "type": "string"
+              },
+              "maxItems": 64,
+              "minItems": 1,
+              "type": "array",
+              "uniqueItems": true
+            }
           },
-          "maxItems": 64,
-          "minItems": 1,
-          "type": "array",
-          "uniqueItems": true
+          "required": [
+            "field_ref",
+            "tokens",
+            "operator",
+            "match_mode",
+            "case_sensitive"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "case_sensitive": {
+              "type": "boolean"
+            },
+            "match_mode": {
+              "const": "all"
+            },
+            "rules": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "field_ref": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "operator": {
+                    "enum": [
+                      "equals",
+                      "starts_with",
+                      "contains",
+                      "ends_with"
+                    ],
+                    "type": "string"
+                  },
+                  "value": {
+                    "maxLength": 256,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "field_ref",
+                  "operator",
+                  "value"
+                ],
+                "type": "object"
+              },
+              "maxItems": 32,
+              "minItems": 1,
+              "type": "array"
+            }
+          },
+          "required": [
+            "rules",
+            "match_mode",
+            "case_sensitive"
+          ],
+          "type": "object"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "end": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "field_ref": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            },
+            "ordering_items": {
+              "items": {
+                "additionalProperties": false,
+                "properties": {
+                  "aliases": {
+                    "items": {
+                      "maxLength": 128,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "maxItems": 32,
+                    "type": "array"
+                  },
+                  "label": {
+                    "maxLength": 128,
+                    "minLength": 1,
+                    "type": "string"
+                  },
+                  "sequence": {
+                    "type": "number"
+                  }
+                },
+                "required": [
+                  "label",
+                  "aliases",
+                  "sequence"
+                ],
+                "type": "object"
+              },
+              "maxItems": 512,
+              "minItems": 1,
+              "type": "array"
+            },
+            "start": {
+              "maxLength": 128,
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "field_ref",
+            "start",
+            "end",
+            "ordering_items"
+          ],
+          "type": "object"
         }
-      },
-      "required": [
-        "field_ref",
-        "tokens",
-        "operator",
-        "match_mode",
-        "case_sensitive"
-      ],
-      "type": "object"
+      ]
     },
     "contract_version": {
       "const": "registered_call.v1",
@@ -62,7 +178,11 @@
       "additionalProperties": false,
       "properties": {
         "function_id": {
-          "const": "core.trim_and_match_tokens"
+          "enum": [
+            "core.trim_and_match_tokens",
+            "manufacturing.match_product_tokens",
+            "manufacturing.filter_ordered_range"
+          ]
         },
         "implementation_sha256": {
           "pattern": "^[0-9a-f]{64}$",

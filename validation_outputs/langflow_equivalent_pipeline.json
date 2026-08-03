@@ -5,8 +5,8 @@
     "contract_version": "langflow.pipeline.graph.validation.v1",
     "flow_id": "5ea0bd1e-448f-5e78-a415-3181adb068fd",
     "endpoint_name": "metadata_v6_data_analysis",
-    "node_count": 35,
-    "edge_count": 46,
+    "node_count": 36,
+    "edge_count": 47,
     "stage_counts": {
       "annotation": 4,
       "answer_facts": 1,
@@ -25,6 +25,7 @@
       "response_state_commit": 1,
       "source_merger": 1,
       "source_retriever": 5,
+      "specialized_function_input": 1,
       "terminals": 4,
       "typed_executor": 1
     },
@@ -63,6 +64,7 @@
       "response_state_commit": "response_state_commit",
       "retrieval_job_router": "job_router",
       "source_merger": "source_merger",
+      "specialized_function_text": "specialized_function_input",
       "typed_executor_publisher": "typed_executor"
     },
     "checks": {
@@ -125,6 +127,7 @@
           "production_today"
         ],
         "operators": [
+          "registered_call",
           "filter",
           "aggregate",
           "sort",
@@ -141,7 +144,7 @@
           "INPUT_QTY"
         ],
         "row_count": 1,
-        "plan_fingerprint": "593fd9fb7dfcfb868f0a86a5266a9900e75aa5a35bab2901d6635bb98a637bb5",
+        "plan_fingerprint": "ad575bb4e9f8ea85b769adc89ad5f6c984506eea0c960d2ca403da8fb609a788",
         "result_sha256": "9639113712fcf86e43d0704f0be60cee9c74f3115dc50ee5cac84601318bc422",
         "message": "요청한 분석 결과는 총 1건입니다."
       },
@@ -415,8 +418,10 @@
           "wip_today"
         ],
         "operators": [
+          "registered_call",
           "filter",
           "aggregate",
+          "registered_call",
           "filter",
           "aggregate",
           "join",
@@ -435,7 +440,7 @@
           "WIP_QTY"
         ],
         "row_count": 1,
-        "plan_fingerprint": "52aad108e476316e4e0b2d47a80d017f8167978a7d98b9bee9c0c586c73a510c",
+        "plan_fingerprint": "4eddfd8d565e9cc6cdeb3762ea305d018fbc887244b8bf8bf639408d65d634cb",
         "result_sha256": "6a7eb8e65618f31978030b885f44c4946e2c6795d0750817f600530913d604b1",
         "message": "요청한 분석 결과는 총 1건입니다."
       },
@@ -462,6 +467,7 @@
           "production"
         ],
         "operators": [
+          "registered_call",
           "filter",
           "aggregate",
           "sort",
@@ -478,7 +484,7 @@
           "PRODUCTION_QTY"
         ],
         "row_count": 1,
-        "plan_fingerprint": "5e8ddfa2678cee0fadb7f83d9bbcfa01d2139a2fbb2b78f23df81e00ca189152",
+        "plan_fingerprint": "cb1e030f541ff6a3ccdd97f809b8ff1a5fdda9148f0084dea6c6d4e9cbe0cb25",
         "result_sha256": "c75869f4f40bba53c82e11fccf02d85ed39905367d0e0ba073b6ce18b35c9057",
         "message": "요청한 분석 결과는 총 1건입니다."
       },
@@ -697,7 +703,7 @@
           "lot_status"
         ],
         "operators": [
-          "ordered_range",
+          "registered_call",
           "filter",
           "project",
           "dedupe",
@@ -715,7 +721,7 @@
           "WF_QTY"
         ],
         "row_count": 2,
-        "plan_fingerprint": "c451ca0f8ce2c3cff164b4c389e2a2c88115cc5a39d0f48d0151cabb48d43c66",
+        "plan_fingerprint": "ab74329749fc4cb097b87f118a8dc326256e3755422756969be9445bbeda05b3",
         "result_sha256": "cfe990c1ad5195037fa1a5bba7b4c07066d539ddc1485392040fc2133d4857da",
         "message": "요청한 분석 결과는 총 2건입니다."
       },
@@ -743,7 +749,7 @@
         ],
         "operators": [
           "filter",
-          "ordered_range",
+          "registered_call",
           "aggregate",
           "sort",
           "project"
@@ -754,7 +760,7 @@
           "PRODUCTION_QTY"
         ],
         "row_count": 2,
-        "plan_fingerprint": "d49cab53f2ce9c10c6069c8835773e35e1c127136c5f83e5ed89181375228d3c",
+        "plan_fingerprint": "4287d1b8da58aa301dd4546ade38c5362047561ea0f9f0c32b08e3c1a4409bdf",
         "result_sha256": "82d91536aef64c8fb2e713c65df87c577118abb57dbbcce6f98df6a046fb41cf",
         "message": "요청한 분석 결과는 총 2건입니다."
       },
@@ -1123,6 +1129,7 @@
           "eqp_uph"
         ],
         "operators": [
+          "registered_call",
           "filter",
           "aggregate",
           "sort",
@@ -1134,7 +1141,7 @@
           "UPH"
         ],
         "row_count": 2,
-        "plan_fingerprint": "8c202c276c4b352ade476637a10b1b9d8a46ad745de02d5ac11bb59bd05f193b",
+        "plan_fingerprint": "de343ae1fba441efd1f7f8fe269e526201e51dc33efdbb710764a5717968bfcd",
         "result_sha256": "981f9301a0dbc7e90a09284c6a600d1ae19299a789a467498d81bbeeb03773a0",
         "message": "요청한 분석 결과는 총 2건입니다."
       },
@@ -1161,6 +1168,7 @@
           "eqp_uph"
         ],
         "operators": [
+          "registered_call",
           "filter",
           "aggregate",
           "sort",
@@ -1171,7 +1179,7 @@
           "UPH"
         ],
         "row_count": 1,
-        "plan_fingerprint": "94e61b00a4fb6a4bfe314355c201140d3580759e768f3fc2aafc1ee28b3897af",
+        "plan_fingerprint": "449d4c27dc844052ce7842ab1840ca89e14b9eadc8b9758b1c6dfc40507e87cb",
         "result_sha256": "125bf45c802dbb8209453bc70689b4c96addbcdbc5dbd78c06052199d4bf8be4",
         "message": "요청한 분석 결과는 총 1건입니다."
       },
@@ -3101,6 +3109,7 @@
       "response_state_commit": 1,
       "source_merger": 1,
       "source_retriever": 5,
+      "specialized_function_input": 1,
       "terminals": 4,
       "typed_executor": 1
     },
@@ -3178,6 +3187,26 @@
         "node_id": "note_prompt_authority",
         "stage": "annotation",
         "methods": []
+      },
+      {
+        "node_id": "specialized_function_text",
+        "stage": "specialized_function_input",
+        "methods": [
+          "text_response"
+        ],
+        "output_names": [
+          "text"
+        ],
+        "contract_versions": [],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
       },
       {
         "node_id": "request_state_capsule",
@@ -3336,6 +3365,7 @@
           "analysis.intent.v1",
           "analysis.plan.v1",
           "pipeline.context.v1",
+          "registered_call.v1",
           "request.capsule.v1",
           "state.policy.v1"
         ],
@@ -3504,6 +3534,7 @@
           "analysis.plan.v1",
           "canonical.frame.v1",
           "pipeline.context.v1",
+          "registered_call.v1",
           "request.capsule.v1",
           "state.policy.v1"
         ],
@@ -3532,6 +3563,7 @@
           "analysis.result.v1",
           "canonical.frame.v1",
           "pipeline.context.v1",
+          "registered_call.v1",
           "request.capsule.v1",
           "state.policy.v1"
         ],
@@ -3564,6 +3596,7 @@
           "canonical.frame.v1",
           "pipeline.context.v1",
           "prompt.runtime-context.v1",
+          "registered_call.v1",
           "request.capsule.v1",
           "state.policy.v1"
         ],
@@ -3638,6 +3671,7 @@
           "answer.facts.v1",
           "canonical.frame.v1",
           "pipeline.context.v1",
+          "registered_call.v1",
           "request.capsule.v1",
           "state.policy.v1"
         ],
@@ -3662,6 +3696,7 @@
         ],
         "contract_versions": [
           "answer.sections.v1",
+          "registered_call.v1",
           "response.v1"
         ],
         "bounded_status": {
@@ -3685,6 +3720,7 @@
         ],
         "contract_versions": [
           "answer.sections.v1",
+          "registered_call.v1",
           "response.v1"
         ],
         "bounded_status": {
@@ -3711,6 +3747,7 @@
         "contract_versions": [
           "answer.sections.v1",
           "gaia.metadata.v1",
+          "registered_call.v1",
           "response.message-link.v1",
           "response.v1"
         ],
@@ -3736,6 +3773,7 @@
         "contract_versions": [
           "answer.sections.v1",
           "display.options.v1",
+          "registered_call.v1",
           "response.message-link.v1",
           "response.v1"
         ],
@@ -3828,12 +3866,13 @@
         "production_today"
       ],
       "operators": [
+        "registered_call",
         "filter",
         "aggregate",
         "sort",
         "project"
       ],
-      "plan_fingerprint": "593fd9fb7dfcfb868f0a86a5266a9900e75aa5a35bab2901d6635bb98a637bb5"
+      "plan_fingerprint": "ad575bb4e9f8ea85b769adc89ad5f6c984506eea0c960d2ca403da8fb609a788"
     },
     "narrative_contract": {
       "attempted": false,
@@ -3880,6 +3919,7 @@
       "response_state_commit": 1,
       "source_merger": 1,
       "source_retriever": 5,
+      "specialized_function_input": 1,
       "terminals": 4,
       "typed_executor": 1
     },
@@ -3957,6 +3997,26 @@
         "node_id": "note_prompt_authority",
         "stage": "annotation",
         "methods": []
+      },
+      {
+        "node_id": "specialized_function_text",
+        "stage": "specialized_function_input",
+        "methods": [
+          "text_response"
+        ],
+        "output_names": [
+          "text"
+        ],
+        "contract_versions": [],
+        "bounded_status": {
+          "ok": null,
+          "status": null,
+          "stage": null,
+          "error_code": null,
+          "error_stage": null,
+          "error_message": "",
+          "error_detail_keys": []
+        }
       },
       {
         "node_id": "request_state_capsule",
@@ -4668,6 +4728,7 @@
           "response_state_commit": 1,
           "source_merger": 1,
           "source_retriever": 5,
+          "specialized_function_input": 1,
           "terminals": 4,
           "typed_executor": 1
         },
@@ -4745,6 +4806,26 @@
             "node_id": "note_prompt_authority",
             "stage": "annotation",
             "methods": []
+          },
+          {
+            "node_id": "specialized_function_text",
+            "stage": "specialized_function_input",
+            "methods": [
+              "text_response"
+            ],
+            "output_names": [
+              "text"
+            ],
+            "contract_versions": [],
+            "bounded_status": {
+              "ok": null,
+              "status": null,
+              "stage": null,
+              "error_code": null,
+              "error_stage": null,
+              "error_message": "",
+              "error_detail_keys": []
+            }
           },
           {
             "node_id": "request_state_capsule",
@@ -5446,6 +5527,7 @@
           "response_state_commit": 1,
           "source_merger": 1,
           "source_retriever": 5,
+          "specialized_function_input": 1,
           "terminals": 4,
           "typed_executor": 1
         },
@@ -5523,6 +5605,26 @@
             "node_id": "note_prompt_authority",
             "stage": "annotation",
             "methods": []
+          },
+          {
+            "node_id": "specialized_function_text",
+            "stage": "specialized_function_input",
+            "methods": [
+              "text_response"
+            ],
+            "output_names": [
+              "text"
+            ],
+            "contract_versions": [],
+            "bounded_status": {
+              "ok": null,
+              "status": null,
+              "stage": null,
+              "error_code": null,
+              "error_stage": null,
+              "error_message": "",
+              "error_detail_keys": []
+            }
           },
           {
             "node_id": "request_state_capsule",
@@ -6220,6 +6322,7 @@
         "response_state_commit": 1,
         "source_merger": 1,
         "source_retriever": 5,
+        "specialized_function_input": 1,
         "terminals": 4,
         "typed_executor": 1
       },
@@ -6297,6 +6400,26 @@
           "node_id": "note_prompt_authority",
           "stage": "annotation",
           "methods": []
+        },
+        {
+          "node_id": "specialized_function_text",
+          "stage": "specialized_function_input",
+          "methods": [
+            "text_response"
+          ],
+          "output_names": [
+            "text"
+          ],
+          "contract_versions": [],
+          "bounded_status": {
+            "ok": null,
+            "status": null,
+            "stage": null,
+            "error_code": null,
+            "error_stage": null,
+            "error_message": "",
+            "error_detail_keys": []
+          }
         },
         {
           "node_id": "request_state_capsule",
@@ -6949,6 +7072,7 @@
         "response_state_commit": 1,
         "source_merger": 1,
         "source_retriever": 5,
+        "specialized_function_input": 1,
         "terminals": 4,
         "typed_executor": 1
       },
@@ -7026,6 +7150,26 @@
           "node_id": "note_prompt_authority",
           "stage": "annotation",
           "methods": []
+        },
+        {
+          "node_id": "specialized_function_text",
+          "stage": "specialized_function_input",
+          "methods": [
+            "text_response"
+          ],
+          "output_names": [
+            "text"
+          ],
+          "contract_versions": [],
+          "bounded_status": {
+            "ok": null,
+            "status": null,
+            "stage": null,
+            "error_code": null,
+            "error_stage": null,
+            "error_message": "",
+            "error_detail_keys": []
+          }
         },
         {
           "node_id": "request_state_capsule",
@@ -7727,6 +7871,7 @@
         "response_state_commit": 1,
         "source_merger": 1,
         "source_retriever": 5,
+        "specialized_function_input": 1,
         "terminals": 4,
         "typed_executor": 1
       },
@@ -7804,6 +7949,26 @@
           "node_id": "note_prompt_authority",
           "stage": "annotation",
           "methods": []
+        },
+        {
+          "node_id": "specialized_function_text",
+          "stage": "specialized_function_input",
+          "methods": [
+            "text_response"
+          ],
+          "output_names": [
+            "text"
+          ],
+          "contract_versions": [],
+          "bounded_status": {
+            "ok": null,
+            "status": null,
+            "stage": null,
+            "error_code": null,
+            "error_stage": null,
+            "error_message": "",
+            "error_detail_keys": []
+          }
         },
         {
           "node_id": "request_state_capsule",
@@ -8513,6 +8678,7 @@
           "response_state_commit": 1,
           "source_merger": 1,
           "source_retriever": 5,
+          "specialized_function_input": 1,
           "terminals": 4,
           "typed_executor": 1
         },
@@ -8590,6 +8756,26 @@
             "node_id": "note_prompt_authority",
             "stage": "annotation",
             "methods": []
+          },
+          {
+            "node_id": "specialized_function_text",
+            "stage": "specialized_function_input",
+            "methods": [
+              "text_response"
+            ],
+            "output_names": [
+              "text"
+            ],
+            "contract_versions": [],
+            "bounded_status": {
+              "ok": null,
+              "status": null,
+              "stage": null,
+              "error_code": null,
+              "error_stage": null,
+              "error_message": "",
+              "error_detail_keys": []
+            }
           },
           {
             "node_id": "request_state_capsule",
@@ -9289,6 +9475,7 @@
           "response_state_commit": 1,
           "source_merger": 1,
           "source_retriever": 5,
+          "specialized_function_input": 1,
           "terminals": 4,
           "typed_executor": 1
         },
@@ -9366,6 +9553,26 @@
             "node_id": "note_prompt_authority",
             "stage": "annotation",
             "methods": []
+          },
+          {
+            "node_id": "specialized_function_text",
+            "stage": "specialized_function_input",
+            "methods": [
+              "text_response"
+            ],
+            "output_names": [
+              "text"
+            ],
+            "contract_versions": [],
+            "bounded_status": {
+              "ok": null,
+              "status": null,
+              "stage": null,
+              "error_code": null,
+              "error_stage": null,
+              "error_message": "",
+              "error_detail_keys": []
+            }
           },
           {
             "node_id": "request_state_capsule",
@@ -10062,6 +10269,7 @@
           "response_state_commit": 1,
           "source_merger": 1,
           "source_retriever": 5,
+          "specialized_function_input": 1,
           "terminals": 4,
           "typed_executor": 1
         },
@@ -10139,6 +10347,26 @@
             "node_id": "note_prompt_authority",
             "stage": "annotation",
             "methods": []
+          },
+          {
+            "node_id": "specialized_function_text",
+            "stage": "specialized_function_input",
+            "methods": [
+              "text_response"
+            ],
+            "output_names": [
+              "text"
+            ],
+            "contract_versions": [],
+            "bounded_status": {
+              "ok": null,
+              "status": null,
+              "stage": null,
+              "error_code": null,
+              "error_stage": null,
+              "error_message": "",
+              "error_detail_keys": []
+            }
           },
           {
             "node_id": "request_state_capsule",

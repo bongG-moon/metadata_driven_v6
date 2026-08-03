@@ -108,6 +108,8 @@ def _node_stage(node: dict[str, Any]) -> str:
         return "model"
     if "promptcomponent" in native_module or node_id.endswith("_prompt"):
         return "prompt"
+    if "textinput" in native_module or node_id == "specialized_function_text":
+        return "specialized_function_input"
     if "chatoutput" in native_module or node_id == "chat_output":
         return "terminals"
     for marker, stage in _SOURCE_STAGE_MARKERS.items():
