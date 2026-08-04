@@ -745,7 +745,7 @@ class RequestStateCapsule(Component):
                     "storage_session_id": storage_session_id,
                     "anonymous_multiturn_enabled": anonymous_multiturn_enabled,
                     "state_policy": state_policy,
-                    "domain_identity": {key: domain_identity.get(key) for key in ("domain_id", "environment", "revision", "catalog_sha256", "package_sha256", "bundle_sha256")},
+                    "domain_identity": {key: domain_identity.get(key) for key in ("domain_id", "environment", "revision")},
                     "prior_version": prior_version,
                     "prior_result": prior_result,
                     "prior_semantics": prior_semantics,
@@ -777,7 +777,7 @@ def _validate_catalog(catalog):
         raise ContractError("metadata_dependency_error", "domain_bundle", "runtime catalog를 찾을 수 없습니다.")
     if catalog.get("contract_version") == "metadata.runtime.catalog.v2":
         return validate_runtime_catalog_v2(catalog)
-    missing = {"contract_version", "datasets", "fields", "metrics", "catalog_sha256"} - set(catalog)
+    missing = {"contract_version", "datasets", "fields", "metrics"} - set(catalog)
     if missing:
         raise ContractError("metadata_dependency_error", "domain_bundle", "runtime catalog 필수 필드가 없습니다.", {"missing": sorted(missing)})
     for key in ("datasets", "fields", "metrics"):
@@ -828,18 +828,17 @@ class DomainBundleLoader(Component):
             revision = str(package["revision"])
             catalog = deepcopy(package["runtime_catalog"])
             catalog = _validate_catalog(catalog)
+            # The loader has already validated the assembled catalog. Downstream
+            # nodes share this object, so a public catalog pin is redundant.
+            catalog.pop("catalog_sha256", None)
             context["domain_bundle"] = {
                 "contract_version": "domain.bundle.runtime.v1",
                 "domain_id": domain_id,
                 "environment": environment,
                 "revision": revision,
                 "source_mode": "three_collections",
-                "catalog_sha256": str(catalog.get("catalog_sha256") or sha256_json(catalog)),
                 "runtime_catalog": catalog,
             }
-            context["domain_bundle"].update(
-                {"package_sha256": package.get("package_sha256"), "bundle_sha256": package.get("bundle_sha256")}
-            )
         except Exception as exc:
             context = _pipeline_error(context, exc, "domain_bundle")
         return Data(data=context)
@@ -848,7 +847,7 @@ class DomainBundleLoader(Component):
 
 CANDIDATE_ROUTE_COMPONENT = r'''
 from lfx.custom.custom_component.component import Component
-from lfx.io import DataInput, Output
+from lfx.io import DataInput, IntInput, Output
 from lfx.schema.data import Data
 
 
@@ -860,6 +859,8 @@ class CandidateRouteGate(Component):
     inputs = [
         DataInput(name="request_context", display_name="검증된 요청 컨텍스트", required=True, info="질문 원문, 세션 상태, 기준 시각이 검증된 요청 정보입니다."),
         DataInput(name="domain_bundle", display_name="도메인 실행 번들", required=True, info="후보 생성에 사용할 승인된 데이터셋·필드·지표 정의입니다."),
+        IntInput(name="max_dataset_candidates", display_name="관련 테이블 최대 후보 수", value=10, info="질문과 관련된 테이블 후보를 최대 몇 개까지 유지할지 설정합니다. 1~64 범위로 적용됩니다."),
+        IntInput(name="max_entity_group_candidates", display_name="관련 도메인 그룹 최대 후보 수", value=10, info="질문과 관련된 공정·제품 등 도메인 그룹 후보를 최대 몇 개까지 유지할지 설정합니다. 1~64 범위로 적용됩니다."),
     ]
     outputs = [Output(name="selection_context", display_name="의도 후보 및 분기 컨텍스트", method="select_route", types=["Data"])]
 
@@ -883,6 +884,8 @@ class CandidateRouteGate(Component):
                     catalog,
                     prior_semantics=current.get("prior_semantics") or {},
                     prior_result=current.get("prior_result") or {},
+                    max_dataset_candidates=getattr(self, "max_dataset_candidates", 10),
+                    max_entity_group_candidates=getattr(self, "max_entity_group_candidates", 10),
                 )
                 validate_generic_v2_candidate_bundle(bundle, catalog=catalog)
                 validate_contract(bundle, "resolved-candidate-bundle.schema.json", stage="candidate_bundle_contract")
@@ -898,7 +901,7 @@ class CandidateRouteGate(Component):
                     "stage": "candidate_route",
                     "candidate_bundle": bundle,
                     "candidate_lane": candidate_lane,
-                    "domain_identity": {key: (domain.get("domain_bundle") or {}).get(key) for key in ("domain_id", "environment", "revision", "catalog_sha256", "package_sha256", "bundle_sha256")},
+                    "domain_identity": {key: (domain.get("domain_bundle") or {}).get(key) for key in ("domain_id", "environment", "revision")},
                     "domain_prompt_extensions": {
                         "intent": str(((catalog.get("prompt_extensions") or {}).get("intent") or "")).encode("utf-8")[:8192].decode("utf-8", errors="ignore"),
                         "answer": str(((catalog.get("prompt_extensions") or {}).get("answer") or "")).encode("utf-8")[:8192].decode("utf-8", errors="ignore"),
@@ -5237,6 +5240,30 @@ def _freeform_field_roles(field_id, physical_column, explicit_mappings, semantic
     return ["project", "output"]
 
 
+def _freeform_field_declared_aliases(field_id, physical_column, source_text):
+    """Extract explicit worker labels without asking the model to infer them."""
+
+    names = {
+        str(field_id or "").strip().casefold(),
+        str(physical_column or "").strip().casefold(),
+    }
+    names.discard("")
+    aliases = []
+    for name in sorted(names, key=len, reverse=True):
+        pattern = re.compile(
+            rf"(?<![A-Za-z0-9_.-]){re.escape(name)}(?![A-Za-z0-9_.-])\s*컬럼"
+            r".{0,120}?(?:이\s*값|해당\s*값|그\s*값)\s*(?:은|는)\s*"
+            r"(?P<label>[가-힣A-Za-z][가-힣A-Za-z0-9 _./-]{0,39}?)"
+            r"(?=\s*(?:이야|야|입니다|이다|을\s*의미|를\s*의미))",
+            re.IGNORECASE | re.DOTALL,
+        )
+        for match in pattern.finditer(str(source_text or "")):
+            label = " ".join(str(match.group("label") or "").strip().split())
+            if label and label not in aliases:
+                aliases.append(label)
+    return aliases
+
+
 def _freeform_dataset_source_segment(source_text, dataset_id):
     """Return only the worker-authored block that registers ``dataset_id``.
 
@@ -5388,6 +5415,9 @@ def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=
                 ),
             }
             aliases = [str(item).strip() for item in raw_field.get("aliases") or [] if str(item).strip()]
+            for alias in _freeform_field_declared_aliases(field_id, physical, dataset_source_text):
+                if alias not in aliases:
+                    aliases.append(alias)
             if aliases:
                 binding["aliases"] = list(dict.fromkeys(aliases))
             if str(raw_field.get("unit") or "").strip():
@@ -5404,6 +5434,9 @@ def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=
                     "semantic_type": semantic_type,
                     "roles": _freeform_field_roles(canonical, physical, explicit_mappings, semantic_type),
                 }
+                aliases = _freeform_field_declared_aliases(canonical, physical, dataset_source_text)
+                if aliases:
+                    model_fields[canonical]["aliases"] = aliases
         for physical in query_columns:
             canonical = reverse_mapping.get(physical.casefold(), physical)
             if canonical not in model_fields:
@@ -5415,6 +5448,9 @@ def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=
                     "semantic_type": semantic_type,
                     "roles": _freeform_field_roles(canonical, physical, explicit_mappings, semantic_type),
                 }
+                aliases = _freeform_field_declared_aliases(canonical, physical, dataset_source_text)
+                if aliases:
+                    model_fields[canonical]["aliases"] = aliases
         if not model_fields:
             raise ContractError(
                 "metadata_clarification_required", "metadata_clarification",
@@ -5428,6 +5464,42 @@ def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=
         time_scope = str(selection.get("time_scope") or raw_card.get("time_scope") or "unspecified")
         if time_scope:
             selection["time_scope"] = time_scope
+        parameters = deepcopy(dict(raw_card.get("parameters") or {}))
+        placeholders = list(dict.fromkeys(
+            match.group(1).strip()
+            for match in re.finditer(r"\{([A-Za-z][A-Za-z0-9_]*)\}", dataset_source_text)
+        ))
+        date_policy = deepcopy(raw_card.get("date_policy")) if isinstance(raw_card.get("date_policy"), dict) else None
+        for name in placeholders:
+            spec = deepcopy(dict(parameters.get(name) or {}))
+            binding = model_fields.get(name) if isinstance(model_fields.get(name), dict) else {}
+            if str(binding.get("semantic_type") or "").casefold() in {"localdate", "date"}:
+                spec["type"] = "LocalDate"
+                compact_pattern = re.compile(
+                    rf"(?<![A-Za-z0-9_]){re.escape(name)}(?![A-Za-z0-9_])"
+                    r".{0,80}?YYYYMMDD\s*형식",
+                    re.IGNORECASE | re.DOTALL,
+                )
+                dashed_pattern = re.compile(
+                    rf"(?<![A-Za-z0-9_]){re.escape(name)}(?![A-Za-z0-9_])"
+                    r".{0,80}?YYYY-MM-DD\s*형식",
+                    re.IGNORECASE | re.DOTALL,
+                )
+                if compact_pattern.search(dataset_source_text):
+                    spec["format"] = "YYYYMMDD"
+                elif dashed_pattern.search(dataset_source_text):
+                    spec["format"] = "YYYY-MM-DD"
+                if date_policy is None:
+                    date_policy = {
+                        "field": name,
+                        "inclusive_start": True,
+                        "inclusive_end": True,
+                        "timezone": "Asia/Seoul",
+                    }
+            else:
+                spec.setdefault("type", "string")
+            spec["required"] = True
+            parameters[name] = spec
         dataset = {
             "display_name": str(raw_card.get("display_name") or dataset_id),
             "family": family,
@@ -5436,6 +5508,10 @@ def _expand_freeform_dataset_fragment(fragment, source_text, reconciliation_out=
             "selection_criteria": selection,
             "fields": {key: model_fields[key] for key in sorted(model_fields)},
         }
+        if parameters:
+            dataset["parameters"] = parameters
+        if date_policy is not None:
+            dataset["date_policy"] = date_policy
         if raw_card.get("default_detail_fields"):
             dataset["default_detail_fields"] = list(raw_card["default_detail_fields"])
         datasets[dataset_id] = dataset
@@ -11987,7 +12063,7 @@ def _assert_safe_generated(path: Path, source: str) -> None:
 
 def build_components(*, check: bool = False) -> list[Path]:
     catalog = _read_json(CATALOG_PATH, "compiled runtime catalog")
-    required_catalog_keys = {"contract_version", "datasets", "fields", "metrics", "catalog_sha256"}
+    required_catalog_keys = {"contract_version", "datasets", "fields", "metrics"}
     if not required_catalog_keys.issubset(catalog):
         raise GenerationError(f"compiled runtime catalog is incomplete; missing {sorted(required_catalog_keys - set(catalog))}")
     schema_paths = sorted(SCHEMA_ROOT.glob("*.schema.json"), key=lambda item: item.name)

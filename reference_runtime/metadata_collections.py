@@ -68,6 +68,17 @@ _DOMAIN_SECTION_ID_FIELDS = {
     "recipes": "recipe_id",
 }
 _GENERIC_DISPLAY_NAMES = {"default", "unknown", "기본", "기타", "미정", "항목"}
+_NUMERIC_METRIC_TYPES = {
+    "number",
+    "integer",
+    "decimal",
+    "float",
+    "quantity",
+    "currency",
+    "rate",
+    "percent",
+    "percentage",
+}
 
 
 def _fail(message: str, details: Mapping[str, Any] | None = None) -> None:
@@ -114,6 +125,196 @@ def _alias_payload_expressions(payload: Mapping[str, Any]) -> set[str]:
     if not isinstance(values, list):
         values = payload.get("aliases")
     return _duplicate_string_values(values)
+
+
+def _natural_field_aliases(
+    source_text: str,
+    field_id: str,
+    physical_column: str,
+) -> list[str]:
+    """Extract only worker-declared field meanings from item natural text.
+
+    This intentionally narrow grammar never invents domain words. It accepts
+    labels only from sentences such as ``PRODUCTION 컬럼 ... 이 값은
+    생산량이야`` where the physical or canonical field is named explicitly.
+    """
+
+    text = str(source_text or "")
+    names = {
+        str(field_id or "").strip().casefold(),
+        str(physical_column or "").strip().casefold(),
+    }
+    names.discard("")
+    result: list[str] = []
+    # Match each known field independently. A single broad ``field ... value``
+    # expression can otherwise consume an earlier DATE/WORK_DT mention and hide
+    # the later metric declaration in the same worker-authored paragraph.
+    for name in sorted(names, key=len, reverse=True):
+        pattern = re.compile(
+            rf"(?<![A-Za-z0-9_.-]){re.escape(name)}(?![A-Za-z0-9_.-])\s*컬럼"
+            r".{0,120}?(?:이\s*값|해당\s*값|그\s*값)\s*(?:은|는)\s*"
+            r"(?P<label>[가-힣A-Za-z][가-힣A-Za-z0-9 _./-]{0,39}?)"
+            r"(?=\s*(?:이야|야|입니다|이다|을\s*의미|를\s*의미))",
+            re.IGNORECASE | re.DOTALL,
+        )
+        for match in pattern.finditer(text):
+            label = " ".join(str(match.group("label") or "").strip().split())
+            if label and label not in result:
+                result.append(label)
+    return result
+
+
+def _enrich_dataset_item_payload(
+    payload: Mapping[str, Any],
+    natural_text: str,
+) -> dict[str, Any]:
+    """Normalize metric-capable fields without trusting provider variability."""
+
+    dataset = deepcopy(dict(payload))
+    raw_fields = dataset.get("fields")
+    if not isinstance(raw_fields, Mapping):
+        return dataset
+    fields: dict[str, Any] = {}
+    for field_id, raw_binding in raw_fields.items():
+        binding = deepcopy(dict(raw_binding)) if isinstance(raw_binding, Mapping) else raw_binding
+        if not isinstance(binding, dict):
+            fields[str(field_id)] = binding
+            continue
+        aliases = [str(value).strip() for value in binding.get("aliases") or [] if str(value).strip()]
+        declared_aliases = _natural_field_aliases(
+            natural_text,
+            str(field_id),
+            str(binding.get("physical_column") or ""),
+        )
+        for alias in declared_aliases:
+            if alias not in aliases:
+                aliases.append(alias)
+        if aliases:
+            binding["aliases"] = aliases
+        semantic_type = str(binding.get("semantic_type") or "").casefold()
+        if declared_aliases and semantic_type in _NUMERIC_METRIC_TYPES:
+            roles = [str(value) for value in binding.get("roles") or [] if str(value)]
+            for role in ("aggregate", "metric", "output"):
+                if role not in roles:
+                    roles.append(role)
+            binding["roles"] = roles
+        fields[str(field_id)] = binding
+    dataset["fields"] = fields
+
+    parameters = deepcopy(dict(dataset.get("parameters") or {}))
+    for name, raw_spec in list(parameters.items()):
+        spec = deepcopy(dict(raw_spec)) if isinstance(raw_spec, Mapping) else {}
+        binding = fields.get(str(name))
+        semantic_type = (
+            str(binding.get("semantic_type") or "").casefold()
+            if isinstance(binding, Mapping)
+            else ""
+        )
+        if semantic_type in {"localdate", "date"}:
+            # Query placeholders bound to canonical date fields are dates even
+            # when a smaller authoring model emitted the generic string type.
+            spec["type"] = "LocalDate"
+            compact_pattern = re.compile(
+                rf"(?<![A-Za-z0-9_]){re.escape(str(name))}(?![A-Za-z0-9_])"
+                r".{0,80}?YYYYMMDD\s*형식",
+                re.IGNORECASE | re.DOTALL,
+            )
+            dashed_pattern = re.compile(
+                rf"(?<![A-Za-z0-9_]){re.escape(str(name))}(?![A-Za-z0-9_])"
+                r".{0,80}?YYYY-MM-DD\s*형식",
+                re.IGNORECASE | re.DOTALL,
+            )
+            if compact_pattern.search(str(natural_text or "")):
+                spec["format"] = "YYYYMMDD"
+            elif dashed_pattern.search(str(natural_text or "")):
+                spec["format"] = "YYYY-MM-DD"
+        parameters[str(name)] = spec
+    if parameters:
+        dataset["parameters"] = parameters
+
+    if not isinstance(dataset.get("date_policy"), Mapping):
+        for name, spec in parameters.items():
+            binding = fields.get(str(name))
+            semantic_type = (
+                str(binding.get("semantic_type") or "").casefold()
+                if isinstance(binding, Mapping)
+                else ""
+            )
+            if semantic_type in {"localdate", "date"} and str(spec.get("type") or "").casefold() in {"localdate", "date"}:
+                dataset["date_policy"] = {
+                    "field": str(name),
+                    "inclusive_start": True,
+                    "inclusive_end": True,
+                    "timezone": "Asia/Seoul",
+                }
+                break
+    return dataset
+
+
+def _synthesize_dataset_metrics(draft: dict[str, Any]) -> None:
+    """Create safe additive metrics from metric-role dataset fields.
+
+    A metric is synthesized only when exactly one dataset family owns the
+    canonical field and every dataset in that family exposes the same numeric
+    field. Explicit domain metrics always win.
+    """
+
+    datasets = draft.get("datasets") if isinstance(draft.get("datasets"), dict) else {}
+    explicit_metrics = draft.get("metrics") if isinstance(draft.get("metrics"), dict) else {}
+    families: dict[str, list[tuple[str, dict[str, Any]]]] = {}
+    for dataset_key, raw_dataset in datasets.items():
+        if not isinstance(raw_dataset, Mapping):
+            continue
+        dataset = raw_dataset if isinstance(raw_dataset, dict) else dict(raw_dataset)
+        family = str(dataset.get("family") or dataset_key)
+        families.setdefault(family, []).append((str(dataset_key), dataset))
+
+    candidates: dict[str, list[tuple[str, list[dict[str, Any]]]]] = {}
+    for family, family_datasets in families.items():
+        field_sets = [set(dict(dataset.get("fields") or {})) for _key, dataset in family_datasets]
+        common_fields = set.intersection(*field_sets) if field_sets else set()
+        for field_id in sorted(common_fields):
+            bindings = [dict(dataset.get("fields") or {})[field_id] for _key, dataset in family_datasets]
+            if not all(str(binding.get("semantic_type") or "").casefold() in _NUMERIC_METRIC_TYPES for binding in bindings):
+                continue
+            if not any(set(binding.get("roles") or []) & {"aggregate", "metric"} for binding in bindings):
+                continue
+            if not any(binding.get("aliases") for binding in bindings):
+                continue
+            candidates.setdefault(field_id, []).append((family, bindings))
+
+    for field_id, owners in sorted(candidates.items()):
+        if field_id in explicit_metrics or len(owners) != 1:
+            continue
+        family, bindings = owners[0]
+        aliases: list[str] = []
+        units = {
+            str(binding.get("unit") or "").strip()
+            for binding in bindings
+            if str(binding.get("unit") or "").strip()
+        }
+        for binding in bindings:
+            roles = [str(value) for value in binding.get("roles") or [] if str(value)]
+            for role in ("aggregate", "metric", "output"):
+                if role not in roles:
+                    roles.append(role)
+            binding["roles"] = roles
+            for alias in binding.get("aliases") or []:
+                value = str(alias).strip()
+                if value and value not in aliases:
+                    aliases.append(value)
+        metric = {
+            "aliases": aliases,
+            "source_binding": {"dataset_family": family, "field": field_id},
+            "additivity": {"default": "additive", "allowed_rollups": ["sum"]},
+            "null_policy": "exclude_from_sum",
+            "zero_policy": "preserve_zero",
+            "value_type": "number",
+        }
+        if len(units) == 1:
+            metric["unit"] = next(iter(units))
+        explicit_metrics[field_id] = metric
+    draft["metrics"] = explicit_metrics
 
 
 def _metadata_collection_names(
@@ -734,6 +935,8 @@ def assemble_domain_package_from_items(
             section = item["section"]
             key = item["key"]
             payload = deepcopy(item["payload"])
+            if collection_kind == "table_catalog" and section == "datasets":
+                payload = _enrich_dataset_item_payload(payload, item["natural_text"])
             if section == "aliases":
                 alias_marker = _duplicate_text(key)
                 previous_owner = alias_owners.get(alias_marker)
@@ -809,6 +1012,8 @@ def assemble_domain_package_from_items(
                 continue
             else:
                 _fail("지원하지 않는 메타데이터 항목 section입니다.", {"collection": collection_kind, "section": section, "key": key})
+
+    _synthesize_dataset_metrics(draft)
 
     if not draft["datasets"]:
         _fail("등록된 데이터셋 항목이 없습니다.")

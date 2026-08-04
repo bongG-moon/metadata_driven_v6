@@ -264,8 +264,6 @@ def validate_generic_v2_plan(plan: dict[str, Any], catalog: dict[str, Any]) -> d
 
     _validate_catalog_pin(catalog)
     _validate_plan_hashes(plan)
-    if str(plan.get("catalog_sha256") or "") != str(catalog.get("catalog_sha256") or ""):
-        _fail("Plan catalog pin does not match the supplied runtime catalog.")
 
     datasets = set(catalog.get("datasets") or {})
     relations = catalog.get("relations") if isinstance(catalog.get("relations"), dict) else {}
@@ -434,9 +432,9 @@ def _validate_compile_dependencies(
 def _validate_catalog_pin(catalog: dict[str, Any]) -> None:
     if not isinstance(catalog, dict) or catalog.get("contract_version") != "metadata.runtime.catalog.v2":
         _fail("A metadata.runtime.catalog.v2 catalog is required.")
-    expected = sha256_json({key: value for key, value in catalog.items() if key != "catalog_sha256"})
-    if str(catalog.get("catalog_sha256") or "") != expected:
-        _fail("Runtime catalog hash does not match its compiled material.")
+    for section in ("datasets", "fields", "metrics"):
+        if not isinstance(catalog.get(section), dict):
+            _fail("Runtime catalog registry is invalid.", {"section": section})
 
 
 def _validate_plan_hashes(plan: dict[str, Any]) -> None:
@@ -449,7 +447,6 @@ def _validate_plan_hashes(plan: dict[str, Any]) -> None:
     semantic = {
         key: material[key]
         for key in (
-            "catalog_sha256",
             "input_refs",
             "retrieval_jobs",
             "operations",
@@ -749,7 +746,10 @@ def _source_constraints(
     clauses: list[dict[str, Any]] = []
     parameters: dict[str, Any] = {}
 
-    if apply_date and bool(semantics.get("date_explicit")):
+    selection = dataset.get("selection_criteria") if isinstance(dataset.get("selection_criteria"), dict) else {}
+    dataset_time_scope = str(selection.get("time_scope") or dataset.get("time_scope") or "").casefold()
+    implicit_current_day = dataset_time_scope in {"current", "current_day", "today"}
+    if apply_date and (bool(semantics.get("date_explicit")) or implicit_current_day):
         value = str(semantics.get("date") or "")
         date_policy = dataset.get("date_policy") if isinstance(dataset.get("date_policy"), dict) else {}
         date_field = str(date_policy.get("field") or "")
@@ -770,10 +770,16 @@ def _source_constraints(
         local_date_parameters = [
             str(name)
             for name, spec in parameter_specs.items()
-            if isinstance(spec, dict) and str(spec.get("type") or "").casefold() in {"localdate", "date"}
+            if isinstance(spec, dict)
+            and (
+                str(spec.get("type") or "").casefold() in {"localdate", "date"}
+                or _semantic_type(catalog, str(name)).casefold() in {"localdate", "date"}
+            )
         ]
         for name in sorted(local_date_parameters):
-            parameters[name] = value
+            spec = parameter_specs.get(name) or {}
+            value_format = str(spec.get("format") or "").upper().replace("-", "")
+            parameters[name] = value.replace("-", "") if value_format == "YYYYMMDD" else value
 
     for item in semantics.get("filter_refs") or []:
         if not isinstance(item, dict):
@@ -1262,7 +1268,7 @@ def _date_filter_dataset(
     anchor: str,
     semantics: dict[str, Any],
 ) -> str:
-    """Choose the joined dataset that can prove an explicit date scope.
+    """Choose the joined dataset that can prove a date scope.
 
     Date semantics may only constrain the selected anchor's registered date
     policy.  A joined dataset's date must never be substituted as a proxy for
@@ -1270,8 +1276,6 @@ def _date_filter_dataset(
     keep ``date_explicit`` false and return no filter dataset.
     """
 
-    if not bool(semantics.get("date_explicit")):
-        return ""
     ordered = _stable(dataset_order)
 
     def has_date_policy(dataset_key: str) -> bool:
@@ -1279,6 +1283,12 @@ def _date_filter_dataset(
         policy = dataset.get("date_policy") if isinstance(dataset.get("date_policy"), dict) else {}
         return bool(policy.get("field"))
 
+    if not bool(semantics.get("date_explicit")):
+        dataset = (catalog.get("datasets") or {}).get(anchor) or {}
+        selection = dataset.get("selection_criteria") if isinstance(dataset.get("selection_criteria"), dict) else {}
+        scope = str(selection.get("time_scope") or dataset.get("time_scope") or "").casefold()
+        if scope not in {"current", "current_day", "today"}:
+            return ""
     return anchor if anchor in ordered and has_date_policy(anchor) else ""
 
 
@@ -1592,7 +1602,6 @@ def _finalize(
 ) -> dict[str, Any]:
     lineage = {
         field: {
-            "catalog_sha256": catalog.get("catalog_sha256"),
             "field": field,
             "dataset_keys": _stable(((catalog.get("fields") or {}).get(field) or {}).get("dataset_keys") or []),
         }
@@ -1602,7 +1611,6 @@ def _finalize(
         "contract_version": "analysis.plan.v1",
         "intent_sha256": intent.get("intent_sha256"),
         "candidate_bundle_sha256": bundle.get("bundle_sha256"),
-        "catalog_sha256": catalog.get("catalog_sha256"),
         "input_refs": list(input_refs or []),
         "retrieval_jobs": jobs,
         "operations": operations,
@@ -1616,7 +1624,6 @@ def _finalize(
     semantic = {
         key: normalized[key]
         for key in (
-            "catalog_sha256",
             "input_refs",
             "retrieval_jobs",
             "operations",

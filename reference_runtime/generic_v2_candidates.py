@@ -37,6 +37,12 @@ MAX_MATCHES_PER_TYPE = 64
 MAX_INTENT_CANDIDATES = 32
 MAX_AMBIGUITY_VARIANTS = 16
 MAX_BUNDLE_BYTES = 28 * 1024
+DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE = {
+    "dataset": 10,
+    "entity_group": 10,
+}
+MIN_CONFIGURED_CANDIDATE_IDENTITIES = 1
+MAX_CONFIGURED_CANDIDATE_IDENTITIES = MAX_MATCHES_PER_TYPE
 
 CATALOG_TARGET_SECTIONS = {
     "dataset": "datasets",
@@ -116,7 +122,6 @@ TOP_N_PATTERN = re.compile(r"(?P<mode>상위|하위|top|bottom)\s*(?P<limit>\d+)
 TOP_LEVEL_KEYS = {
     "contract_version",
     "request_id",
-    "catalog_sha256",
     "dataset_candidates",
     "field_candidates",
     "metric_candidates",
@@ -173,6 +178,8 @@ def build_generic_v2_candidate_bundle(
     *,
     prior_semantics: dict[str, Any] | None = None,
     prior_result: dict[str, Any] | None = None,
+    max_dataset_candidates: int = DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE["dataset"],
+    max_entity_group_candidates: int = DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE["entity_group"],
 ) -> dict[str, Any]:
     """Build the canonical runtime bundle consumed by the v2 intent resolver."""
 
@@ -184,7 +191,17 @@ def build_generic_v2_candidate_bundle(
     if not question:
         _fail("intent_contract_error", "candidate_routing", "질문이 비어 있습니다.")
 
-    matches = _collect_registered_matches(question, catalog)
+    identity_limits = {
+        "dataset": _configured_candidate_limit(
+            max_dataset_candidates,
+            DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE["dataset"],
+        ),
+        "entity_group": _configured_candidate_limit(
+            max_entity_group_candidates,
+            DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE["entity_group"],
+        ),
+    }
+    matches = _collect_registered_matches(question, catalog, identity_limits=identity_limits)
     pools = {
         pool_key: deepcopy(matches.get(target_type, []))
         for target_type, pool_key in MATCH_POOL_KEYS.items()
@@ -251,7 +268,6 @@ def build_generic_v2_candidate_bundle(
     prompt_cards = [_prompt_card(item) for item in intent_candidates]
     material = {
         "request_id": request_id,
-        "catalog_sha256": str(catalog.get("catalog_sha256") or ""),
         **pools,
         "intent_candidates": intent_candidates,
         "prompt_cards": prompt_cards,
@@ -332,8 +348,6 @@ def validate_generic_v2_candidate_bundle(
         _fail("route_contract_error", "candidate_bundle_validation", "candidate bundle 버전이 올바르지 않습니다.")
     if catalog is not None:
         _validate_catalog(catalog)
-        if bundle.get("catalog_sha256") != catalog.get("catalog_sha256"):
-            _fail("metadata_dependency_error", "candidate_bundle_validation", "candidate bundle의 catalog hash가 다릅니다.")
 
     for pool_key in MATCH_POOL_KEYS.values():
         pool = bundle.get(pool_key)
@@ -564,7 +578,20 @@ def resolve_generic_v2_intent(
     return intent, telemetry
 
 
-def _collect_registered_matches(question: str, catalog: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+def _configured_candidate_limit(value: Any, default: int) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = int(default)
+    return max(MIN_CONFIGURED_CANDIDATE_IDENTITIES, min(parsed, MAX_CONFIGURED_CANDIDATE_IDENTITIES))
+
+
+def _collect_registered_matches(
+    question: str,
+    catalog: dict[str, Any],
+    *,
+    identity_limits: Mapping[str, int] | None = None,
+) -> dict[str, list[dict[str, Any]]]:
     aliases: dict[tuple[str, str], list[dict[str, Any]]] = {}
 
     def register_values(target_type: str, target_key: str, values: Any, spec: Mapping[str, Any] | None = None) -> None:
@@ -596,6 +623,28 @@ def _collect_registered_matches(question: str, catalog: dict[str, Any]) -> dict[
             if not isinstance(spec, dict):
                 continue
             register_values(target_type, str(key), spec.get("aliases") or [])
+            if target_type == "dataset":
+                # Dataset identity, worker-facing label and registered use_when
+                # phrases are authoritative retrieval evidence.  This mirrors
+                # the v5 bounded table-candidate stage without fuzzy LLM search.
+                register_values(
+                    target_type,
+                    str(key),
+                    [
+                        {"text": str(key), "priority": 120},
+                        {"text": str(spec.get("display_name") or ""), "priority": 110},
+                    ],
+                )
+                criteria = spec.get("selection_criteria") if isinstance(spec.get("selection_criteria"), dict) else {}
+                register_values(
+                    target_type,
+                    str(key),
+                    [
+                        {"text": value, "priority": 100}
+                        for value in criteria.get("use_when") or []
+                        if str(value).strip()
+                    ],
+                )
 
     for card in catalog.get("specialized_functions") or []:
         if not isinstance(card, dict):
@@ -660,6 +709,18 @@ def _collect_registered_matches(question: str, catalog: dict[str, Any]) -> dict[
             clean = {key: deepcopy(value) for key, value in candidate.items() if not key.startswith("_")}
             selected.append(clean)
         selected.sort(key=lambda item: (int(item["evidence"]["start"]), -len(str(item["alias"])), str(item["identity"])))
+        identity_limit = (identity_limits or DEFAULT_CANDIDATE_IDENTITIES_BY_TYPE).get(target_type)
+        if identity_limit is not None:
+            allowed_identities: list[str] = []
+            bounded: list[dict[str, Any]] = []
+            for candidate in selected:
+                identity = str(candidate.get("identity") or "")
+                if identity not in allowed_identities:
+                    if len(allowed_identities) >= identity_limit:
+                        continue
+                    allowed_identities.append(identity)
+                bounded.append(candidate)
+            selected = bounded
         result[target_type] = selected[:MAX_MATCHES_PER_TYPE]
     return result
 
@@ -824,6 +885,13 @@ def _evaluate_composition(
     raw_fields = _matched_ids(matches, "field")
     fields = _visible_field_refs(request, catalog, matches)
     datasets = _matched_ids(matches, "dataset")
+    if not metrics and datasets and _question_implies_metric(str(request.get("question") or "")):
+        metrics = _root_metric_refs(
+            catalog,
+            _unique_metrics_for_datasets(catalog, datasets),
+            request=request,
+            matches=matches,
+        )
     grains = _matched_ids(matches, "grain")
     relations = _matched_ids(matches, "relation")
     entity_groups = _matched_ids(matches, "entity_group")
@@ -1134,7 +1202,6 @@ def _prompt_card(candidate: dict[str, Any]) -> dict[str, Any]:
 def _bundle_material(bundle: dict[str, Any]) -> dict[str, Any]:
     return {
         "request_id": bundle.get("request_id"),
-        "catalog_sha256": bundle.get("catalog_sha256"),
         **{pool_key: bundle.get(pool_key) for pool_key in MATCH_POOL_KEYS.values()},
         "intent_candidates": bundle.get("intent_candidates"),
         "prompt_cards": bundle.get("prompt_cards"),
@@ -1172,7 +1239,7 @@ def _validate_catalog(catalog: dict[str, Any]) -> None:
         _fail("metadata_dependency_error", "candidate_routing", "metadata.runtime.catalog.v2가 필요합니다.")
     actual_hash = str(catalog.get("catalog_sha256") or "")
     expected_hash = sha256_json({key: value for key, value in catalog.items() if key != "catalog_sha256"})
-    if actual_hash != expected_hash:
+    if actual_hash and actual_hash != expected_hash:
         _fail(
             "metadata_dependency_error",
             "candidate_routing",
@@ -1378,6 +1445,33 @@ def _metric_source_datasets(
     return _stable(datasets), _stable(gaps)
 
 
+def _unique_metrics_for_datasets(catalog: dict[str, Any], dataset_refs: Iterable[str]) -> list[str]:
+    """Return a metric only when selected dataset families make it unambiguous."""
+
+    families = {
+        str(((catalog.get("datasets") or {}).get(dataset_ref) or {}).get("family") or "")
+        for dataset_ref in dataset_refs
+    }
+    families.discard("")
+    metrics = [
+        str(metric_id)
+        for metric_id, metric in (catalog.get("metrics") or {}).items()
+        if isinstance(metric, dict)
+        and str((metric.get("source_binding") or {}).get("dataset_family") or "") in families
+    ]
+    return _stable(metrics) if len(set(metrics)) == 1 else []
+
+
+def _question_implies_metric(question: str) -> bool:
+    return any(
+        _contains(question, cue)
+        for cue in (
+            "실적", "수량", "합계", "총량", "평균", "비율",
+            "actual", "amount", "quantity", "total", "average", "rate",
+        )
+    )
+
+
 def _formula_metric_refs(value: Any) -> list[str]:
     result: list[str] = []
     if isinstance(value, dict):
@@ -1419,41 +1513,69 @@ def _select_time_scoped_dataset(
         exclude_when = [str(value) for value in criteria.get("exclude_when") or [] if str(value)]
         if (
             use_when
-            and any(_contains(question, cue) for cue in use_when)
-            and not any(_contains(question, cue) for cue in exclude_when)
+            and any(_selection_cue_matches(question, cue) for cue in use_when)
+            and not any(_selection_cue_matches(question, cue) for cue in exclude_when)
         ):
             criteria_matches.append(dataset_key)
     if len(criteria_matches) == 1:
         return criteria_matches[0]
     if len(criteria_matches) > 1:
         return ""
-    current_cues = (
-        "현재", "현시간", "실시간", "현황",
-        "current", "real-time", "realtime",
-    )
+    day_cues = ("오늘", "금일", "당일", "today", "current day")
+    current_cues = ("현재", "현시간", "실시간", "현황", "current", "real-time", "realtime")
+    if any(_contains(question, cue) for cue in day_cues):
+        preferred = [
+            dataset_key
+            for dataset_key in matches
+            if _dataset_time_scope(dataset_key, datasets.get(dataset_key) or {})
+            in {"current_day", "today"}
+        ]
+        return preferred[0] if len(preferred) == 1 else ""
     if any(_contains(question, cue) for cue in current_cues):
         preferred = [
             dataset_key
             for dataset_key in matches
-            if str((datasets.get(dataset_key) or {}).get("time_scope") or "").casefold()
+            if _dataset_time_scope(dataset_key, datasets.get(dataset_key) or {})
             in {"current", "current_day", "today"}
         ]
         return preferred[0] if len(preferred) == 1 else ""
     requested_date, _explicit = _date_semantics(request)
     reference_date = str(request.get("reference_instant") or "")[:10]
     date_values = _typed_values(request, "date")
-    absolute_past = any(str(item.get("resolution") or "") == "explicit" for item in date_values) and bool(
-        requested_date and reference_date and requested_date < reference_date
+    historical_date = bool(
+        date_values and requested_date and reference_date and requested_date < reference_date
     )
-    if not absolute_past:
+    if not historical_date:
         return ""
     preferred = [
         dataset_key
         for dataset_key in matches
-        if str((datasets.get(dataset_key) or {}).get("time_scope") or "").casefold()
+        if _dataset_time_scope(dataset_key, datasets.get(dataset_key) or {})
         in {"history", "historical", "past"}
     ]
     return preferred[0] if len(preferred) == 1 else ""
+
+
+def _selection_cue_matches(question: str, cue: str) -> bool:
+    """Match a registered phrase even when a qualifier appears between its words."""
+
+    if _contains(question, cue):
+        return True
+    parts = re.findall(r"[0-9A-Za-z가-힣]+", normalize_text(cue))
+    return len(parts) > 1 and all(_contains(question, part) for part in parts)
+
+
+def _dataset_time_scope(dataset_key: str, dataset: Mapping[str, Any]) -> str:
+    criteria = dataset.get("selection_criteria") if isinstance(dataset.get("selection_criteria"), Mapping) else {}
+    scope = str(criteria.get("time_scope") or dataset.get("time_scope") or "").casefold()
+    if scope and scope != "unspecified":
+        return scope
+    identity = " ".join((str(dataset_key), str(dataset.get("display_name") or ""))).casefold()
+    if any(token in identity for token in ("today", "current", "오늘", "당일", "현재")):
+        return "current_day"
+    if any(token in identity for token in ("history", "historical", "past", "이력", "과거")):
+        return "history"
+    return scope
 
 
 def _field_source_datasets(
@@ -1563,6 +1685,19 @@ def _dimension_refs(catalog: dict[str, Any], fields: list[str], grain_ids: list[
         ]
         if len(matching_grains) == 1:
             result.extend(_strings(matching_grains[0].get("keys") or []))
+    if analysis_kind == "rank" and not result:
+        # A directly mentioned registered field is a complete rank grain even
+        # when the worker did not register a separate grain card.  Temporal
+        # qualifiers and metric-valued fields are never promoted.
+        for field in fields:
+            card = (catalog.get("fields") or {}).get(field) or {}
+            semantic_type = str(card.get("semantic_type") or "").casefold()
+            roles = set(_strings(card.get("roles") or []))
+            if semantic_type in {"date", "localdate", "datetime", "timestamp", "instant"}:
+                continue
+            if roles.intersection({"metric", "aggregate"}):
+                continue
+            result.append(field)
     return _stable(result)
 
 
@@ -1950,6 +2085,10 @@ def _registered_filter_literals(
         group = (catalog.get("entity_groups") or {}).get(group_id) or {}
         field = str(group.get("target_field") or group.get("entity") or "")
         selection = group.get("selection") if isinstance(group.get("selection"), dict) else {}
+        if not selection:
+            members = [str(value) for value in group.get("members") or [] if str(value)]
+            if members:
+                selection = {"operator": "in", "value": members}
         operator = str(selection.get("operator") or "")
         if not field or not _registered(catalog, "field", field) or operator == "all_registered":
             continue

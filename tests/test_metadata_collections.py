@@ -7,6 +7,11 @@ from pathlib import Path
 import pytest
 
 from reference_runtime.canonical import ContractError
+from reference_runtime.generic_v2_candidates import (
+    build_generic_v2_candidate_bundle,
+    normalize_generic_v2_intent,
+)
+from reference_runtime.generic_v2_planner import compile_generic_v2_plan
 from reference_runtime.metadata_collections import (
     DOMAIN_METADATA_COLLECTION,
     MAIN_FILTER_COLLECTION,
@@ -21,6 +26,7 @@ from reference_runtime.metadata_collections import (
     replace_metadata_items,
     upsert_partial_metadata_items,
 )
+from reference_runtime.request_literals import build_request_capsule
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -89,6 +95,176 @@ def _item(collection: str, section: str, key: str, payload: dict) -> dict:
         "payload": deepcopy(payload),
         "updated_at": "2026-08-03T00:00:00+00:00",
     }
+
+
+def test_natural_dataset_metric_and_member_group_compile_to_deterministic_plan() -> None:
+    def dataset_payload(*, time_scope: str) -> dict:
+        if time_scope == "history":
+            use_when = ["어제 생산", "전일 생산", "특정 과거일 생산"]
+            exclude_when = ["오늘 생산", "당일 생산", "현재 생산"]
+        else:
+            use_when = ["오늘 생산", "당일 생산", "현재 생산"]
+            exclude_when = ["어제 생산", "전일 생산", "특정 과거일 생산"]
+        return {
+            "display_name": f"Production {time_scope}",
+            "family": "production",
+            "source_type": "oracle",
+            "time_scope": time_scope,
+            "selection_criteria": {
+                "time_scope": time_scope,
+                "use_when": use_when,
+                "exclude_when": exclude_when,
+            },
+            "fields": {
+                "DATE": {
+                    "physical_column": "WORK_DATE",
+                    "semantic_type": "date",
+                    "roles": ["filter", "project", "output"],
+                },
+                "OPER_NAME": {
+                    "physical_column": "OPER_NAME",
+                    "semantic_type": "string",
+                    "roles": ["filter", "project", "output"],
+                },
+                "PRODUCTION": {
+                    "physical_column": "PRODUCTION",
+                    "semantic_type": "number",
+                    "roles": ["project", "output"],
+                },
+            },
+            "source_adapter": "oracle",
+            "config_ref": f"config:oracle:production_{time_scope}@1",
+            "query_ref": f"query:production_{time_scope}@1",
+            "source_config": {
+                "source_type": "oracle",
+                "db_key": "PNT_RPT",
+                "query_template": "SELECT WORK_DATE, OPER_NAME, PRODUCTION FROM PROD WHERE WORK_DATE = {DATE}",
+                "required_params": ["DATE"],
+            },
+            "parameters": {"DATE": {"type": "string", "required": True}},
+        }
+
+    group = _item(
+        "domain",
+        "entity_groups",
+        "DP",
+        {
+            "group_id": "DP",
+            "display_name": "DP",
+            "target_field": "OPER_NAME",
+            "members": ["WET1", "WET2", "C/C1"],
+            "aliases": ["DP", "DP공정", "DP 공정"],
+        },
+    )
+    history = _item(
+        "table_catalog",
+        "datasets",
+        "production",
+        dataset_payload(time_scope="history"),
+    )
+    history["natural_text"] = (
+        "이력 생산 실적 데이터는 production으로 등록해줘. "
+        "DATE는 YYYYMMDD 형식이야. "
+        "수량은 PRODUCTION 컬럼을 사용하고, 이 값은 생산량이야."
+    )
+    today = _item(
+        "table_catalog",
+        "datasets",
+        "production_today",
+        dataset_payload(time_scope="current_day"),
+    )
+    today["natural_text"] = (
+        "당일 생산 실적 데이터는 production_today로 등록해줘. "
+        "DATE는 YYYYMMDD 형식이야. "
+        "수량은 PRODUCTION 컬럼을 사용하고, 이 값은 생산량이야."
+    )
+    date_alias = _item(
+        "main_filter",
+        "aliases",
+        "field:DATE",
+        {"target_type": "field", "target_key": "DATE", "values": ["날짜", "기준일"]},
+    )
+    oper_alias = _item(
+        "main_filter",
+        "aliases",
+        "field:OPER_NAME",
+        {"target_type": "field", "target_key": "OPER_NAME", "values": ["공정"]},
+    )
+
+    package = assemble_domain_package_from_items(
+        {
+            "domain": [group],
+            "table_catalog": [history, today],
+            "main_filter": [date_alias, oper_alias],
+        }
+    )
+    catalog = package["runtime_catalog"]
+    request = build_request_capsule(
+        "어제 DP공정 생산량",
+        session_id="regression-session",
+        subject_id="regression-user",
+        reference_instant="2026-08-04T09:00:00+09:00",
+        previous_state_ref="",
+    )
+    bundle = build_generic_v2_candidate_bundle(request, catalog)
+    intent = normalize_generic_v2_intent(request, bundle)
+    plan = compile_generic_v2_plan(intent, bundle, catalog, question=request["question"])
+
+    assert catalog["metrics"]["PRODUCTION"]["aliases"] == ["생산량"]
+    assert catalog["entity_groups"]["DP"]["members"] == ["WET1", "WET2", "C/C1"]
+    assert bundle["route_decision"]["route"] == "deterministic"
+    assert "catalog_sha256" not in bundle
+    assert intent["semantics"]["dataset_refs"] == ["production"]
+    assert plan["retrieval_jobs"][0]["parameters"] == {"DATE": "20260803"}
+    assert plan["retrieval_jobs"][0]["filters"]["clauses"][1]["field"] == "OPER_NAME"
+    assert "catalog_sha256" not in plan
+    assert all("catalog_sha256" not in value for value in plan["lineage"].values())
+
+    for question, expected_dataset, expected_date in (
+        ("오늘 DP공정 생산량", "production_today", "20260804"),
+        ("전일 생산 실적", "production", "20260803"),
+        ("당일 생산 실적", "production_today", "20260804"),
+        ("production_today 생산량", "production_today", "20260804"),
+    ):
+        next_request = build_request_capsule(
+            question,
+            session_id="related-candidate-session",
+            subject_id="regression-user",
+            reference_instant="2026-08-04T09:00:00+09:00",
+            previous_state_ref="",
+        )
+        next_bundle = build_generic_v2_candidate_bundle(next_request, catalog)
+        next_intent = normalize_generic_v2_intent(next_request, next_bundle)
+        next_plan = compile_generic_v2_plan(
+            next_intent,
+            next_bundle,
+            catalog,
+            question=next_request["question"],
+        )
+        assert next_bundle["route_decision"]["route"] == "deterministic"
+        assert next_intent["semantics"]["dataset_refs"] == [expected_dataset]
+        assert next_plan["retrieval_jobs"][0]["dataset_key"] == expected_dataset
+        assert next_plan["retrieval_jobs"][0]["parameters"] == {"DATE": expected_date}, question
+
+    rank_request = build_request_capsule(
+        "어제 DP공정 생산량이 가장 큰 공정 상위 3개",
+        session_id="related-rank-session",
+        subject_id="regression-user",
+        reference_instant="2026-08-04T09:00:00+09:00",
+        previous_state_ref="",
+    )
+    rank_bundle = build_generic_v2_candidate_bundle(rank_request, catalog)
+    rank_intent = normalize_generic_v2_intent(rank_request, rank_bundle)
+    rank_plan = compile_generic_v2_plan(
+        rank_intent,
+        rank_bundle,
+        catalog,
+        question=rank_request["question"],
+    )
+    assert rank_intent["semantics"]["dataset_refs"] == ["production"]
+    assert rank_intent["semantics"]["dimension_refs"] == ["OPER_NAME"]
+    assert rank_intent["semantics"]["rank"] == {"mode": "top", "limit": 3}
+    assert rank_plan["retrieval_jobs"][0]["dataset_key"] == "production"
 
 
 def test_items_round_trip_to_exact_runtime_catalog_without_release_fields() -> None:

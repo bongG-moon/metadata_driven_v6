@@ -323,9 +323,9 @@ def test_runtime_bundle_has_one_canonical_shape_not_legacy_projection() -> None:
     assert "candidates" not in bundle
     assert "metadata_bundle_sha256" not in bundle
     assert "operator_registry_sha256" not in bundle
+    assert "catalog_sha256" not in bundle
     assert bundle["bundle_sha256"] == sha256_json({
         "request_id": bundle["request_id"],
-        "catalog_sha256": bundle["catalog_sha256"],
         "dataset_candidates": bundle["dataset_candidates"],
         "field_candidates": bundle["field_candidates"],
         "metric_candidates": bundle["metric_candidates"],
@@ -337,6 +337,52 @@ def test_runtime_bundle_has_one_canonical_shape_not_legacy_projection() -> None:
         "intent_candidates": bundle["intent_candidates"],
         "prompt_cards": bundle["prompt_cards"],
     })
+
+
+def test_related_candidate_limits_are_runtime_configurable() -> None:
+    catalog = support_ticket_catalog()
+    template = deepcopy(catalog["datasets"]["ticket_view"])
+    for index in range(12):
+        dataset_id = f"shared_candidate_{index:02d}"
+        catalog["datasets"][dataset_id] = {
+            **deepcopy(template),
+            "key": dataset_id,
+            "display_name": "Shared Candidate",
+        }
+        group_id = f"shared_group_{index:02d}"
+        catalog["entity_groups"][group_id] = {
+            "group_id": group_id,
+            "aliases": ["Shared Group"],
+            "entity": "CASE_ID",
+            "selection": {"operator": "registered_predicate", "predicate_id": "is_open"},
+        }
+    catalog["catalog_sha256"] = sha256_json(
+        {key: value for key, value in catalog.items() if key != "catalog_sha256"}
+    )
+
+    bundle = build_generic_v2_candidate_bundle(
+        request("shared candidate shared group"),
+        catalog,
+        max_dataset_candidates=4,
+        max_entity_group_candidates=3,
+    )
+    identities = {
+        item["identity"] for item in bundle["dataset_candidates"]
+    }
+
+    assert len(identities) == 4
+    assert len(bundle["dataset_candidates"]) == 4
+    assert len({item["identity"] for item in bundle["entity_group_candidates"]}) == 3
+    assert len(bundle["entity_group_candidates"]) == 3
+
+    clamped = build_generic_v2_candidate_bundle(
+        request("shared candidate shared group"),
+        catalog,
+        max_dataset_candidates=0,
+        max_entity_group_candidates=1000,
+    )
+    assert len(clamped["dataset_candidates"]) == 1
+    assert len(clamped["entity_group_candidates"]) == 12
 
 
 def test_generic_module_contains_no_shipped_domain_identifiers_or_code_generation_lane() -> None:

@@ -73,7 +73,7 @@ def extract_date_candidates(question: str, reference_instant: str | datetime | N
                     "resolution": "explicit",
                 }
             )
-    relative_terms = (("오늘", 0), ("금일", 0), ("어제", -1), ("전일", -1))
+    relative_terms = (("오늘", 0), ("금일", 0), ("당일", 0), ("어제", -1), ("전일", -1))
     for term, offset in relative_terms:
         for match in re.finditer(re.escape(term), text, flags=re.I):
             parsed = reference.date() + timedelta(days=offset)

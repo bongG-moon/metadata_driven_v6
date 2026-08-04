@@ -57,7 +57,12 @@ def compile_baseline(
     )
     catalog["catalog_sha256"] = compute_catalog_sha256(catalog)
     catalog = validate_runtime_catalog(catalog)
-    if authoring_root.resolve() == (ROOT / "metadata" / "authoring").resolve():
+    default_authoring_root = (ROOT / "metadata" / "authoring").resolve()
+    default_output_dir = (ROOT / "metadata" / "fixtures" / "compiled").resolve()
+    if (
+        authoring_root.resolve() == default_authoring_root
+        and output_dir.resolve() == default_output_dir
+    ):
         write_runtime_catalog(MANUFACTURING_PACK_CATALOG, catalog)
     output_dir.mkdir(parents=True, exist_ok=True)
     catalog_path = write_runtime_catalog(output_dir / "runtime_catalog.json", catalog)
@@ -75,7 +80,6 @@ def compile_baseline(
             "legacy_catalog_sha256": catalog["catalog_sha256"],
         },
     )
-    default_output_dir = (ROOT / "metadata" / "fixtures" / "compiled").resolve()
     manufacturing_dir = (
         ROOT / "metadata" / "domain_packs" / "manufacturing" / "compiled"
         if output_dir.resolve() == default_output_dir

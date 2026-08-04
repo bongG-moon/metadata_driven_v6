@@ -101,6 +101,18 @@ def test_merge_combines_chunks_deterministically_and_returns_minimal_executor_fr
     }
 
 
+def test_runtime_source_merge_accepts_unpinned_catalog_and_does_not_republish_pin() -> None:
+    runtime_catalog = deepcopy(CATALOG)
+    runtime_catalog.pop("catalog_sha256", None)
+    result = source_result_for_dataset("production_today", source_alias="production")
+
+    bundle = merge_source_results([result], runtime_catalog)
+
+    assert "catalog_sha256" not in runtime_catalog
+    assert "catalog_sha256" not in bundle
+    validate_source_bundle(bundle, runtime_catalog)
+
+
 def test_executor_frames_can_share_owned_snapshot_rows() -> None:
     result = source_result_for_dataset("production_today", source_alias="production")
     bundle = merge_source_results([result], CATALOG)

@@ -25,8 +25,7 @@
     "aliases",
     "prompt_extensions",
     "specialized_functions",
-    "output_profile",
-    "catalog_sha256"
+    "output_profile"
   ],
   "properties": {
     "contract_version": {

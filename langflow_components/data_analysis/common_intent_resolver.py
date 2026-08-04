@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 
-EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"0b035cefd556b3c37b166e73270dee3e7070a2adf2dd56750b8e1015516bfcce","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"15dbb187f458d03ad4d55063eef898b862529dc68e9f64840d08ab20df9cfb76","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"c2b00a9f4e910220c413c557eaec188d143491f04484533db3d8fe3963ed309d","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/metadata-freeform-dataset-ir.schema.json":"1b22d18352b484e2ed847c2859bd4361aef4e9bb7fe52584c17ad5e4381d0642","contracts/schemas/metadata-freeform-domain-ir.schema.json":"28cf27865e798227662a452dd83dba1a1ae4e7ef1a14e706ab17ed22747a970e","contracts/schemas/metadata-freeform-main-filter-ir.schema.json":"d8cacb5b86029087e568b0ee2d5aabf76a8e91866cb3954bd0aa8c6e1d2e4e9f","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"41c4152f45577f05c925d5d782a48f8db45f67f8e48aac8805b822269516bd58","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"a24b7d2fc3798f1dd69e1af94a7071eae8fb56d93a4191258953fd63b4211568","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"3f7f6c5154c9e7922dd65490e9166ba0038c6a242258ec30d409d8a553948fed","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"9d412acfb007f069a1d06eedc718d61cf56bca2844d25d7ade5b21050e6c0b13","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"5d5d13e1ebc379bee29e8db1d1d103c8f96383ca34923c37879e87bce42a167e","reference_runtime/generic_v2_planner.py":"142665c8050c9302830cedf45928a25b73cd34e80bec66de9ba77003209176d3","reference_runtime/metadata_collections.py":"cb6cc7da54c55c7885569a83d400f38f456698a3d5fdf8fb4e3bfc394641ae54","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"e3782e6e86e41968a7bab1be4056ac2e9459c28188efa92f6532d2898d12abee","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"d2125d6902ca246b2239e8569959ac37f45847bf17dafaf93b857e088c750e42","reference_runtime/request_literals.py":"00493f9e342ab3065215805ae32f3068cb594209434bf280f2bb4f23c4be62ff","reference_runtime/source_contracts.py":"c43d8865ff045f4c26c5194262620a50961be5b56552c5cc6e7d580b2c11d7b0","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"af39b2bcfc561fbeed29b62f52d712decf895ef43b41f89ee70c4469507b82fe"}}')
+EMBEDDED_SOURCE_MANIFEST = json.loads('{"catalog_contract_version":"metadata.runtime.catalog.v1","catalog_declared_sha256":"1f8b6c1522b96425a6a46a3e4dfcf4c5b7c338c6bc0af3c2a0878806ea4a7f8e","catalog_file_sha256":"3a1e305cc6842ac73770c3cec3de134da2cf4d97cfa5bd8b04aa3b8e2f3aa8e0","contract_version":"standalone.source.manifest.v1","reference_sources":{"contracts/schemas/active-domain-pointer.schema.json":"8ff3e114e106d0bc08c83e61947ac967c28cd5390cd0539cb1efdc64b82f9a61","contracts/schemas/analysis-plan.schema.json":"015b37bd029df977cea34a84c3287b60b463eaa26a1ec46d5f1b5926a0f1635d","contracts/schemas/analysis-result.schema.json":"06e92c0892ff5b209783332f33e4d4ed1855612470b088390e4501591f68065b","contracts/schemas/analysis-route.schema.json":"aadd7504e7f75329b8b6a50634261e073450e6d19d8e14d4a44196c0000e0c04","contracts/schemas/answer-facts.schema.json":"26c573be25f4fade355a37f2ab231f3e0aa8ac83445ee58020a99388648809ed","contracts/schemas/answer-sections.schema.json":"4c1d645c9927879e6a9e877def326ff045b5a01edaf48a566b935bc4734882ab","contracts/schemas/approval-event.schema.json":"4aa6b10eeb875538d00d6de564bdbe24eb093e8727ed57515cbadba63f13d7a9","contracts/schemas/config-registry.schema.json":"2f90dfb2b99e17faa9afecaf1f32295f6d713067aeca66c7dc1544c5713598e9","contracts/schemas/display-options.schema.json":"099ef7c371a2ac015cf7b59ae873d2ff749cdad7fa738bbcccc9b4838ea45866","contracts/schemas/domain-package.schema.json":"f39f433985180636bb3b6dfe054cfb8e63998acbe0112f7082a8233b619517f7","contracts/schemas/download-item.schema.json":"91efd43bf2db00bf5e85071fa2992679c3b2dc050251a5c82e839dcd7f5d4086","contracts/schemas/error-registry.schema.json":"f67a1ab5ef2568626d406cb9feb38acfbb6fc593fa04f3da063f8293da653b64","contracts/schemas/error.schema.json":"1a0c89cc1898a894b0490a59f286c68520c0f74be0811f6c06c4aa3e50fe5602","contracts/schemas/evidence-manifest.schema.json":"2805ed7cce742e96b5e10902b096fbec91e40a8aca7fde7bfe95c1d12a9668bb","contracts/schemas/executable-blueprint.schema.json":"e55dbe8faa2f1f2eb933b1548b2b1c37886a0911ceb4e70838427bac2327f14a","contracts/schemas/executed-result.schema.json":"eaba5818e5fb30e2a572f5a81488d9ba34032adcf3af55dfbb0d4287afc7e435","contracts/schemas/flow-inventory.schema.json":"cdce69d64a9df37a88e139a0fd0900d38d9475d2a8f13ff9a9b5c1bf0777b672","contracts/schemas/gaia-metadata.schema.json":"86d0a11a06a97d573b550a427d26abe9db6e897d3c46681f02e2427735e9f093","contracts/schemas/metadata-annotation-proposal.schema.json":"f0b227cc42a528d6e0b95f1c8c4a1bf6bbb6871d17d32c108d65b47d2b0ddc7f","contracts/schemas/metadata-authoring-draft.schema.json":"c2b00a9f4e910220c413c557eaec188d143491f04484533db3d8fe3963ed309d","contracts/schemas/metadata-authoring-proposal.schema.json":"8ee3fc86d8f596c554443c16ad619822e63315ed8f2bfd06311987fc63322edd","contracts/schemas/metadata-authoring-response.schema.json":"da776b8a156d007c5bd95e86ad10cfb5a8ac7f06c2cae0c52aeb96b6a36415f6","contracts/schemas/metadata-bootstrap-dataset-ir.schema.json":"351260f7ed418b35f4ca1e5012a353b1d8f820ea21dfc8880483c193880af3b6","contracts/schemas/metadata-bootstrap-main-filter-ir.schema.json":"41c849c88b803d53af9c02c3d50127c47e8ee38e46d7b0a1ad0d09c3638e48fa","contracts/schemas/metadata-bundle.schema.json":"985ffe44974cf14d6c52a8188d54c3b209c00478e83888f00c359cd056d5dc81","contracts/schemas/metadata-envelope.schema.json":"9abca177e22b570f2158dace05256f671c0acbd054705dfe4f34611fbdae2048","contracts/schemas/metadata-freeform-dataset-ir.schema.json":"1b22d18352b484e2ed847c2859bd4361aef4e9bb7fe52584c17ad5e4381d0642","contracts/schemas/metadata-freeform-domain-ir.schema.json":"28cf27865e798227662a452dd83dba1a1ae4e7ef1a14e706ab17ed22747a970e","contracts/schemas/metadata-freeform-main-filter-ir.schema.json":"d8cacb5b86029087e568b0ee2d5aabf76a8e91866cb3954bd0aa8c6e1d2e4e9f","contracts/schemas/model-profile.schema.json":"14345c16f629fc03a3de2cdd2fe469bef1fdc82cd2f93954ce1f4204ba82f356","contracts/schemas/operator-registry.schema.json":"acd003c6db66b470a2653fc8a97caaf3856c9d4cfd934bc0f27ef609787c2746","contracts/schemas/pending-metadata-write.schema.json":"af7a0593fafbdcea16f1212ba92484525626e43f2a25d91f9c310a80f5b37a4d","contracts/schemas/query-registry.schema.json":"8422a44035eb2a06381166d69a185036c698f581b17741a8c4686fbeea109040","contracts/schemas/registered-call.schema.json":"41c4152f45577f05c925d5d782a48f8db45f67f8e48aac8805b822269516bd58","contracts/schemas/registered-function-card.schema.json":"bc9ca8b01c90d2d11737f1a70586e9227510b67fdab26c8ae605d9e830170dfd","contracts/schemas/request-capsule.schema.json":"675e661653098288d6cc9e6e9b3599ed3bf3e05d6d592ac66d9ed46b9fd2afaf","contracts/schemas/resolved-candidate-bundle.schema.json":"8d97eaa49ea37b539c5fd27a763331bf67e7f491515bbebb90134c5a471ddca5","contracts/schemas/response.schema.json":"40c1e43f2228c04bb9ea652f1107a7ac202405c3321bc2c6af8dbc543b2e7b06","contracts/schemas/retrieval-job-bundle.schema.json":"e73cd6e6c50bb24b528111c36c410af3afe2fe3ff28d3d906cfe023263a12105","contracts/schemas/runtime-catalog-v2.schema.json":"22fb10de76f21b0a4d60a63afa58c59036ed469c6eff1c9f8d85e15e53bbe8fc","contracts/schemas/semantic-intent-selection.schema.json":"a70c99e36060531fac9730c02f706ffa8d108b872c5abe0e2d05cafa459e6a75","contracts/schemas/semantic-intent.schema.json":"a743b7e26168dda04a7f46205fed67987a587cf3cce939cf57b228b099bfad53","contracts/schemas/source-bundle.schema.json":"a5330ef1b104df5dd0f19385b5e7994ee5469feffa110ee84087b7992258ea92","contracts/schemas/source-result.schema.json":"f342dcf0f948f7f99899335d83f302f2aaa38b05bb246eb06f9c1da0161f516c","contracts/schemas/trace.schema.json":"3f7cb2dd4e88b5f9f09695347ce42d8b98d5c4534d8fab41cca8ea1c9e3d484e","contracts/schemas/turn-state.schema.json":"688ad4f5ac1b133e60e3a2ef2bef56d0b18c87a41d2c6c236264285aeba32280","contracts/schemas/unsupported-telemetry.schema.json":"8c3675797be935d6fd52db2883d433d464df2fdecc5e0d52e795a5fa1e6c8439","contracts/schemas/validation-case.schema.json":"23304f969ca614324f7a74b52edc72c4e6753e76c476a77fc8db68f089941682","langflow_components/shared/01_prompt_bundle_composer.py":"2a8e80103205136221c87901a1bdeeb7df62f954c9f3f9c407a77a2e41a6b77b","langflow_components/shared/02_conditional_llm_invoker.py":"2b7ee35fb4276b932285a62860b1114b29797698232bfc9523597c103c6ea3d9","metadata/domain_packs/manufacturing/approved_source_registry.json":"241969f12d76c0d616296894dc51ba95553ebf48d5edb15e20480c4beec64587","reference_runtime/authoring_blueprint.py":"9fc416a04e0da317586ad8abf9831bf650746a7f1907ad62fcaef4012327fe71","reference_runtime/authoring_source_manifest.py":"311bd68482e163a781bf11aa449587879f659fa9c36f7564129ecea44b88170c","reference_runtime/canonical.py":"338b8b013b9311f94d9b5ff7a3d5902576e9dfb88b40d72d37436025806c2d1d","reference_runtime/contracts.py":"5d16082db0bf437e537a24352834548e48e157a4c740659e9c9f1a0e46960d6e","reference_runtime/domain_authoring_patches.py":"4c78c72bc2412cbe78e74372b7c5af658ada8de1b8058b228f02d2b68b41c445","reference_runtime/domain_packages.py":"ae08de3501c92be10bd8f983fa710cc8e4cec6a40dd8051140ab754c9caac04a","reference_runtime/dummy_data.py":"9d412acfb007f069a1d06eedc718d61cf56bca2844d25d7ade5b21050e6c0b13","reference_runtime/engine.py":"62df5f1a06c0a2765085826bec3e73f99f02da470850d180f2d7a53078c67606","reference_runtime/generic_v2_candidates.py":"f1718a481dc39bb0c93c4871c86f35a95e5382339384333e2aeb6ddbbb3cd158","reference_runtime/generic_v2_planner.py":"3d565d561d57d34c9f15ca05bcfc39571f33f83965f3c1f6111f93607b47710f","reference_runtime/metadata_collections.py":"661798f7376d85e52cb1c2430f917fab7934f279fa49b85a3c95fffdaa36e33a","reference_runtime/metadata_compiler.py":"99544e6094883b4241d010af2bec5d67e6205d34634ad46d6e2ee173107336e3","reference_runtime/plan_compiler.py":"e3782e6e86e41968a7bab1be4056ac2e9459c28188efa92f6532d2898d12abee","reference_runtime/presenter.py":"fee16b71dfaf07be0d27fee14f47aa753ea71350165185071552ff0f30a31101","reference_runtime/registered_functions.py":"d2125d6902ca246b2239e8569959ac37f45847bf17dafaf93b857e088c750e42","reference_runtime/request_literals.py":"48483bdd7eb9e691abaa419594df2322551b7fe829c9dd3035dcd709117f4acb","reference_runtime/source_contracts.py":"e2ced836c1a3e25f5e205ed31efa5bc71687973d028953034195be4438efcaf4","reference_runtime/state_contracts.py":"5a03fff6684850361904add4e4d15ea578617d1fce20564119bbac175fb334ae","reference_runtime/typed_executor.py":"af39b2bcfc561fbeed29b62f52d712decf895ef43b41f89ee70c4469507b82fe"}}')
 
 
 import hashlib
@@ -161,7 +161,7 @@ def extract_date_candidates(question: str, reference_instant: str | datetime | N
             except ValueError:
                 raise ContractError('intent_contract_error', 'request_capsule', '질문의 날짜가 올바르지 않습니다.', {'evidence': match.group(0)})
             candidates.append({'candidate_id': f'date:{parsed.isoformat()}', 'value_type': 'LocalDate', 'value': parsed.isoformat(), 'evidence': {'text': match.group(0), 'start': match.start(), 'end': match.end()}, 'resolution': 'explicit'})
-    relative_terms = (('오늘', 0), ('금일', 0), ('어제', -1), ('전일', -1))
+    relative_terms = (('오늘', 0), ('금일', 0), ('당일', 0), ('어제', -1), ('전일', -1))
     for term, offset in relative_terms:
         for match in re.finditer(re.escape(term), text, flags=re.I):
             parsed = reference.date() + timedelta(days=offset)
@@ -1870,18 +1870,21 @@ _v2cMAX_MATCHES_PER_TYPE = 64
 _v2cMAX_INTENT_CANDIDATES = 32
 _v2cMAX_AMBIGUITY_VARIANTS = 16
 _v2cMAX_BUNDLE_BYTES = 28 * 1024
+_v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE = {'dataset': 10, 'entity_group': 10}
+_v2cMIN_CONFIGURED_CANDIDATE_IDENTITIES = 1
+_v2cMAX_CONFIGURED_CANDIDATE_IDENTITIES = _v2cMAX_MATCHES_PER_TYPE
 _v2cCATALOG_TARGET_SECTIONS = {'dataset': 'datasets', 'field': 'fields', 'metric': 'metrics', 'entity_group': 'entity_groups', 'grain': 'grains', 'relation': 'relations', 'recipe': 'recipes'}
 _v2cMATCH_POOL_KEYS = {'dataset': 'dataset_candidates', 'field': 'field_candidates', 'metric': 'metric_candidates', 'entity_group': 'entity_group_candidates', 'grain': 'grain_candidates', 'relation': 'relation_candidates', 'recipe': 'recipe_candidates', 'function': 'function_candidates'}
 _v2cALLOWED_TEMPLATE_OPERATIONS = {'filter', 'project', 'aggregate', 'join', 'derive', 'compare_fields', 'sort', 'rank', 'transform_previous_result'}
 _v2cUNSUPPORTED_LEXEMES = ('예측', 'forecast', '원인 분석', '왜 발생', 'root cause', '최적화', 'optimize', '시뮬레이션', 'simulate')
 _v2cOPERATION_LEXEMES = {'rank': ('상위', '하위', 'top', 'bottom', '가장 큰', '가장 작은', '최대', '최소', 'highest', 'lowest'), 'project': ('컬럼', '필드', '열만', 'column', 'field', 'projection'), 'join': ('조인', 'join', '붙여', '합쳐', '함께', '연결'), 'compare_fields': ('보다 큰', '보다 작은', '보다 크거나 같은', '보다 작거나 같은', '초과', '미만', '이상', '이하', 'greater than', 'less than', 'at least', 'at most', 'above', 'below'), 'sort': ('큰 순', '작은 순', '내림차순', '오름차순', '정렬', 'sort'), 'aggregate': ('합계', '총 ', '전체', '평균', '별', 'sum', 'total', 'average', 'aggregate'), 'detail': ('목록', '상세', '보여', '알려', 'list', 'detail', 'show')}
 _v2cTOP_N_PATTERN = re.compile('(?P<mode>상위|하위|top|bottom)\\s*(?P<limit>\\d+)\\s*(?:개|건|rows?)?', re.I)
-_v2cTOP_LEVEL_KEYS = {'contract_version', 'request_id', 'catalog_sha256', 'dataset_candidates', 'field_candidates', 'metric_candidates', 'entity_group_candidates', 'grain_candidates', 'relation_candidates', 'recipe_candidates', 'function_candidates', 'intent_candidates', 'prompt_cards', 'bundle_sha256', 'route_decision', 'route_evidence'}
+_v2cTOP_LEVEL_KEYS = {'contract_version', 'request_id', 'dataset_candidates', 'field_candidates', 'metric_candidates', 'entity_group_candidates', 'grain_candidates', 'relation_candidates', 'recipe_candidates', 'function_candidates', 'intent_candidates', 'prompt_cards', 'bundle_sha256', 'route_decision', 'route_evidence'}
 _v2cINTENT_CANDIDATE_KEYS = {'candidate_id', 'description', 'semantics', 'semantics_sha256', 'required_slots', 'resolved_slots', 'evidence_refs'}
 _v2cPROMPT_CARD_KEYS = {'candidate_id', 'description', 'analysis_kind', 'metric_refs', 'dimension_refs', 'recipe_refs', 'function_refs', 'unresolved_slots'}
 _v2cROUTE_KEYS = {'contract_version', 'route', 'reason_code', 'resolved_candidate_bundle_sha256', 'selected_candidate_ids', 'required_slots', 'unresolved_slots', 'ambiguity_sets', 'route_policy_version', 'eligibility_proof_sha256'}
 
-def build_generic_v2_candidate_bundle(request: dict[str, Any], catalog: dict[str, Any], *, prior_semantics: dict[str, Any] | None=None, prior_result: dict[str, Any] | None=None) -> dict[str, Any]:
+def build_generic_v2_candidate_bundle(request: dict[str, Any], catalog: dict[str, Any], *, prior_semantics: dict[str, Any] | None=None, prior_result: dict[str, Any] | None=None, max_dataset_candidates: int=_v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE['dataset'], max_entity_group_candidates: int=_v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE['entity_group']) -> dict[str, Any]:
     """Build the canonical runtime bundle consumed by the v2 intent resolver."""
     _v2c_validate_catalog(catalog)
     request_id = str(request.get('request_id') or '')
@@ -1890,7 +1893,8 @@ def build_generic_v2_candidate_bundle(request: dict[str, Any], catalog: dict[str
     question = normalize_text(str(request.get('question') or ''))
     if not question:
         _v2c_fail('intent_contract_error', 'candidate_routing', '질문이 비어 있습니다.')
-    matches = _v2c_collect_registered_matches(question, catalog)
+    identity_limits = {'dataset': _v2c_configured_candidate_limit(max_dataset_candidates, _v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE['dataset']), 'entity_group': _v2c_configured_candidate_limit(max_entity_group_candidates, _v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE['entity_group'])}
+    matches = _v2c_collect_registered_matches(question, catalog, identity_limits=identity_limits)
     pools = {pool_key: deepcopy(matches.get(target_type, [])) for target_type, pool_key in _v2cMATCH_POOL_KEYS.items()}
     ambiguity = _v2c_alias_ambiguity(matches)
     unsupported_signals = [term for term in _v2cUNSUPPORTED_LEXEMES if _v2c_contains(question, term)]
@@ -1921,7 +1925,7 @@ def build_generic_v2_candidate_bundle(request: dict[str, Any], catalog: dict[str
         route_name = 'intent_llm'
         reason_code = 'ambiguous_candidate_selection' if ambiguity else 'semantic_choice_required'
     prompt_cards = [_v2c_prompt_card(item) for item in intent_candidates]
-    material = {'request_id': request_id, 'catalog_sha256': str(catalog.get('catalog_sha256') or ''), **pools, 'intent_candidates': intent_candidates, 'prompt_cards': prompt_cards}
+    material = {'request_id': request_id, **pools, 'intent_candidates': intent_candidates, 'prompt_cards': prompt_cards}
     bundle_sha256 = sha256_json(material)
     selected_ids = [intent_candidates[0]['candidate_id']] if route_name == 'deterministic' else []
     required_slots = _v2c_stable((slot for candidate in intent_candidates for slot in candidate.get('required_slots') or []))
@@ -1943,8 +1947,6 @@ def validate_generic_v2_candidate_bundle(bundle: dict[str, Any], catalog: dict[s
         _v2c_fail('route_contract_error', 'candidate_bundle_validation', 'candidate bundle 버전이 올바르지 않습니다.')
     if catalog is not None:
         _v2c_validate_catalog(catalog)
-        if bundle.get('catalog_sha256') != catalog.get('catalog_sha256'):
-            _v2c_fail('metadata_dependency_error', 'candidate_bundle_validation', 'candidate bundle의 catalog hash가 다릅니다.')
     for pool_key in _v2cMATCH_POOL_KEYS.values():
         pool = bundle.get(pool_key)
         if not isinstance(pool, list) or len(pool) > _v2cMAX_MATCHES_PER_TYPE:
@@ -2036,7 +2038,14 @@ def normalize_generic_v2_intent(request: dict[str, Any], bundle: dict[str, Any],
     material = {'contract_version': _v2cINTENT_VERSION, 'request_id': request.get('request_id'), 'candidate_bundle_sha256': bundle.get('bundle_sha256'), 'intent_candidate_id': selected_candidate_id, 'semantics': deepcopy(selected['semantics']), 'route': route_name, 'intent_generator': generator}
     return {**material, 'intent_sha256': sha256_json(material)}
 
-def _v2c_collect_registered_matches(question: str, catalog: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+def _v2c_configured_candidate_limit(value: Any, default: int) -> int:
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        parsed = int(default)
+    return max(_v2cMIN_CONFIGURED_CANDIDATE_IDENTITIES, min(parsed, _v2cMAX_CONFIGURED_CANDIDATE_IDENTITIES))
+
+def _v2c_collect_registered_matches(question: str, catalog: dict[str, Any], *, identity_limits: Mapping[str, int] | None=None) -> dict[str, list[dict[str, Any]]]:
     aliases: dict[tuple[str, str], list[dict[str, Any]]] = {}
 
     def register_values(target_type: str, target_key: str, values: Any, spec: Mapping[str, Any] | None=None) -> None:
@@ -2065,6 +2074,10 @@ def _v2c_collect_registered_matches(question: str, catalog: dict[str, Any]) -> d
             if not isinstance(spec, dict):
                 continue
             register_values(target_type, str(key), spec.get('aliases') or [])
+            if target_type == 'dataset':
+                register_values(target_type, str(key), [{'text': str(key), 'priority': 120}, {'text': str(spec.get('display_name') or ''), 'priority': 110}])
+                criteria = spec.get('selection_criteria') if isinstance(spec.get('selection_criteria'), dict) else {}
+                register_values(target_type, str(key), [{'text': value, 'priority': 100} for value in criteria.get('use_when') or [] if str(value).strip()])
     for card in catalog.get('specialized_functions') or []:
         if not isinstance(card, dict):
             continue
@@ -2100,6 +2113,18 @@ def _v2c_collect_registered_matches(question: str, catalog: dict[str, Any]) -> d
             clean = {key: deepcopy(value) for key, value in candidate.items() if not key.startswith('_')}
             selected.append(clean)
         selected.sort(key=lambda item: (int(item['evidence']['start']), -len(str(item['alias'])), str(item['identity'])))
+        identity_limit = (identity_limits or _v2cDEFAULT_CANDIDATE_IDENTITIES_BY_TYPE).get(target_type)
+        if identity_limit is not None:
+            allowed_identities: list[str] = []
+            bounded: list[dict[str, Any]] = []
+            for candidate in selected:
+                identity = str(candidate.get('identity') or '')
+                if identity not in allowed_identities:
+                    if len(allowed_identities) >= identity_limit:
+                        continue
+                    allowed_identities.append(identity)
+                bounded.append(candidate)
+            selected = bounded
         result[target_type] = selected[:_v2cMAX_MATCHES_PER_TYPE]
     return result
 
@@ -2170,6 +2195,8 @@ def _v2c_evaluate_composition(request: dict[str, Any], catalog: dict[str, Any], 
     raw_fields = _v2c_matched_ids(matches, 'field')
     fields = _v2c_visible_field_refs(request, catalog, matches)
     datasets = _v2c_matched_ids(matches, 'dataset')
+    if not metrics and datasets and _v2c_question_implies_metric(str(request.get('question') or '')):
+        metrics = _v2c_root_metric_refs(catalog, _v2c_unique_metrics_for_datasets(catalog, datasets), request=request, matches=matches)
     grains = _v2c_matched_ids(matches, 'grain')
     relations = _v2c_matched_ids(matches, 'relation')
     entity_groups = _v2c_matched_ids(matches, 'entity_group')
@@ -2346,7 +2373,7 @@ def _v2c_prompt_card(candidate: dict[str, Any]) -> dict[str, Any]:
     return {'candidate_id': candidate.get('candidate_id'), 'description': candidate.get('description'), 'analysis_kind': semantics.get('analysis_kind'), 'metric_refs': list(semantics.get('metric_refs') or []), 'dimension_refs': list(semantics.get('dimension_refs') or []), 'recipe_refs': list(semantics.get('recipe_refs') or []), 'function_refs': list(semantics.get('function_refs') or []), 'unresolved_slots': []}
 
 def _v2c_bundle_material(bundle: dict[str, Any]) -> dict[str, Any]:
-    return {'request_id': bundle.get('request_id'), 'catalog_sha256': bundle.get('catalog_sha256'), **{pool_key: bundle.get(pool_key) for pool_key in _v2cMATCH_POOL_KEYS.values()}, 'intent_candidates': bundle.get('intent_candidates'), 'prompt_cards': bundle.get('prompt_cards')}
+    return {'request_id': bundle.get('request_id'), **{pool_key: bundle.get(pool_key) for pool_key in _v2cMATCH_POOL_KEYS.values()}, 'intent_candidates': bundle.get('intent_candidates'), 'prompt_cards': bundle.get('prompt_cards')}
 
 def _v2c_route_proof_material(*, bundle_sha256: str, route: str, reason_code: str, candidate_ids: list[str], selected_candidate_ids: list[str], required_slots: list[str], unresolved_slots: list[str], ambiguity_sets: list[list[str]], unsupported_signals: list[str]) -> dict[str, Any]:
     return {'route_policy_version': _v2cROUTE_POLICY_VERSION, 'bundle_sha256': bundle_sha256, 'route': route, 'reason_code': reason_code, 'candidate_ids': candidate_ids, 'selected_candidate_ids': selected_candidate_ids, 'required_slots': required_slots, 'unresolved_slots': unresolved_slots, 'ambiguity_sets': ambiguity_sets, 'unsupported_signals': unsupported_signals}
@@ -2356,7 +2383,7 @@ def _v2c_validate_catalog(catalog: dict[str, Any]) -> None:
         _v2c_fail('metadata_dependency_error', 'candidate_routing', 'metadata.runtime.catalog.v2가 필요합니다.')
     actual_hash = str(catalog.get('catalog_sha256') or '')
     expected_hash = sha256_json({key: value for key, value in catalog.items() if key != 'catalog_sha256'})
-    if actual_hash != expected_hash:
+    if actual_hash and actual_hash != expected_hash:
         _v2c_fail('metadata_dependency_error', 'candidate_routing', 'runtime catalog hash가 다릅니다.', {'expected': expected_hash, 'actual': actual_hash})
     for section in _v2cCATALOG_TARGET_SECTIONS.values():
         if not isinstance(catalog.get(section), dict):
@@ -2480,6 +2507,16 @@ def _v2c_metric_source_datasets(catalog: dict[str, Any], metric_refs: Iterable[s
         visit(str(metric_ref))
     return (_v2c_stable(datasets), _v2c_stable(gaps))
 
+def _v2c_unique_metrics_for_datasets(catalog: dict[str, Any], dataset_refs: Iterable[str]) -> list[str]:
+    """Return a metric only when selected dataset families make it unambiguous."""
+    families = {str(((catalog.get('datasets') or {}).get(dataset_ref) or {}).get('family') or '') for dataset_ref in dataset_refs}
+    families.discard('')
+    metrics = [str(metric_id) for metric_id, metric in (catalog.get('metrics') or {}).items() if isinstance(metric, dict) and str((metric.get('source_binding') or {}).get('dataset_family') or '') in families]
+    return _v2c_stable(metrics) if len(set(metrics)) == 1 else []
+
+def _v2c_question_implies_metric(question: str) -> bool:
+    return any((_v2c_contains(question, cue) for cue in ('실적', '수량', '합계', '총량', '평균', '비율', 'actual', 'amount', 'quantity', 'total', 'average', 'rate')))
+
 def _v2c_formula_metric_refs(value: Any) -> list[str]:
     result: list[str] = []
     if isinstance(value, dict):
@@ -2512,24 +2549,47 @@ def _v2c_select_time_scoped_dataset(catalog: dict[str, Any], matches: list[str],
             continue
         use_when = [str(value) for value in criteria.get('use_when') or [] if str(value)]
         exclude_when = [str(value) for value in criteria.get('exclude_when') or [] if str(value)]
-        if use_when and any((_v2c_contains(question, cue) for cue in use_when)) and (not any((_v2c_contains(question, cue) for cue in exclude_when))):
+        if use_when and any((_v2c_selection_cue_matches(question, cue) for cue in use_when)) and (not any((_v2c_selection_cue_matches(question, cue) for cue in exclude_when))):
             criteria_matches.append(dataset_key)
     if len(criteria_matches) == 1:
         return criteria_matches[0]
     if len(criteria_matches) > 1:
         return ''
+    day_cues = ('오늘', '금일', '당일', 'today', 'current day')
     current_cues = ('현재', '현시간', '실시간', '현황', 'current', 'real-time', 'realtime')
+    if any((_v2c_contains(question, cue) for cue in day_cues)):
+        preferred = [dataset_key for dataset_key in matches if _v2c_dataset_time_scope(dataset_key, datasets.get(dataset_key) or {}) in {'current_day', 'today'}]
+        return preferred[0] if len(preferred) == 1 else ''
     if any((_v2c_contains(question, cue) for cue in current_cues)):
-        preferred = [dataset_key for dataset_key in matches if str((datasets.get(dataset_key) or {}).get('time_scope') or '').casefold() in {'current', 'current_day', 'today'}]
+        preferred = [dataset_key for dataset_key in matches if _v2c_dataset_time_scope(dataset_key, datasets.get(dataset_key) or {}) in {'current', 'current_day', 'today'}]
         return preferred[0] if len(preferred) == 1 else ''
     requested_date, _explicit = _v2c_date_semantics(request)
     reference_date = str(request.get('reference_instant') or '')[:10]
     date_values = _v2c_typed_values(request, 'date')
-    absolute_past = any((str(item.get('resolution') or '') == 'explicit' for item in date_values)) and bool(requested_date and reference_date and (requested_date < reference_date))
-    if not absolute_past:
+    historical_date = bool(date_values and requested_date and reference_date and (requested_date < reference_date))
+    if not historical_date:
         return ''
-    preferred = [dataset_key for dataset_key in matches if str((datasets.get(dataset_key) or {}).get('time_scope') or '').casefold() in {'history', 'historical', 'past'}]
+    preferred = [dataset_key for dataset_key in matches if _v2c_dataset_time_scope(dataset_key, datasets.get(dataset_key) or {}) in {'history', 'historical', 'past'}]
     return preferred[0] if len(preferred) == 1 else ''
+
+def _v2c_selection_cue_matches(question: str, cue: str) -> bool:
+    """Match a registered phrase even when a qualifier appears between its words."""
+    if _v2c_contains(question, cue):
+        return True
+    parts = re.findall('[0-9A-Za-z가-힣]+', normalize_text(cue))
+    return len(parts) > 1 and all((_v2c_contains(question, part) for part in parts))
+
+def _v2c_dataset_time_scope(dataset_key: str, dataset: Mapping[str, Any]) -> str:
+    criteria = dataset.get('selection_criteria') if isinstance(dataset.get('selection_criteria'), Mapping) else {}
+    scope = str(criteria.get('time_scope') or dataset.get('time_scope') or '').casefold()
+    if scope and scope != 'unspecified':
+        return scope
+    identity = ' '.join((str(dataset_key), str(dataset.get('display_name') or ''))).casefold()
+    if any((token in identity for token in ('today', 'current', '오늘', '당일', '현재'))):
+        return 'current_day'
+    if any((token in identity for token in ('history', 'historical', 'past', '이력', '과거'))):
+        return 'history'
+    return scope
 
 def _v2c_field_source_datasets(catalog: dict[str, Any], fields: Iterable[str], preferred: Iterable[str]) -> tuple[list[str], list[str]]:
     preferred_list = _v2c_stable(preferred)
@@ -2619,6 +2679,16 @@ def _v2c_dimension_refs(catalog: dict[str, Any], fields: list[str], grain_ids: l
         matching_grains = [grain for grain in (catalog.get('grains') or {}).values() if isinstance(grain, dict) and set(_v2c_strings(grain.get('keys') or [])) & set(fields)]
         if len(matching_grains) == 1:
             result.extend(_v2c_strings(matching_grains[0].get('keys') or []))
+    if analysis_kind == 'rank' and (not result):
+        for field in fields:
+            card = (catalog.get('fields') or {}).get(field) or {}
+            semantic_type = str(card.get('semantic_type') or '').casefold()
+            roles = set(_v2c_strings(card.get('roles') or []))
+            if semantic_type in {'date', 'localdate', 'datetime', 'timestamp', 'instant'}:
+                continue
+            if roles.intersection({'metric', 'aggregate'}):
+                continue
+            result.append(field)
     return _v2c_stable(result)
 
 def _v2c_date_semantics(request: dict[str, Any]) -> tuple[str, bool]:
@@ -2844,6 +2914,10 @@ def _v2c_registered_filter_literals(request: dict[str, Any], catalog: dict[str, 
         group = (catalog.get('entity_groups') or {}).get(group_id) or {}
         field = str(group.get('target_field') or group.get('entity') or '')
         selection = group.get('selection') if isinstance(group.get('selection'), dict) else {}
+        if not selection:
+            members = [str(value) for value in group.get('members') or [] if str(value)]
+            if members:
+                selection = {'operator': 'in', 'value': members}
         operator = str(selection.get('operator') or '')
         if not field or not _v2c_registered(catalog, 'field', field) or operator == 'all_registered':
             continue

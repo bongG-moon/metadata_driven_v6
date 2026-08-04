@@ -101,7 +101,6 @@
     "contract_version",
     "intent_sha256",
     "candidate_bundle_sha256",
-    "catalog_sha256",
     "retrieval_jobs",
     "operations",
     "result_operation_id",

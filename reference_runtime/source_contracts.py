@@ -15,12 +15,22 @@ from typing import Any, Iterable
 from zoneinfo import ZoneInfo
 
 from .canonical import ContractError, json_value, sha256_json
-from .metadata_compiler import validate_runtime_catalog
+from .metadata_compiler import compute_catalog_sha256, validate_runtime_catalog
 
 
 SOURCE_RESULT_VERSION = "source.result.v1"
 SOURCE_BUNDLE_VERSION = "source.bundle.v1"
 CANONICALIZER_VERSION = "source-contract-merger.v1"
+
+
+def _validate_execution_catalog(runtime_catalog: dict[str, Any]) -> dict[str, Any]:
+    """Validate catalog structure without exposing a hash in runtime payloads."""
+
+    validation_copy = deepcopy(runtime_catalog)
+    if not validation_copy.get("catalog_sha256"):
+        validation_copy["catalog_sha256"] = compute_catalog_sha256(validation_copy)
+    validate_runtime_catalog(validation_copy)
+    return runtime_catalog
 
 
 def canonicalize_rows(
@@ -38,7 +48,7 @@ def canonicalize_rows(
     explicitly registered as the primary physical column or an alias.
     """
 
-    validate_runtime_catalog(runtime_catalog)
+    _validate_execution_catalog(runtime_catalog)
     datasets = runtime_catalog["datasets"]
     if dataset_key not in datasets:
         raise ContractError(
@@ -138,7 +148,7 @@ def merge_source_results(
     chunk order.  Repeating the same source-result identity is rejected.
     """
 
-    validate_runtime_catalog(runtime_catalog)
+    _validate_execution_catalog(runtime_catalog)
     results = list(source_results)
     jobs = list(retrieval_jobs) if retrieval_jobs is not None else []
     job_by_alias: dict[str, dict[str, Any]] = {}
@@ -327,7 +337,6 @@ def merge_source_results(
 
     bundle: dict[str, Any] = {
         "contract_version": SOURCE_BUNDLE_VERSION,
-        "catalog_sha256": runtime_catalog["catalog_sha256"],
         "canonicalizer_version": CANONICALIZER_VERSION,
         "canonicalized": True,
         "frames": frames,
@@ -350,9 +359,7 @@ def validate_source_bundle(bundle: dict[str, Any], runtime_catalog: dict[str, An
     if bundle.get("bundle_sha256") != compute_bundle_sha256(bundle):
         raise ContractError("source_schema_mismatch", "source_merge", "source bundle hash가 일치하지 않습니다.")
     if runtime_catalog is not None:
-        validate_runtime_catalog(runtime_catalog)
-        if bundle.get("catalog_sha256") != runtime_catalog.get("catalog_sha256"):
-            raise ContractError("metadata_dependency_error", "source_merge", "source bundle과 runtime catalog pin이 다릅니다.")
+        _validate_execution_catalog(runtime_catalog)
     frames = bundle.get("frames")
     if not isinstance(frames, dict):
         raise ContractError("source_schema_mismatch", "source_merge", "source bundle frames가 object가 아닙니다.")

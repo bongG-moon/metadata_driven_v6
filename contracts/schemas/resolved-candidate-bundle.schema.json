@@ -134,7 +134,6 @@
   "required": [
     "contract_version",
     "request_id",
-    "catalog_sha256",
     "dataset_candidates",
     "field_candidates",
     "metric_candidates",

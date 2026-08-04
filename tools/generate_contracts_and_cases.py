@@ -917,7 +917,6 @@ def build_envelope_schemas() -> dict[str, dict[str, Any]]:
             },
             [
                 "request_id",
-                "catalog_sha256",
                 "dataset_candidates",
                 "field_candidates",
                 "metric_candidates",
@@ -949,7 +948,7 @@ def build_envelope_schemas() -> dict[str, dict[str, Any]]:
                 "plan_fingerprint": SHA256,
                 "input_refs": array(string(min_length=1), max_items=4, unique=True),
             },
-            ["intent_sha256", "candidate_bundle_sha256", "catalog_sha256", "retrieval_jobs", "operations", "result_operation_id", "result_contract", "lineage", "plan_id", "plan_fingerprint"],
+            ["intent_sha256", "candidate_bundle_sha256", "retrieval_jobs", "operations", "result_operation_id", "result_contract", "lineage", "plan_id", "plan_fingerprint"],
         ),
         "retrieval-job-bundle.schema.json": envelope_schema("retrieval-job-bundle.schema.json", "retrieval.job_bundle.v1", {"job_bundle_id": OPAQUE_REF, "plan_id": OPAQUE_REF, "bindings": array(JSON_OBJECT_REF, max_items=32), "jobs": array(JSON_OBJECT_REF, min_items=1, max_items=64)}, ["job_bundle_id", "plan_id", "bindings", "jobs"]),
         "source-result.schema.json": envelope_schema("source-result.schema.json", "source.result.v1", {"job_id": string(min_length=1), "status": source_status, "schema": array(JSON_OBJECT_REF, max_items=256), "rows": array(JSON_OBJECT_REF, max_items=20), "source_ref": nullable(OPAQUE_REF), "row_count": integer(minimum=0), "truncated": {"type": "boolean"}, "content_sha256": nullable(SHA256), "error": nullable(JSON_OBJECT_REF)}, ["job_id", "status", "schema", "rows", "source_ref", "row_count", "truncated", "content_sha256", "error"]),
